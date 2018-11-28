@@ -21,7 +21,7 @@ namespace Launcher
     {
         #region Class fields
         private static Preferences _instance = null;
-        private readonly string _configFile = @"AppConfig.dat";
+        private readonly string _configFile = @"app_data.dat";
         private Options _options;
         #endregion
 
@@ -57,7 +57,7 @@ namespace Launcher
         }
         #endregion
 
-        #region Search for the configuration file       
+        #region Load configuration file       
         public void LoadConfigFile()
         {               
             if (File.Exists(_configFile))

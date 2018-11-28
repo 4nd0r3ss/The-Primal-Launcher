@@ -1,6 +1,9 @@
-﻿using System;
+﻿using Launcher.users;
+using System;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -9,8 +12,16 @@ namespace Launcher
     public partial class MainWindow : Form
     {
         private Preferences Config { get; set; } = Preferences.Instance;
-        private Log LogMsg { get; set; } = Log.Instance;
-        private UpdateServer Server { get; set; }
+        private Log _log { get; set; } = Log.Instance;
+          
+        public const int WM_NCLBUTTONDOWN = 0xA1;
+        public const int HT_CAPTION = 0x2;
+
+        [System.Runtime.InteropServices.DllImportAttribute("user32.dll")]
+        public static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
+        [System.Runtime.InteropServices.DllImportAttribute("user32.dll")]
+        public static extern bool ReleaseCapture();
+
 
         public MainWindow()
         {          
@@ -26,17 +37,18 @@ namespace Launcher
             Task.Run(() =>
             {
                 while (true)                
-                    if (LogMsg.HasLogMessages())
-                        this.LbxOutput.Items.Insert(0, LogMsg.GetLogMessage());                
+                    if (_log.HasLogMessages())
+                        this.LbxOutput.Items.Insert(0, _log.GetLogMessage());                
             });
-            
-            LogMsg.LogMessage(LogMsg.MSG, "Welcome to the Seventh Astral Server app!");
+
+            _log.Warning("Welcome to the Seventh Astral Server app!");
 
             //Get paths from configuration file.  
             txtGameInstallPath.Text = Config.Options.GameInstallPath;
             txtPatchPath.Text = Config.Options.PatchDownloadPath;
 
-            LblDownloadStatus.Text = ServerUtilities.GetEpoch();
+            
+            
         }
 
         private void BtnChangeGameInstallPath_Click(object sender, EventArgs e)
@@ -57,9 +69,9 @@ namespace Launcher
 
         private void BtnLaunchGame_Click(object sender, EventArgs e)
         {
-            
-            Task.Run(() => { UpdateServer.Initialize(); });
-            Task.Run(() => { LobbyServer.Initialize(); });
+            LobbyServer lobby;
+            Task.Run(() => { UpdateServer.Initialize(); });            
+            Task.Run(() => { lobby = new LobbyServer(); });
         }
 
         private void Button1_Click(object sender, EventArgs e) =>        
@@ -69,24 +81,36 @@ namespace Launcher
         {
             e.DrawBackground();
             e.DrawFocusRectangle();
-
-            Color c = Color.White; //default color
-            string str = this.LbxOutput.Items[e.Index].ToString();
-            
-            if (str.IndexOf(LogMsg.ERR) >= 0)            
-                c = Color.Red;   
-            else if (str.IndexOf(LogMsg.WNG) >= 0)
-                c = Color.Yellow;
-            else if (str.IndexOf(LogMsg.OK) >= 0)
-                c = Color.DarkGreen;
-
             e.Graphics.DrawString(
                 this.LbxOutput.Items[e.Index].ToString(), 
                 new Font(FontFamily.GenericMonospace, 8, FontStyle.Regular), 
-                new SolidBrush(c), e.Bounds);
+                new SolidBrush(_log.GetMessageColor(this.LbxOutput.Items[e.Index].ToString())), e.Bounds);
         }
 
         private void Lbxoutput_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label4_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void TopFrame_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                ReleaseCapture();
+                SendMessage(Handle, WM_NCLBUTTONDOWN, HT_CAPTION, 0);
+            }
+        }
+
+        private void btnClose_Click(object sender, EventArgs e) => Application.Exit();
+
+        private void btnMinimize_Click(object sender, EventArgs e) => this.WindowState = FormWindowState.Minimized;
+
+        private void panel3_Paint(object sender, PaintEventArgs e)
         {
 
         }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,15 +11,15 @@ namespace Launcher
     class HttpServer
     {
         static bool _httpActive = false;        
-        private static TcpListener HttpListener { get; } = new TcpListener(ServerUtilities.IPLocalhost, 80);
-        private static Log LogMsg { get; set; } = Log.Instance;
+        private static TcpListener HttpListener { get; } = new TcpListener(IPAddress.Parse("17.0.0.1"), 80);
+        private static Log _log { get; set; } = Log.Instance;
 
         public static void Initialize()
         {
             //TODO: VERIFY IF PORT 80 IS IN USE
             if (!_httpActive)
             {
-                LogMsg.LogMessage(LogMsg.MSG, "Http server started @ port 80.");
+                _log.Message("Http server started @ port 80.");
                 HttpListener.Start();
                 _httpActive = true;
                 HttpDeamon();
@@ -29,7 +30,7 @@ namespace Launcher
         {
             if (_httpActive)
             {
-                LogMsg.LogMessage(LogMsg.MSG, "Shutting down http server.");
+                _log.Message("Shutting down http server.");
                 HttpListener.Stop();
                 _httpActive = false;
             }
@@ -66,6 +67,7 @@ namespace Launcher
             string page = "";
             try { page = System.IO.File.ReadAllText(@"login/" + file); }
             catch (Exception) { page = Packet.ToText(Packet.ErrorPage); }
+            finally { }
             return page;
         }
     }

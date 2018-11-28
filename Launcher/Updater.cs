@@ -8,23 +8,23 @@ namespace Launcher
 {
     class Updater
     {
-        private static Log LogMsg = Log.Instance;
+        private static Log _log = Log.Instance;
         public static byte[] Boot { get; set; } = Packet.UpToDate();
         public static byte[] Game { get; set; } = Packet.GameUpdatePacket;
 
         public static byte[] CheckBootVer()
         {                     
             bool upToDate = true;
-            LogMsg.LogMessage(LogMsg.MSG, "Checking ffxivboot.exe version...");
+            _log.Message("Checking ffxivboot.exe version...");
 
             if (upToDate)
             {
-                LogMsg.LogMessage(LogMsg.OK, "ffxivboot.exe is up-to-date!");
+                _log.Success("ffxivboot.exe is up-to-date!");
                 return Boot;
             }
             else
             {
-                LogMsg.LogMessage(LogMsg.WNG, "ffxivboot.exe is outdated! Starting update...");
+                _log.Warning("ffxivboot.exe is outdated! Starting update...");
                 return Boot;
             }            
         }
@@ -32,16 +32,16 @@ namespace Launcher
         public static byte[] CheckGameVer()
         {            
             bool upToDate = true;
-            LogMsg.LogMessage(LogMsg.MSG, "Checking game version...");
+            _log.Message("Checking game version...");
 
             if (upToDate)
             {
-                LogMsg.LogMessage(LogMsg.OK, "You have the latest verion (1.23b).");
+                _log.Success("You have the latest verion (1.23b).");
                 return Boot;
             }
             else
             {
-                LogMsg.LogMessage(LogMsg.WNG, "The game is outdated! Starting update...");
+                _log.Warning("The game is outdated! Starting update...");
                 return Boot;
             }
         }

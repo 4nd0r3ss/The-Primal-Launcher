@@ -11,12 +11,12 @@ namespace Launcher
 {
     public class UpdateServer
     {
-                   
+        private static string FFXIVBootFilePath { get; } = Preferences.Instance.Options.GameInstallPath + @"\ffxivboot.exe";
         static bool _updateActive = false;       
 
         #region Class properties
-        private static Log LogMsg { get; set; } = Log.Instance;
-        private static TcpListener UpdateListener { get; } = new TcpListener(ServerUtilities.IPLocalhost, 54996);
+        private static Log _log { get; set; } = Log.Instance;
+        private static TcpListener UpdateListener { get; } = new TcpListener(IPAddress.Parse("127.0.0.1"), 54996);
         #endregion
 
         #region Initialize & Shutdown
@@ -24,7 +24,7 @@ namespace Launcher
         {
             if (!_updateActive)
             {
-                LogMsg.LogMessage(LogMsg.MSG, "Update server started @ port 54996.");
+                _log.Message("Update server started @ port 54996.");
                 UpdateListener.Start();
                 _updateActive = true;
                 UpdateDaemon();
@@ -35,11 +35,11 @@ namespace Launcher
         {
             if (_updateActive)
             {
-                LogMsg.LogMessage(LogMsg.MSG, "Shutting down update server.");
+                _log.Message("Shutting down update server.");
                 try{ UpdateListener.Stop(); }
                 catch (Exception){}
                 finally{                    
-                    HttpServer.Initialize();    
+                    //HttpServer.Initialize();    
                 }
 
                 _updateActive = false;
@@ -51,9 +51,9 @@ namespace Launcher
         private static void UpdateDaemon()
         {           
             //if  ffxivboot.exe is not there for some reason, abort.
-            if (File.Exists(ServerUtilities.FFXIVBootFilePath))
+            if (File.Exists(FFXIVBootFilePath))
             {
-                ServerUtilities.LaunchGame();
+                LaunchGame();
                 
                 while (_updateActive)
                 {
@@ -77,16 +77,22 @@ namespace Launcher
                         }
                     }
                     catch (Exception) {
-                        LogMsg.LogMessage(LogMsg.WNG, "Something went wrong with the update server. Please try again.");
+                        _log.Warning("Something went wrong with the update server. Please try again.");
                     }
                 }
             }
             else
             {
-                LogMsg.LogMessage(LogMsg.ERR, "ffixvboot.exe not found! Please reinstall the game.");                
+                _log.Error("ffixvboot.exe not found! Please reinstall the game.");                
             }
             return;
         }
-        #endregion       
+        #endregion
+
+        private static void LaunchGame()
+        {
+            _log.Message("Launching ffxivboot.exe.");
+            Process.Start(new ProcessStartInfo { FileName = FFXIVBootFilePath });
+        }
     }
 }
