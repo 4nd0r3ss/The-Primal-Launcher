@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Launcher.users
+namespace Launcher.Characters
 {
-    [Serializable]
-    public class Character
+    class Retainer
     {
+        public static int OPCODE = 0x10;
+        private readonly int SIZE = 0x0;
     }
 }

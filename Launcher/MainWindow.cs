@@ -1,4 +1,4 @@
-﻿using Launcher.users;
+﻿using Launcher.Characters;
 using System;
 using System.Diagnostics;
 using System.Drawing;
@@ -13,7 +13,8 @@ namespace Launcher
     {
         private Preferences Config { get; set; } = Preferences.Instance;
         private Log _log { get; set; } = Log.Instance;
-          
+
+        #region Main window click & drag stuff
         public const int WM_NCLBUTTONDOWN = 0xA1;
         public const int HT_CAPTION = 0x2;
 
@@ -21,34 +22,32 @@ namespace Launcher
         public static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
         [System.Runtime.InteropServices.DllImportAttribute("user32.dll")]
         public static extern bool ReleaseCapture();
+        #endregion
 
-
-        public MainWindow()
-        {          
-            InitializeComponent();
-        }
+        public MainWindow() => InitializeComponent();       
 
         private void Form1_Load(object sender, EventArgs e)
         {
             //dirty way to get rid of cross-thread exception
             CheckForIllegalCrossThreadCalls = false;
 
+            _log.Warning("Welcome to the Seventh Astral Server app!");
+
             //Output logger thread
             Task.Run(() =>
             {
                 while (true)                
                     if (_log.HasLogMessages())
-                        this.LbxOutput.Items.Insert(0, _log.GetLogMessage());                
-            });
-
-            _log.Warning("Welcome to the Seventh Astral Server app!");
+                        LbxOutput.Items.Insert(0, _log.GetLogMessage());                
+            });           
 
             //Get paths from configuration file.  
             txtGameInstallPath.Text = Config.Options.GameInstallPath;
             txtPatchPath.Text = Config.Options.PatchDownloadPath;
 
-            
-            
+
+
+            //LblDownloadStatus.Text = ;
         }
 
         private void BtnChangeGameInstallPath_Click(object sender, EventArgs e)
@@ -68,11 +67,7 @@ namespace Launcher
         }
 
         private void BtnLaunchGame_Click(object sender, EventArgs e)
-        {
-            LobbyServer lobby;
-            Task.Run(() => { UpdateServer.Initialize(); });            
-            Task.Run(() => { lobby = new LobbyServer(); });
-        }
+            => Task.Run(() => { UpdateServer update = new UpdateServer(); });
 
         private void Button1_Click(object sender, EventArgs e) =>        
             Task.Run(() => { Patcher.PatchExecutableFiles(); });        

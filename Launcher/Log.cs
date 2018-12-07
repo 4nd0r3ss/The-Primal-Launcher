@@ -13,9 +13,9 @@ namespace Launcher
         private string SUCCESS { get; } = "[success]";
         private string UPDATE { get; } = "[update]";
         private string HTTP { get; } = "[http]";
-        #endregion
-               
         private string SEPARATOR { get; } = "========================================================================================";
+        #endregion
+
         private static Log _instance = null;
         private static readonly object _padlock = new object();
         private Queue<KeyValuePair<string, string>> MessageQueue { get; set; } = new Queue<KeyValuePair<string, string>>();

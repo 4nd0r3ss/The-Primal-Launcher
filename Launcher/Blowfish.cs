@@ -1,4 +1,7 @@
 ﻿using System;
+using System.IO;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Launcher
 {
@@ -452,5 +455,32 @@ namespace Launcher
 	        return 0;
         }
 
+        public static byte[] GenerateKey(string ticketPhrase, uint clientNumber)
+        {
+            byte[] key;
+            using (MemoryStream memStream = new MemoryStream(0x2C))
+            {
+                using (BinaryWriter binWriter = new BinaryWriter(memStream))
+                {
+                    binWriter.Write((Byte)0x78);
+                    binWriter.Write((Byte)0x56);
+                    binWriter.Write((Byte)0x34);
+                    binWriter.Write((Byte)0x12);
+                    binWriter.Write((UInt32)clientNumber);
+                    binWriter.Write((Byte)0xE8);
+                    binWriter.Write((Byte)0x03);
+                    binWriter.Write((Byte)0x00);
+                    binWriter.Write((Byte)0x00);
+                    binWriter.Write(Encoding.ASCII.GetBytes(ticketPhrase), 0, Encoding.ASCII.GetByteCount(ticketPhrase) >= 0x20 ? 0x20 : Encoding.ASCII.GetByteCount(ticketPhrase));
+                }
+                byte[] nonMD5edKey = memStream.GetBuffer();
+
+                using (MD5 md5Hash = MD5.Create())
+                {
+                    key = md5Hash.ComputeHash(nonMD5edKey);
+                }
+            }
+            return key;
+        }
     }
 }

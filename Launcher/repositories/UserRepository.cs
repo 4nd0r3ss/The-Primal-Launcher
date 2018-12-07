@@ -6,7 +6,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Launcher.users
+namespace Launcher.Characters
 {
     public sealed class UserRepository
     {
@@ -42,23 +42,14 @@ namespace Launcher.users
                 Id = id,
                 Uname = name,
                 Pwd = pwd
-            };
-
-            //Create default game account
-            GameAccount defaultGameAccount = new GameAccount()
+            };          
+            
+            newUser.AccountList.Add(new GameAccount()
             {
                 Id = 1,
-                Name = "FINAL FANTASY XIV"
-            };
-
-            //add default game account to new user
-            newUser.AccountList.Add(defaultGameAccount);
-
-            //complete max number of accounts inside the list (needed for packet size[?])
-            for (int i = 1; i < User.MAX_ACCOUNTS; i++)
-                newUser.AccountList.Add(new GameAccount());
-
-            //Add default user to user list
+                Name = "FFXIV1.0 Primal Launcher Default Account"
+            });   
+                        
             _userList.Add(newUser);
         }
 
@@ -67,9 +58,10 @@ namespace Launcher.users
             throw new NotImplementedException();
         }
 
-        public static void UpdateUser()
+        public static void UpdateUser(User user)
         {
-            throw new NotImplementedException();
+            _userList[_userList.FindIndex(x => x.Id == user.Id)] = user;
+            WriteFile("User info updated.");
         }
 
         public User GetUser(string uname, string pwd) => _userList.Find(x => x.Uname == uname && x.Pwd == pwd);       
@@ -77,21 +69,25 @@ namespace Launcher.users
 
         public static void CreateRepositoryFile()
         {
-            AddUser(1,"FFXIVPlayer","");
-            //Create repository file with user list.
-            try
+            AddUser(1,"FFXIVPlayer", "FFXIVPlayer");
+            WriteFile("Default user successfully created.");
+            LoadUsers();
+        }
+
+        private static void WriteFile(string msg)
+        {
+            try //Create repository file with user list.
             {
                 using (var fileStream = new FileStream(USERS_FILE, FileMode.Create))
                 {
                     var bFormatter = new BinaryFormatter();
                     bFormatter.Serialize(fileStream, _userList);
                 }
-                _log.Success("Users file successfully created.");
+                _log.Success(msg);
             }
-            catch (Exception) { _log.Error("Could not create the users file. Please check app permissions."); }
-            finally { LoadUsers(); }
+            catch (Exception) { _log.Error("Could not write file. Please check app permissions."); }            
         }
-
+             
         private static void LoadUsers()
         {
             if (File.Exists(USERS_FILE))

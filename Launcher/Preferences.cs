@@ -15,6 +15,10 @@ namespace Launcher
     {
         public string GameInstallPath { get; set; }
         public string PatchDownloadPath { get; set; }
+        public string ServerAddress { get; set; }
+        public bool UseExternalHttpServer { get; set; }
+        public bool ShowLoginPage { get; set; }
+        public bool ChooseGameAccount { get; set; }
     }
 
     public class Preferences
@@ -26,9 +30,7 @@ namespace Launcher
         #endregion
 
         #region Constructor
-        private Preferences() {           
-            LoadConfigFile();
-        }
+        private Preferences() => LoadConfigFile();
         #endregion
 
         #region Class properties
@@ -68,7 +70,7 @@ namespace Launcher
                     _options = (Options)bFormatter.Deserialize(fileStream);
                 }
             }
-            else //If there is no config file
+            else //there is no config file
             {                
                 Configure();                
                 SaveConfigFile();
@@ -92,6 +94,10 @@ namespace Launcher
         {
             _options.GameInstallPath = SearchGameInstallPath();
             _options.PatchDownloadPath = @"patches\";
+            _options.ServerAddress = "127.0.0.1";
+            _options.UseExternalHttpServer = false;
+            _options.ShowLoginPage = true;
+            _options.ChooseGameAccount = true;
         }
         #endregion
 

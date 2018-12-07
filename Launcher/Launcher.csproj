@@ -47,8 +47,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Blowfish.cs" />
-    <Compile Include="servers\HttpServer.cs" />
-    <Compile Include="servers\LobbyServer.cs" />
+    <Compile Include="Characters\CharacterClass.cs" />
+    <Compile Include="Packets\GamePacket.cs" />
+    <Compile Include="Packets\HtmlPacket.cs" />
+    <Compile Include="Packets\SubPacket.cs" />
+    <Compile Include="Servers\HttpServer.cs" />
+    <Compile Include="Servers\LobbyServer.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="Patcher.cs" />
     <Compile Include="MainWindow.cs">
@@ -58,18 +62,20 @@
       <DependentUpon>MainWindow.cs</DependentUpon>
     </Compile>
     <Compile Include="Preferences.cs" />
-    <Compile Include="Packet.cs" />
+    <Compile Include="Packets\Packet.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="servers\Server.cs" />
-    <Compile Include="servers\UpdateServer.cs" />
+    <Compile Include="Servers\Server.cs" />
+    <Compile Include="Servers\UpdateServer.cs" />
     <Compile Include="Updater.cs" />
-    <Compile Include="users\Character.cs" />
-    <Compile Include="users\GameAccount.cs" />
-    <Compile Include="users\User.cs" />
-    <Compile Include="repositories\UserRepository.cs" />
-    <Compile Include="users\World.cs" />
-    <Compile Include="repositories\WorldRepository.cs" />
+    <Compile Include="Characters\Character.cs" />
+    <Compile Include="Player\GameAccount.cs" />
+    <Compile Include="Characters\Retainer.cs" />
+    <Compile Include="Player\User.cs" />
+    <Compile Include="Repositories\UserRepository.cs" />
+    <Compile Include="Characters\CharacterPosition.cs" />
+    <Compile Include="WorldInfo\World.cs" />
+    <Compile Include="Repositories\WorldRepository.cs" />
     <EmbeddedResource Include="MainWindow.resx">
       <DependentUpon>MainWindow.cs</DependentUpon>
     </EmbeddedResource>

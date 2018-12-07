@@ -6,7 +6,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Launcher.users
+namespace Launcher.Characters
 {
     public class WorldRepository
     {
@@ -59,6 +59,7 @@ namespace Launcher.users
         }
 
         public World GetWorld(string name) => _worldList.Find(x => x.Name == name);
+        public World GetWorld(byte id) => _worldList.Find(x => x.Id == (int)id);
         #endregion
 
         public static void CreateRepositoryFile()
