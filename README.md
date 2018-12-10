@@ -1,7 +1,7 @@
 # FFXIV1.0 Primal Launcher
 
-Goal
-====
+Introduction
+============
 This project aims to transform the long-abandoned FFXIV1.0 in a single player experience for those who want to know this game's rich story and lore. 
 
 Features
