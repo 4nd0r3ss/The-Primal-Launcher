@@ -3,7 +3,7 @@
 namespace Launcher.Characters
 {
     [Serializable]
-    public struct CharacterPosition
+    public struct Position
     {       
         public int ZoneId { get; set; }
         public float X { get; set; }
@@ -11,12 +11,12 @@ namespace Launcher.Characters
         public float Z { get; set; }
         public float Rotation { get; set; }
 
-        public static CharacterPosition GetInitialPosition(uint initialTown)
+        public static Position GetInitialPosition(uint initialTown)
         {
             switch (initialTown)
             {
                 case 1:
-                    return new CharacterPosition //Limsa 
+                    return new Position //Limsa 
                     {
                         ZoneId = 193,
                         X = 0.016f,
@@ -25,7 +25,7 @@ namespace Launcher.Characters
                         Rotation = 0.025f
                     };
                 case 2:
-                    return new CharacterPosition //Gridania
+                    return new Position //Gridania
                     {
                         ZoneId = 166,
                         X = 369.5434f,
@@ -34,7 +34,7 @@ namespace Launcher.Characters
                         Rotation = -1.26721f
                     };
                 case 3:
-                    return new CharacterPosition //Ul'Dah
+                    return new Position //Ul'Dah
                     {
                         ZoneId = 184,
                         X = 5.364327f,
@@ -44,7 +44,7 @@ namespace Launcher.Characters
                     };               
             }
 
-            return new CharacterPosition();
+            return new Position();
         }
     }
 }

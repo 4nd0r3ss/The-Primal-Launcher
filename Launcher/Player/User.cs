@@ -39,9 +39,88 @@ namespace Launcher.Characters
 
                     Buffer.BlockCopy(account, 0, accountListData, ((i * GameAccount.SLOT_SIZE)+ 0x10), account.Length);
                 }
-            }
-            File.WriteAllBytes("accounts.txt", accountListData);
+            }            
             return accountListData;
         }
+
+        public byte[] GetCharacters(int accountId)
+        {
+            List<Character> characterList =  AccountList[accountId].CharacterList;
+            byte[] result = new byte[(Character.SLOT_SIZE * 2) + 0x10];
+            
+            result[0x08] = 0x01; //list sequence (?)
+            result[0x09] = 2; //no logic for 8 character slots yet, 2 only.
+
+            for(int i=0;i<2/*characterList.Count*/;i++)
+            {
+                byte[] characterSlot = new byte[Character.SLOT_SIZE];
+                characterSlot[0x08] = (byte)i; 
+                characterSlot[0x09] = 0x08; //0X01 = inactive, 0x02 = rename char, 0x08 = legacy
+
+                if (characterList.Count >= (i+1) )
+                {
+                    Character character = characterList.Find(x => x.Slot == i);
+
+                    byte[] name = Encoding.ASCII.GetBytes(Encoding.ASCII.GetString(character.Name).Trim(new[] { '\0' }));
+                    byte[] gearSet = character.GearSet.ToBytes();
+                    byte[] worldName = Encoding.ASCII.GetBytes(WorldRepository.Instance.GetWorld(character.WorldId).Name);                    
+                    
+                    Buffer.BlockCopy(BitConverter.GetBytes(character.Id), 0, characterSlot, 0x04, 0x04); //sequence?                    
+                    Buffer.BlockCopy(name, 0, characterSlot, 0x10, name.Length);
+                    Buffer.BlockCopy(worldName, 0, characterSlot, 0x30, worldName.Length);
+
+                    //Base64 info
+                    byte[] base64Info = new byte[0xf5];
+
+                    using (MemoryStream ms = new MemoryStream(base64Info))
+                    {
+                        using (BinaryWriter bw = new BinaryWriter(ms))
+                        {
+                            bw.Write((uint)0x000004c0); //??
+                            bw.Write((uint)0x232327ea); //??
+                            bw.Write((uint)name.Length + 0x01);
+                            bw.Write(name);
+                            bw.Write((byte)0);
+                            bw.Write((ulong)0x040000001c); //??
+                            bw.Write(CharacterClass.GetTribeModel(character.Tribe));
+                            bw.Write(character.Size);
+                            bw.Write(character.SkinColor | (uint)(character.HairColor << 10) | (uint)(character.EyeColor << 20));
+                            bw.Write(BitField.PrimitiveConversion.ToUInt32(character.Face));
+                            bw.Write(character.HairHighlightColor | (uint)(character.HairStyle << 10) | character.Face.CharacteristicsColor << 20);
+                            bw.Write(character.Voice);
+                            bw.Write(gearSet);
+                            bw.Write((ulong)0);
+                            bw.Write((uint)0xcdd4dbdb);
+                            bw.Write((uint)0x00000139);
+                            bw.Write(character.CurrentClass);
+                            bw.Write(character.CurrentLevel);
+                            bw.Write(character.CurrentJob);
+                            bw.Write((ushort)0x01); //Job level?
+                            bw.Write(character.Tribe);
+                            bw.Write(0xe22222aa); //??
+                            bw.Write(0x0000000a); //size of the string below
+                            bw.Write(Encoding.ASCII.GetBytes("prv0Inn01\0")); //figure out if this can change
+                            bw.Write(0x00000011); //size of the string below
+                            bw.Write(Encoding.ASCII.GetBytes("defaultTerritory\0")); //figure out if this can change
+                            bw.Write(character.Guardian);
+                            bw.Write(character.BirthMonth);
+                            bw.Write(character.BirthDay);
+                            bw.Write((ushort)0x17); //??
+                            bw.Write((uint)0x04); //??
+                            bw.Write((uint)0x04); //??
+                            bw.Seek(0x10, SeekOrigin.Current);
+                            bw.Write(character.InitialTown);
+                            bw.Write(character.InitialTown);
+                        }                        
+                        base64Info = Encoding.ASCII.GetBytes(Convert.ToBase64String(base64Info).Replace('+', '-').Replace('/', '_'));
+                    }
+                    //Write encoded character info into the character slot byte array.
+                    Buffer.BlockCopy(base64Info, 0, characterSlot, 0x40, base64Info.Length);
+                }
+                //Write character slot into slot list.
+                Buffer.BlockCopy(characterSlot, 0, result, ((Character.SLOT_SIZE * i) + 0x10), characterSlot.Length);
+            }
+            return result;
+        }       
     }
 }

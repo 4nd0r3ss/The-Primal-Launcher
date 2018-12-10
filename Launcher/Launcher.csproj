@@ -46,11 +46,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BitField.cs" />
     <Compile Include="Blowfish.cs" />
     <Compile Include="Characters\CharacterClass.cs" />
     <Compile Include="Packets\GamePacket.cs" />
     <Compile Include="Packets\HtmlPacket.cs" />
     <Compile Include="Packets\SubPacket.cs" />
+    <Compile Include="Servers\GameServer.cs" />
     <Compile Include="Servers\HttpServer.cs" />
     <Compile Include="Servers\LobbyServer.cs" />
     <Compile Include="Log.cs" />
@@ -73,7 +75,7 @@
     <Compile Include="Characters\Retainer.cs" />
     <Compile Include="Player\User.cs" />
     <Compile Include="Repositories\UserRepository.cs" />
-    <Compile Include="Characters\CharacterPosition.cs" />
+    <Compile Include="Characters\Position.cs" />
     <Compile Include="WorldInfo\World.cs" />
     <Compile Include="Repositories\WorldRepository.cs" />
     <EmbeddedResource Include="MainWindow.resx">

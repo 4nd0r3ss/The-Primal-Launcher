@@ -36,24 +36,26 @@ namespace Launcher.Characters
         private WorldRepository() => LoadWorlds();
 
         #region World CRUD
-        public static void AddWorld(int id, string name, int population)
+        public static void Create(int id, string name, int population, string address, ushort port)
         {
             World newWorld = new World()
             {
                 Id = id,
                 Name = name,
-                Population = population
+                Population = population,
+                Address = address,
+                Port = port
             };         
 
             _worldList.Add(newWorld);
         }
 
-        public static void DropWorld()
+        public static void Delete()
         {
             throw new NotImplementedException();
         }
 
-        public static void UpdateWorld()
+        public static void Update()
         {
             throw new NotImplementedException();
         }
@@ -64,12 +66,9 @@ namespace Launcher.Characters
 
         public static void CreateRepositoryFile()
         {
-            AddWorld(1, "AndreusServer", 0x61);
-            AddWorld(2, "KellyServer", 0x61);
-            AddWorld(3, "PrimalServer", 0x61);
-            AddWorld(4, "LocoServer", 0x61);
-            AddWorld(5, "NachosServer", 0x61);
-            AddWorld(6, "Ragnarok", 0x61);
+            Create(1, "AndreusServer", 0x61, "127.0.0.1", 54992);
+            Create(2, "KellyServer", 0x31, "127.0.0.1", 54992);
+            
             //Create repository file with user list.
             try
             {
