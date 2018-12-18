@@ -69,6 +69,24 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Servers\Server.cs" />
     <Compile Include="Servers\UpdateServer.cs" />
+    <Compile Include="ucAbout.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ucAbout.Designer.cs">
+      <DependentUpon>ucAbout.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ucOptions.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ucOptions.Designer.cs">
+      <DependentUpon>ucOptions.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ucLogWindow.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ucLogWindow.Designer.cs">
+      <DependentUpon>ucLogWindow.cs</DependentUpon>
+    </Compile>
     <Compile Include="Updater.cs" />
     <Compile Include="Characters\Character.cs" />
     <Compile Include="Player\GameAccount.cs" />
@@ -90,6 +108,15 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="ucAbout.resx">
+      <DependentUpon>ucAbout.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ucOptions.resx">
+      <DependentUpon>ucOptions.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ucLogWindow.resx">
+      <DependentUpon>ucLogWindow.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

@@ -158,9 +158,15 @@ namespace Launcher
             //first subpacket start and end
             int index = 0x00;
             ushort subPacketSize = (ushort)(Data[0x1] << 8 | Data[0x0]);
+
+            int counter = 0;
             
-            for(int i=0;i<this.NumSubpackets;i++)
-            {               
+            for(int i=0;i<NumSubpackets;i++)
+            {
+
+                File.WriteAllBytes("out_" + counter + ".txt", Data);
+                
+
                 byte[] subpacketData = new byte[subPacketSize - 0x10];
                 Buffer.BlockCopy(Data, index + 16, subpacketData, 0, subpacketData.Length); //copy whole subpacket. -16 = without subpacket header.            
 
@@ -168,12 +174,26 @@ namespace Launcher
                 {
                     Size = subPacketSize,
                     Type = (ushort)(subpacketData[3] << 8 | subpacketData[2]),
-                    SourceId = (ushort)(subpacketData[5] << 8 | subpacketData[4]),
-                    TargetId = (ushort)(subpacketData[7] << 8 | subpacketData[6]),
+                    //SourceId = (uint)(subpacketData[0x07] << 24 | subpacketData[0x06] << 16 | subpacketData[0x05] << 8 | subpacketData[0x04]),    
+                    //TargetId = (uint)(subpacketData[0x0b] << 24 | subpacketData[0x0a] << 16 | subpacketData[0x09] << 8 | subpacketData[0x08]),
                     Data = subpacketData
                 };
 
-                subpacket.Dencrypt(bf);
+                if(bf != null)
+                    subpacket.Dencrypt(bf);
+
+                File.WriteAllBytes("out1_" + counter + ".txt", subpacket.Data);
+                counter++;
+
+                SubPacket subpacket2 = new SubPacket
+                {
+                    Size = subPacketSize,
+                    Type = (ushort)(subpacketData[3] << 8 | subpacketData[2]),
+                    SourceId = (uint)(subpacketData[0x07] << 24 | subpacketData[0x06] << 16 | subpacketData[0x05] << 8 | subpacketData[0x04]),
+                    TargetId = (uint)(subpacketData[0x0b] << 24 | subpacketData[0x0a] << 16 | subpacketData[0x09] << 8 | subpacketData[0x08]),
+                    Data = subpacketData
+                };
+
                 SubPacketQueue.Enqueue(subpacket);
                 index = subPacketSize;
                 subPacketSize = (ushort)(Data[subPacketSize + 0x01] << 8 | Data[subPacketSize + 0x00]);

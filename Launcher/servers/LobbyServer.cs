@@ -24,14 +24,14 @@ namespace Launcher
 
         public override void ProcessIncoming(StateObject state)
         {
-            Packet packet = new Packet(state.buffer);
+            Packet packet = new Packet(state.buffer);         
 
             if (packet.Size == 0x288 && packet.Data[0x34] == 'T')
             {
                 StartSession(state.workSocket, packet);               
             }
             else
-            {                
+            {
                 packet.ProcessSubPackets(_blowfish);
 
                 while (packet.SubPacketQueue.Count > 0)
@@ -53,20 +53,17 @@ namespace Launcher
                             ModifyCharacter(state.workSocket, sp);
                             break;
                         default:
-                            DebugPacket(sp);
+                            UnknownPacketDebug(sp);
                             break;
                     }
                 }
             }
-        }
+        }               
 
-        private int counter = 0;
-
-        private void DebugPacket(SubPacket sp)
+        private void UnknownPacketDebug(SubPacket sp)
         {
-
-            //File.WriteAllBytes(counter + "in.txt", sp.Data);
-            counter++;
+            //File.WriteAllBytes(counter + "unknown_packet.txt", sp.Data);       
+            _log.Error("[Lobby Server] Unknown packet");
         }
 
         private void StartSession(Socket handler, Packet packet)
@@ -282,7 +279,7 @@ namespace Launcher
             throw new NotImplementedException();
         }
 
-        public void ServerTransition(World world, User user) => Task.Run(() => { GameServer game = new GameServer(world, user); });
+        public void ServerTransition(World world, User user) => Task.Run(() => { GameServer game = new GameServer(_blowfish, world, user); });
         
     }
 }

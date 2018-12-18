@@ -10,10 +10,7 @@ using System.Windows.Forms;
 namespace Launcher
 {
     public partial class MainWindow : Form
-    {
-        private Preferences Config { get; set; } = Preferences.Instance;
-        private Log _log { get; set; } = Log.Instance;
-
+    {     
         #region Main window click & drag stuff
         public const int WM_NCLBUTTONDOWN = 0xA1;
         public const int HT_CAPTION = 0x2;
@@ -24,75 +21,24 @@ namespace Launcher
         public static extern bool ReleaseCapture();
         #endregion
 
-        public MainWindow() => InitializeComponent();       
-
-        private void Form1_Load(object sender, EventArgs e)
+        public MainWindow()
         {
-            //dirty way to get rid of cross-thread exception
-            CheckForIllegalCrossThreadCalls = false;
+            InitializeComponent();
 
-            _log.Warning("Welcome to the Seventh Astral Server app!");
+            //load default user control (log window)
+            pnlMain.Controls.Add(ucLogWindow.Instance);
+            ucLogWindow.Instance.Dock = DockStyle.Fill;
+            ucLogWindow.Instance.BringToFront();
 
-            //Output logger thread
-            Task.Run(() =>
-            {
-                while (true)                
-                    if (_log.HasLogMessages())
-                        LbxOutput.Items.Insert(0, _log.GetLogMessage());                
-            });           
-
-            //Get paths from configuration file.  
-            txtGameInstallPath.Text = Config.Options.GameInstallPath;
-            txtPatchPath.Text = Config.Options.PatchDownloadPath;
-
-
-
-            //LblDownloadStatus.Text = ;
-        }
-
-        private void BtnChangeGameInstallPath_Click(object sender, EventArgs e)
-        {
-            string path = Config.SelectFolder();
-            
-            if (path != null)
-                txtGameInstallPath.Text = path;            
-        }
-
-        private void BtnChangePatchPath_Click(object sender, EventArgs e)
-        {
-            string path = Config.SelectFolder();
-            
-            if (path != null)
-                txtPatchPath.Text = path;
-        }
+            //default user control button color
+            btnLogWindow.BackColor = Color.White;
+            btnLogWindow.ForeColor = Color.Maroon;
+        }       
 
         private void BtnLaunchGame_Click(object sender, EventArgs e)
-            => Task.Run(() => { UpdateServer update = new UpdateServer(); });
+            => Task.Run(() => { UpdateServer update = new UpdateServer(); });    
 
-        private void Button1_Click(object sender, EventArgs e) =>        
-            Task.Run(() => { Patcher.PatchExecutableFiles(); });        
-
-        private void Lbxoutput_DrawItem(object sender, DrawItemEventArgs e)
-        {
-            e.DrawBackground();
-            e.DrawFocusRectangle();
-            e.Graphics.DrawString(
-                this.LbxOutput.Items[e.Index].ToString(), 
-                new Font(FontFamily.GenericMonospace, 8, FontStyle.Regular), 
-                new SolidBrush(_log.GetMessageColor(this.LbxOutput.Items[e.Index].ToString())), e.Bounds);
-        }
-
-        private void Lbxoutput_SelectedIndexChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label4_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void TopFrame_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
+        private void TopFrame_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
             {
@@ -105,9 +51,47 @@ namespace Launcher
 
         private void btnMinimize_Click(object sender, EventArgs e) => this.WindowState = FormWindowState.Minimized;
 
-        private void panel3_Paint(object sender, PaintEventArgs e)
+        private void ButtonColorsSetup(object sender)
         {
+            Button btn = sender as Button;
 
+            foreach (Button b in pnlButtons.Controls)
+            {
+                b.BackColor = Color.DarkRed;
+                b.ForeColor = Color.White;
+            }
+
+            btn.BackColor = Color.White;
+            btn.ForeColor = Color.Maroon;
+        }
+
+        private void btnLogWindow_Click(object sender, EventArgs e)
+        {            
+            ucLogWindow.Instance.BringToFront();
+            ButtonColorsSetup(sender);
+        }      
+
+        private void btnOptions_Click(object sender, EventArgs e)
+        {
+            if (!pnlMain.Controls.Contains(ucOptions.Instance))
+            {
+                pnlMain.Controls.Add(ucOptions.Instance);
+                ucOptions.Instance.Dock = DockStyle.Fill;
+            }
+            
+            ucOptions.Instance.BringToFront();
+            ButtonColorsSetup(sender);
+        }
+
+        private void btnAbout_Click(object sender, EventArgs e)
+        {
+            if (!pnlMain.Controls.Contains(ucAbout.Instance))
+            {
+                pnlMain.Controls.Add(ucAbout.Instance);
+                ucAbout.Instance.Dock = DockStyle.Fill;
+            }
+            ucAbout.Instance.BringToFront();
+            ButtonColorsSetup(sender);
         }
     }
 }
