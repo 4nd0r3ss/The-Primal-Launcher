@@ -43,58 +43,37 @@ namespace Launcher.packets
             GamePacketList.Add(gamePacket);
         }
 
-        public byte[] ToBytes(ref Blowfish blowfish)
+        public byte[] ToBytes(Blowfish blowfish)
         {
             byte[] toBytes = new byte[Size];
-
             byte[] header = new byte[0x10];
-            Buffer.BlockCopy(BitConverter.GetBytes(Size), 0, header, 0, 0x02);
-            header[0x02] = 0x03;
-            header[0x04] = 0x68;
-            header[0x05] = 0x68;
-            header[0x07] = 0xe0;
-            header[0x08] = 0x68;
-            header[0x09] = 0x68;
-            header[0x0b] = 0xe0;
-
             int index = 0x10;
+
+            if (Type == 0)
+                Type = 0x03;
+
+            if (SourceId == 0)
+                SourceId = 0xe0006868;
+
+            if (TargetId == 0)
+                TargetId = 0xe0006868;
+
+            Buffer.BlockCopy(BitConverter.GetBytes(Size), 0, header, 0, 0x02);
+            Buffer.BlockCopy(BitConverter.GetBytes(Type), 0, header, 0x02, 0x02);
+            Buffer.BlockCopy(BitConverter.GetBytes(SourceId), 0, header, 0x04, 0x04);
+            Buffer.BlockCopy(BitConverter.GetBytes(TargetId), 0, header, 0x08, 0x04);           
+
             Buffer.BlockCopy(header, 0, toBytes, 0, header.Length);
 
             foreach (GamePacket gp in GamePacketList)
             {
-                Buffer.BlockCopy(gp.ToBytes(ref blowfish), 0, toBytes, index, gp.Size);
+                Buffer.BlockCopy(gp.ToBytes(blowfish), 0, toBytes, index, gp.Size);
                 index += gp.Size;
             }
 
             return toBytes;
         }
-
-        public byte[] ToBytes()
-        {
-            byte[] toBytes = new byte[Size];
-
-            byte[] header = new byte[0x10];
-            Buffer.BlockCopy(BitConverter.GetBytes(Size), 0, header, 0, 0x02);
-            header[0x02] = 0x03;
-            header[0x04] = 0x68;
-            header[0x05] = 0x68;
-            header[0x07] = 0xe0;
-            header[0x08] = 0x68;
-            header[0x09] = 0x68;
-            header[0x0b] = 0xe0;
-
-            int index = 0x10;
-            Buffer.BlockCopy(header, 0, toBytes, 0, header.Length);
-
-            foreach (GamePacket gp in GamePacketList)
-            {
-                Buffer.BlockCopy(gp.ToBytes(), 0, toBytes, index, gp.Size);
-                index += gp.Size;
-            }
-
-            return toBytes;
-        }
-
+               
         public int Opcode() => (Data[0x03]) >> 8 | (Data[0x02]);
 
         #region Encoding
@@ -104,7 +83,7 @@ namespace Launcher.packets
             catch (Exception) { _log.Error("Error encrypting subpacket!"); }
         }
 
-        public void Dencrypt(Blowfish bf)
+        public void Decrypt(Blowfish bf)
         {
             try { bf.Decipher(Data, 0, Data.Length); }
             catch (Exception) { _log.Error("Error decrypting subpacket!"); }

@@ -9,7 +9,7 @@ namespace Launcher.packets
     public class GamePacket
     {
         byte[] _data;
-        public int Opcode { get; set; }
+        public ushort Opcode { get; set; }
         public byte[] TimeStamp { get; set; }
         public byte[] Data
         {
@@ -30,7 +30,7 @@ namespace Launcher.packets
 
         private void GamePacketSetup(byte[] packet)
         {
-            Opcode = packet[2] << 8 | packet[3];
+            Opcode = (ushort)(packet[2] << 8 | packet[3]);
             TimeStamp = new byte[] { packet[0x8], packet[0x9], packet[0xa], packet[0xb] };
 
             byte[] data = new byte[packet.Length - 16];
@@ -38,42 +38,23 @@ namespace Launcher.packets
 
             Data = data;
         }
-
-        public byte[] ToBytes(ref Blowfish blowfish)
+                       
+        public byte[] ToBytes(Blowfish blowfish)
         {
             byte[] toBytes = new byte[Data.Length + 0x10];
-
             byte[] header = new byte[0x10];
+
             header[0x00] = 0x14;
-            header[0x02] = (byte)Opcode;
+            Buffer.BlockCopy(BitConverter.GetBytes(Opcode), 0, header, 0x02, 0x02);            
             Buffer.BlockCopy(Server.GetTimeStampHex(), 0, header, 0x08, 0x04);
 
             Buffer.BlockCopy(header, 0, toBytes, 0, header.Length);
             Buffer.BlockCopy(Data, 0, toBytes, 0x10, Data.Length);
 
-            if (blowfish != null)
-            {
+            if(blowfish != null)
                 blowfish.Encipher(toBytes, 0, toBytes.Length);
-            }
 
             return toBytes;
-        }
-
-        //<-- FOR DEBUG, DELETE LATER
-        public byte[] ToBytes()
-        {
-            byte[] toBytes = new byte[Data.Length + 0x10];
-
-            byte[] header = new byte[0x10];
-            header[0x00] = 0x14;
-            header[0x02] = (byte)Opcode;
-            Buffer.BlockCopy(Server.GetTimeStampHex(), 0, header, 0x08, 0x04);
-
-            Buffer.BlockCopy(header, 0, toBytes, 0, header.Length);
-            Buffer.BlockCopy(Data, 0, toBytes, 0x10, Data.Length);
-
-            return toBytes;
-        }
-        //-->
+        }        
     }
 }

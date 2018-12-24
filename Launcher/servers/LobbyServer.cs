@@ -97,12 +97,11 @@ namespace Launcher
             GamePacket gamePacket = new GamePacket
             {
                 Opcode = GameAccount.OPCODE,
-                TimeStamp = GetTimeStampHex(),
                 Data = _user.GetAccountListData()
             };
 
             Packet packet = new Packet(gamePacket);
-            handler.Send(packet.Build(ref _blowfish));
+            handler.Send(packet.Build(_blowfish));
             _log.Message("Account list sent.");
         }
 
@@ -111,45 +110,41 @@ namespace Launcher
             GamePacket worldList = new GamePacket
             {
                 Opcode = World.OPCODE,
-                TimeStamp = GetTimeStampHex(),
                 Data = _worldRepo.GetWorldListData()
             };
 
             Packet worldListPacket = new Packet(worldList);            
-            handler.Send(worldListPacket.Build(ref _blowfish));
+            handler.Send(worldListPacket.Build(_blowfish));
             _log.Message("World list sent.");
 
             //GamePacket importList = new GamePacket
             //{
             //    Opcode = 0x16,
-            //    TimeStamp = GetTimeStampHex(),
             //    Data = new byte[]{} //SIZE: 0X1F0
             //};
 
             //Packet importListPacket = new Packet(importList);
-            //handler.Send(importListPacket.Build(ref _blowfish));
+            //handler.Send(importListPacket.Build(_blowfish));
             //_log.Message("Import list sent.");
 
             //GamePacket retainerList = new GamePacket
             //{
             //    Opcode = 0x17,
-            //    TimeStamp = GetTimeStampHex(),
             //    Data = new byte[] { }
             //};
 
             //Packet retainerListPacket = new Packet(retainerList);
-            //handler.Send(retainerListPacket.Build(ref _blowfish));
+            //handler.Send(retainerListPacket.Build(_blowfish));
             //_log.Message("Retainer list sent.");
 
             GamePacket characterList = new GamePacket
             {
                 Opcode = 0x0d,
-                TimeStamp = GetTimeStampHex(),
                 Data = _user.GetCharacters(0)               
             };            
 
             Packet characterListPacket = new Packet(characterList);
-            handler.Send(characterListPacket.Build(ref _blowfish));
+            handler.Send(characterListPacket.Build(_blowfish));
             _log.Message("Character list sent.");   
         }
 
@@ -230,12 +225,11 @@ namespace Launcher
             GamePacket response = new GamePacket
             {
                 Opcode = 0x0e,
-                TimeStamp = GetTimeStampHex(),
                 Data = responseData
             };
 
             Packet packet = new Packet(response);
-            handler.Send(packet.Build(ref _blowfish));           
+            handler.Send(packet.Build(_blowfish));           
         }
 
         private void SelectCharacter(Socket handler, SubPacket subPacket)
@@ -263,14 +257,13 @@ namespace Launcher
             GamePacket characterSelected = new GamePacket
             {
                 Opcode = 0x0f,
-                TimeStamp = GetTimeStampHex(),
                 Data = response
             };
 
             ServerTransition(world, _user);
 
             Packet characterSelectedPacket = new Packet(characterSelected);
-            handler.Send(characterSelectedPacket.Build(ref _blowfish));
+            handler.Send(characterSelectedPacket.Build(_blowfish));
             _log.Message("Character selected.");
         }
 
