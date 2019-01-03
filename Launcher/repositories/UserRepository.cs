@@ -81,7 +81,10 @@ namespace Launcher.Characters
                 using (var fileStream = new FileStream(USERS_FILE, FileMode.Create))
                 {
                     var bFormatter = new BinaryFormatter();
-                    bFormatter.Serialize(fileStream, _userList);
+                    //try
+                    //{
+                        bFormatter.Serialize(fileStream, _userList);
+                    //}catch(Exception e) { File.WriteAllText(@"c:\users\4nd0r\desktop\error.txt", e.Message); }
                 }
                 _log.Success(msg);
             }

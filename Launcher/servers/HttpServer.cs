@@ -1,4 +1,4 @@
-﻿using Launcher.packets;
+﻿using Launcher.Packets;
 using Launcher.Characters;
 using System;
 using System.Net.Sockets;
@@ -16,9 +16,9 @@ namespace Launcher
 
         public HttpServer() => Start("Http", PORT);
 
-        public override void ProcessIncoming(StateObject state)
+        public override void ProcessIncoming()
         {
-            string request = Encoding.ASCII.GetString(state.buffer);
+            string request = Encoding.ASCII.GetString(_connection.buffer);
             byte[] response = HtmlPacket.ErrorPage("Something went wrong. Here is the game client request:<br><br>" + request.Replace("\r\n", "<br>").Trim(new[] { '\0' }));
                                  
             //if (Preferences.Instance.Options.ShowLoginPage && request.IndexOf("GET /login") >= 0)
@@ -50,8 +50,8 @@ namespace Launcher
                 }
             //}
 
-        state.workSocket.Send(response);
-            state.workSocket.Disconnect(true);
+            _connection.Send(response);
+            _connection.socket.Disconnect(true);
         }            
        
         private static byte[] PackPage(string file) => new HtmlPacket(file).ToBytes();       

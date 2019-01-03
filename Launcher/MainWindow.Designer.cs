@@ -124,9 +124,9 @@
             this.btnLaunchGame.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnLaunchGame.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnLaunchGame.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(0)))));
-            this.btnLaunchGame.Location = new System.Drawing.Point(0, 422);
+            this.btnLaunchGame.Location = new System.Drawing.Point(1, 423);
             this.btnLaunchGame.Name = "btnLaunchGame";
-            this.btnLaunchGame.Size = new System.Drawing.Size(165, 42);
+            this.btnLaunchGame.Size = new System.Drawing.Size(163, 42);
             this.btnLaunchGame.TabIndex = 8;
             this.btnLaunchGame.Text = "Launch game";
             this.btnLaunchGame.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -167,9 +167,9 @@
             // 
             this.pnlSidePanel.BackColor = System.Drawing.Color.Maroon;
             this.pnlSidePanel.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+            this.pnlSidePanel.Controls.Add(this.btnLaunchGame);
             this.pnlSidePanel.Controls.Add(this.pnlButtons);
             this.pnlSidePanel.Controls.Add(this.panel1);
-            this.pnlSidePanel.Controls.Add(this.btnLaunchGame);
             this.pnlSidePanel.Dock = System.Windows.Forms.DockStyle.Left;
             this.pnlSidePanel.Location = new System.Drawing.Point(0, 0);
             this.pnlSidePanel.Name = "pnlSidePanel";

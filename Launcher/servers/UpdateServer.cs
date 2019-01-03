@@ -23,18 +23,18 @@ namespace Launcher
             Process.Start(new ProcessStartInfo { FileName = Preferences.Instance.Options.GameInstallPath + @"\ffxivboot.exe" });
         }
 
-        public override void ProcessIncoming(StateObject state)
+        public override void ProcessIncoming()
         {
-            string stringData = Encoding.ASCII.GetString(state.buffer);           
+            string stringData = Encoding.ASCII.GetString(_connection.buffer);           
 
             //Boot version check response
             if (stringData.IndexOf("boot") > 0)
-                state.workSocket.Send(Updater.CheckBootVer());
+                _connection.Send(Updater.CheckBootVer());
 
             //Game version check response
             if (stringData.IndexOf("game") > 0)
             {
-                state.workSocket.Send(Updater.CheckGameVer());
+                _connection.Send(Updater.CheckGameVer());
                 ServerShutDown(); //sending shutdown after server's final task.
             }                           
         }

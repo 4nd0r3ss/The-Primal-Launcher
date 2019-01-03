@@ -1,4 +1,4 @@
-﻿using Launcher.packets;
+﻿using Launcher.Packets;
 
 namespace Launcher
 {

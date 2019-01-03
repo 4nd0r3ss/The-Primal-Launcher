@@ -3,36 +3,9 @@ using System.IO;
 using System.Text;
 
 namespace Launcher.Characters
-{
+{  
     [Serializable]
-    public struct Face
-    {
-        [BitField.BitfieldLength(5)]
-        public uint Characteristics;
-        [BitField.BitfieldLength(3)]
-        public uint CharacteristicsColor;
-        [BitField.BitfieldLength(6)]
-        public uint Type;
-        [BitField.BitfieldLength(2)]
-        public uint Ears;
-        [BitField.BitfieldLength(2)]
-        public uint Mouth;
-        [BitField.BitfieldLength(2)]
-        public uint Features;
-        [BitField.BitfieldLength(3)]
-        public uint Nose;
-        [BitField.BitfieldLength(3)]
-        public uint EyeShape;
-        [BitField.BitfieldLength(1)]
-        public uint IrisSize;
-        [BitField.BitfieldLength(3)]
-        public uint EyeBrows;
-        [BitField.BitfieldLength(2)]
-        public uint Unknown;
-    }
-
-    [Serializable]
-    public class Character
+    public class PlayerCharacter
     {
         #region Packet build
         public static readonly ushort OPCODE = 0xd;
@@ -58,7 +31,7 @@ namespace Launcher.Characters
         public ushort HairColor { get; set; }
         public ushort HairHighlightColor { get; set; }
         public ushort HairVariation { get; set; }
-        public ushort EyeColor { get; set; }
+        public ushort EyeColor { get; set; } //oddly not part of face bitfield values. Maybe it was added at a later time in development?
         #endregion
 
         public Face Face { get; set; }
@@ -77,9 +50,9 @@ namespace Launcher.Characters
         public ushort CurrentLevel { get; set; } = 1;
         #endregion
                 
-        public GearSet GearSet { get; set; }       
-
+        public GearSet GearSet { get; set; }      
         public Position Position { get; set; }
+        public Inventory Inventory { get; set; }       
 
         public void Setup(byte[] data)
         {
@@ -94,7 +67,7 @@ namespace Launcher.Characters
             //decoded packet info
             data = Convert.FromBase64String(tmp);
 
-            File.WriteAllBytes("decodedchara.txt", data);
+            //File.WriteAllBytes("decodedchara.txt", data);
 
             //General
             Size = data[0x09];
@@ -132,8 +105,8 @@ namespace Launcher.Characters
             Tribe = data[0x08];             
             
             CurrentClass = data[0x2a];            
-            GearSet = CharacterClass.GetInitialGearSet(CurrentClass, Tribe);  
-            Position = Position.GetInitialPosition(InitialTown);
+            GearSet = Appearance.GetInitialGearSet(CurrentClass, Tribe);  
+            Position = InitialPosition.Get(InitialTown);
         }
 
         private uint NewId()

@@ -22,6 +22,8 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>
+    </DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -48,9 +50,12 @@
   <ItemGroup>
     <Compile Include="BitField.cs" />
     <Compile Include="Blowfish.cs" />
-    <Compile Include="Characters\CharacterClass.cs" />
+    <Compile Include="Characters\Appearance.cs" />
+    <Compile Include="Characters\Group.cs" />
+    <Compile Include="Characters\Inventory.cs" />
     <Compile Include="Packets\GamePacket.cs" />
     <Compile Include="Packets\HtmlPacket.cs" />
+    <Compile Include="Packets\MessagePacket.cs" />
     <Compile Include="Packets\SubPacket.cs" />
     <Compile Include="Servers\GameServer.cs" />
     <Compile Include="Servers\HttpServer.cs" />
@@ -69,6 +74,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Servers\Server.cs" />
     <Compile Include="Servers\UpdateServer.cs" />
+    <Compile Include="TestPackets.cs" />
     <Compile Include="ucAbout.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -88,7 +94,7 @@
       <DependentUpon>ucLogWindow.cs</DependentUpon>
     </Compile>
     <Compile Include="Updater.cs" />
-    <Compile Include="Characters\Character.cs" />
+    <Compile Include="Characters\PlayerCharacter.cs" />
     <Compile Include="Player\GameAccount.cs" />
     <Compile Include="Characters\Retainer.cs" />
     <Compile Include="Player\User.cs" />

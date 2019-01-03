@@ -1,4 +1,4 @@
-﻿using Launcher.packets;
+﻿using Launcher.Packets;
 using Launcher.Characters;
 using System;
 using System.IO;
@@ -14,7 +14,7 @@ namespace Launcher
         private const int PORT = 54994;       
         private static WorldRepository _worldRepo = WorldRepository.Instance;
         private User _user;
-        private Character _newCharacter = new Character();
+        private PlayerCharacter _newCharacter = new PlayerCharacter();
 
         public LobbyServer(User user)
         {
@@ -22,13 +22,13 @@ namespace Launcher
             Start("Lobby", PORT);
         }
 
-        public override void ProcessIncoming(StateObject state)
+        public override void ProcessIncoming()
         {
-            Packet packet = new Packet(state.buffer);         
+            Packet packet = new Packet(_connection.buffer);         
 
             if (packet.Size == 0x288 && packet.Data[0x34] == 'T')
             {
-                StartSession(state.workSocket, packet);               
+                StartSession(packet);               
             }
             else
             {
@@ -41,16 +41,16 @@ namespace Launcher
                     switch (sp.Opcode())
                     {
                         case 0x03:
-                            GetCharacters(state.workSocket, sp);
+                            GetCharacters(sp);
                             break;
                         case 0x04:
-                            SelectCharacter(state.workSocket, sp);
+                            SelectCharacter(sp);
                             break;
                         case 0x05:
-                            SessionAcknowledgement(state.workSocket, sp);
+                            SendAccountList();
                             break;
                         case 0x0B:
-                            ModifyCharacter(state.workSocket, sp);
+                            ModifyCharacter(sp);
                             break;
                         default:
                             UnknownPacketDebug(sp);
@@ -66,33 +66,26 @@ namespace Launcher
             _log.Error("[Lobby Server] Unknown packet");
         }
 
-        private void StartSession(Socket handler, Packet packet)
+        private void StartSession(Packet packet)
         {
-            string ticketPhrase = "";
-            uint clientNumber = 0;            
+            byte[] ticketPhrase = new byte[0x40];
+            byte[] clientNumber = new byte[0x04];
 
-            //<-- Code block taken from Ioncannon code.
-            using (MemoryStream mem = new MemoryStream(packet.Data))
-            {
-                using (BinaryReader binReader = new BinaryReader(mem))
-                {
-                    try
-                    {
-                        binReader.BaseStream.Seek(0x34, SeekOrigin.Begin);
-                        ticketPhrase = Encoding.ASCII.GetString(binReader.ReadBytes(0x40)).Trim(new[] { '\0' });
-                        clientNumber = binReader.ReadUInt32();
-                    }
-                    catch (Exception){_log.Error("Invalid security handshake packet.");}
-                }
-            }
-            //-->
+            Buffer.BlockCopy(packet.Data, 0x34, ticketPhrase, 0, ticketPhrase.Length);
+            Buffer.BlockCopy(packet.Data, 0x74, clientNumber, 0, clientNumber.Length);            
             
-            _blowfish = new Blowfish(Blowfish.GenerateKey(ticketPhrase, clientNumber));  
-            handler.Send(Packet.AckPacket);
+            _blowfish = new Blowfish(
+                Blowfish.GenerateKey(
+                    Encoding.ASCII.GetString(ticketPhrase).Trim(new[] { '\0' }), 
+                    BitConverter.ToUInt32(clientNumber, 0)
+                )
+            );  
+
+            _connection.Send(Packet.AckPacket);
             _log.Message("Security handshake packet sent.");
         }
 
-        private void SessionAcknowledgement(Socket handler, SubPacket subPacket)
+        private void SendAccountList()
         {                           
             GamePacket gamePacket = new GamePacket
             {
@@ -101,11 +94,11 @@ namespace Launcher
             };
 
             Packet packet = new Packet(gamePacket);
-            handler.Send(packet.Build(_blowfish));
+            _connection.Send(packet.Build(_blowfish));
             _log.Message("Account list sent.");
         }
 
-        private void GetCharacters(Socket handler, SubPacket subPacket)
+        private void GetCharacters(SubPacket subPacket)
         {
             GamePacket worldList = new GamePacket
             {
@@ -114,7 +107,7 @@ namespace Launcher
             };
 
             Packet worldListPacket = new Packet(worldList);            
-            handler.Send(worldListPacket.Build(_blowfish));
+            _connection.Send(worldListPacket.Build(_blowfish));
             _log.Message("World list sent.");
 
             //GamePacket importList = new GamePacket
@@ -140,17 +133,17 @@ namespace Launcher
             GamePacket characterList = new GamePacket
             {
                 Opcode = 0x0d,
-                Data = _user.GetCharacters(0)               
+                Data = _user.GetCharacters(0) //only one account supported so far.          
             };            
 
             Packet characterListPacket = new Packet(characterList);
-            handler.Send(characterListPacket.Build(_blowfish));
+            _connection.Send(characterListPacket.Build(_blowfish));
             _log.Message("Character list sent.");   
         }
 
-        private void ModifyCharacter(Socket handler, SubPacket subPacket)
+        private void ModifyCharacter(SubPacket subPacket)
         {
-            File.WriteAllBytes("characreation_in.txt", subPacket.Data);
+            //File.WriteAllBytes("characreation_in.txt", subPacket.Data);
 
             byte[] responseData = new byte[0x50];
             byte command = subPacket.Data[0x21];
@@ -205,8 +198,7 @@ namespace Launcher
                     _user.AccountList[0].CharacterList.RemoveAt(i);
                     //Update user info
                     UserRepository.UpdateUser(_user);
-                    _log.Warning("Character ID#" + id.ToString("X") + ": \"" + name + "\" was deleted.");
-                    File.WriteAllBytes("deletechar.txt", subPacket.Data);
+                    _log.Warning("Character ID#" + id.ToString("X") + ": \"" + name + "\" was deleted.");                    
                     break;
 
                 case 0x05:
@@ -229,11 +221,13 @@ namespace Launcher
             };
 
             Packet packet = new Packet(response);
-            handler.Send(packet.Build(_blowfish));           
+            _connection.Send(packet.Build(_blowfish));           
         }
 
-        private void SelectCharacter(Socket handler, SubPacket subPacket)
+        private void SelectCharacter(SubPacket subPacket)
         {
+            File.WriteAllBytes(@"c:\users\4nd0r\desktop\selectcharacter.txt", subPacket.Data);
+
             byte sequence = subPacket.Data[0x10];
             byte[] characterId = new byte[0x04];
             byte[] ticket = new byte[0x08];
@@ -241,8 +235,16 @@ namespace Launcher
             Buffer.BlockCopy(subPacket.Data, 0x18, characterId, 0, 0x04);
             Buffer.BlockCopy(subPacket.Data, 0x20, ticket, 0, 0x08);
 
+            _user.SelectedCharacterId = BitConverter.ToUInt32(characterId, 0);
+
+            //when you create a new character, the game client calls SelectCharacter right after,
+            //however the reveived packet does not contain the character id for some reason. 
+            //the code below fix this as we need it to get the world id.
+            if (_user.SelectedCharacterId == 0)
+                _user.SelectedCharacterId = _newCharacter.Id;
+
             //Get world info
-            byte worldId = _user.AccountList[0].CharacterList.Find(x => x.Id == BitConverter.ToUInt32(characterId, 0)).WorldId;
+            byte worldId = _user.AccountList[0].CharacterList.Find(x => x.Id == _user.SelectedCharacterId).WorldId;
             World world = _worldRepo.GetWorld(worldId);
 
             byte[] response = new byte[0x98];
@@ -260,10 +262,10 @@ namespace Launcher
                 Data = response
             };
 
-            ServerTransition(world, _user);
+            ServerTransition(world);
 
             Packet characterSelectedPacket = new Packet(characterSelected);
-            handler.Send(characterSelectedPacket.Build(_blowfish));
+            _connection.Send(characterSelectedPacket.Build(_blowfish));
             _log.Message("Character selected.");
         }
 
@@ -272,7 +274,7 @@ namespace Launcher
             throw new NotImplementedException();
         }
 
-        public void ServerTransition(World world, User user) => Task.Run(() => { GameServer game = new GameServer(_blowfish, world, user); });
+        public void ServerTransition(World world) => Task.Run(() => { GameServer game = new GameServer(_blowfish, world, _user); });
         
     }
 }

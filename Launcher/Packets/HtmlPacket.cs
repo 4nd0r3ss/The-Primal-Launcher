@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 
-namespace Launcher.packets
+namespace Launcher.Packets
 {
     class HtmlPacket
     {

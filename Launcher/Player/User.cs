@@ -15,6 +15,8 @@ namespace Launcher.Characters
         public string Pwd { get; set; } = "";        
         public List<GameAccount> AccountList { get; set; } = new List<GameAccount>();
         private byte NumAccounts => (byte)AccountList.Count;
+        public uint SessionId { get; set; }
+        public uint SelectedCharacterId { get; set; }
         
         public byte[] GetAccountListData()
         {
@@ -45,21 +47,21 @@ namespace Launcher.Characters
 
         public byte[] GetCharacters(int accountId)
         {
-            List<Character> characterList =  AccountList[accountId].CharacterList;
-            byte[] result = new byte[(Character.SLOT_SIZE * 2) + 0x10];
+            List<PlayerCharacter> characterList =  AccountList[accountId].CharacterList;
+            byte[] result = new byte[(PlayerCharacter.SLOT_SIZE * 2) + 0x10];
             
             result[0x08] = 0x01; //list sequence (?)
             result[0x09] = 2; //no logic for 8 character slots yet, 2 only.
 
             for(int i=0;i<2/*characterList.Count*/;i++)
             {
-                byte[] characterSlot = new byte[Character.SLOT_SIZE];
+                byte[] characterSlot = new byte[PlayerCharacter.SLOT_SIZE];
                 characterSlot[0x08] = (byte)i; 
                 characterSlot[0x09] = 0x08; //0X01 = inactive, 0x02 = rename char, 0x08 = legacy
 
                 if (characterList.Count >= (i+1) )
                 {
-                    Character character = characterList.Find(x => x.Slot == i);
+                    PlayerCharacter character = characterList.Find(x => x.Slot == i);
 
                     byte[] name = Encoding.ASCII.GetBytes(Encoding.ASCII.GetString(character.Name).Trim(new[] { '\0' }));
                     byte[] gearSet = character.GearSet.ToBytes();
@@ -82,7 +84,7 @@ namespace Launcher.Characters
                             bw.Write(name);
                             bw.Write((byte)0);
                             bw.Write((ulong)0x040000001c); //??
-                            bw.Write(CharacterClass.GetTribeModel(character.Tribe));
+                            bw.Write(Appearance.GetTribeModel(character.Tribe));
                             bw.Write(character.Size);
                             bw.Write(character.SkinColor | (uint)(character.HairColor << 10) | (uint)(character.EyeColor << 20));
                             bw.Write(BitField.PrimitiveConversion.ToUInt32(character.Face));
@@ -118,7 +120,7 @@ namespace Launcher.Characters
                     Buffer.BlockCopy(base64Info, 0, characterSlot, 0x40, base64Info.Length);
                 }
                 //Write character slot into slot list.
-                Buffer.BlockCopy(characterSlot, 0, result, ((Character.SLOT_SIZE * i) + 0x10), characterSlot.Length);
+                Buffer.BlockCopy(characterSlot, 0, result, ((PlayerCharacter.SLOT_SIZE * i) + 0x10), characterSlot.Length);
             }
             return result;
         }       

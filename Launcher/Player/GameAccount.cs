@@ -15,17 +15,17 @@ namespace Launcher.Characters
         #region Properties
         public int Id { get; set; }
         public string Name { get; set; }
-        public List<Character> CharacterList { get; set; } = new List<Character>();
+        public List<PlayerCharacter> CharacterList { get; set; } = new List<PlayerCharacter>();
         #endregion
 
         public byte[] GetCharacterListInfo()
         {
-            byte[] characterData = new byte[(Character.SLOT_SIZE * Character.MAX_SLOTS) + 0x10];
+            byte[] characterData = new byte[(PlayerCharacter.SLOT_SIZE * PlayerCharacter.MAX_SLOTS) + 0x10];
             characterData[0x08] = 0x02;
             characterData[0x09] = 0x02;
-            for(int i=0;i< Character.MAX_SLOTS; i++)
+            for(int i=0;i< PlayerCharacter.MAX_SLOTS; i++)
             {
-                characterData[(Character.SLOT_SIZE * i) + 0x10 + 0x08] = (byte)i;
+                characterData[(PlayerCharacter.SLOT_SIZE * i) + 0x10 + 0x08] = (byte)i;
             }
 
             return characterData;

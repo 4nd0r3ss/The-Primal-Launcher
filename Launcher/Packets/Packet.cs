@@ -1,13 +1,10 @@
-﻿using Launcher.packets;
+﻿using Launcher.Packets;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net.Sockets;
-using System.Text;
 
 namespace Launcher
-{   
+{
     public class Packet
     {
         #region Static fields
@@ -17,21 +14,27 @@ namespace Launcher
         #region Properties
         public byte IsAuthenticated { get; private set; } = 0x01; //0x00: isAuthenticated;
         public byte IsEncoded { get; private set; } = 0x00; //0x01: isCompressed/encoded;
-        public ushort ConnType { get; private set; } //0x02: connectionType;
+        public ushort ConnType { get; set; } //0x02: connectionType;
         public ushort Size { get; private set; } = 0x10; //0x04: packetSize;
         public ushort NumSubpackets { get; private set; } //0x06: numSubpackets;
         public uint TimeStamp { get; private set; } //0x08: timestamp; //Miliseconds
         public byte[] Data { get; set; }       
         public Queue<SubPacket> SubPacketQueue { get; set; } = new Queue<SubPacket>();
         public List<SubPacket> SubPacketList { get; set; } = new List<SubPacket>();
-        #endregion        
+        #endregion
 
         #region Constructors
-        public Packet(byte[] incoming) => PacketSetup(incoming);
         public Packet() { }
+        public Packet(byte[] incoming) => PacketSetup(incoming);
+        public Packet(SubPacket subPacket) => AddSubPacket(subPacket);       
         public Packet(GamePacket gamePacket)
         {
-            SubPacket subPacket= new SubPacket(gamePacket);            
+            SubPacket subPacket = new SubPacket(gamePacket);            
+            AddSubPacket(subPacket);
+        }    
+        public Packet(MessagePacket messagePacket)
+        {
+            SubPacket subPacket = new SubPacket(messagePacket);
             AddSubPacket(subPacket);
         }
         #endregion
@@ -140,7 +143,7 @@ namespace Launcher
             {
                 byte[] subpacketData = new byte[subPacketSize - 0x10];
 
-                if (subpacketData.Length > 0x8) //do not process small sync packets
+                if (subpacketData.Length > 0x8) //do not process small ping packets
                 {
                     Buffer.BlockCopy(Data, index + 16, subpacketData, 0, subpacketData.Length); //copy whole subpacket. -16 = without subpacket header.            
 
@@ -156,10 +159,11 @@ namespace Launcher
                     if (bf != null)
                         subpacket.Decrypt(bf);
 
-                    SubPacketQueue.Enqueue(subpacket);
-                    index = subPacketSize;
-                    subPacketSize = (ushort)(Data[subPacketSize + 0x01] << 8 | Data[subPacketSize + 0x00]);
+                    SubPacketQueue.Enqueue(subpacket);                    
                 }
+
+                index = subPacketSize;
+                subPacketSize = (ushort)(Data[subPacketSize + 0x01] << 8 | Data[subPacketSize + 0x00]);
             }
             
         }       
