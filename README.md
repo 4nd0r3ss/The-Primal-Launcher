@@ -13,4 +13,17 @@ Some of the main features are:
 - Built-in game update downloader and update using original updater for a complete experience;
 - Built-in micro web-server to handle http requests using original login window and mock-up login screen mimicking the original one (cand be edited!);
 
+What has been done so far
+=========================
+
+I'm still working on basic functionality. So far it is possible to launch the game, create/delete characters and enter the game, however there is not much to do in-game as I didn't implement anything but the chat message system yet. It is possible to walk around the map though.
+
+TODO
+====
+
+The next steps are:
+- Zone teleportation (to change maps and walk around :)
+- Change weather, music and Dalamud phase
+- Proper world creation with NPCs and zone info;
+- Create game actors and load objects into the game;
 
