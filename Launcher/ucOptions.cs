@@ -29,7 +29,7 @@ namespace Launcher
 
             //Get paths from configuration file.  
             txtGameInstallPath.Text = Config.Options.GameInstallPath;
-            txtPatchPath.Text = Config.Options.PatchDownloadPath;
+            txtPatchPath.Text = Config.Options.UserFilesPath + Preferences.AppFolder;
         }            
         
         private void btnChangeGameInstallPath_Click_1(object sender, EventArgs e)

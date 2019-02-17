@@ -1,11 +1,8 @@
-﻿using Launcher.Packets;
-using Launcher.Characters;
-using System;
+﻿using System;
 using System.IO;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
-using Launcher.Servers;
 
 namespace Launcher
 {
@@ -18,43 +15,53 @@ namespace Launcher
 
         public LobbyServer(User user)
         {
+            Task.Run(() =>
+            {
+                while (_listening)                
+                    ProcessIncoming(ref _connection);                
+            });
+
             _user = user;
             Start("Lobby", PORT);
-        }
+                                  
+        }       
 
-        public override void ProcessIncoming()
+        public override void ProcessIncoming(ref StateObject _connection)
         {
-            Packet packet = new Packet(_connection.buffer);         
-
-            if (packet.Size == 0x288 && packet.Data[0x34] == 'T')
+            while (_connection.bufferQueue.Count > 0)
             {
-                StartSession(packet);               
-            }
-            else
-            {
-                packet.ProcessSubPackets(_blowfish);
+                Packet packet = new Packet(_connection.bufferQueue.Dequeue());         
 
-                while (packet.SubPacketQueue.Count > 0)
+                if (packet.Size == 0x288 && packet.Data[0x34] == 'T')
                 {
-                    SubPacket sp = packet.SubPacketQueue.Dequeue();
+                    StartSession(packet);
+                }
+                else
+                {
+                    packet.ProcessSubPackets(_blowfish);
 
-                    switch (sp.Opcode())
+                    while (packet.SubPacketQueue.Count > 0)
                     {
-                        case 0x03:
-                            GetCharacters(sp);
-                            break;
-                        case 0x04:
-                            SelectCharacter(sp);
-                            break;
-                        case 0x05:
-                            SendAccountList();
-                            break;
-                        case 0x0B:
-                            ModifyCharacter(sp);
-                            break;
-                        default:
-                            UnknownPacketDebug(sp);
-                            break;
+                        SubPacket sp = packet.SubPacketQueue.Dequeue();
+
+                        switch (sp.Opcode())
+                        {
+                            case 0x03:
+                                GetCharacters(sp);
+                                break;
+                            case 0x04:
+                                SelectCharacter(sp);
+                                break;
+                            case 0x05:
+                                SendAccountList();
+                                break;
+                            case 0x0B:
+                                ModifyCharacter(sp);
+                                break;
+                            default:
+                                UnknownPacketDebug(sp);
+                                break;
+                        }
                     }
                 }
             }
@@ -82,7 +89,7 @@ namespace Launcher
             );  
 
             _connection.Send(Packet.AckPacket);
-            _log.Message("Security handshake packet sent.");
+            _log.Info("Security handshake packet sent.");
         }
 
         private void SendAccountList()
@@ -94,8 +101,8 @@ namespace Launcher
             };
 
             Packet packet = new Packet(gamePacket);
-            _connection.Send(packet.Build(_blowfish));
-            _log.Message("Account list sent.");
+            _connection.Send(packet.ToBytes(_blowfish));
+            _log.Info("Account list sent.");
         }
 
         private void GetCharacters(SubPacket subPacket)
@@ -107,8 +114,8 @@ namespace Launcher
             };
 
             Packet worldListPacket = new Packet(worldList);            
-            _connection.Send(worldListPacket.Build(_blowfish));
-            _log.Message("World list sent.");
+            _connection.Send(worldListPacket.ToBytes(_blowfish));
+            _log.Info("World list sent.");
 
             //GamePacket importList = new GamePacket
             //{
@@ -137,13 +144,14 @@ namespace Launcher
             };            
 
             Packet characterListPacket = new Packet(characterList);
-            _connection.Send(characterListPacket.Build(_blowfish));
-            _log.Message("Character list sent.");   
+            File.WriteAllBytes(@"c:\users\4nd0r\desktop\getchars_out.txt", characterListPacket.ToBytes());
+            _connection.Send(characterListPacket.ToBytes(_blowfish));
+            _log.Info("Character list sent.");   
         }
 
         private void ModifyCharacter(SubPacket subPacket)
         {
-            //File.WriteAllBytes("characreation_in.txt", subPacket.Data);
+            File.WriteAllBytes("characreation_in.txt", subPacket.Data);
 
             byte[] responseData = new byte[0x50];
             byte command = subPacket.Data[0x21];
@@ -151,22 +159,20 @@ namespace Launcher
 
             responseData[0x00] = subPacket.Data[0x10]; //sequence
             responseData[0x08] = (byte)1; //unknown
-            responseData[0x09] = (byte)1; //unknown
+            responseData[0x09] = (byte)2; //unknown
             responseData[0x0a] = command;
-
-            responseData[0x00] = subPacket.Data[0x10]; //pid ??
-            responseData[0x00] = subPacket.Data[0x10]; //cid ??
-            Buffer.BlockCopy(BitConverter.GetBytes(0x400017), 0, responseData, 0x18, 0x03); //type ??        
+            
+            //Buffer.BlockCopy(BitConverter.GetBytes(0x400017), 0, responseData, 0x18, 0x03); //type ??        
             responseData[0x1c] = (byte)1; //ticket
 
             switch (command)
             {
                 case 0x01:
                     //As this is intended to be a single player experience, no name reserving is needed.                    
-                    Buffer.BlockCopy(subPacket.Data, 0x24, _newCharacter.Name, 0, 0x20);
+                    Buffer.BlockCopy(subPacket.Data, 0x24, _newCharacter.CharacterName, 0, 0x20);
                     _newCharacter.Slot = subPacket.Data[0x20];                                        
                     _newCharacter.WorldId = worldId;                   
-                    _log.Message("Character name reserved.");
+                    _log.Info("Character name reserved.");
                     break;
 
                 case 0x02:
@@ -174,11 +180,13 @@ namespace Launcher
                     _user.AccountList[0].CharacterList.Add(_newCharacter);
                     UserRepository.UpdateUser(_user);
                     worldId = _newCharacter.WorldId;
-                    _log.Success("Character ID#"+_newCharacter.Id.ToString("X")+": \"" + Encoding.ASCII.GetString(_newCharacter.Name) + "\" created!");
+                    //Buffer.BlockCopy(BitConverter.GetBytes(_newCharacter.Id), 0, responseData, 0x10, 0x04);
+                    Buffer.BlockCopy(BitConverter.GetBytes(_newCharacter.Id), 0, responseData, 0x14, 0x04);
+                    _log.Success("Character ID#"+_newCharacter.Id.ToString("X")+": \"" + Encoding.ASCII.GetString(_newCharacter.CharacterName) + "\" created!");
                     break;
 
                 case 0x03:
-                    _log.Message("Rename character");
+                    _log.Info("Rename character");
                     break;
 
                 case 0x04:
@@ -206,27 +214,28 @@ namespace Launcher
                     break;
 
                 case 0x06:
-                    _log.Message("Rename retainer");
+                    _log.Info("Rename retainer");
                     break;
             }
 
             byte[] worldName = Encoding.ASCII.GetBytes(_worldRepo.GetWorld(worldId).Name);
             Buffer.BlockCopy(worldName, 0, responseData, 0x40, worldName.Length);   
-            Buffer.BlockCopy(_newCharacter.Name, 0, responseData, 0x20, 0x20);            
+            Buffer.BlockCopy(_newCharacter.CharacterName, 0, responseData, 0x20, 0x20);            
 
             GamePacket response = new GamePacket
             {
                 Opcode = 0x0e,
                 Data = responseData
-            };
+            };           
 
-            Packet packet = new Packet(response);
-            _connection.Send(packet.Build(_blowfish));           
+            Packet packet = new Packet(new SubPacket(response) { SourceId = _newCharacter.Id, TargetId = _newCharacter.Id });
+            File.WriteAllBytes(@"c:\users\4nd0r\desktop\createchar_out.txt", packet.ToBytes());
+            _connection.Send(packet.ToBytes(_blowfish));           
         }
 
         private void SelectCharacter(SubPacket subPacket)
         {
-            File.WriteAllBytes(@"c:\users\4nd0r\desktop\selectcharacter.txt", subPacket.Data);
+            //File.WriteAllBytes(@"c:\users\4nd0r\desktop\selectcharacter_in.txt", subPacket.Data);
 
             byte sequence = subPacket.Data[0x10];
             byte[] characterId = new byte[0x04];
@@ -235,17 +244,22 @@ namespace Launcher
             Buffer.BlockCopy(subPacket.Data, 0x18, characterId, 0, 0x04);
             Buffer.BlockCopy(subPacket.Data, 0x20, ticket, 0, 0x08);
 
-            _user.SelectedCharacterId = BitConverter.ToUInt32(characterId, 0);
+            uint selectedCharacterId = BitConverter.ToUInt32(characterId, 0);
+
+            //Keep selected character in the User obj 
+            _user.Character = _user.AccountList[0].CharacterList.Find(x => x.Id == selectedCharacterId);
 
             //when you create a new character, the game client calls SelectCharacter right after,
-            //however the reveived packet does not contain the character id for some reason. 
+            //however the received packet does not contain the character id for some reason. 
             //the code below fix this as we need it to get the world id.
-            if (_user.SelectedCharacterId == 0)
-                _user.SelectedCharacterId = _newCharacter.Id;
+            if (_user.Character == null)
+                _user.Character = _newCharacter;
+            //if (selectedCharacterId == 0)
+                //selectedCharacterId = _newCharacter.Id;
 
             //Get world info
-            byte worldId = _user.AccountList[0].CharacterList.Find(x => x.Id == _user.SelectedCharacterId).WorldId;
-            World world = _worldRepo.GetWorld(worldId);
+            byte worldId = _user.Character.WorldId;
+            World world = _worldRepo.GetWorld(worldId);            
 
             byte[] response = new byte[0x98];
             response[0] = sequence;
@@ -265,8 +279,8 @@ namespace Launcher
             ServerTransition(world);
 
             Packet characterSelectedPacket = new Packet(characterSelected);
-            _connection.Send(characterSelectedPacket.Build(_blowfish));
-            _log.Message("Character selected.");
+            _connection.Send(characterSelectedPacket.ToBytes(_blowfish));
+            _log.Info("Character selected.");
         }
 
         public override void ServerTransition()
@@ -274,7 +288,7 @@ namespace Launcher
             throw new NotImplementedException();
         }
 
-        public void ServerTransition(World world) => Task.Run(() => { GameServer game = new GameServer(_blowfish, world, _user); });
+        public void ServerTransition(World world) => Task.Run(() => { GameServer game = new GameServer(world, _user); });
         
     }
 }

@@ -35,26 +35,31 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Ionic.Zlib, Version=1.9.1.5, Culture=neutral, PublicKeyToken=edbe51ad942a3f5c, processorArchitecture=MSIL">
+      <HintPath>..\packages\Ionic.Zlib.1.9.1.5\lib\Ionic.Zlib.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Numerics" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
-    <Reference Include="System.Net.Http" />
     <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BitField.cs" />
     <Compile Include="Blowfish.cs" />
+    <Compile Include="Characters\Aetheryte.cs" />
     <Compile Include="Characters\Appearance.cs" />
+    <Compile Include="Characters\CharacterClass.cs" />
     <Compile Include="Characters\Group.cs" />
     <Compile Include="Characters\Inventory.cs" />
+    <Compile Include="Characters\Property.cs" />
     <Compile Include="Packets\GamePacket.cs" />
-    <Compile Include="Packets\HtmlPacket.cs" />
+    <Compile Include="Packets\HttpPacket.cs" />
     <Compile Include="Packets\MessagePacket.cs" />
     <Compile Include="Packets\SubPacket.cs" />
     <Compile Include="Servers\GameServer.cs" />
@@ -100,8 +105,11 @@
     <Compile Include="Player\User.cs" />
     <Compile Include="Repositories\UserRepository.cs" />
     <Compile Include="Characters\Position.cs" />
+    <Compile Include="Characters\Actor.cs" />
+    <Compile Include="WorldInfo\MusicSet.cs" />
     <Compile Include="WorldInfo\World.cs" />
     <Compile Include="Repositories\WorldRepository.cs" />
+    <Compile Include="WorldInfo\Zone.cs" />
     <EmbeddedResource Include="MainWindow.resx">
       <DependentUpon>MainWindow.cs</DependentUpon>
     </EmbeddedResource>
@@ -123,6 +131,7 @@
     <EmbeddedResource Include="ucLogWindow.resx">
       <DependentUpon>ucLogWindow.cs</DependentUpon>
     </EmbeddedResource>
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

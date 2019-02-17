@@ -42,9 +42,9 @@
             this.BtnPatchExe = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.radioButton1 = new System.Windows.Forms.RadioButton();
-            this.radioButton2 = new System.Windows.Forms.RadioButton();
             this.radioButton3 = new System.Windows.Forms.RadioButton();
+            this.radioButton2 = new System.Windows.Forms.RadioButton();
+            this.radioButton1 = new System.Windows.Forms.RadioButton();
             this.groupBox2.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -53,6 +53,7 @@
             // txtGameInstallPath
             // 
             this.txtGameInstallPath.Enabled = false;
+            this.txtGameInstallPath.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.txtGameInstallPath.Location = new System.Drawing.Point(27, 26);
             this.txtGameInstallPath.Name = "txtGameInstallPath";
             this.txtGameInstallPath.Size = new System.Drawing.Size(488, 20);
@@ -60,6 +61,7 @@
             // 
             // btnChangeGameInstallPath
             // 
+            this.btnChangeGameInstallPath.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.btnChangeGameInstallPath.Location = new System.Drawing.Point(521, 24);
             this.btnChangeGameInstallPath.Name = "btnChangeGameInstallPath";
             this.btnChangeGameInstallPath.Size = new System.Drawing.Size(58, 23);
@@ -73,6 +75,7 @@
             this.groupBox2.Controls.Add(this.LblDownloadStatus);
             this.groupBox2.Controls.Add(this.button1);
             this.groupBox2.Controls.Add(this.progressBar1);
+            this.groupBox2.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.groupBox2.Location = new System.Drawing.Point(30, 261);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(306, 130);
@@ -108,6 +111,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
+            this.label2.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.label2.Location = new System.Drawing.Point(27, 59);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(107, 13);
@@ -116,6 +120,7 @@
             // 
             // btnChangePatchPath
             // 
+            this.btnChangePatchPath.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.btnChangePatchPath.Location = new System.Drawing.Point(521, 73);
             this.btnChangePatchPath.Name = "btnChangePatchPath";
             this.btnChangePatchPath.Size = new System.Drawing.Size(58, 23);
@@ -127,6 +132,7 @@
             // txtPatchPath
             // 
             this.txtPatchPath.Enabled = false;
+            this.txtPatchPath.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.txtPatchPath.Location = new System.Drawing.Point(27, 75);
             this.txtPatchPath.Name = "txtPatchPath";
             this.txtPatchPath.Size = new System.Drawing.Size(488, 20);
@@ -136,6 +142,7 @@
             // 
             this.groupBox1.Controls.Add(this.button2);
             this.groupBox1.Controls.Add(this.BtnPatchExe);
+            this.groupBox1.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.groupBox1.Location = new System.Drawing.Point(342, 261);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(245, 130);
@@ -165,6 +172,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
+            this.label1.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.label1.Location = new System.Drawing.Point(27, 7);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(114, 13);
@@ -176,6 +184,7 @@
             this.groupBox3.Controls.Add(this.radioButton3);
             this.groupBox3.Controls.Add(this.radioButton2);
             this.groupBox3.Controls.Add(this.radioButton1);
+            this.groupBox3.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.groupBox3.Location = new System.Drawing.Point(30, 117);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Size = new System.Drawing.Size(289, 100);
@@ -183,16 +192,16 @@
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Web server options";
             // 
-            // radioButton1
+            // radioButton3
             // 
-            this.radioButton1.AutoSize = true;
-            this.radioButton1.Location = new System.Drawing.Point(13, 23);
-            this.radioButton1.Name = "radioButton1";
-            this.radioButton1.Size = new System.Drawing.Size(208, 17);
-            this.radioButton1.TabIndex = 0;
-            this.radioButton1.TabStop = true;
-            this.radioButton1.Text = "Use built-in web server (recommended)";
-            this.radioButton1.UseVisualStyleBackColor = true;
+            this.radioButton3.AutoSize = true;
+            this.radioButton3.Location = new System.Drawing.Point(13, 71);
+            this.radioButton3.Name = "radioButton3";
+            this.radioButton3.Size = new System.Drawing.Size(267, 17);
+            this.radioButton3.TabIndex = 2;
+            this.radioButton3.TabStop = true;
+            this.radioButton3.Text = "Use an http server installed in this machine (unsafe)";
+            this.radioButton3.UseVisualStyleBackColor = true;
             // 
             // radioButton2
             // 
@@ -206,16 +215,16 @@
             this.radioButton2.UseVisualStyleBackColor = true;
             this.radioButton2.CheckedChanged += new System.EventHandler(this.radioButton2_CheckedChanged);
             // 
-            // radioButton3
+            // radioButton1
             // 
-            this.radioButton3.AutoSize = true;
-            this.radioButton3.Location = new System.Drawing.Point(13, 71);
-            this.radioButton3.Name = "radioButton3";
-            this.radioButton3.Size = new System.Drawing.Size(267, 17);
-            this.radioButton3.TabIndex = 2;
-            this.radioButton3.TabStop = true;
-            this.radioButton3.Text = "Use an http server installed in this machine (unsafe)";
-            this.radioButton3.UseVisualStyleBackColor = true;
+            this.radioButton1.AutoSize = true;
+            this.radioButton1.Location = new System.Drawing.Point(13, 23);
+            this.radioButton1.Name = "radioButton1";
+            this.radioButton1.Size = new System.Drawing.Size(208, 17);
+            this.radioButton1.TabIndex = 0;
+            this.radioButton1.TabStop = true;
+            this.radioButton1.Text = "Use built-in web server (recommended)";
+            this.radioButton1.UseVisualStyleBackColor = true;
             // 
             // ucOptions
             // 

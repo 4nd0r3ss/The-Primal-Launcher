@@ -6,7 +6,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Launcher.Characters
+namespace Launcher
 {
     public class WorldRepository
     {
@@ -14,6 +14,7 @@ namespace Launcher.Characters
         private static readonly object _padlock = new object();
         private static List<World> _worldList = new List<World>();
         private static readonly Log _log = Log.Instance;
+        private static Preferences _preferences = Preferences.Instance;
 
         private const string WORLD_FILE = @"worlds_data.dat";
 
@@ -31,7 +32,6 @@ namespace Launcher.Characters
 
             }
         }
-
 
         private WorldRepository() => LoadWorlds();
 
@@ -72,10 +72,10 @@ namespace Launcher.Characters
             //Create repository file with user list.
             try
             {
-                using (var fileStream = new FileStream(WORLD_FILE, FileMode.Create))
+                using (var fileStream = new FileStream(_preferences.Options.UserFilesPath + Preferences.AppFolder + WORLD_FILE, FileMode.Create))
                 {
-                    var bFormatter = new BinaryFormatter();
-                    bFormatter.Serialize(fileStream, _worldList);
+                    var bFormatter = new BinaryFormatter();                   
+                    bFormatter.Serialize(fileStream, _worldList);  
                 }
                 _log.Success("World file successfully created.");
             }
@@ -85,18 +85,18 @@ namespace Launcher.Characters
 
         private static void LoadWorlds()
         {
-            if (File.Exists(WORLD_FILE))
+            if (File.Exists(_preferences.Options.UserFilesPath + Preferences.AppFolder + WORLD_FILE))
             {
                 try
                 {
-                    using (var fileStream = new FileStream(WORLD_FILE, FileMode.Open))
+                    using (var fileStream = new FileStream(_preferences.Options.UserFilesPath + Preferences.AppFolder + WORLD_FILE, FileMode.Open))
                     {
-                        var bFormatter = new BinaryFormatter();
-                        _worldList = (List<World>)bFormatter.Deserialize(fileStream);
+                        var bFormatter = new BinaryFormatter();                        
+                         _worldList = (List<World>)bFormatter.Deserialize(fileStream); 
                     }
                     _log.Success("Loaded saved users.");
                 }
-                catch (Exception) { _log.Error("There is a problem with the world file. Please try again."); }
+                catch (Exception) {_log.Error("There is a problem with the world file. Please try again."); }
             }
             else
             {

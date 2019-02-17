@@ -1,5 +1,4 @@
-﻿using Launcher.Characters;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -10,7 +9,9 @@ using System.Windows.Forms;
 namespace Launcher
 {
     public partial class MainWindow : Form
-    {     
+    {
+        private Log _log = Log.Instance;
+
         #region Main window click & drag stuff
         public const int WM_NCLBUTTONDOWN = 0xA1;
         public const int HT_CAPTION = 0x2;
@@ -33,6 +34,8 @@ namespace Launcher
             //default user control button color
             btnLogWindow.BackColor = Color.White;
             btnLogWindow.ForeColor = Color.Maroon;
+
+            _log.Info("Welcome to Primal Launcher!");
         }       
 
         private void BtnLaunchGame_Click(object sender, EventArgs e)

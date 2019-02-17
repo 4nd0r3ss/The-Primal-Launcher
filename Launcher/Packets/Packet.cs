@@ -1,7 +1,8 @@
-﻿using Launcher.Packets;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using Ionic.Zlib;
 
 namespace Launcher
 {
@@ -45,7 +46,7 @@ namespace Launcher
             SubPacketList.Add(subPacket);
         }
 
-        public byte[] Build(Blowfish blowfish = null)
+        public byte[] ToBytes(Blowfish blowfish = null)
         {
             byte[] toBytes = new byte[Size];
 
@@ -66,6 +67,29 @@ namespace Launcher
             }
 
             return toBytes;
+        }
+
+        public byte[] ToBytesZipped()
+        {
+            //get ready-to-send packet
+            byte[] toBytes = ToBytes();
+            //separate data from packet header
+            byte[] data = new byte[toBytes.Length - 0x10];            
+            Buffer.BlockCopy(toBytes, 0x10, data, 0, (toBytes.Length - 0x10));
+            //zip data and get size
+            byte[] zipped = Zip(data);
+            ushort zippedSize = (ushort)zipped.Length;
+            //write zipped data to result array
+            byte[] result = new byte[zippedSize + 0x10];
+            //write packet header back
+            Buffer.BlockCopy(toBytes, 0, result, 0, 0x10);
+            //update packet size after compression
+            Buffer.BlockCopy(BitConverter.GetBytes(zippedSize), 0, result, 0x04, sizeof(ushort));
+            //write zpped data to result
+            Buffer.BlockCopy(zipped, 0, result, 0x10, zippedSize);
+            //turn packet zipped switch on
+            result[0x01] = 0x01;
+            return result;
         }
 
         #region Dummy packets  
@@ -119,53 +143,74 @@ namespace Launcher
         private void PacketSetup(byte[] data)
         {
             if(data.Any(b => b != 0))
-            {
-                byte[] packetData = new byte[data.Length - 0x10];
-                Buffer.BlockCopy(data, 0x10, packetData, 0, data.Length - 0x10);
-
+            {                 
                 IsAuthenticated = data[0x00];
                 IsEncoded = data[0x01];
                 ConnType = (ushort)(data[0x03] << 8 | data[0x02]);
                 Size = (ushort)(data[0x05] << 8 | data[0x04]);
                 NumSubpackets = (ushort)(data[0x07] << 8 | data[0x06]);
-                TimeStamp = (uint)(data[0x07] << 24 | data[0x07] << 16 | data[0x07] << 8 | data[0x06]);
+                //TimeStamp = (uint)(data[0x07] << 24 | data[0x07] << 16 | data[0x07] << 8 | data[0x06]);
+
+                byte[] packetData = new byte[Size - 0x10];
+                Buffer.BlockCopy(data, 0x10, packetData, 0, Size - 0x10);
+
                 Data = packetData;
             }            
         }
 
         public void ProcessSubPackets(Blowfish bf)
-        {
-            //first subpacket start and end
-            int index = 0x00;
-            ushort subPacketSize = (ushort)(Data[0x1] << 8 | Data[0x0]);
-           
-            for (int i = 0; i < NumSubpackets; i++)
+        {            
+            int index = 0;
+            ushort subPacketSize = (ushort)(Data[0x01] << 8 | Data[0]);
+
+            for (int i = 1; i <= NumSubpackets; i++)
             {
-                byte[] subpacketData = new byte[subPacketSize - 0x10];
-
-                if (subpacketData.Length > 0x8) //do not process small ping packets
+                try
                 {
-                    Buffer.BlockCopy(Data, index + 16, subpacketData, 0, subpacketData.Length); //copy whole subpacket. -16 = without subpacket header.            
+                    byte[] subpacketData = new byte[subPacketSize - 0x10];
 
-                    SubPacket subpacket = new SubPacket
+                    if (subpacketData.Length > 0x8) //do not process small sync packets
                     {
-                        Size = subPacketSize,
-                        Type = (ushort)(Data[index + 0x03] << 8 | Data[index + 0x02]),
-                        SourceId = (uint)(Data[index + 0x07] << 24 | Data[index + 0x06] << 16 | Data[index + 0x05] << 8 | Data[index + 0x04]),    
-                        TargetId = (uint)(Data[index + 0x0b] << 24 | Data[index + 0x0a] << 16 | Data[index + 0x09] << 8 | Data[index + 0x08]),
-                        Data = subpacketData
-                    };
+                        Buffer.BlockCopy(Data, index + 0x10, subpacketData, 0, subpacketData.Length); //copy whole subpacket. + 0x10  = without subpacket header.            
 
-                    if (bf != null)
-                        subpacket.Decrypt(bf);
+                        SubPacket subpacket = new SubPacket
+                        {
+                            Size = subPacketSize,
+                            Type = (ushort)(Data[index + 0x03] << 8 | Data[index + 0x02]),
+                            SourceId = (uint)(Data[index + 0x07] << 24 | Data[index + 0x06] << 16 | Data[index + 0x05] << 8 | Data[index + 0x04]),
+                            TargetId = (uint)(Data[index + 0x0b] << 24 | Data[index + 0x0a] << 16 | Data[index + 0x09] << 8 | Data[index + 0x08]),
+                            Data = subpacketData
+                        };
 
-                    SubPacketQueue.Enqueue(subpacket);                    
+                        if (bf != null)
+                            subpacket.Decrypt(bf);
+
+                        SubPacketQueue.Enqueue(subpacket);
+                    }
+
+                    index += subPacketSize;
+
+                    if(i < NumSubpackets)
+                        subPacketSize = (ushort)(Data[index + 0x01] << 8 | Data[index + 0x00]);
                 }
+                catch (OverflowException) { break; }
 
-                index = subPacketSize;
-                subPacketSize = (ushort)(Data[subPacketSize + 0x01] << 8 | Data[subPacketSize + 0x00]);
             }
-            
-        }       
+        }
+
+        #region Compression/Decompression
+        private byte[] Zlib(byte[] bytes, CompressionMode mode)
+        {
+            using (var compressedStream = new MemoryStream(bytes))
+            using (var zipStream = new ZlibStream(compressedStream, mode))
+            using (var resultStream = new MemoryStream())
+            {
+                zipStream.CopyTo(resultStream);
+                return resultStream.ToArray();
+            }
+        }
+        private byte[] Zip(byte[] data) => Zlib(data, CompressionMode.Compress);
+        private byte[] UnZip(byte[] data) => Zlib(data, CompressionMode.Decompress);
+        #endregion
     }
 }

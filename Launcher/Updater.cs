@@ -1,4 +1,4 @@
-﻿using Launcher.Packets;
+﻿
 
 namespace Launcher
 {
@@ -6,7 +6,7 @@ namespace Launcher
     {
         private static Log _log = Log.Instance;
 
-        private static HtmlPacket BootUpToDate { get; } = new HtmlPacket()
+        private static HttpPacket BootUpToDate { get; } = new HttpPacket()
         {
             HttpResponse = "204 No Content",
             ContentLocation = "ffxiv/2d2a390f/vercheck.dat",
@@ -17,7 +17,7 @@ namespace Launcher
             XLatestVersion = "2010.09.18.0000"
         };
 
-        private static HtmlPacket BootOutdated { get; } = new HtmlPacket
+        private static HttpPacket BootOutdated { get; } = new HttpPacket
         {
             HttpResponse = "200 OK",
             ContentLocation = "ffxiv/48eca647/vercheck.dat",
@@ -30,7 +30,7 @@ namespace Launcher
             Connection = "keep-alive"
         };
 
-        private static HtmlPacket GameUpToDate { get; } = new HtmlPacket
+        private static HttpPacket GameUpToDate { get; } = new HttpPacket
         {
             HttpResponse = "204 No Content",   
             ContentLocation = "ffxiv/48eca647/vercheck.dat",
@@ -45,12 +45,12 @@ namespace Launcher
             ContentType = "text/plain"
         };
 
-        private static HtmlPacket GameOutdated { get; } = new HtmlPacket();
+        private static HttpPacket GameOutdated { get; } = new HttpPacket();
 
         public static byte[] CheckBootVer()
         {                     
             bool upToDate = true;
-            _log.Message("Checking ffxivboot.exe version...");
+            _log.Info("Checking ffxivboot.exe version...");
 
             /* TODO: ffxivboot.exe version check */
 
@@ -69,7 +69,7 @@ namespace Launcher
         public static byte[] CheckGameVer()
         {            
             bool upToDate = true;
-            _log.Message("Checking game version...");
+            _log.Info("Checking game version...");
 
             /* TODO: ffxivgame.exe version check */
 

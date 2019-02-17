@@ -1,6 +1,4 @@
-﻿using Launcher.Packets;
-using Launcher.Characters;
-using System;
+﻿using System;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,14 +10,14 @@ namespace Launcher
         private const int PORT = 80;
         public static readonly string HTTP_SERVER_VERSION = "Primal-Http-Server/0.1"; //for html headers
         private static UserRepository _userRepo = UserRepository.Instance;
-        private User _user;  
+        private User _user;
 
         public HttpServer() => Start("Http", PORT);
 
-        public override void ProcessIncoming()
+        public override void ProcessIncoming(ref StateObject connection)
         {
-            string request = Encoding.ASCII.GetString(_connection.buffer);
-            byte[] response = HtmlPacket.ErrorPage("Something went wrong. Here is the game client request:<br><br>" + request.Replace("\r\n", "<br>").Trim(new[] { '\0' }));
+            string request = Encoding.ASCII.GetString(connection.buffer);
+            byte[] response = HttpPacket.ErrorPage("Something went wrong. Here is the game client request:<br><br>" + request.Replace("\r\n", "<br>").Trim(new[] { '\0' }));
                                  
             //if (Preferences.Instance.Options.ShowLoginPage && request.IndexOf("GET /login") >= 0)
             //{
@@ -40,22 +38,44 @@ namespace Launcher
 
                 if (_user != null)
                 {                    
-                    response = HtmlPacket.AuthPage(_user.Id);
-                    _log.Message("Authorization page sent.");
+                    response = HttpPacket.AuthPage(_user.Id);
+                    _log.Info("Authorization page sent.");
                     ServerShutDown();
                 }
                 else
                 {
-                    response = HtmlPacket.ErrorPage("User not found!<br><a href='/login'>Try again.</a>");
+                    response = HttpPacket.ErrorPage("User not found!<br><a href='/login'>Try again.</a>");
                 }
             //}
 
-            _connection.Send(response);
-            _connection.socket.Disconnect(true);
+            connection.Send(response);
+            connection.socket.Disconnect(true);
         }            
        
-        private static byte[] PackPage(string file) => new HtmlPacket(file).ToBytes();       
+        private static byte[] PackPage(string file) => new HttpPacket(file).ToBytes();       
 
         public override void ServerTransition() => Task.Run(() => { LobbyServer lobby = new LobbyServer(_user); });
+
+        public override void ReadCallback(IAsyncResult ar)
+        {
+            _connection = (StateObject)ar.AsyncState;
+
+            int bytesRead = _connection.socket.EndReceive(ar, out SocketError errorCode);
+
+            if (errorCode != SocketError.Success)
+               bytesRead = 0;
+
+           if (bytesRead > 0)
+           {
+               ProcessIncoming(ref _connection);
+               try
+               {
+                   if(_connection.socket.Connected)
+                        _connection.socket.BeginReceive(_connection.buffer, 0, StateObject.BufferSize, 0, new AsyncCallback(ReadCallback), _connection);
+               }catch(SocketException e) { throw e; }
+              
+           }
+           
+        }
     }
 }

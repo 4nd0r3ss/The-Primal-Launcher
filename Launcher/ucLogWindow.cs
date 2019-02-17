@@ -23,22 +23,19 @@ namespace Launcher
                 return _instance;
             }
         }
+
+
         private ucLogWindow()
         {
             InitializeComponent();
 
             //dirty way to get rid of cross-thread exception
             CheckForIllegalCrossThreadCalls = false;
+        }
 
-            _log.Warning("Welcome to the FFXIV1.0 Primal Launcher!");
-
-            //Output logger thread
-            Task.Run(() =>
-            {
-                while (true)
-                    if (_log.HasLogMessages())
-                        LbxOutput.Items.Insert(0, _log.GetLogMessage());
-            });
+        public void WriteLogMessage(string message)
+        {
+            LbxOutput.Items.Insert(0, message);
         }
 
         private void Lbxoutput_DrawItem(object sender, DrawItemEventArgs e)
@@ -46,9 +43,9 @@ namespace Launcher
             e.DrawBackground();
             e.DrawFocusRectangle();
             e.Graphics.DrawString(
-                this.LbxOutput.Items[e.Index].ToString(),
+                LbxOutput.Items[e.Index].ToString(),
                 new Font(FontFamily.GenericMonospace, 8, FontStyle.Regular),
-                new SolidBrush(_log.GetMessageColor(this.LbxOutput.Items[e.Index].ToString())), e.Bounds);
+                new SolidBrush(_log.GetMessageColor(LbxOutput.Items[e.Index].ToString())), e.Bounds);
         }
     }
 }

@@ -6,7 +6,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Launcher.Characters
+namespace Launcher
 {
     public sealed class UserRepository
     {
@@ -14,6 +14,7 @@ namespace Launcher.Characters
         private static readonly object _padlock = new object();
         private static List<User> _userList = new List<User>();
         private static readonly Log _log = Log.Instance;
+        private static Preferences _preferences = Preferences.Instance;
 
         private const string USERS_FILE = @"user_data.dat";        
 
@@ -61,7 +62,7 @@ namespace Launcher.Characters
         public static void UpdateUser(User user)
         {
             _userList[_userList.FindIndex(x => x.Id == user.Id)] = user;
-            WriteFile("User info updated.");
+            WriteFile("");
         }
 
         public User GetUser(string uname, string pwd) => _userList.Find(x => x.Uname == uname && x.Pwd == pwd);       
@@ -78,33 +79,40 @@ namespace Launcher.Characters
         {
             try //Create repository file with user list.
             {
-                using (var fileStream = new FileStream(USERS_FILE, FileMode.Create))
+                using (var fileStream = new FileStream(_preferences.Options.UserFilesPath + Preferences.AppFolder + USERS_FILE, FileMode.Create))
                 {
                     var bFormatter = new BinaryFormatter();
-                    //try
-                    //{
+                    try
+                    {
                         bFormatter.Serialize(fileStream, _userList);
-                    //}catch(Exception e) { File.WriteAllText(@"c:\users\4nd0r\desktop\error.txt", e.Message); }
+                    }
+                    catch (Exception e) { throw e; }
                 }
-                _log.Success(msg);
+
+                if(msg != "")
+                    _log.Success(msg);
             }
-            catch (Exception) { _log.Error("Could not write file. Please check app permissions."); }            
+            catch (Exception e) {_log.Error("Could not write file. Please check app permissions."); throw e; }
         }
              
         private static void LoadUsers()
         {
-            if (File.Exists(USERS_FILE))
+            if (File.Exists(_preferences.Options.UserFilesPath + Preferences.AppFolder + USERS_FILE))
             {
                 try
                 {
-                    using (var fileStream = new FileStream(USERS_FILE, FileMode.Open))
+                    using (var fileStream = new FileStream(_preferences.Options.UserFilesPath + Preferences.AppFolder + USERS_FILE, FileMode.Open))
                     {
-                        var bFormatter = new BinaryFormatter();
-                        _userList = (List<User>)bFormatter.Deserialize(fileStream);
+                        var bFormatter = new BinaryFormatter();                       
+                        try
+                        {
+                            _userList = (List<User>)bFormatter.Deserialize(fileStream);
+                        }
+                        catch (Exception e) { throw e; }
                     }
                     _log.Success("Loaded saved users.");
                 }
-                catch (Exception) { _log.Error("There is a problem with the users file. Please try again."); }
+                catch (Exception e) { _log.Error("There is a problem with the users file. Please try again."); throw e; }
             }
             else
             {

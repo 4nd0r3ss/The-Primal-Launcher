@@ -19,6 +19,7 @@ namespace Launcher
         public bool UseExternalHttpServer { get; set; }
         public bool ShowLoginPage { get; set; }
         public bool ChooseGameAccount { get; set; }
+        public string UserFilesPath { get; set; }
     }
 
     public class Preferences
@@ -27,6 +28,7 @@ namespace Launcher
         private static Preferences _instance = null;
         private readonly string _configFile = @"app_data.dat";
         private Options _options;
+        public static string AppFolder = @"\FFXIV Primal Launcher\";
         #endregion
 
         #region Constructor
@@ -62,9 +64,9 @@ namespace Launcher
         #region Load configuration file       
         public void LoadConfigFile()
         {               
-            if (File.Exists(_configFile))
+            if (File.Exists(_options.UserFilesPath + AppFolder + _configFile))
             {               
-                using (var fileStream = new FileStream(_configFile, FileMode.Open))
+                using (var fileStream = new FileStream(_options.UserFilesPath + AppFolder + _configFile, FileMode.Open))
                 {
                     var bFormatter = new BinaryFormatter();
                     _options = (Options)bFormatter.Deserialize(fileStream);
@@ -81,11 +83,20 @@ namespace Launcher
         #region Save options object to configuration file
         private void SaveConfigFile()
         {
-            using (var fileStream = new FileStream(_configFile, FileMode.Create))
+            if (Directory.Exists(_options.UserFilesPath + AppFolder))
             {
-                var bFormatter = new BinaryFormatter();
-                bFormatter.Serialize(fileStream, _options);
+                using (var fileStream = new FileStream(_options.UserFilesPath + AppFolder + _configFile, FileMode.Create))
+                {
+                    var bFormatter = new BinaryFormatter();
+                    bFormatter.Serialize(fileStream, _options);
+                }
             }
+            else
+            {
+                Directory.CreateDirectory(_options.UserFilesPath + AppFolder);
+                SaveConfigFile();
+            }
+               
         }
         #endregion
 
@@ -98,6 +109,7 @@ namespace Launcher
             _options.UseExternalHttpServer = false;
             _options.ShowLoginPage = true;
             _options.ChooseGameAccount = true;
+            _options.UserFilesPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
         }
         #endregion
 

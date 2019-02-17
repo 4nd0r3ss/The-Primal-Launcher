@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Launcher.Packets
+namespace Launcher
 {
     public class SubPacket
     {
         private static readonly Log _log = Log.Instance;
+        private byte[] _data;
 
         #region Properties
         public ushort Size { get; set; }
@@ -13,7 +14,16 @@ namespace Launcher.Packets
         public uint SourceId { get; set; }
         public uint TargetId { get; set; }
         public uint Unknown { get; set; }
-        public byte[] Data { get; set; }
+        
+        public byte[] Data
+        {
+            get => _data;
+            set {
+                Size = (ushort)(0x10 + value.Length);
+                _data = value;
+            }
+
+        }
         public List<GamePacket> GamePacketList { get; set; } = new List<GamePacket>();
         #endregion
 

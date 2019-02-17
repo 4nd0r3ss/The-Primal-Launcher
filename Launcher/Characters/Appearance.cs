@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace Launcher.Characters
+namespace Launcher
 {
     [Serializable]
     public struct Face
@@ -31,49 +31,91 @@ namespace Launcher.Characters
         public uint Unknown;
     }
 
+    /// <summary>
+    /// This class contains basic information for character creation like character model, initial status and initial gear.
+    /// </summary>
     [Serializable]
-    public struct Class
+    public struct Tribe
     {
-        public uint Id { get; set; }
-        public string Name { get; set; }
-        public uint[] InitialGear { get; set; }    
-        
-        public Class(uint id, string name, uint[] initialGear)
-        {
-            Id = id;
-            Name = name;
-            InitialGear = initialGear;
-        }
-    }
+        public byte Id { get; }
+        public uint Undershirt { get; }
+        public uint Model { get; }  
+        public ushort[] InitialParameters { get; set; }
 
-    [Serializable]
-    struct Tribe
-    {
-        public uint Id { get; set; }
-        public uint Undershirt { get; set; }
-        public uint Model { get; set; }
-
-        public Tribe(uint id, uint undershirt, uint model)
+        public Tribe(byte id, uint undershirt, uint model, ushort[] initialParameters)
         {
             Id = id;
             Undershirt = undershirt;
             Model = model;
+            InitialParameters = initialParameters;
         }
+
+        //I modeled this differently until I figured out how it was implemented in the game. It is a MESS.
+        //From indexes 15 forward it will be calculated based on equiment.
+        private static List<ushort[]> InitialParametersList = new List<ushort[]>
+        {
+            //--, --, --, str, vit, dex, int, mnd, pie, fir, ice, wnd, ear, lit, wat, acc, eva, att, def, --, --, --, --, attMagP, heaMagP, enhMagP, enfMagP, magAcc, magEva
+            new ushort[]{0,0,0,16,15,14,16,13,16,16,13,15,15,15,16,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, //midlander
+            new ushort[]{0,0,0,18,17,15,13,15,12,15,16,14,14,18,13,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, //highlander
+            new ushort[]{0,0,0,14,13,18,17,12,16,12,14,18,17,14,15,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, //wildwood
+            new ushort[]{0,0,0,15,14,15,18,15,13,14,16,12,17,15,16,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, //duskwight
+            new ushort[]{0,0,0,13,13,17,16,15,16,14,13,15,16,17,15,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, //plainsfolk
+            new ushort[]{0,0,0,12,12,15,16,17,18,17,12,16,18,15,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, //dunesfolk
+            new ushort[]{0,0,0,16,15,17,13,14,15,18,15,13,15,12,17,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, //seeker of the sun
+            new ushort[]{0,0,0,13,12,16,14,18,17,13,18,15,14,16,14,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, //keeper of the moon
+            new ushort[]{0,0,0,17,18,13,12,16,14,13,17,17,12,13,18,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, //sea wolf
+            new ushort[]{0,0,0,15,16,12,15,17,15,18,14,16,13,14,18,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, //hellsguard
+        };
+
+        public static readonly List<Tribe> List = new List<Tribe>
+        {
+            //id, undershirt, model
+            new Tribe(0, 0, 0, null),  //objects
+            new Tribe(1, 1184, 1, InitialParametersList[0]),  //midlander male
+            new Tribe(2, 1186, 2, InitialParametersList[0]),  //midlander female
+            new Tribe(3, 1187, 9, InitialParametersList[1]),  //highlander male
+            new Tribe(4, 1184, 3, InitialParametersList[2]),  //wildwood male
+            new Tribe(5, 1024, 4, InitialParametersList[2]),  //wildwood female
+            new Tribe(6, 1187, 3, InitialParametersList[3]),  //duskwight male 
+            new Tribe(7, 1505, 4, InitialParametersList[3]),  //duskwight female
+            new Tribe(8, 1184, 5, InitialParametersList[4]),  //plainsfolk male
+            new Tribe(9, 1185, 6, InitialParametersList[4]),  //plainsfolk female
+            new Tribe(10, 1504, 5, InitialParametersList[5]), //dunesfolk male
+            new Tribe(11, 1505, 6, InitialParametersList[5]), //dunesfolk female
+            new Tribe(12, 1216, 8, InitialParametersList[6]), //seeker of the sun
+            new Tribe(13, 1186, 8, InitialParametersList[7]), //keeper of the moon
+            new Tribe(14, 1184, 7, InitialParametersList[8]), //sea wolf
+            new Tribe(15, 1186, 7, InitialParametersList[9]), //hellsguard
+        };               
+
+        public static Tribe GetTribe(uint tribe) => List.Find(x => x.Id == tribe);
+        public static uint GetModel(uint tribe) => List.Find(x => x.Id == tribe).Model;
     }
 
+    /// <summary>
+    /// Keeps a set of the character's currently equipped gear.
+    /// </summary>
     [Serializable]
     public struct GearSet
     {
         public uint MainWeapon { get; set; }
         public uint SecondaryWeapon { get; set; }
+        public uint SPMainWeapon { get; set; }
+        public uint SPSecondaryWeapon { get; set; }
+        public uint Throwing { get; set; }
+        public uint Pack { get; set; }
+        public uint Pouch { get; set; }
         public uint Head { get; set; }
         public uint Body { get; set; }
         public uint Hands { get; set; }
         public uint Legs { get; set; }
         public uint Feet { get; set; }
         public uint Waist { get; set; }
+        public uint Neck { get; set; }
         public uint RightEar { get; set; }
-        public uint LeaftEar { get; set; }
+        public uint LeftEar { get; set; }
+        public uint LeftIndex { get; set; }
+        public uint RightIndex { get; set; }
         public uint RightFinger { get; set; }
         public uint LeftFinger { get; set; }
 
@@ -86,89 +128,29 @@ namespace Launcher.Characters
                 using(BinaryWriter bw = new BinaryWriter(ms))
                 {
                     bw.Write(MainWeapon);
-                    bw.Write(SecondaryWeapon);
-                    bw.Write((ulong)0);
-                    bw.Write((ulong)0);
-                    bw.Write((uint)0);
+                    bw.Write(SecondaryWeapon);                   
+                    bw.Write(SPMainWeapon);
+                    bw.Write(SPSecondaryWeapon);
+                    bw.Write(Throwing);
+                    bw.Write(Pack);
+                    bw.Write(Pouch);
                     bw.Write(Head);
                     bw.Write(Body);
                     bw.Write(Legs);
                     bw.Write(Hands);
                     bw.Write(Feet);
                     bw.Write(Waist);
-                    bw.Write((uint)0);
+                    bw.Write(Neck);
                     bw.Write(RightEar);
-                    bw.Write(LeaftEar);
-                    bw.Write((ulong)0);
+                    bw.Write(LeftEar);
+                    bw.Write(LeftIndex);
+                    bw.Write(RightIndex);
                     bw.Write(RightFinger);
                     bw.Write(LeftFinger);                   
-                }
-
-                //result = ms.GetBuffer();
+                }               
             }
             return result;
         }
     }   
-
-    [Serializable]
-    public static class Appearance
-    {
-        private static readonly List<Tribe> Tribes = new List<Tribe>
-        {
-            new Tribe(1, 1184, 1), //id, undershirt, model
-            new Tribe(2, 1186, 2),
-            new Tribe(3, 1187, 9),
-            new Tribe(4, 1184, 3),
-            new Tribe(5, 1024, 4),
-            new Tribe(6, 1187, 3),
-            new Tribe(7, 1505, 4),
-            new Tribe(8, 1184, 5),
-            new Tribe(9, 1185, 6),
-            new Tribe(10, 1504, 5),
-            new Tribe(11, 1505, 6),
-            new Tribe(12, 1216, 8),
-            new Tribe(13, 1186, 8),
-            new Tribe(14, 1184, 7),
-            new Tribe(15, 1186, 7),
-        };
-
-        private static readonly List<Class> Classes = new List<Class>
-        {
-            new Class(2, "pug", new uint[0x09] {60818432, 60818432, 0, 0, 10656, 10560, 1024, 25824, 6144}),
-            new Class(3, "gla", new uint[0x09] {79692890, 0, 0, 0, 31776, 4448, 1024, 25824, 6144}),
-            new Class(4, "mrd", new uint[0x09] {147850310, 0, 0, 23713, 0, 10016, 5472, 1152, 6144}),
-            new Class(7, "arc", new uint[0x09] {210764860, 236979210, 231736320, 0, 9888, 9984, 1024, 25824, 6144}),
-            new Class(8, "lnc", new uint[0x09] {168823858, 0, 0, 0, 13920, 7200, 1024, 10656, 6144}),
-            new Class(22, "thm", new uint[0x09] {294650980, 0, 0, 0, 7744, 5472, 1024, 5504, 4096}),
-            new Class(23, "cnj", new uint[0x09] {347079700, 0, 0, 0, 4448, 2240, 1024, 4416, 4096}),
-            new Class(29, "crp", new uint[0x09] {705692672, 0, 0, 0, 0, 10016, 10656, 9632, 2048}),
-            new Class(30, "bsm", new uint[0x09] {721421372, 0, 0, 0, 0, 2241, 2336, 2304, 2048}),
-            new Class(31, "arm", new uint[0x09] {737149962, 0, 0, 0, 32992, 2240, 1024, 2272, 2048}),
-            new Class(32, "gsm", new uint[0x09] {752878592, 0, 0, 0, 2368, 3424, 1024, 10656, 2048}),
-            new Class(33, "ltw", new uint[0x09] {768607252, 0, 0, 4448, 4449, 1792, 1024, 21888, 2048}),
-            new Class(34, "wvr", new uint[0x09] {784335922, 0, 0, 0, 5505, 5473, 1024, 5505, 2048}),
-            new Class(35, "alc", new uint[0x09] {800064522, 0, 0, 20509, 5504, 2241, 1024, 1152, 2048}),
-            new Class(36, "cul", new uint[0x09] {815793192, 0, 0, 5632, 34848, 1792, 1024, 25825, 2048}),
-            new Class(39, "min", new uint[0x09] {862979092, 0, 0, 0, 1184, 2242, 6464, 6528, 14336}),
-            new Class(40, "btn", new uint[0x09] {878707732, 0, 0, 6304, 6624, 6560, 1024, 1152, 14336}),
-            new Class(41, "fsh", new uint[0x09] {894436372, 0, 0, 6400, 1184, 9984, 1024, 6529, 14336}),
-        };             
-        public static GearSet GetInitialGearSet(uint id, uint tribe)
-        {
-            Class cClass = Classes.Find(x => x.Id == id);
-
-            return new GearSet
-            {                
-                MainWeapon = cClass.InitialGear[0],
-                SecondaryWeapon = cClass.InitialGear[0x01],
-                Head = cClass.InitialGear[0x03],
-                Body = cClass.InitialGear[0x04] == 0 ? Tribes.Find(x => x.Id == tribe).Undershirt : cClass.InitialGear[0x04],
-                Hands = cClass.InitialGear[0x05],
-                Legs = cClass.InitialGear[0x06],
-                Feet = cClass.InitialGear[0x07],
-                Waist = cClass.InitialGear[0x08]
-            };          
-        }
-        public static uint GetTribeModel(uint tribe) => Tribes.Find(x => x.Id == tribe).Model;
-    }
+       
 }

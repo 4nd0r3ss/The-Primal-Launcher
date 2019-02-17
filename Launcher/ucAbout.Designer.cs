@@ -43,11 +43,11 @@
             this.lblAppName.AutoSize = true;
             this.lblAppName.Font = new System.Drawing.Font("Bahnschrift Condensed", 20.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblAppName.ForeColor = System.Drawing.Color.DarkRed;
-            this.lblAppName.Location = new System.Drawing.Point(183, 24);
+            this.lblAppName.Location = new System.Drawing.Point(198, 23);
             this.lblAppName.Name = "lblAppName";
-            this.lblAppName.Size = new System.Drawing.Size(235, 33);
+            this.lblAppName.Size = new System.Drawing.Size(211, 32);
             this.lblAppName.TabIndex = 1;
-            this.lblAppName.Text = "FFXIV1.0 Primal Launcher";
+            this.lblAppName.Text = "Primal Launcher";
             // 
             // lblVersion
             // 

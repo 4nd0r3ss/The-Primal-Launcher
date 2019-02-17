@@ -1,7 +1,8 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 
-namespace Launcher.Characters
+namespace Launcher
 {
     [Serializable]
     public class GameAccount

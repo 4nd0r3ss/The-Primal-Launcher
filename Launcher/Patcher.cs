@@ -35,7 +35,7 @@ namespace Launcher
         #region Executable patching methods
         private static void PatchLoginExe()
         {           
-            _log.Message("Starting patch process for ffxivlogin.exe...");
+            _log.Info("Starting patch process for ffxivlogin.exe...");
 
             if (HasWritePermission())
             {
@@ -43,15 +43,15 @@ namespace Launcher
                 byte[] encodedString = { 0xCA, 0xCF, 0xB8, 0xA2, 0x96, 0x96, 0x14, 0xCC, 0xF2, 0x9C, 0x9A, 0x8, 0x55, 0xAC, 0x7E, 0x35, 0x99, 0xB9, 0x57, };
 
                 //Open executable for patching
-                _log.Message("Copying executable bytes into memory...");
+                _log.Info("Copying executable bytes into memory...");
                 byte[] exeDataLogin = File.ReadAllBytes(GameInstPath + @"/ffxivlogin.exe");
 
                 //Save backup
-                _log.Message("Backing up file as ffxivlogin.exe.bak...");
+                _log.Info("Backing up file as ffxivlogin.exe.bak...");
                 File.WriteAllBytes(GameInstPath + @"/ffxivlogin.exe.bak", exeDataLogin);
 
                 //Write encoded localhost address to offset 0x53EA0 (old login string offset)
-                _log.Message("Patching (redirect requests to 127.0.0.1)...");
+                _log.Info("Patching (redirect requests to 127.0.0.1)...");
                 using (MemoryStream memStream = new MemoryStream(exeDataLogin))
                 {
                     using (BinaryWriter binaryWriter = new BinaryWriter(memStream))
@@ -62,16 +62,16 @@ namespace Launcher
                 }
 
                 //Save patched file
-                _log.Message("Saving patched file...");
+                _log.Info("Saving patched file...");
                 //File.WriteAllBytes(GameInstPath + @"/ffxivlogin.exe", exeDataLogin);
 
-                _log.Message("Done!");
+                _log.Info("Done!");
             }
             else
             {
-                _log.Message("you need write permission in the game installation folder.");
-                _log.Message("Please close this program, right-click the shortcut and select 'Run as administrator'.");
-                _log.Message("This operation is required only once. Aborting patching operation.");
+                _log.Info("you need write permission in the game installation folder.");
+                _log.Info("Please close this program, right-click the shortcut and select 'Run as administrator'.");
+                _log.Info("This operation is required only once. Aborting patching operation.");
             }  
         }
 
