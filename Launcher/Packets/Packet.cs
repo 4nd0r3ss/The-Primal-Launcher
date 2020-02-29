@@ -77,7 +77,7 @@ namespace Launcher
             byte[] data = new byte[toBytes.Length - 0x10];            
             Buffer.BlockCopy(toBytes, 0x10, data, 0, (toBytes.Length - 0x10));
             //zip data and get size
-            byte[] zipped = Zip(data);
+            byte[] zipped = Zip.Compress(data);
             ushort zippedSize = (ushort)zipped.Length;
             //write zipped data to result array
             byte[] result = new byte[zippedSize + 0x10];
@@ -196,21 +196,6 @@ namespace Launcher
                 catch (OverflowException) { break; }
 
             }
-        }
-
-        #region Compression/Decompression
-        private byte[] Zlib(byte[] bytes, CompressionMode mode)
-        {
-            using (var compressedStream = new MemoryStream(bytes))
-            using (var zipStream = new ZlibStream(compressedStream, mode))
-            using (var resultStream = new MemoryStream())
-            {
-                zipStream.CopyTo(resultStream);
-                return resultStream.ToArray();
-            }
-        }
-        private byte[] Zip(byte[] data) => Zlib(data, CompressionMode.Compress);
-        private byte[] UnZip(byte[] data) => Zlib(data, CompressionMode.Decompress);
-        #endregion
+        }        
     }
 }

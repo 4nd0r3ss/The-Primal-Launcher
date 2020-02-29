@@ -52,12 +52,12 @@ namespace Launcher
             if(Preferences.Instance.Options.UseExternalHttpServer)
             {                              
                 _log.Warning("Using external HTTP server. You can change this in the options pane.");               
-                User user = UserRepository.Instance.GetUser("FFXIVPlayer", "FFXIVPlayer");  //if using external http server, load default user.
-                Task.Run(() => { LobbyServer http = new LobbyServer(user); });                   
+                UserFactory.Instance.LoadUser("FFXIVPlayer", "FFXIVPlayer");  //if using external http server, load default user.
+                Task.Run(() => { new LobbyServer(); });                   
             }           
             else
             {
-                Task.Run(() => { HttpServer http = new HttpServer(); });
+                Task.Run(() => { new HttpServer(); });
             }    
         }
     }

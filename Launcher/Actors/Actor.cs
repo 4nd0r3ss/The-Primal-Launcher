@@ -15,8 +15,7 @@ namespace Launcher
         public uint TargetId { get; set; }
 
         public uint Id { get; set; }
-        public uint NameId { get; set; }
-        public uint DisplayNameId { get; set; }
+        public uint NameId { get; set; }        
         public string ClassPath { get; set; }
         public byte PropFlag { get; set; }
         public List<EventCondition> EventConditions { get; set; } = new List<EventCondition>();
@@ -38,78 +37,40 @@ namespace Launcher
         public Face Face { get; set; }
 
         public GearSet GearSet { get; set; }
-        public Tribe Tribe { get; set; } = Tribe.GetTribe(0); //objects wont have a tribe, so we load zeros by default.
+        public Model Model { get; set; } = Model.GetTribe(0); //objects wont have a tribe, so we load zeros by default.
+        public uint AppearanceCode { get; set; }
 
         public Position Position { get; set; } = new Position();
         public LuaParameters LuaParameters { get; set; }
-        public uint[] Speeds { get; set; }   
+        public uint[] Speeds { get; set; }          
 
-        public enum Opcode
+        public virtual void Spawn(Socket handler, ushort spawnType = 0, ushort isZoning = 0, ushort actorIndex = 0)
         {
-            Unknown              = 0x0f,
-            CreateActor          = 0xca,
-            LoadActorScript      = 0xcc,
-            SetPosition          = 0xce,
-            SetSpeed             = 0xd0,            
-            SetAppearance        = 0xd6,
-            SetName              = 0x13d,
-            SetMainState         = 0x134,
-            SetSubState          = 0x144,
-            SetAllStatus         = 0x179,
-            SetIcon              = 0x145,
-            SetIsZoning          = 0x17b,       
-            AchievementPoints    = 0x19c,
-            AchievementsLatest   = 0x19b,
-            AchievementsCompeted = 0x19a,
-            PlayerCommand        = 0x132,            
-            ActorInit            = 0x137,
-
-            //specific to player character
-            SetGrandCompany      = 0x194,
-            SetTitle             = 0x19d,
-            SetCurrentJob        = 0x1a4,
-            SetSpecialEventWork  = 0x196,
-            SetChocoboName       = 0x198,
-            SetHasChocobo        = 0x199,
-
-            BattleActionResult01 = 0x139,
-            EndClientOrderEvent  = 0x131,
-
-            //event conditions
-            SetTalkEventCondition                = 0x012e,
-            SetNoticeEventcondition              = 0x016b,
-            SetEmoteEventCondition               = 0x016c,
-            SetPushEventConditionWithCircle      = 0x016f,
-            SetPushEventConditionWithFan         = 0x0170,
-            SetPushEventConditionWithTriggerBox  = 0x0175
-        }
-
-        public enum MainState
-        {
-            Passive      = 0x00,
-            Dead         = 0x01,
-            Active       = 0x02,
-            Dead2        = 0x03,
-            SitObject    = 0x0a,
-            SitFloor     = 0x0e,
-            Mounting     = 0x0f
-        }
-
-        public virtual void Spawn(Socket handler, ushort spawnType = 0)
-        {
-            CreateActor(handler, 0);
-            SetEventCondition(handler);
+            Prepare(actorIndex);
+            CreateActor(handler, 0x08);
+            //SetEventCondition(handler);
+            SetEventConditions(handler);
             SetSpeeds(handler, Speeds);
-            SetPosition(handler, Position, spawnType);
+            SetPosition(handler, Position, spawnType, isZoning);
+            SetAppearance(handler);
             SetName(handler);
             SetMainState(handler, MainState.Passive, 0);
+            SetSubState(handler);
+            SetAllStatus(handler);
+            SetIcon(handler);
             SetIsZoning(handler);
-            LoadActorScript(handler,LuaParameters);
+            LoadActorScript(handler, LuaParameters);
+            ActorInit(handler);
         }
+
+        public virtual void Prepare(ushort actorIndex) { }
 
         public void SetEventCondition(Socket handler)
         {
-            if(EventConditions.Count > 0) //not all actors have event conditions
+            if(EventConditions==null)
+                EventConditions = new List<EventCondition>();
+
+            if (EventConditions.Count > 0) //not all actors have event conditions
             {
                 foreach(var e in EventConditions)
                 {
@@ -135,18 +96,73 @@ namespace Launcher
                 }
             }
         }
-        
+
+        public void SetEventConditions(Socket handler)
+        {
+            if (EventConditions.Count > 0) //not all actors have event conditions
+            {
+                foreach (var e in EventConditions)
+                {
+                    byte[] data = new byte[0x28];
+                    byte[] conditionName = Encoding.ASCII.GetBytes(e.ConditionName);
+                    int conditionNameLength = e.ConditionName.Length;
+
+                    switch (e.Opcode)
+                    {
+                        case Opcode.SetEmoteEventCondition:
+                            Buffer.BlockCopy(BitConverter.GetBytes(e.Priority), 0, data, 0, sizeof(byte));
+                            Buffer.BlockCopy(BitConverter.GetBytes(e.IsDisabled), 0, data, 0x1, sizeof(byte));
+                            Buffer.BlockCopy(BitConverter.GetBytes(e.EmoteId), 0, data, 0x2, sizeof(ushort));
+                            Buffer.BlockCopy(conditionName, 0, data, 0x4, conditionNameLength);
+                            break;
+                        case Opcode.SetPushEventConditionWithCircle:
+                            data = new byte[0x38];
+                            Buffer.BlockCopy(BitConverter.GetBytes(e.Radius), 0, data, 0, sizeof(uint));
+                            Buffer.BlockCopy(BitConverter.GetBytes(e.Direction), 0, data, 0x10, sizeof(byte));
+                            Buffer.BlockCopy(BitConverter.GetBytes(e.IsSilent), 0, data, 0x12, sizeof(byte));
+                            Buffer.BlockCopy(conditionName, 0, data, 0x13, conditionNameLength);
+                            break;
+                        case Opcode.SetPushEventConditionWithFan:
+                            data = new byte[0x40];
+                            Buffer.BlockCopy(BitConverter.GetBytes(e.Radius), 0, data, 0, sizeof(uint));
+                            Buffer.BlockCopy(BitConverter.GetBytes(e.Direction), 0, data, 0x18, sizeof(byte));
+                            Buffer.BlockCopy(BitConverter.GetBytes(e.IsSilent), 0, data, 0x1a, sizeof(byte));
+                            Buffer.BlockCopy(conditionName, 0, data, 0x1b, conditionNameLength);
+                            break;
+                        case Opcode.SetPushEventConditionWithTriggerBox:
+                            data = new byte[0x40];
+                            Buffer.BlockCopy(BitConverter.GetBytes(e.BgObjectId), 0, data, 0, sizeof(uint));
+                            Buffer.BlockCopy(BitConverter.GetBytes(e.LayoutId), 0, data, 0x4, sizeof(uint));
+                            Buffer.BlockCopy(BitConverter.GetBytes(e.ActorId), 0, data, 0x8, sizeof(byte));
+                            Buffer.BlockCopy(BitConverter.GetBytes(e.Direction), 0, data, 0x14, sizeof(byte));
+                            Buffer.BlockCopy(conditionName, 0, data, 0x17, conditionNameLength);
+                            Buffer.BlockCopy(Encoding.ASCII.GetBytes(e.ReactionName), 0, data, 0x38, e.ReactionName.Length);
+                            break;
+                        case Opcode.SetNoticeEventcondition:
+                        case Opcode.SetTalkEventCondition:
+                        default:
+                            Buffer.BlockCopy(BitConverter.GetBytes(e.Priority), 0, data, 0, sizeof(byte));
+                            Buffer.BlockCopy(BitConverter.GetBytes(e.IsDisabled), 0, data, 0x1, sizeof(byte));
+                            Buffer.BlockCopy(conditionName, 0, data, 0x2, conditionNameLength);
+                            break;
+                    }
+
+                    SendPacket(handler, e.Opcode, data);
+                }
+            }
+        }
+
         public virtual void ActorInit(Socket handler)
         {
-            byte[] data = new byte[0x88];
-            SendPacket(handler, Opcode.ActorInit, data);
+            //byte[] data = new byte[0x88];
+            //SendPacket(handler, Opcode.ActorInit, data);
         }
 
         public virtual void LoadActorScript(Socket handler, LuaParameters luaParameters)
         {
             byte[] data = new byte[0x108];           
 
-            Buffer.BlockCopy(BitConverter.GetBytes(0x30400000), 0, data, 0, sizeof(uint));
+            Buffer.BlockCopy(BitConverter.GetBytes(luaParameters.ServerCodes), 0, data, 0, sizeof(uint));
             Buffer.BlockCopy(Encoding.ASCII.GetBytes(luaParameters.ActorName), 0, data, 0x04, luaParameters.ActorName.Length);
             Buffer.BlockCopy(Encoding.ASCII.GetBytes(luaParameters.ClassName), 0, data, 0x24, luaParameters.ClassName.Length);
 
@@ -203,7 +219,6 @@ namespace Launcher
 
         public void SetName(Socket handler, int isCustom = 0, byte[] customName = null)
         {
-
             byte[] data = new byte[0x28];
             
             if(customName != null)
@@ -266,8 +281,8 @@ namespace Launcher
 
             Dictionary<uint, uint> AppearanceSlots = new Dictionary<uint, uint>
             {
-                { 0x00, Tribe.Model }, //slot number, value
-                { 0x01, 0x00 },
+                { 0x00, Model.Type }, //slot number, value
+                { 0x01, AppearanceCode },
                 { 0x02, (uint)(SkinColor | HairColor << 10 | EyeColor << 20) },
                 { 0x03, BitField.PrimitiveConversion.ToUInt32(Face) },
                 { 0x04, (uint)(HairHighlightColor | HairStyle << 10) },
@@ -313,7 +328,7 @@ namespace Launcher
             SendPacket(handler, Opcode.SetAppearance, data);
         }
 
-        public void SendPacket(Socket handler, Opcode opcode, byte[] data)
+        public void SendPacket(Socket handler, Opcode opcode, byte[] data, uint sourceId = 0, uint targetId = 0)
         {
             GamePacket gamePacket = new GamePacket
             {
@@ -321,21 +336,51 @@ namespace Launcher
                 Data = data
             };
 
+            //Packet packet = new Packet(new SubPacket(gamePacket) { SourceId = sourceId > 0 ? sourceId : Id, TargetId = targetId > 0 ? targetId : TargetId });
             Packet packet = new Packet(new SubPacket(gamePacket) { SourceId = Id, TargetId = TargetId });
             handler.Send(packet.ToBytes());
+        }
+
+        public uint NewId()
+        {
+            Random rnd = new Random();
+            byte[] id = new byte[0x4];
+            rnd.NextBytes(id);
+            return BitConverter.ToUInt32(id, 0);
+        }
+
+        public void DoEmote(Socket handler)
+        {
+            byte[] data = new byte[] { 0x00, 0xB0, 0x00, 0x05, 0x41, 0x29, 0x9B, 0x02, 0x6E, 0x52, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+            Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, data, 0x04, 4);
+            SendPacket(handler, Opcode.DoEmote, data);
         }
 
         /// <summary>
         /// This struct is used to keep data about event conditions for actors. Actors have a list of event conditions populated by specialized class' constructor. 
         /// </summary>
         [Serializable]
-        public struct EventCondition
+        public class EventCondition
         {
             public Opcode Opcode { get; set; }
-            public float Radius { get; set; }
+            public string ConditionName { get; set; }
+            public ushort EmoteId { get; set; }
+
+            public float Radius { get; set; }       //circle size
+
+            public byte Priority { get; set; }      //unknown
+            public byte IsDisabled { get; set; }    //0x1 won't fire event.
+            public byte IsSilent { get; set; }      //0x1 do NOT lock UI and player.
+            public byte Direction { get; set; }     //possible values: 0x11 leave circle, 0x1 enter circle.
+
+            //For BG objects
+            public uint BgObjectId { get; set; }
+            public uint LayoutId { get; set; }
+            public uint ActorId { get; set; } = 0x4;
+            public string ReactionName { get; set; }
+
             public byte Option1 { get; set; }
             public byte Option2 { get; set; }
-            public string ConditionName { get; set; }
 
             public EventCondition(Opcode opcode, string conditionName, float radius, byte opt1, byte opt2)
             {
@@ -361,10 +406,58 @@ namespace Launcher
 
             return secondDigit + firstDigit;
         }
-
-        public string GenerateActorName()
+              
+        public void GenerateActorName(int actorNumber)
         {
-            return "";
+            //get actor zone name
+            string zoneName = ActorRepository.Instance.Zones.Find(x => x.Id == Position.ZoneId).MapName
+                .Replace("Field", "Fld")
+                .Replace("Dungeon", "Dgn")
+                .Replace("Town", "Twn")
+                .Replace("Battle", "Btl")
+                .Replace("Test", "Tes")
+                .Replace("Event", "Evt")
+                .Replace("Ship", "Shp")
+                .Replace("Office", "Ofc");
+
+
+            ////Format Class Name
+            //string className = this.className.Replace("Populace", "Ppl")
+            //                                 .Replace("Monster", "Mon")
+            //                                 .Replace("Crowd", "Crd")
+            //                                 .Replace("MapObj", "Map")
+            //                                 .Replace("Object", "Obj")
+            //                                 .Replace("Retainer", "Rtn")
+            //                                 .Replace("Standard", "Std");
+
+            //className = Char.ToLowerInvariant(className[0]) + className.Substring(1);
+
+            ////Format Zone Name
+            //string zoneName = 
+            //if (zone is PrivateArea)
+            //{
+            //    //Check if "normal"
+            //    zoneName = zoneName.Remove(zoneName.Length - 1, 1) + "P";
+            //}
+            //zoneName = Char.ToLowerInvariant(zoneName[0]) + zoneName.Substring(1);
+
+            //try
+            //{
+            //    className = className.Substring(0, 20 - zoneName.Length);
+            //}
+            //catch (ArgumentOutOfRangeException e)
+            //{ }
+
+            ////Convert actor number to base 63
+            //string classNumber = Utils.ToStringBase63(actorNumber);
+
+            ////Get stuff after @
+            //uint zoneId = zone.actorId;
+            //uint privLevel = 0;
+            //if (zone is PrivateArea)
+            //    privLevel = ((PrivateArea)zone).GetPrivateAreaType();
+
+            //actorName = String.Format("{0}_{1}_{2}@{3:X3}{4:X2}", className, zoneName, classNumber, zoneId, privLevel);
         }
     }
 
@@ -376,6 +469,7 @@ namespace Launcher
     {
         public string ActorName { get; set; }
         public string ClassName { get; set; }
+        public uint ServerCodes { get; set; }
         public List<KeyValuePair<byte, object>> List { get; set; }  = new List<KeyValuePair<byte, object>>();
 
         /// <summary>
@@ -495,5 +589,91 @@ namespace Launcher
             return input;
         }
         #endregion  
+    }
+
+    public enum Opcode
+    {
+        Unknown = 0x0f,
+        CreateActor = 0xca,
+        LoadActorScript = 0xcc,
+        SetPosition = 0xce,
+        SetSpeed = 0xd0,
+        SetAppearance = 0xd6,
+        MapUiChange = 0xe2,
+        SetName = 0x13d,
+        SetMainState = 0x134,
+        SetSubState = 0x144,
+        SetAllStatus = 0x179,
+        SetIcon = 0x145,
+        SetIsZoning = 0x17b,
+        AchievementPoints = 0x19c,
+        AchievementsLatest = 0x19b,
+        AchievementsCompeted = 0x19a,
+        PlayerCommand = 0x132,
+        ActorInit = 0x137,
+        CommandResultX1 = 0x139,
+        CommandResult = 0x13c,
+        DoEmote = 0xe1,
+
+        //text sheet 
+        TextSheetMessage30b = 0x157,
+
+        //World specific
+        SetDalamud = 0x10,
+        SetMusic = 0x0c,
+        SetWeather = 0x0d,
+        SetMap = 0x05,
+
+        //specific to player character
+        SetGrandCompany = 0x194,
+        SetTitle = 0x19d,
+        SetCurrentJob = 0x1a4,
+        SetSpecialEventWork = 0x196,
+        SetChocoboName = 0x198,
+        SetChocoboMounted = 0x197,
+        SetHasChocobo = 0x199,
+
+        BattleActionResult01 = 0x139,
+        EndClientOrderEvent = 0x131,
+
+        //event conditions
+        SetTalkEventCondition = 0x012e,
+        SetNoticeEventcondition = 0x016b,
+        SetEmoteEventCondition = 0x016c,
+        SetPushEventConditionWithCircle = 0x016f,
+        SetPushEventConditionWithFan = 0x0170,
+        SetPushEventConditionWithTriggerBox = 0x0175
+    }
+
+    public enum MainState
+    {
+        Passive = 0x00,
+        Dead = 0x01,
+        Active = 0x02,
+        Dead2 = 0x03,
+        SitObject = 0x0a,
+        SitFloor = 0x0e,
+        Mounting = 0x0f
+    }
+
+    public enum Animation
+    {
+        MountChocobo = 0x7c000062
+    }
+
+    public enum Command
+    {
+        MountChocobo = 0x2eee,
+        UmountChocobo = 0x2eef
+    }
+
+    public enum BGMMode
+    {
+        Play = 0x01,
+        CrossFade = 0x02,
+        Layer = 0x03,
+        FadeIn = 0x04,
+        Channel1 = 0x05,
+        Channel2 = 0x06
     }
 }

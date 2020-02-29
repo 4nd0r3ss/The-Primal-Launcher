@@ -9,7 +9,7 @@ namespace Launcher
         private readonly string CRLF = "\r\n";
 
         #region Common headers
-        private string Response { get; set; } = "HTTP/1.1 ";
+        private string Response { get; set; }
         public string HttpResponse { get; set; }
         private readonly string DateAndTime = DateTime.Now.ToString("r");
         private readonly string Server = HttpServer.HTTP_SERVER_VERSION;
@@ -61,7 +61,7 @@ namespace Launcher
 
         public byte[] ToBytes()
         {           
-            Response += HttpResponse + CRLF;
+            Response = "HTTP/1.1 " + HttpResponse + CRLF;
             CheckHeader("Date", DateAndTime);
             CheckHeader("Server", Server);
             CheckHeader("Last-Modified", LastModified);            
@@ -74,7 +74,7 @@ namespace Launcher
             CheckHeader("X-Patch-Module", XPatchModule);
             CheckHeader("X-Protocol", XProtocol);
             CheckHeader("X-Info-Url", XInfoUrl);
-            CheckHeader("X-Latest-Version", XProtocol);
+            CheckHeader("X-Latest-Version", XLatestVersion);
             CheckHeader("Keep-Alive", KeepAlive);
             CheckHeader("Connection", Connection);
             Response += CRLF; //html header finalizer

@@ -135,7 +135,7 @@ namespace Launcher
                 MainWeapon = cClass.InitialGear[0],
                 SecondaryWeapon = cClass.InitialGear[0x01],
                 Head = cClass.InitialGear[0x03],
-                Body = cClass.InitialGear[0x04] == 0 ? Tribe.List.Find(x => x.Id == tribe).Undershirt : cClass.InitialGear[0x04],
+                Body = cClass.InitialGear[0x04] == 0 ? Model.List.Find(x => x.Id == tribe).Undershirt : cClass.InitialGear[0x04],
                 Hands = cClass.InitialGear[0x06],
                 Legs = cClass.InitialGear[0x05],
                 Feet = cClass.InitialGear[0x07],

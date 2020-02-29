@@ -29,17 +29,39 @@ namespace Launcher
             //load default user control (log window)
             pnlMain.Controls.Add(ucLogWindow.Instance);
             ucLogWindow.Instance.Dock = DockStyle.Fill;
-            ucLogWindow.Instance.BringToFront();
 
-            //default user control button color
-            btnLogWindow.BackColor = Color.White;
-            btnLogWindow.ForeColor = Color.Maroon;
 
-            _log.Info("Welcome to Primal Launcher!");
-        }       
 
-        private void BtnLaunchGame_Click(object sender, EventArgs e)
-            => Task.Run(() => { UpdateServer update = new UpdateServer(); });    
+            //first thing is to check game installation.
+            if (Updater.GameInstallationOk())
+            {                
+                ucLogWindow.Instance.BringToFront();
+
+                //default user control button color
+                btnLogWindow.BackColor = Color.White;
+                btnLogWindow.ForeColor = Color.Maroon;
+            }
+            else
+            {
+                //load game update user control
+                pnlMain.Controls.Add(ucGameUpdate.Instance);
+                ucGameUpdate.Instance.Dock = DockStyle.Fill;
+                ucGameUpdate.Instance.BringToFront();
+
+                //default user control button color
+                btnGameUpdate.BackColor = Color.White;
+                btnGameUpdate.ForeColor = Color.Maroon;
+
+                //disable launch button
+                btnLaunchGame.Enabled = false;
+            }            
+
+            
+
+            _log.Info("Welcome to Primal Launcher!");         
+        }
+
+        private void BtnLaunchGame_Click(object sender, EventArgs e) =>  Task.Run(() => { new UpdateServer(); });    
 
         private void TopFrame_MouseDown(object sender, MouseEventArgs e)
         {
@@ -95,6 +117,34 @@ namespace Launcher
             }
             ucAbout.Instance.BringToFront();
             ButtonColorsSetup(sender);
+        }
+
+        private void btnGameUpdate_Click(object sender, EventArgs e)
+        {
+            if (!pnlMain.Controls.Contains(ucGameUpdate.Instance))
+            {
+                pnlMain.Controls.Add(ucGameUpdate.Instance);
+                ucGameUpdate.Instance.Dock = DockStyle.Fill;
+            }
+            ucGameUpdate.Instance.BringToFront();
+            ButtonColorsSetup(sender);
+        }
+
+        private void Launch()
+        {           
+
+            string sessionId = "1";
+            uint ticks = (uint)DateTime.Now.Ticks;
+            string commandLine = string.Format(" T ={0} /LANG =en-us /REGION =2 /SERVER_UTC =1356916742 /SESSION_ID ={1}", ticks, sessionId);
+                        
+            //Blowfish fb = new Blowfish(
+            //    Blowfish.GenerateKey(
+            //        (ticks & ~0xffff).ToString(),
+            //        BitConverter.ToUInt32(new byte[] { 1 }, 0)
+            //    )
+            //);
+
+            //Process.Start(Preferences.Instance.Options.GameInstallPath + "ffxivgame.exe", "  sqex0002" + commandLine + "!////");
         }
     }
 }

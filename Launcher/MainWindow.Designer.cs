@@ -43,7 +43,7 @@
             this.button3 = new System.Windows.Forms.Button();
             this.btnAbout = new System.Windows.Forms.Button();
             this.btnHelp = new System.Windows.Forms.Button();
-            this.btnMisc = new System.Windows.Forms.Button();
+            this.btnGameUpdate = new System.Windows.Forms.Button();
             this.btnOptions = new System.Windows.Forms.Button();
             this.btnLogWindow = new System.Windows.Forms.Button();
             this.pnlTopBar.SuspendLayout();
@@ -157,9 +157,9 @@
             this.lblAppName.AutoSize = true;
             this.lblAppName.Font = new System.Drawing.Font("Bahnschrift Condensed", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblAppName.ForeColor = System.Drawing.SystemColors.ButtonFace;
-            this.lblAppName.Location = new System.Drawing.Point(11, 108);
+            this.lblAppName.Location = new System.Drawing.Point(26, 108);
             this.lblAppName.Name = "lblAppName";
-            this.lblAppName.Size = new System.Drawing.Size(146, 17);
+            this.lblAppName.Size = new System.Drawing.Size(110, 18);
             this.lblAppName.TabIndex = 0;
             this.lblAppName.Text = "Primal Launcher v0.1";
             // 
@@ -181,7 +181,7 @@
             this.pnlButtons.Controls.Add(this.button3);
             this.pnlButtons.Controls.Add(this.btnAbout);
             this.pnlButtons.Controls.Add(this.btnHelp);
-            this.pnlButtons.Controls.Add(this.btnMisc);
+            this.pnlButtons.Controls.Add(this.btnGameUpdate);
             this.pnlButtons.Controls.Add(this.btnOptions);
             this.pnlButtons.Controls.Add(this.btnLogWindow);
             this.pnlButtons.Location = new System.Drawing.Point(-1, 134);
@@ -235,20 +235,21 @@
             this.btnHelp.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.btnHelp.UseVisualStyleBackColor = false;
             // 
-            // btnMisc
+            // btnGameUpdate
             // 
-            this.btnMisc.BackColor = System.Drawing.Color.DarkRed;
-            this.btnMisc.FlatAppearance.BorderSize = 0;
-            this.btnMisc.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnMisc.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnMisc.ForeColor = System.Drawing.SystemColors.ButtonFace;
-            this.btnMisc.Location = new System.Drawing.Point(2, 99);
-            this.btnMisc.Name = "btnMisc";
-            this.btnMisc.Size = new System.Drawing.Size(165, 47);
-            this.btnMisc.TabIndex = 17;
-            this.btnMisc.Text = "Other";
-            this.btnMisc.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnMisc.UseVisualStyleBackColor = false;
+            this.btnGameUpdate.BackColor = System.Drawing.Color.DarkRed;
+            this.btnGameUpdate.FlatAppearance.BorderSize = 0;
+            this.btnGameUpdate.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnGameUpdate.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnGameUpdate.ForeColor = System.Drawing.SystemColors.ButtonFace;
+            this.btnGameUpdate.Location = new System.Drawing.Point(2, 99);
+            this.btnGameUpdate.Name = "btnGameUpdate";
+            this.btnGameUpdate.Size = new System.Drawing.Size(165, 47);
+            this.btnGameUpdate.TabIndex = 17;
+            this.btnGameUpdate.Text = "Game update";
+            this.btnGameUpdate.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnGameUpdate.UseVisualStyleBackColor = false;
+            this.btnGameUpdate.Click += new System.EventHandler(this.btnGameUpdate_Click);
             // 
             // btnOptions
             // 
@@ -323,7 +324,7 @@
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.Button btnAbout;
         private System.Windows.Forms.Button btnHelp;
-        private System.Windows.Forms.Button btnMisc;
+        private System.Windows.Forms.Button btnGameUpdate;
         private System.Windows.Forms.Button btnOptions;
         private System.Windows.Forms.Button btnLogWindow;
     }

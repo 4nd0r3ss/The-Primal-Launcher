@@ -30,23 +30,14 @@
         {
             this.txtGameInstallPath = new System.Windows.Forms.TextBox();
             this.btnChangeGameInstallPath = new System.Windows.Forms.Button();
-            this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.LblDownloadStatus = new System.Windows.Forms.Label();
-            this.button1 = new System.Windows.Forms.Button();
-            this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.label2 = new System.Windows.Forms.Label();
             this.btnChangePatchPath = new System.Windows.Forms.Button();
             this.txtPatchPath = new System.Windows.Forms.TextBox();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.button2 = new System.Windows.Forms.Button();
-            this.BtnPatchExe = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.radioButton3 = new System.Windows.Forms.RadioButton();
             this.radioButton2 = new System.Windows.Forms.RadioButton();
             this.radioButton1 = new System.Windows.Forms.RadioButton();
-            this.groupBox2.SuspendLayout();
-            this.groupBox1.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -69,44 +60,6 @@
             this.btnChangeGameInstallPath.Text = "Change";
             this.btnChangeGameInstallPath.UseVisualStyleBackColor = true;
             this.btnChangeGameInstallPath.Click += new System.EventHandler(this.btnChangeGameInstallPath_Click_1);
-            // 
-            // groupBox2
-            // 
-            this.groupBox2.Controls.Add(this.LblDownloadStatus);
-            this.groupBox2.Controls.Add(this.button1);
-            this.groupBox2.Controls.Add(this.progressBar1);
-            this.groupBox2.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.groupBox2.Location = new System.Drawing.Point(30, 261);
-            this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(306, 130);
-            this.groupBox2.TabIndex = 14;
-            this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "Game Update";
-            // 
-            // LblDownloadStatus
-            // 
-            this.LblDownloadStatus.AutoSize = true;
-            this.LblDownloadStatus.Location = new System.Drawing.Point(10, 111);
-            this.LblDownloadStatus.Name = "LblDownloadStatus";
-            this.LblDownloadStatus.Size = new System.Drawing.Size(35, 13);
-            this.LblDownloadStatus.TabIndex = 8;
-            this.LblDownloadStatus.Text = "label4";
-            // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(10, 78);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(132, 23);
-            this.button1.TabIndex = 7;
-            this.button1.Text = "Download game update";
-            this.button1.UseVisualStyleBackColor = true;
-            // 
-            // progressBar1
-            // 
-            this.progressBar1.Location = new System.Drawing.Point(148, 78);
-            this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(141, 23);
-            this.progressBar1.TabIndex = 6;
             // 
             // label2
             // 
@@ -137,37 +90,6 @@
             this.txtPatchPath.Name = "txtPatchPath";
             this.txtPatchPath.Size = new System.Drawing.Size(488, 20);
             this.txtPatchPath.TabIndex = 4;
-            // 
-            // groupBox1
-            // 
-            this.groupBox1.Controls.Add(this.button2);
-            this.groupBox1.Controls.Add(this.BtnPatchExe);
-            this.groupBox1.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.groupBox1.Location = new System.Drawing.Point(342, 261);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(245, 130);
-            this.groupBox1.TabIndex = 13;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Patches";
-            // 
-            // button2
-            // 
-            this.button2.Location = new System.Drawing.Point(30, 78);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(185, 23);
-            this.button2.TabIndex = 7;
-            this.button2.Text = "Restore original files";
-            this.button2.UseVisualStyleBackColor = true;
-            // 
-            // BtnPatchExe
-            // 
-            this.BtnPatchExe.Location = new System.Drawing.Point(30, 39);
-            this.BtnPatchExe.Name = "BtnPatchExe";
-            this.BtnPatchExe.Size = new System.Drawing.Size(185, 23);
-            this.BtnPatchExe.TabIndex = 6;
-            this.BtnPatchExe.Text = "Patch game files";
-            this.BtnPatchExe.UseVisualStyleBackColor = true;
-            this.BtnPatchExe.Click += new System.EventHandler(this.BtnPatchExe_Click);
             // 
             // label1
             // 
@@ -237,13 +159,8 @@
             this.Controls.Add(this.btnChangePatchPath);
             this.Controls.Add(this.btnChangeGameInstallPath);
             this.Controls.Add(this.txtPatchPath);
-            this.Controls.Add(this.groupBox2);
-            this.Controls.Add(this.groupBox1);
             this.Name = "ucOptions";
             this.Size = new System.Drawing.Size(605, 427);
-            this.groupBox2.ResumeLayout(false);
-            this.groupBox2.PerformLayout();
-            this.groupBox1.ResumeLayout(false);
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
             this.ResumeLayout(false);
@@ -255,16 +172,9 @@
 
         private System.Windows.Forms.TextBox txtGameInstallPath;
         private System.Windows.Forms.Button btnChangeGameInstallPath;
-        private System.Windows.Forms.GroupBox groupBox2;
-        private System.Windows.Forms.Label LblDownloadStatus;
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.ProgressBar progressBar1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button btnChangePatchPath;
         private System.Windows.Forms.TextBox txtPatchPath;
-        private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.Button button2;
-        private System.Windows.Forms.Button BtnPatchExe;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.GroupBox groupBox3;
         private System.Windows.Forms.RadioButton radioButton3;

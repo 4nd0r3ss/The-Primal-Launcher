@@ -28,7 +28,7 @@ namespace Launcher
         private static Preferences _instance = null;
         private readonly string _configFile = @"app_data.dat";
         private Options _options;
-        public static string AppFolder = @"\FFXIV Primal Launcher\";
+        public static string AppFolder = @"\Primal Launcher User Files\";
         #endregion
 
         #region Constructor
@@ -100,7 +100,7 @@ namespace Launcher
         }
         #endregion
 
-        #region Fills up options object with default values
+        #region Fill up options object with default values
         private void Configure()
         {
             _options.GameInstallPath = SearchGameInstallPath();

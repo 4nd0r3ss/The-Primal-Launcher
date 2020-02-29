@@ -9,8 +9,7 @@ namespace Launcher
     {
         private const int PORT = 80;
         public static readonly string HTTP_SERVER_VERSION = "Primal-Http-Server/0.1"; //for html headers
-        private static UserRepository _userRepo = UserRepository.Instance;
-        private User _user;
+        private static UserFactory _userFactory = UserFactory.Instance;        
 
         public HttpServer() => Start("Http", PORT);
 
@@ -18,15 +17,15 @@ namespace Launcher
         {
             string request = Encoding.ASCII.GetString(connection.buffer);
             byte[] response = HttpPacket.ErrorPage("Something went wrong. Here is the game client request:<br><br>" + request.Replace("\r\n", "<br>").Trim(new[] { '\0' }));
-                                 
+
             //if (Preferences.Instance.Options.ShowLoginPage && request.IndexOf("GET /login") >= 0)
             //{
-            //    response = PackPage(@"login/index.html");
-            //    _log.Message("Login page sent.");
+                response = PackPage(@"login/index.html");
+                _log.Info("Login page sent.");
             //}
             //else
             //{
-                //<-- dirty way to get uname and pwd from http headers...
+                //< --dirty way to get uname and pwd from http headers...
                 //string[] tmp = request.Split(' ');
                 //string queryString = tmp[1].Substring(11);
                 //tmp = queryString.Split('&');
@@ -34,11 +33,11 @@ namespace Launcher
                 string pwd = "FFXIVPlayer";// tmp[1].Substring(4);  
                 //-->
 
-                _user = _userRepo.GetUser(uname, pwd); //get current user stored data
+                _userFactory.LoadUser(uname, pwd); //get current user stored data
 
-                if (_user != null)
-                {                    
-                    response = HttpPacket.AuthPage(_user.Id);
+                if (_userFactory.User != null)
+                {
+                    response = HttpPacket.AuthPage(_userFactory.User.Id);
                     _log.Info("Authorization page sent.");
                     ServerShutDown();
                 }
@@ -54,7 +53,7 @@ namespace Launcher
        
         private static byte[] PackPage(string file) => new HttpPacket(file).ToBytes();       
 
-        public override void ServerTransition() => Task.Run(() => { LobbyServer lobby = new LobbyServer(_user); });
+        public override void ServerTransition() => Task.Run(() => { new LobbyServer(); });
 
         public override void ReadCallback(IAsyncResult ar)
         {

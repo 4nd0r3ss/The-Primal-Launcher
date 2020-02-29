@@ -5,10 +5,11 @@ namespace Launcher
 {
     public class SubPacket
     {
-        private static readonly Log _log = Log.Instance;
+        private static readonly Log _log = Log.Instance;       
         private byte[] _data;
 
         #region Properties
+        private uint PlayerCharacterId { get; set; } = UserFactory.Instance.User.Character == null ? 0xe0006868 : UserFactory.Instance.User.Character.Id;
         public ushort Size { get; set; }
         public ushort Type { get; set; } = 0x03;
         public uint SourceId { get; set; }
@@ -62,10 +63,10 @@ namespace Launcher
             int index = 0x10;
 
             if (SourceId == 0 && Type == 0x03)
-                SourceId = 0xe0006868;
+                SourceId = PlayerCharacterId;
 
             if (TargetId == 0 && Type == 0x03)
-                TargetId = 0xe0006868;                    
+                TargetId = PlayerCharacterId;                    
 
             Buffer.BlockCopy(BitConverter.GetBytes(Size), 0, header, 0, 0x02);
             Buffer.BlockCopy(BitConverter.GetBytes(Type), 0, header, 0x02, 0x02);

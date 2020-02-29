@@ -15,6 +15,8 @@ namespace Launcher
         public static readonly int SLOT_SIZE = 0x1d0;
         #endregion
 
+
+
         #region Info        
         public byte[] CharacterName { get; set; } = new byte[0x20];
         public byte WorldId { get; set; }
@@ -82,14 +84,14 @@ namespace Launcher
             BirthMonth = data[0x28];
             BirthDay = data[0x29];
             InitialTown = data[0x48];
-            Tribe = Tribe.GetTribe(data[0x08]);
+            Model = Model.GetTribe(data[0x08]);
 
             //Starting class
             CurrentClassId = data[0x2a];
             Classes[CurrentClassId].Level = 1; //having a class level > 0 makes it active.
             Classes[CurrentClassId].IsCurrent = true; //current class the player will start with.
 
-            GearSet = CharacterClass.GetInitialGearSet(Classes[CurrentClassId], Tribe.Id);
+            GearSet = CharacterClass.GetInitialGearSet(Classes[CurrentClassId], Model.Id);
 
             Position initial = Position.GetInitialPosition(InitialTown);
             Position = new Position
@@ -120,15 +122,7 @@ namespace Launcher
             LuaParameters.Add(0);
             LuaParameters.Add(false);
             LuaParameters.Add(true);
-        }
-
-        private uint NewId()
-        {
-            Random rnd = new Random();
-            byte[] id = new byte[0x4];
-            rnd.NextBytes(id);
-            return BitConverter.ToUInt32(id, 0);
-        }
+        }       
 
         private List<KeyValuePair<uint, string>> Commands { get; } = new List<KeyValuePair<uint, string>>
         {
@@ -153,15 +147,16 @@ namespace Launcher
             }
         }
 
-        public override void Spawn(Socket sender, ushort spawnType = 0x01)
+        public override void Spawn(Socket sender, ushort spawnType = 0x01, ushort isZoning = 0, ushort actorIndex = 0)
         {
             //For packet creation            
             TargetId = Id;
 
+            SendGroupPackets(sender);
             CreateActor(sender, 0x08);
             CommandSequence(sender);
             SetSpeeds(sender);
-            SetPosition(sender, Position, spawnType);
+            SetPosition(sender, Position, spawnType, isZoning);
             SetAppearance(sender);
             SetName(sender, -1, CharacterName); //-1 = it's a custom name.
             SendUnknown(sender);
@@ -263,8 +258,8 @@ namespace Launcher
             //property.Add(sender, Id, string.Format("charaWork.statusShownTime[{0}]", i), ); 
 
             //Write character's parameters
-            for (int i = 0; i < Tribe.InitialParameters.Length; i++)
-                property.Add(string.Format("charaWork.battleTemp.generalParameter[{0}]", i), Tribe.InitialParameters[i]);
+            for (int i = 0; i < Model.InitialParameters.Length; i++)
+                property.Add(string.Format("charaWork.battleTemp.generalParameter[{0}]", i), Model.InitialParameters[i]);
 
             //unknown
             property.Add("charaWork.battleTemp.castGauge_speed[0]", 1.0f);
@@ -354,7 +349,7 @@ namespace Launcher
             property.Add("playerWork.restBonusExpRate", 0f);
 
             //From PlayerCharacter obj
-            property.Add("playerWork.tribe", Tribe.Id);
+            property.Add("playerWork.tribe", Model.Id);
             property.Add("playerWork.guardian", Guardian);
             property.Add("playerWork.birthdayMonth", BirthMonth);
             property.Add("playerWork.birthdayDay", BirthDay);
@@ -392,5 +387,92 @@ namespace Launcher
 
             SendPacket(sender, Opcode.EndClientOrderEvent, data);
         }
+
+        public void ToggleMount(Socket sender, Command command)
+        {
+            //change to chocobo bgm
+            byte[] data = new byte[0x08];
+            Buffer.BlockCopy(BitConverter.GetBytes((ushort)(command == Command.MountChocobo ? 0x53 : ActorRepository.Instance.Zones.Find(x=>x.Id==Position.ZoneId).GetCurrentBGM())), 0, data, 0, 2);
+            Buffer.BlockCopy(BitConverter.GetBytes((ushort)MusicMode.FadeStart), 0, data, 0x02, 2);
+            SendPacket(sender, Opcode.SetMusic, data);
+
+            //set player state
+            data = new byte[0x08];
+
+            if (command == Command.MountChocobo)
+            {
+                data[0x05] = 0x1f; //mounted     
+                SendPacket(sender, Opcode.SetChocoboMounted, data);
+            }
+            else
+                SetMainState(sender, MainState.Passive, 0xbf);         
+
+            //send command answer
+            data = new byte[0x28];
+            Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, data, 0, 4);
+            Buffer.BlockCopy(BitConverter.GetBytes((uint)Animation.MountChocobo), 0, data, 0x4, 4);
+            data[0x27] = 0x08; //8 animation slots to be played in sequence?
+            SendPacket(sender, Opcode.CommandResult, data);
+
+            //set chocobo speeds (this packet is originally sent 3 times for unknown reasons)
+            if (command == Command.MountChocobo)
+            {
+                data = new byte[] {
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x66, 0x66, 0x66, 0x40, 0x01, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x10, 0x41, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x41, 0x03, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+                };
+
+                SendPacket(sender, Opcode.SetSpeed, data);
+                SendPacket(sender, Opcode.SetSpeed, data);
+                SendPacket(sender, Opcode.SetSpeed, data);
+            }
+            else
+            {
+                SetSpeeds(sender);
+                SetSpeeds(sender);
+                SetSpeeds(sender);
+            }
+
+            //text sheet message ('you call [chocobo name]' chat message?) (should be sent by world?)
+            if(command == Command.MountChocobo)
+                data = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0xF8, 0x5F, 0x91, 0x65, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00 };
+            else
+                data = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0xF8, 0x5F, 0x93, 0x65, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00 };
+
+            Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, data, 0, 4);
+            SendPacket(sender, Opcode.TextSheetMessage30b, data, sourceId: 0x5ff80001);
+
+            //command result 
+            data = new byte[0x38];            
+            Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, data, 0, 4);
+            Buffer.BlockCopy(BitConverter.GetBytes((uint)Animation.MountChocobo), 0, data, 0x4, 4);
+            Buffer.BlockCopy(BitConverter.GetBytes((uint)1), 0, data, 0x20, 4);
+            Buffer.BlockCopy(BitConverter.GetBytes((ushort)command), 0, data, 0x24, 2);
+            Buffer.BlockCopy(BitConverter.GetBytes((ushort)0x810), 0, data, 0x26, 2); //unknown
+            Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, data, 0x28, 4);
+            data[0x30] = 1;
+            data[0x36] = 1;
+            SendPacket(sender, Opcode.CommandResultX1, data);
+
+            //end event order
+            if(command == Command.MountChocobo)
+            {
+                data = new byte[0x30];               
+                Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, data, 0, 4);
+                Buffer.BlockCopy(Encoding.ASCII.GetBytes("commandForced"), 0, data, 0x9, 4);
+                Buffer.BlockCopy(BitConverter.GetBytes(0x09d4f200), 0, data, 0x28, 4);
+                Buffer.BlockCopy(BitConverter.GetBytes(0x0a09a930), 0, data, 0x2c, 4);
+                SendPacket(sender, Opcode.EndClientOrderEvent, data);
+            }            
+        }
+
+
     }
 }

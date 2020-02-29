@@ -35,18 +35,18 @@ namespace Launcher
     /// This class contains basic information for character creation like character model, initial status and initial gear.
     /// </summary>
     [Serializable]
-    public struct Tribe
+    public struct Model
     {
         public byte Id { get; }
         public uint Undershirt { get; }
-        public uint Model { get; }  
+        public uint Type { get; set; }  
         public ushort[] InitialParameters { get; set; }
 
-        public Tribe(byte id, uint undershirt, uint model, ushort[] initialParameters)
+        public Model(byte id, uint undershirt, uint type, ushort[] initialParameters = null)
         {
             Id = id;
             Undershirt = undershirt;
-            Model = model;
+            Type = type;
             InitialParameters = initialParameters;
         }
 
@@ -67,29 +67,29 @@ namespace Launcher
             new ushort[]{0,0,0,15,16,12,15,17,15,18,14,16,13,14,18,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, //hellsguard
         };
 
-        public static readonly List<Tribe> List = new List<Tribe>
+        public static readonly List<Model> List = new List<Model>
         {
             //id, undershirt, model
-            new Tribe(0, 0, 0, null),  //objects
-            new Tribe(1, 1184, 1, InitialParametersList[0]),  //midlander male
-            new Tribe(2, 1186, 2, InitialParametersList[0]),  //midlander female
-            new Tribe(3, 1187, 9, InitialParametersList[1]),  //highlander male
-            new Tribe(4, 1184, 3, InitialParametersList[2]),  //wildwood male
-            new Tribe(5, 1024, 4, InitialParametersList[2]),  //wildwood female
-            new Tribe(6, 1187, 3, InitialParametersList[3]),  //duskwight male 
-            new Tribe(7, 1505, 4, InitialParametersList[3]),  //duskwight female
-            new Tribe(8, 1184, 5, InitialParametersList[4]),  //plainsfolk male
-            new Tribe(9, 1185, 6, InitialParametersList[4]),  //plainsfolk female
-            new Tribe(10, 1504, 5, InitialParametersList[5]), //dunesfolk male
-            new Tribe(11, 1505, 6, InitialParametersList[5]), //dunesfolk female
-            new Tribe(12, 1216, 8, InitialParametersList[6]), //seeker of the sun
-            new Tribe(13, 1186, 8, InitialParametersList[7]), //keeper of the moon
-            new Tribe(14, 1184, 7, InitialParametersList[8]), //sea wolf
-            new Tribe(15, 1186, 7, InitialParametersList[9]), //hellsguard
+            new Model(0, 0, 0, null),  //default
+            new Model(1, 1184, 1, InitialParametersList[0]),  //midlander male
+            new Model(2, 1186, 2, InitialParametersList[0]),  //midlander female
+            new Model(3, 1187, 9, InitialParametersList[1]),  //highlander male
+            new Model(4, 1184, 3, InitialParametersList[2]),  //wildwood male
+            new Model(5, 1024, 4, InitialParametersList[2]),  //wildwood female
+            new Model(6, 1187, 3, InitialParametersList[3]),  //duskwight male 
+            new Model(7, 1505, 4, InitialParametersList[3]),  //duskwight female
+            new Model(8, 1184, 5, InitialParametersList[4]),  //plainsfolk male
+            new Model(9, 1185, 6, InitialParametersList[4]),  //plainsfolk female
+            new Model(10, 1504, 5, InitialParametersList[5]), //dunesfolk male
+            new Model(11, 1505, 6, InitialParametersList[5]), //dunesfolk female
+            new Model(12, 1216, 8, InitialParametersList[6]), //seeker of the sun
+            new Model(13, 1186, 8, InitialParametersList[7]), //keeper of the moon
+            new Model(14, 1184, 7, InitialParametersList[8]), //sea wolf
+            new Model(15, 1186, 7, InitialParametersList[9]), //hellsguard                    
         };               
 
-        public static Tribe GetTribe(uint tribe) => List.Find(x => x.Id == tribe);
-        public static uint GetModel(uint tribe) => List.Find(x => x.Id == tribe).Model;
+        public static Model GetTribe(uint tribe) => List.Find(x => x.Id == tribe);
+        public static uint GetModel(uint tribe) => List.Find(x => x.Id == tribe).Type;
     }
 
     /// <summary>

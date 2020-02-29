@@ -10,6 +10,7 @@ namespace Launcher
     [Serializable]
     public class User
     {
+        private static User _instance = null;
         public int Id { get; set; }
         public string Uname { get; set; }
         public string Pwd { get; set; } = "";
@@ -17,6 +18,18 @@ namespace Launcher
         private byte NumAccounts => (byte)AccountList.Count;
         public uint SessionId { get; set; }
         public PlayerCharacter Character { get; set; }
+
+        public static User Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new User();
+                }
+                return _instance;
+            }
+        }
 
         public byte[] GetAccountListData()
         {
@@ -65,7 +78,7 @@ namespace Launcher
 
                     byte[] name = Encoding.ASCII.GetBytes(Encoding.ASCII.GetString(character.CharacterName).Trim(new[] { '\0' }));
                     byte[] gearSet = character.GearSet.ToBytes();
-                    byte[] worldName = Encoding.ASCII.GetBytes(WorldRepository.Instance.GetWorld(character.WorldId).Name);
+                    byte[] worldName = Encoding.ASCII.GetBytes(WorldFactory.GetWorld(character.WorldId).Name);
                     CharacterClass currentClass = character.Classes[character.CurrentClassId];
 
                     Buffer.BlockCopy(BitConverter.GetBytes(character.Id), 0, characterSlot, 0x04, 0x04); //sequence?                    
@@ -85,7 +98,7 @@ namespace Launcher
                             bw.Write(name);
                             bw.Write((byte)0); //name end byte
                             bw.Write((ulong)0x040000001c); //??                           
-                            bw.Write(character.Tribe.Model);
+                            bw.Write(character.Model.Type);
                             bw.Write(character.Size);
                             bw.Write(character.SkinColor | (uint)(character.HairColor << 10) | (uint)(character.EyeColor << 20));
                             bw.Write(BitField.PrimitiveConversion.ToUInt32(character.Face));
@@ -99,7 +112,7 @@ namespace Launcher
                             bw.Write(currentClass.Level);                         
                             bw.Write(character.CurrentJob);
                             bw.Write((ushort)0x01); //Job level?
-                            bw.Write(character.Tribe.Id);
+                            bw.Write(character.Model.Id);
                             bw.Write(0xe22222aa); //??
                             bw.Write(0x0000000a); //size of the string below
                             bw.Write(Encoding.ASCII.GetBytes("prv0Inn01\0")); //figure out if this can change

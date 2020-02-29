@@ -9,12 +9,18 @@ using System.Windows.Forms;
 namespace Launcher
 {
     public static class Patcher
-    {
-        private static Log _log { get; set; } = Log.Instance;
-        private static string GameInstPath { get; set; } = Preferences.Instance.Options.GameInstallPath;
+    {       
+        private static string GameInstallPath { get; set; } = Preferences.Instance.Options.GameInstallPath;
+
+        //Login server address
+        private static readonly byte[] loginServerAddress = { 0xCA, 0xCF, 0xB8, 0xA2, 0x96, 0x96, 0x14, 0xCC, 0xF2, 0x9C, 0x9A, 0x8, 0x55, 0xAC, 0x7E, 0x35, 0x99, 0xB9, 0x57, }; //127.0.0.1/login (encoded string)
+        //Lobby server address (localhost)
+        private static readonly byte[] lobbyServerAddress = { 0x31, 0x32, 0x37, 0x2e, 0x30, 0x2e, 0x30, 0x2e, 0x31, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }; //[lobby01.ffxiv.com] -> [127.0.0.1        ] size: 0x11
+        //Lobby server port (54997)
+        private static readonly byte[] lobbyServerPort = { 0x35, 0x34, 0x39, 0x39, 0x37 };
 
         #region Check patched files
-        public static void CheckPatched()
+        public static void CheckInstallation()
         {
             bool bakFilesExist = true;
 
@@ -35,61 +41,77 @@ namespace Launcher
         #region Executable patching methods
         private static void PatchLoginExe()
         {           
-            _log.Info("Starting patch process for ffxivlogin.exe...");
+            //Load binary into memory              
+            byte[] exeDataLogin = File.ReadAllBytes(GameInstallPath + @"/ffxivlogin.exe");
 
-            if (HasWritePermission())
+            //Save backup               
+            File.WriteAllBytes(GameInstallPath + @"/ffxivlogin.exe.bak", exeDataLogin);
+
+            //Write encoded localhost address to offset 0x53EA0 (old login server string offset)               
+            using (MemoryStream memStream = new MemoryStream(exeDataLogin))
             {
-                //127.0.0.1/login
-                byte[] encodedString = { 0xCA, 0xCF, 0xB8, 0xA2, 0x96, 0x96, 0x14, 0xCC, 0xF2, 0x9C, 0x9A, 0x8, 0x55, 0xAC, 0x7E, 0x35, 0x99, 0xB9, 0x57, };
-
-                //Open executable for patching
-                _log.Info("Copying executable bytes into memory...");
-                byte[] exeDataLogin = File.ReadAllBytes(GameInstPath + @"/ffxivlogin.exe");
-
-                //Save backup
-                _log.Info("Backing up file as ffxivlogin.exe.bak...");
-                File.WriteAllBytes(GameInstPath + @"/ffxivlogin.exe.bak", exeDataLogin);
-
-                //Write encoded localhost address to offset 0x53EA0 (old login string offset)
-                _log.Info("Patching (redirect requests to 127.0.0.1)...");
-                using (MemoryStream memStream = new MemoryStream(exeDataLogin))
+                using (BinaryWriter binaryWriter = new BinaryWriter(memStream))
                 {
-                    using (BinaryWriter binaryWriter = new BinaryWriter(memStream))
-                    {
-                        binaryWriter.BaseStream.Seek(0x53EA0, SeekOrigin.Begin);
-                        binaryWriter.Write(encodedString);
-                    }
+                    binaryWriter.BaseStream.Seek(0x53EA0, SeekOrigin.Begin);
+                    binaryWriter.Write(loginServerAddress);
                 }
-
-                //Save patched file
-                _log.Info("Saving patched file...");
-                //File.WriteAllBytes(GameInstPath + @"/ffxivlogin.exe", exeDataLogin);
-
-                _log.Info("Done!");
             }
-            else
-            {
-                _log.Info("you need write permission in the game installation folder.");
-                _log.Info("Please close this program, right-click the shortcut and select 'Run as administrator'.");
-                _log.Info("This operation is required only once. Aborting patching operation.");
-            }  
+
+            //Save patched file                
+            File.WriteAllBytes(GameInstallPath + @"/ffxivlogin.exe", exeDataLogin);
         }
 
         private static void PatchBootExe()
         {
-           throw new NotImplementedException();
+            //Load binary into memory 
+            byte[] exeDataBoot = File.ReadAllBytes(GameInstallPath + @"/ffxivboot.exe");
+
+            //Save binary backup
+            File.WriteAllBytes(GameInstallPath + @"/ffxivboot.exe.bak", exeDataBoot);
+
+            using (MemoryStream memStream = new MemoryStream(exeDataBoot))
+            {
+                using (BinaryWriter binaryWriter = new BinaryWriter(memStream))
+                {
+                    //Change lobby server address
+                    binaryWriter.BaseStream.Seek(0x00965d08, SeekOrigin.Begin);
+                    binaryWriter.Write(lobbyServerAddress);
+
+                    //Change update server address
+                    binaryWriter.BaseStream.Seek(0x00966404, SeekOrigin.Begin);
+                    binaryWriter.Write(lobbyServerAddress);
+                }
+            }
+
+            //Save patched file                
+            File.WriteAllBytes(GameInstallPath + @"/ffxivboot.exe", exeDataBoot);
         }
 
         private static void PatchGameExe()
-        {
-            //Change server ip
-            //Offset: 0x00b90110 to 0x00b90120
-            //[lobby01.ffxiv.com] -> [127.0.0.1        ] size: 0x11
-            //Change server port
-            //Offset: 0x00c50424 to 0x00c50428
-            //[54996] to [54997] size: 0x5
+        {            
 
-            throw new NotImplementedException();
+            //Load binary into memory 
+            byte[] exeDataGame = File.ReadAllBytes(GameInstallPath + @"/ffxivgame.exe");
+
+            //Save binary backup
+            File.WriteAllBytes(GameInstallPath + @"/ffxivgame.exe.bak", exeDataGame);
+                                   
+            using (MemoryStream memStream = new MemoryStream(exeDataGame))
+            {
+                using (BinaryWriter binaryWriter = new BinaryWriter(memStream))
+                {
+                    //Change lobby server address
+                    binaryWriter.BaseStream.Seek(0x00b90110, SeekOrigin.Begin);
+                    binaryWriter.Write(lobbyServerAddress);
+
+                    //Change lobby server port
+                    binaryWriter.BaseStream.Seek(0x00c50424, SeekOrigin.Begin);
+                    binaryWriter.Write(lobbyServerPort);
+                }
+            }
+
+            //Save patched file                
+            File.WriteAllBytes(GameInstallPath + @"/ffxivgame.exe", exeDataGame);
         }
         #endregion
 
@@ -103,11 +125,11 @@ namespace Launcher
         #endregion
 
         #region Game installation path write permission checker
-        private static bool HasWritePermission()
+        public static bool HasWritePermission()
         {
             try
             {
-                string testFile = GameInstPath + @"/CheckPermission.dat";
+                string testFile = GameInstallPath + @"/CheckPermission.dat";
 
                 File.WriteAllText(testFile, "");
 

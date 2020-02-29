@@ -24,13 +24,21 @@ namespace Launcher
             }
         }
 
-
         private ucLogWindow()
         {
             InitializeComponent();
 
             //dirty way to get rid of cross-thread exception
             CheckForIllegalCrossThreadCalls = false;
+
+
+            //Task.Run(() => {
+            //    while (true)
+            //    {
+            //        lblEorzeaTime.Text = Clock.Instance.Time;
+            //    }
+            //});
+            
         }
 
         public void WriteLogMessage(string message)
@@ -46,6 +54,23 @@ namespace Launcher
                 LbxOutput.Items[e.Index].ToString(),
                 new Font(FontFamily.GenericMonospace, 8, FontStyle.Regular),
                 new SolidBrush(_log.GetMessageColor(LbxOutput.Items[e.Index].ToString())), e.Bounds);
+        }
+
+        public void PrintPlayerPosition(Position position, byte[] unknown)
+        {
+            lblPCPositionZone.Text = position.ZoneId.ToString();
+            lblPCPositionX.Text = position.X.ToString();
+            lblPCPositionY.Text = position.Y.ToString();
+            lblPCPositionZ.Text = position.Z.ToString();
+            lblPCPositionR.Text = position.R.ToString();
+                
+                
+                
+                
+                //"x: " + position.X + ", y: " + position.Y + ", z: " + position.Z + ", r: " + position.R + ", region id: " + position.ZoneId + ", unknown: " +
+                //unknown[0].ToString("X2") + " " + unknown[1].ToString("X2") + " " + unknown[2].ToString("X2") + " " +
+                //unknown[3].ToString("X2") + " " + unknown[4].ToString("X2") + " " + unknown[5].ToString("X2");
+
         }
     }
 }

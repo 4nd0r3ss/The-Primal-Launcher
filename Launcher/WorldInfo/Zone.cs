@@ -4,240 +4,284 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
-
 namespace Launcher
 {
+    public enum ZoneType
+    {
+        Default = 4,
+        Inn = 68,
+        Instance = 6,
+        CanStealth = 132
+    }
     [Serializable]
     public class Zone : Actor
     {
         private Log _log = Log.Instance;
-
         public uint RegionId { get; set; }
         public string MapName { get; set; }
-        public byte[] PlaceName { get; set; }       
-        public bool IsIsolated { get; set; }
-        public bool IsInn { get; set; }
-        public bool MountAllowed { get; set; }
-        public bool CanStealth { get; set; }
-        public bool IsInstance { get; set; }
+        public string PlaceName { get; set; }      
+        public bool MountAllowed { get; set; }       
         public MusicSet MusicSet { get; set; }
 
-        public List<Actor> LoadedActors = new List<Actor>(); //list to keep all actors which are currentl in this zone.
+        public List<Actor> Actors = new List<Actor>(); //list to keep all actors which are currentl in this zone.
 
-        public Zone(uint zoneId, uint regionId, string mapName, string placeName, string className, MusicSet musicSet, bool isIsolated, bool isInn, bool mountAllowed, bool canStealth, bool isInstance)
+        public Zone(uint regionId, uint zoneId, byte locationNameId, byte musicSetId, int classNameId = -1, bool isMountAllowed = true, ZoneType zoneType = ZoneType.Default, string mapName = null)
         {
-            Id = zoneId;
-            //Name = "_areaMaster";
+            Id = zoneId;            
             RegionId = regionId;
             MapName = mapName;
-            PlaceName = Encoding.ASCII.GetBytes(placeName);
-            ClassPath = className;
-            MusicSet = musicSet;
-            IsInn = isInn;
-            MountAllowed = mountAllowed;
-            CanStealth = canStealth;
-            IsInstance = isInstance;
-
+            PlaceName = ZoneList.LocationName[locationNameId];
+            ClassPath = classNameId < 0 ? null : "ZoneMaster" + ZoneList.ClassName[classNameId];
+            MusicSet = MusicSet.Get(musicSetId);           
+            MountAllowed = isMountAllowed;
+            
             LuaParameters = new LuaParameters
             {
                 ActorName = "_areaMaster" + "@0" + LuaParameters.SwapEndian(zoneId).ToString("X").Substring(0, 4),
-                ClassName = className
+                ClassName = ClassPath,
+                ServerCodes = 0x30400000
             };
 
-            LuaParameters.Add("/Area/Zone/" + className);
+            LuaParameters.Add("/Area/Zone/" + ClassPath);
             LuaParameters.Add(false);
             LuaParameters.Add(true);
-            LuaParameters.Add(mapName);
+            LuaParameters.Add(MapName);
             LuaParameters.Add("");
             LuaParameters.Add(-1);
-            LuaParameters.Add((byte)0);
-            LuaParameters.Add(false);
-            LuaParameters.Add(false);
-            LuaParameters.Add(false);
-            LuaParameters.Add(false);
-            LuaParameters.Add(false);
-            LuaParameters.Add(true);
-            LuaParameters.Add(false);
-            LuaParameters.Add(false);
-
-            //get aetherytes from list
-            //    foreach(var eth in Aetheryte.AetheryteList)
-            //    {
-            //        if (eth.Key == zoneId)
-            //            LoadedActors.Add(eth.Value);
-            //    }
-            //    //try this for performance
-            //    //var selected = Aetheryte.AetheryteList.Select(x => x.Key == zoneId).ToList();
-            //    //foreach(var a in selected)
-            //    //{
-            //    //    LoadedActors.Add((Aetheryte)a);
-            //    //}
+            LuaParameters.Add(Convert.ToByte(isMountAllowed));
+            
+            for (int i = 7; i > -1; i--)          
+                LuaParameters.Add(((byte)zoneType & (1 << i)) != 0);
         }
-
+       
         public void SpawnActors(Socket sender)
         {
-            //foreach (var a in LoadedActors)
-            //{
-            //    a.Spawn(sender);
-            //}
+            try
+            {
+                for(int i=0;i<Actors.Count;i++)
+                    Actors[i].Spawn(sender, actorIndex: (ushort)i);
+            }
+            catch(Exception e)
+            {
+                _log.Error(e.Message);
+            }
+
+            _log.Success("Loaded " + Actors.Count + " actors in zone " + PlaceName);
+        }
+
+        public uint GetCurrentBGM()
+        {
+            //if it's past 8 in the morning, play day music.
+            if (Clock.Instance.Period == "AM" && Clock.Instance.Time >= new TimeSpan(5, 0, 0))
+                return MusicSet.DayMusic;
+            else
+                return MusicSet.NightMusic;
         }
     }
 
     [Serializable]
     public class ZoneList
     {
-        public Dictionary<uint, Zone> Zones = new Dictionary<uint, Zone>
+        public List<Zone> Zones = new List<Zone>
         {
             //Convert booleans to bitfield?
-            { 128, new Zone(128, 101, "sea0Field01", "Lower La Noscea", ClassName[0], MusicSet.Get(1), false, false, true, false, false)},
-            { 129, new Zone(129, 101, "sea0Field02", "Western La Noscea", ClassName[0], MusicSet.Get(1), false, false, true, false, false)},
-            { 130, new Zone(130, 101, "sea0Field03", "Eastern La Noscea", ClassName[0], MusicSet.Get(1), false, false, true, false, false)},
-            { 131, new Zone(131, 101, "sea0Dungeon01", "Mistbeard Cove", ClassName[0], MusicSet.Get(0), false, false, false, false, false)},
-            { 132, new Zone(132, 101, "sea0Dungeon03", "Cassiopeia Hollow", ClassName[0], MusicSet.Get(0), false, false, false, false, false)},
-            { 133, new Zone(133, 101, "sea0Town01", "Limsa Lominsa", ClassName[0], MusicSet.Get(2), false, false, false, false, false)},
-            { 134, new Zone(134, 202, "sea0Market01", "Market Wards", ClassName[1], MusicSet.Get(0), false, false, false, false, false)},
-            { 135, new Zone(135, 101, "sea0Field04", "Upper La Noscea", ClassName[0], MusicSet.Get(1), false, false, true, false, false)},
-            { 137, new Zone(137, 101, "sea0Dungeon06", "U'Ghamaro Mines", ClassName[0], MusicSet.Get(0), false, false, false, true, false)},
-            { 138, new Zone(138, 101, null, "La Noscea", "", MusicSet.Get(1), false, false, false, false, false)},
-
-            { 139, new Zone(139, 112, "sea0Field01a", "The Cieldalaes", ClassName[0], MusicSet.Get(0), false, false, false, false, false)},
-            { 140, new Zone(140, 101, null, "Sailors Ward", "", MusicSet.Get(0), false, false, false, false, false)},
-            { 141, new Zone(141, 101, "sea0Field01a", "Lower La Noscea", ClassName[0], MusicSet.Get(1), false, false, false, false, false)},
-            { 143, new Zone(143, 102, "roc0Field01", "Coerthas Central Highlands", ClassName[2], MusicSet.Get(3), false, false, true, false, false)},
-            { 144, new Zone(144, 102, "roc0Field02", "Coerthas Eastern Highlands", ClassName[2], MusicSet.Get(3), false, false, true, false, false)},
-            { 145, new Zone(145, 102, "roc0Field03", "Coerthas Eastern Lowlands", ClassName[2], MusicSet.Get(3), false, false, true, false, false)},
-            { 146, new Zone(146, 102, null, "Coerthas", "", MusicSet.Get(3), false, false, false, false, false)},
-            { 147, new Zone(147, 102, "roc0Field04", "Coerthas Central Lowlands", ClassName[2], MusicSet.Get(3), false, false, true, false, false)},
-            { 148, new Zone(148, 102, "roc0Field05", "Coerthas Western Highlands", ClassName[2], MusicSet.Get(3), false, false, true, false, false)},
-            { 150, new Zone(150, 103, "fst0Field01", "Central Shroud", ClassName[3], MusicSet.Get(4), false, false, true, false, false)},
-
-            { 151, new Zone(151, 103, "fst0Field02", "East Shroud", ClassName[3], MusicSet.Get(4), false, false, true, false, false)},
-            { 152, new Zone(152, 103, "fst0Field03", "North Shroud", ClassName[3], MusicSet.Get(4), false, false, true, false, false)},
-            { 153, new Zone(153, 103, "fst0Field04", "West Shroud", ClassName[3], MusicSet.Get(4), false, false, true, false, false)},
-            { 154, new Zone(154, 103, "fst0Field05", "South Shroud", ClassName[3], MusicSet.Get(4), false, false, true, false, false)},
-            { 155, new Zone(155, 103, "fst0Town01", "Gridania", ClassName[3], MusicSet.Get(5), false, false, false, false, false)},
-            { 156, new Zone(156, 103, null, "The Black Shroud", "", MusicSet.Get(0), false, false, false, false, false)},
-            { 157, new Zone(157, 103, "fst0Dungeon01", "The Mun-Tuy Cellars", ClassName[3], MusicSet.Get(0), false, false, false, false, false)},
-            { 158, new Zone(158, 103, "fst0Dungeon02", "The Tam-Tara Deepcroft", ClassName[3], MusicSet.Get(0), false, false, false, false, false)},
-            { 159, new Zone(159, 103, "fst0Dungeon03", "The Thousand Maws of Toto-Rak", ClassName[3], MusicSet.Get(0), false, false, false, false, false)},
-            { 160, new Zone(160, 204, "fst0Market01", "Market Wards", ClassName[4], MusicSet.Get(0), false, false, false, false, false)},
-
-            { 161, new Zone(161, 103, null, "Peasants Ward", "", MusicSet.Get(0), false, false, false, false, false)},
-            { 162, new Zone(162, 103, "fst0Field01a", "Central Shroud", ClassName[3], MusicSet.Get(4), false, false, false, false, false)},
-            { 164, new Zone(164, 106, "fst0Battle01", "Central Shroud", ClassName[5], MusicSet.Get(6), false, false, false, false, false)},
-            { 165, new Zone(165, 106, "fst0Battle02", "Central Shroud", ClassName[5], MusicSet.Get(6), false, false, false, false, false)},
-            { 166, new Zone(166, 106, "fst0Battle03", "Central Shroud", ClassName[5], MusicSet.Get(6), false, false, false, false, false)},
-            { 167, new Zone(167, 106, "fst0Battle04", "Central Shroud", ClassName[5], MusicSet.Get(6), false, false, false, false, false)},
-            { 168, new Zone(168, 106, "fst0Battle05", "Central Shroud", ClassName[5], MusicSet.Get(6), false, false, false, false, false)},
-            { 170, new Zone(170, 104, "wil0Field01", "Central Thanalan", ClassName[6], MusicSet.Get(7), false, false, true, false, false)},
-            { 171, new Zone(171, 104, "wil0Field02", "Eastern Thanalan", ClassName[6], MusicSet.Get(7), false, false, true, false, false)},
-            { 172, new Zone(172, 104, "wil0Field03", "Western Thanalan", ClassName[6], MusicSet.Get(7), false, false, true, false, false)},
-
-            { 173, new Zone(173, 104, "wil0Field04", "Northern Thanalan", ClassName[6], MusicSet.Get(7), false, false, true, false, false)},
-            { 174, new Zone(174, 104, "wil0Field05", "Southern Thanalan", ClassName[6], MusicSet.Get(7), false, false, true, false, false)},
-            { 175, new Zone(175, 104, "wil0Town01", "Ul'dah", ClassName[6], MusicSet.Get(11), false, false, false, false, false)},
-            { 176, new Zone(176, 104, "wil0Dungeon02", "Nanawa Mines", ClassName[6], MusicSet.Get(0), false, false, false, false, false)},
-            { 177, new Zone(177, 207, "_jail", "-", ClassName[11], MusicSet.Get(1), false, false, false, false, false)},
-            { 178, new Zone(178, 104, "wil0Dungeon04", "Copperbell Mines", ClassName[6], MusicSet.Get(0), false, false, false, false, false)},
-            { 179, new Zone(179, 104, "null", "Thanalan", "", MusicSet.Get(0), false, false, false, false, false)},
-            { 180, new Zone(180, 205, "wil0Market01", "Market Wards", ClassName[7], MusicSet.Get(0), false, false, false, false, false)},
-            { 181, new Zone(181, 104, null, "Merchants Ward", "", MusicSet.Get(0), false, false, false, false, false)},
-            { 182, new Zone(182, 104, null, "Central Thanalan", "", MusicSet.Get(0), false, false, false, false, false)},
-
-            { 184, new Zone(184, 107, "wil0Battle01", "Ul'dah", ClassName[8], MusicSet.Get(0), false, false, false, false, false)},
-            { 185, new Zone(185, 107, "wil0Battle01", "Ul'dah", ClassName[8], MusicSet.Get(0), false, false, false, false, false)},
-            { 186, new Zone(186, 104, "wil0Battle02", "Ul'dah", ClassName[8], MusicSet.Get(0), false, false, false, false, false)},
-            { 187, new Zone(187, 104, "wil0Battle03", "Ul'dah", ClassName[8], MusicSet.Get(0), false, false, false, false, false)},
-            { 188, new Zone(188, 104, "wil0Battle04", "Ul'dah", ClassName[8], MusicSet.Get(0), false, false, false, false, false)},
-            { 190, new Zone(190, 105, "lak0Field01", "Mor Dhona", ClassName[9], MusicSet.Get(8), false, false, true, false, false)},
-            { 192, new Zone(192, 112, "ocn1Battle01", "Rhotano Sea", ClassName[10], MusicSet.Get(0), false, false, false, false, false)},
-            { 193, new Zone(193, 111, "ocn0Battle02", "Rhotano Sea", ClassName[12], MusicSet.Get(9), false, false, false, false, false)},
-            { 194, new Zone(194, 112, "ocn1Battle03", "Rhotano Sea", ClassName[10], MusicSet.Get(0), false, false, false, false, false)},
-            { 195, new Zone(195, 112, "ocn1Battle04", "Rhotano Sea", ClassName[10], MusicSet.Get(0), false, false, false, false, false)},
-
-            { 196, new Zone(196, 112, "ocn1Battle05", "Rhotano Sea", ClassName[10], MusicSet.Get(0), false, false, false, false, false)},
-            { 198, new Zone(198, 112, "ocn1Battle06", "Rhotano Sea", ClassName[10], MusicSet.Get(0), false, false, false, false, false)},
-            { 200, new Zone(200, 805, "sea1Cruise01", "Strait of Merlthor", ClassName[13], MusicSet.Get(10), false, false, false, false, false)},
-            { 201, new Zone(201, 208, "prv0Cottage00", "-", ClassName[14], MusicSet.Get(0), false, false, false, false, false)},
-            { 204, new Zone(204, 101, "sea0Field02a", "Western La Noscea", "", MusicSet.Get(1), false, false, false, false, false)},
-            { 205, new Zone(205, 101, "sea0Field03a", "Eastern La Noscea", "", MusicSet.Get(1), false, false, false, false, false)},
-            { 206, new Zone(206, 103, "fst0Town01a", "Gridania", ClassName[3], MusicSet.Get(16), false, false, false, false, false)},
-            { 207, new Zone(207, 103, "fst0Field03a", "North Shroud", ClassName[3], MusicSet.Get(4), false, false, false, false, false)},
-            { 208, new Zone(208, 103, "fst0Field05a", "South Shroud", ClassName[3], MusicSet.Get(4), false, false, false, false, false)},
-            { 209, new Zone(209, 104, "wil0Town01a", "Ul'dah", ClassName[5], MusicSet.Get(11), false, false, false, false, false)},
-
-            { 210, new Zone(210, 104, null, "Eastern Thanalan", "", MusicSet.Get(7), false, false, false, false, false)},
-            { 211, new Zone(211, 104, null, "Western Thanalan", "", MusicSet.Get(7), false, false, false, false, false)},
-            { 230, new Zone(230, 101, "sea0Town01a", "Limsa Lominsa", ClassName[0], MusicSet.Get(2), false, false, false, false, false)},
-            { 231, new Zone(231, 102, "roc0Dungeon01", "Dzemael Darkhold", ClassName[2], MusicSet.Get(0), false, false, false, false, false)},
-            { 232, new Zone(232, 202, "sea0Office01", "Maelstrom Command", ClassName[15], MusicSet.Get(13), false, false, false, false, false)},
-            { 233, new Zone(233, 205, "wil0Office01", "Hall of Flames", ClassName[16], MusicSet.Get(14), false, false, false, false, false)},
-            { 234, new Zone(234, 204, "fst0Office01", "Adders' Nest", ClassName[17], MusicSet.Get(12), false, false, false, false, false)},
-            { 235, new Zone(235, 101, null, "Shposhae", "", MusicSet.Get(0), false, false, false, false, false)},
-            { 236, new Zone(236, 101, "sea1Field01", "Locke's Lie", ClassName[18], MusicSet.Get(0), false, false, false, false, false)},
-            { 237, new Zone(237, 101, null, "Turtleback Island", "", MusicSet.Get(0), false, false, false, false, false)},
-
-            { 238, new Zone(238, 103, "fst0Field04", "Thornmarch", "", MusicSet.Get(0), false, false, false, false, false)},
-            { 239, new Zone(239, 102, "roc0Field02a", "The Howling Eye", ClassName[2], MusicSet.Get(0), false, false, false, false, false)},
-            { 240, new Zone(240, 104, "wil0Field05a", "The Bowl of Embers", "", MusicSet.Get(0), false, false, false, false, false)},
-            { 244, new Zone(244, 209, "prv0Inn01", "Inn Room", ClassName[19], MusicSet.Get(15), false, true, false, false, false)},
-            { 245, new Zone(245, 102, "roc0Dungeon04", "The Aurum Vale", ClassName[2], MusicSet.Get(0), false, false, false, false, false)},
-            { 246, new Zone(246, 104, null, "Cutter's Cry", "", MusicSet.Get(0), false, false, false, false, false)},
-            { 247, new Zone(247, 103, null, "North Shroud", "", MusicSet.Get(0), false, false, false, false, false)},
-            { 248, new Zone(248, 101, null, "Western La Noscea", "", MusicSet.Get(0), false, false, false, false, false)},
-            { 249, new Zone(249, 104, null, "Eastern Thanalan", "", MusicSet.Get(0), false, false, false, false, false)},
-            { 250, new Zone(250, 102, "roc0Field02a", "The Howling Eye", ClassName[2], MusicSet.Get(0), false, false, false, false, false)},
-
-            { 251, new Zone(251, 105, null, "Transmission Tower", "", MusicSet.Get(0), false, false, false, false, false)},
-            { 252, new Zone(252, 102, "roc0Dungeon04", "The Aurum Vale", ClassName[2], MusicSet.Get(0), false, false, false, false, false)},
-            { 253, new Zone(253, 102, "roc0Dungeon04", "The Aurum Vale", ClassName[2], MusicSet.Get(0), false, false, false, false, false)},
-            { 254, new Zone(254, 104, null, "Cutter's Cry", "", MusicSet.Get(0), false, false, false, false, false)},
-            { 255, new Zone(255, 104, null, "Cutter's Cry", "", MusicSet.Get(0), false, false, false, false, false)},
-            { 256, new Zone(256, 102, "roc0Field02a", "The Howling Eye", ClassName[2], MusicSet.Get(0), false, false, false, false, false)},
-            { 257, new Zone(257, 109, "roc1Field01", "Rivenroad", ClassName[20], MusicSet.Get(0), false, false, false, false, false)},
-            { 258, new Zone(258, 103, null, "North Shroud", "", MusicSet.Get(0), false, false, false, false, false)},
-            { 259, new Zone(259, 103, null, "North Shroud", "", MusicSet.Get(0), false, false, false, false, false)},
-            { 260, new Zone(260, 101, null, "Western La Noscea", "", MusicSet.Get(0), false, false, false, false, false)},
-
-            { 261, new Zone(261, 101, null, "Western La Noscea", "", MusicSet.Get(0), false, false, false, false, false)},
-            { 262, new Zone(262, 104, null, "Eastern Thanalan", "", MusicSet.Get(0), false, false, false, false, false)},
-            { 263, new Zone(263, 104, null, "Eastern Thanalan", "", MusicSet.Get(0), false, false, false, false, false)},
-            { 264, new Zone(264, 105, "lak0Field01", "Transmission Tower", "", MusicSet.Get(0), false, false, true, false, false)},
-            { 265, new Zone(265, 104, null, "The Bowl of Embers", "", MusicSet.Get(0), false, false, false, false, false)},
-            { 266, new Zone(266, 105, "lak0Field01a", "Mor Dhona", ClassName[9], MusicSet.Get(8), false, false, false, false, false)},
-            { 267, new Zone(267, 109, "roc1Field02", "Rivenroad", ClassName[20], MusicSet.Get(0), false, false, false, false, false)},
-            { 268, new Zone(268, 109, "roc1Field03", "Rivenroad", ClassName[20], MusicSet.Get(0), false, false, false, false, false)},
-            { 269, new Zone(269, 101, null, "Locke's Lie", "", MusicSet.Get(0), false, false, false, false, false)},
-            { 270, new Zone(270, 101, null, "Turtleback Island", "", MusicSet.Get(0), false, false, false, false, false)},
+            new Zone(101, 128, locationNameId: 0, classNameId: 0, musicSetId: 1, mapName: "sea0Field01"),
+            new Zone(101, 129, locationNameId: 1, classNameId: 0, musicSetId: 1, mapName: "sea0Field02"),
+            new Zone(101, 130, locationNameId: 2, classNameId: 0, musicSetId: 1, mapName: "sea0Field03"),
+            new Zone(101, 131, locationNameId: 3, classNameId: 0, musicSetId: 0, mapName: "sea0Dungeon01"),
+            new Zone(101, 132, locationNameId: 4, classNameId: 0, musicSetId: 0, mapName: "sea0Dungeon03"),
+            new Zone(101, 133, locationNameId: 5, classNameId: 0, musicSetId: 2, mapName: "sea0Town01"),
+            new Zone(101, 137, locationNameId: 6, classNameId: 0, musicSetId: 0, mapName: "sea0Dungeon06"),
+            //new Zone(101, 138, locationNameId: 7, musicSetId: 1),
+            //new Zone(101, 140, locationNameId: 8, musicSetId: 0),
+            new Zone(101, 141, locationNameId: 0, classNameId: 0, musicSetId: 1, mapName: "sea0Field01a"),
+            new Zone(101, 135, locationNameId: 9, classNameId: 0, musicSetId: 1, mapName: "sea0Field04"),
+            //new Zone(101, 204, locationNameId: 1, musicSetId: 1, mapName: "sea0Field02a"),
+            //new Zone(101, 205, locationNameId: 2, musicSetId: 1, mapName: "sea0Field03a"),
+            new Zone(101, 230, locationNameId: 5, classNameId: 0, musicSetId: 2, mapName: "sea0Town01a"),
+            //new Zone(101, 235, locationNameId: 10, musicSetId: 0),
+            new Zone(101, 236, locationNameId: 11, classNameId: 18, musicSetId: 0, mapName: "sea1Field01"),
+            //new Zone(101, 237, locationNameId: 12, musicSetId: 0),
+            //new Zone(101, 248, locationNameId: 1, musicSetId: 0),
+            //new Zone(101, 260, locationNameId: 1, musicSetId: 0),
+            //new Zone(101, 261, locationNameId: 1, musicSetId: 0),
+            //new Zone(101, 269, locationNameId: 11, musicSetId: 0),
+            //new Zone(101, 270, locationNameId: 12, musicSetId: 0),
+            new Zone(102, 143, locationNameId: 13, classNameId: 2, musicSetId: 3, mapName: "roc0Field01"),
+            new Zone(102, 144, locationNameId: 14, classNameId: 2, musicSetId: 3, mapName: "roc0Field02"),
+            new Zone(102, 145, locationNameId: 15, classNameId: 2, musicSetId: 3, mapName: "roc0Field03"),
+            //new Zone(102, 146, locationNameId: 16, musicSetId: 3),
+            new Zone(102, 147, locationNameId: 17, classNameId: 2, musicSetId: 3, mapName: "roc0Field04"),
+            new Zone(102, 148, locationNameId: 18, classNameId: 2, musicSetId: 3, mapName: "roc0Field05"),
+            new Zone(102, 231, locationNameId: 19, classNameId: 2, musicSetId: 0, mapName: "roc0Dungeon01"),
+            new Zone(102, 239, locationNameId: 20, classNameId: 2, musicSetId: 0, mapName: "roc0Field02a"),
+            new Zone(102, 245, locationNameId: 21, classNameId: 2, musicSetId: 0, mapName: "roc0Dungeon04"),
+            new Zone(102, 250, locationNameId: 20, classNameId: 2, musicSetId: 0, mapName: "roc0Field02a"),
+            new Zone(102, 252, locationNameId: 21, classNameId: 2, musicSetId: 0, mapName: "roc0Dungeon04"),
+            new Zone(102, 253, locationNameId: 21, classNameId: 2, musicSetId: 0, mapName: "roc0Dungeon04"),
+            new Zone(102, 256, locationNameId: 20, classNameId: 2, musicSetId: 0, mapName: "roc0Field02a"),
+            new Zone(103, 150, locationNameId: 22, classNameId: 3, musicSetId: 4, mapName: "fst0Field01"),
+            new Zone(103, 151, locationNameId: 23, classNameId: 3, musicSetId: 4, mapName: "fst0Field02"),
+            new Zone(103, 152, locationNameId: 24, classNameId: 3, musicSetId: 4, mapName: "fst0Field03"),
+            new Zone(103, 153, locationNameId: 25, classNameId: 3, musicSetId: 4, mapName: "fst0Field04"),
+            new Zone(103, 154, locationNameId: 26, classNameId: 3, musicSetId: 4, mapName: "fst0Field05"),
+            new Zone(103, 155, locationNameId: 27, classNameId: 3, musicSetId: 5, mapName: "fst0Town01"),
+            //new Zone(103, 156, locationNameId: 28, musicSetId: 0),
+            new Zone(103, 157, locationNameId: 29, classNameId: 3, musicSetId: 0, mapName: "fst0Dungeon01"),
+            new Zone(103, 158, locationNameId: 30, classNameId: 3, musicSetId: 0, mapName: "fst0Dungeon02"),
+            new Zone(103, 159, locationNameId: 31, classNameId: 3, musicSetId: 0, mapName: "fst0Dungeon03"),
+            //new Zone(103, 161, locationNameId: 32, musicSetId: 0),
+            new Zone(103, 162, locationNameId: 22, classNameId: 3, musicSetId: 4, mapName: "fst0Field01a"),
+            new Zone(103, 206, locationNameId: 27, classNameId: 3, musicSetId: 16, mapName: "fst0Town01a"),
+            new Zone(103, 207, locationNameId: 24, classNameId: 3, musicSetId: 4, mapName: "fst0Field03a"),
+            new Zone(103, 208, locationNameId: 26, classNameId: 3, musicSetId: 4, mapName: "fst0Field05a"),
+            //new Zone(103, 238, locationNameId: 33, musicSetId: 0, mapName: "fst0Field04"),
+            //new Zone(103, 247, locationNameId: 24, musicSetId: 0),
+            //new Zone(103, 258, locationNameId: 24, musicSetId: 0),
+            //new Zone(103, 259, locationNameId: 24, musicSetId: 0),
+            new Zone(104, 170, locationNameId: 34, classNameId: 6, musicSetId: 7, mapName: "wil0Field01"),
+            new Zone(104, 171, locationNameId: 35, classNameId: 6, musicSetId: 7, mapName: "wil0Field02"),
+            new Zone(104, 172, locationNameId: 36, classNameId: 6, musicSetId: 7, mapName: "wil0Field03"),
+            new Zone(104, 173, locationNameId: 37, classNameId: 6, musicSetId: 7, mapName: "wil0Field04"),
+            new Zone(104, 174, locationNameId: 38, classNameId: 6, musicSetId: 7, mapName: "wil0Field05"),
+            new Zone(104, 175, locationNameId: 39, classNameId: 6, musicSetId: 11, mapName: "wil0Town01"),
+            new Zone(104, 176, locationNameId: 40, classNameId: 6, musicSetId: 0, mapName: "wil0Dungeon02"),
+            new Zone(104, 178, locationNameId: 41, classNameId: 6, musicSetId: 0, mapName: "wil0Dungeon04"),
+            //new Zone(104, 179, locationNameId: 42, musicSetId: 0),
+            //new Zone(104, 181, locationNameId: 43, musicSetId: 0),
+            //new Zone(104, 182, locationNameId: 34, musicSetId: 0),
+            new Zone(104, 186, locationNameId: 39, classNameId: 8, musicSetId: 0, mapName: "wil0Battle02"),
+            new Zone(104, 187, locationNameId: 39, classNameId: 8, musicSetId: 0, mapName: "wil0Battle03"),
+            new Zone(104, 188, locationNameId: 39, classNameId: 8, musicSetId: 0, mapName: "wil0Battle04"),
+            new Zone(104, 209, locationNameId: 39, classNameId: 5, musicSetId: 11, mapName: "wil0Town01a"),
+            //new Zone(104, 210, locationNameId: 35, musicSetId: 7),
+            //new Zone(104, 211, locationNameId: 36, musicSetId: 7),
+            //new Zone(104, 240, locationNameId: 44, musicSetId: 0, mapName: "wil0Field05a"),
+            //new Zone(104, 246, locationNameId: 45, musicSetId: 0),
+            //new Zone(104, 249, locationNameId: 35, musicSetId: 0),
+            //new Zone(104, 254, locationNameId: 45, musicSetId: 0),
+            //new Zone(104, 255, locationNameId: 45, musicSetId: 0),
+            //new Zone(104, 262, locationNameId: 35, musicSetId: 0),
+            //new Zone(104, 263, locationNameId: 35, musicSetId: 0),
+            //new Zone(104, 265, locationNameId: 44, musicSetId: 0),
+            new Zone(105, 190, locationNameId: 46, classNameId: 9, musicSetId: 8, mapName: "lak0Field01"),
+            //new Zone(105, 251, locationNameId: 47, musicSetId: 0),
+            //new Zone(105, 264, locationNameId: 47, musicSetId: 0, mapName: "lak0Field01"),
+            new Zone(105, 266, locationNameId: 46, classNameId: 9, musicSetId: 8, mapName: "lak0Field01a"),
+            new Zone(106, 164, locationNameId: 22, classNameId: 5, musicSetId: 6, mapName: "fst0Battle01"),
+            new Zone(106, 165, locationNameId: 22, classNameId: 5, musicSetId: 6, mapName: "fst0Battle02"),
+            new Zone(106, 166, locationNameId: 22, classNameId: 5, musicSetId: 6, mapName: "fst0Battle03"),
+            new Zone(106, 167, locationNameId: 22, classNameId: 5, musicSetId: 6, mapName: "fst0Battle04"),
+            new Zone(106, 168, locationNameId: 22, classNameId: 5, musicSetId: 6, mapName: "fst0Battle05"),
+            new Zone(107, 184, locationNameId: 39, classNameId: 8, musicSetId: 0, mapName: "wil0Battle01"),
+            new Zone(107, 185, locationNameId: 39, classNameId: 8, musicSetId: 0, mapName: "wil0Battle01"),
+            new Zone(109, 257, locationNameId: 48, classNameId: 20, musicSetId: 0, mapName: "roc1Field01"),
+            new Zone(109, 267, locationNameId: 48, classNameId: 20, musicSetId: 0, mapName: "roc1Field02"),
+            new Zone(109, 268, locationNameId: 48, classNameId: 20, musicSetId: 0, mapName: "roc1Field03"),
+            new Zone(111, 193, locationNameId: 49, classNameId: 12, musicSetId: 9, mapName: "ocn0Battle02"),
+            new Zone(112, 139, locationNameId: 50, classNameId: 0, musicSetId: 0, mapName: "sea0Field01a"),
+            new Zone(112, 192, locationNameId: 49, classNameId: 10, musicSetId: 0, mapName: "ocn1Battle01"),
+            new Zone(112, 194, locationNameId: 49, classNameId: 10, musicSetId: 0, mapName: "ocn1Battle03"),
+            new Zone(112, 195, locationNameId: 49, classNameId: 10, musicSetId: 0, mapName: "ocn1Battle04"),
+            new Zone(112, 196, locationNameId: 49, classNameId: 10, musicSetId: 0, mapName: "ocn1Battle05"),
+            new Zone(112, 198, locationNameId: 49, classNameId: 10, musicSetId: 0, mapName: "ocn1Battle06"),
+            new Zone(202, 134, locationNameId: 51, classNameId: 1, musicSetId: 0, mapName: "sea0Market01"),
+            new Zone(202, 232, locationNameId: 52, classNameId: 15, musicSetId: 13, mapName: "sea0Office01"),
+            new Zone(204, 234, locationNameId: 53, classNameId: 17, musicSetId: 12, mapName: "fst0Office01"),
+            new Zone(204, 160, locationNameId: 51, classNameId: 4, musicSetId: 0, mapName: "fst0Market01"),
+            new Zone(205, 233, locationNameId: 54, classNameId: 16, musicSetId: 14, mapName: "wil0Office01"),
+            new Zone(205, 180, locationNameId: 51, classNameId: 7, musicSetId: 0, mapName: "wil0Market01"),
+            new Zone(207, 177, locationNameId: 57, classNameId: 11, musicSetId: 1, mapName: "_jail"),
+            new Zone(208, 201, locationNameId: 57, classNameId: 14, musicSetId: 0, mapName: "prv0Cottage00"),
+            new Zone(209, 244, locationNameId: 55, classNameId: 19, musicSetId: 15, mapName: "prv0Inn01"),
+            new Zone(805, 200, locationNameId: 56, classNameId: 13, musicSetId: 10, mapName: "sea1Cruise01"),
         };
-
+        public static string[] LocationName { get; } = new string[]
+        {
+            "Lower La Noscea",      //0
+            "Western La Noscea",    //1
+            "Eastern La Noscea",    //2
+            "Mistbeard Cove",       //3
+            "Cassiopeia Hollow",    //4
+            "Limsa Lominsa",        //5
+            "U'Ghamaro Mines",      //6
+            "La Noscea",            //7
+            "Sailors Ward",         //8
+            "Upper La Noscea",      //9
+            "Shposhae",             //10
+            "Locke's Lie",          //11
+            "Turtleback Island",    //12
+            "Coerthas Central Highlands",   //13
+            "Coerthas Eastern Highlands",   //14
+            "Coerthas Eastern Lowlands",    //15
+            "Coerthas",                     //16
+            "Coerthas Central Lowlands",    //17
+            "Coerthas Western Highlands",   //18 
+            "Dzemael Darkhold",             //19
+            "The Howling Eye",              //20
+            "The Aurum Vale",               //21
+            "Central Shroud",               //22
+            "East Shroud",                  //23
+            "North Shroud",                 //24
+            "West Shroud",                  //25
+            "South Shroud",                 //26
+            "Gridania",                     //27
+            "The Black Shroud",             //28
+            "The Mun-Tuy Cellars",          //29
+            "The Tam-Tara Deepcroft",       //30
+            "The Thousand Maws of Toto-Rak",//31
+            "Peasants Ward",                //32
+            "Thornmarch",                   //33
+            "Central Thanalan",             //34
+            "Eastern Thanalan",             //35
+            "Western Thanalan",             //36
+            "Northern Thanalan",            //37
+            "Southern Thanalan",            //38
+            "Ul'dah",                       //39
+            "Nanawa Mines",                 //40
+            "Copperbell Mines",             //41
+            "Thanalan",                     //42
+            "Merchants Ward",               //43
+            "The Bowl of Embers",           //44
+            "Cutter's Cry",                 //45
+            "Mor Dhona",                    //46
+            "Transmission Tower",           //47
+            "Rivenroad",                    //48
+            "Rhotano Sea",                  //49
+            "The Cieldalaes",               //50
+            "Market Wards",                 //51
+            "Maelstrom Command",            //52
+            "Adders' Nest",                 //53
+            "Hall of Flames",               //54
+            "Inn Room",                     //55
+            "Strait of Merlthor",           //56
+            "-",                            //57
+        };
         public static string[] ClassName { get; } = new string[]
         {
-            "ZoneMasterSeaS0",       //0
-            "ZoneMasterMarketSeaS0", //1
-            "ZoneMasterRocR0",       //2
-            "ZoneMasterFstF0",       //3
-            "ZoneMasterMarketFstF0", //4
-            "ZoneMasterBattleFstF0", //5
-            "ZoneMasterWilW0",       //6
-            "ZoneMasterMarketWilW0", //7
-            "ZoneMasterBattleWilW0", //8
-            "ZoneMasterLakL0",       //9
-            "ZoneMasterBattleOcnO1", //10
-            "ZoneMasterJail",        //11
-            "ZoneMasterBattleOcnO0", //12
-            "ZoneMasterCruiseSeaS1", //13
-            "ZoneMasterCottagePrv00",//14
-            "ZoneMasterOfficeSeaS0", //15
-            "ZoneMasterOfficeWilW0", //16
-            "ZoneMasterOfficeFstF0", //17
-            "ZoneMasterSeaS1",       //18
-            "ZoneMasterPrvI0",       //19
-            "ZoneMasterRocR1"        //20
+            "SeaS0",       //0
+            "MarketSeaS0", //1
+            "RocR0",       //2
+            "FstF0",       //3
+            "MarketFstF0", //4
+            "BattleFstF0", //5
+            "WilW0",       //6
+            "MarketWilW0", //7
+            "BattleWilW0", //8
+            "LakL0",       //9
+            "BattleOcnO1", //10
+            "Jail",        //11
+            "BattleOcnO0", //12
+            "CruiseSeaS1", //13
+            "CottagePrv00",//14
+            "OfficeSeaS0", //15
+            "OfficeWilW0", //16
+            "OfficeFstF0", //17
+            "SeaS1",       //18
+            "PrvI0",       //19
+            "RocR1"        //20
         };
-
-        public Zone GetZone(uint id) => Zones[id];
-
+        public Zone GetZone(uint id) => Zones.Find(x=>x.Id==id);
         public static List<Position> EntryPoints { get; } = new List<Position>
         {
             new Position(128, -8.48f, 45.36f, 139.5f, 2.02f, 15),
@@ -245,21 +289,27 @@ namespace Launcher
             new Position(133, -8.062f, 45.429f, 139.364f, 2.955f, 15),
             new Position(150, 333.271f, 5.889f, -943.275f, 0.794f, 15),
             new Position(155, 58.92f, 4f, -1219.07f, 0.52f, 15),
-            new Position(166, 356.09f, 3.74f, -701.62f, -1.4f, 15),
-            new Position(166, 356.09f, 3.74f, -701.62f, -1.4f, 16),
+            new Position(166, 356.09f, 3.74f, -701.62f, -1.4f, 15),//
+            new Position(166, 356.09f, 3.74f, -701.62f, -1.4f, 16),//
             new Position(170, -27.015f, 181.798f,-79.72f, 2.513f, 15),
             new Position(175, -110.157f, 202f, 171.345f, 0f, 15),
-            new Position(184, 5.36433f, 196f, 133.656f, -2.84938f, 15),
+            new Position(184, 5.36433f, 196f, 133.656f, -2.84938f, 15),//
             new Position(184, -24.34f, 192f, 34.22f, 0.78f, 16),
             new Position(184, -24.34f, 192f, 34.22f, 0.78f, 15),
             new Position(184, -22f, 196f, 87f, 1.8f, 15),
-            new Position(193, 0.016f, 10.35f, -36.91f, 0.025f, 15),
+            new Position(193, 0.016f, 10.35f, -36.91f, 0.025f, 15),//
             new Position(193, -5f, 16.35f, 6f, 0.5f, 16),
             new Position(230, -838.1f, 6f, 231.94f, 1.1f, 15),
             new Position(244, 0.048f, 0f, -5.737f, 0f, 15),
             new Position(244, -160.048f, 0f, -165.737f, 0f, 15),
-            new Position(244, 160.048f, 0f, 154.263f, 0f, 15)
-        };      
+            new Position(244, 160.048f, 0f, 154.263f, 0f, 15),
+            new Position(190, 160.048f, 0f, 154.263f, 0f, 15),
+            new Position(240, 160.048f, 0f, 154.263f, 0f, 15),
+            new Position(206, -124.852f, 15.920f, -1328.476f, 0f, 15),
+            new Position(177, 0f, 0f, 0f, 0f, 15),
+
+        };
     }
 }
+
 

@@ -6,92 +6,53 @@ using System.Linq;
 namespace Launcher
 {
     [Serializable]
-    public class World
+    public class World : Actor
     {
-        #region Static members
-        public static int SIZE = 0x50;//0x50; //account data chunk size
-        public static byte OPCODE = 0x15;
-        #endregion
-
-        #region Properties
-        public int Id { get; set; }
-        public string Name { get; set; }
+        #region Properties   
+        public ushort Port { get; set; }
+        public int ServerId { get; set; }
         public int Population { get; set; }
-        public string Address { get; set; }
-        public ushort Port {get;set;}
-        public uint CharacterId { get; set; }
-        public ZoneList ZoneList { get; set; }
-        #endregion            
+        public string Name { get; set; }        
+        public string Address { get; set; }           
+        public List<Zone> Zones { get; set; }
+        private Actor WorldMaster { get; set; }       
+        public PlayerCharacter PlayerCharacter { get; set; }
+        #endregion
+        public World() {}
 
-        private enum Opcode
+        public void Initialize(Socket handler)
         {
-            SetDalamud = 0x10,
-            SetMusic = 0x0c,
-            SetWeather = 0x0d,
-            SetMap = 0x05,
-            BeginSpawning = 0x017b //this an actor opcode. don't want to turn World into an actor just bc of this...
-        }     
+            PlayerCharacter playerCharacter = UserFactory.Instance.User.Character;
 
-        public void SpawnDebugActor(Socket sender)
-        {
-            Actor debug = new Actor
-            {
-                //Name = "debug",
-                Id = 0x5ff80002, //id from hardcoded packet (just bc it works)     
-                TargetId = CharacterId
-            };
+            Zones = ActorRepository.Instance.Zones;
+            Debug debug = new Debug();
 
-            debug.LuaParameters = new LuaParameters
-            {
-                ActorName = "debug",
-                ClassName = "Debug"
-            };
+            WorldMaster = new Actor { Id = 0x5ff80001, TargetId = playerCharacter.Id };
+            WorldMaster.LuaParameters = new LuaParameters { ActorName = "worldMaster", ClassName = "WorldMaster" };
+            WorldMaster.LuaParameters.Add("/World/WorldMaster_event");
+            WorldMaster.LuaParameters.Add(false);
+            WorldMaster.LuaParameters.Add(false);
+            WorldMaster.LuaParameters.Add(false);
+            WorldMaster.LuaParameters.Add(false);
+            WorldMaster.LuaParameters.Add(false);
+            WorldMaster.LuaParameters.Add(null);
+            WorldMaster.Speeds = new uint[] { 0, 0, 0, 0 };
+            WorldMaster.Position = new Position();
 
-            debug.LuaParameters.Add("/System/Debug.prog");
-            debug.LuaParameters.Add(false);
-            debug.LuaParameters.Add(false);
-            debug.LuaParameters.Add(false);
-            debug.LuaParameters.Add(false);
-            debug.LuaParameters.Add(true);
-            debug.LuaParameters.Add((uint)0xc51f); //???
-            debug.LuaParameters.Add(true);
-            debug.LuaParameters.Add(true);
+            uint currentZone = playerCharacter.Position.ZoneId;
+            Zone zone = Zones.Find(x => x.Id == currentZone);            
 
-            debug.Speeds = new uint[] { 0, 0, 0, 0 };
-
-            debug.Position = new Position();
-
-            debug.Spawn(sender, 0x01);
-        }
-
-        public void FinishWorldInit(Socket sender)
-        {
-            Actor worldMaster = new Actor
-            {
-                //Name = "worldMaster",
-                Id = 0x5ff80001, //id from hardcoded packet (just bc it works)     
-                TargetId = CharacterId
-            };
-
-            worldMaster.LuaParameters = new LuaParameters
-            {
-                ActorName = "worldMaster",
-                ClassName = "WorldMaster"
-            };
-
-            worldMaster.LuaParameters.Add("/World/WorldMaster_event");
-            worldMaster.LuaParameters.Add(false);
-            worldMaster.LuaParameters.Add(false);
-            worldMaster.LuaParameters.Add(false);
-            worldMaster.LuaParameters.Add(false);
-            worldMaster.LuaParameters.Add(false);
-            worldMaster.LuaParameters.Add(null);            
-
-            worldMaster.Speeds = new uint[] { 0, 0, 0, 0 };
-
-            worldMaster.Position = new Position();
-
-            worldMaster.Spawn(sender, 0x01);
+            SetIsZoning(handler);
+            SetDalamudPhase(handler);
+            SetMusic(handler, zone.GetCurrentBGM());
+            SetWeather(handler, Weather.Clear);
+            SetMap(handler, currentZone);
+            WorldMaster.Spawn(handler, 0x01);
+            debug.Spawn(handler);          
+            zone.Spawn(handler);//spawn zone      
+            playerCharacter.Inventory = new Inventory();
+            playerCharacter.Spawn(handler);//spawn player character
+            zone.SpawnActors(handler);
         }
 
         public void SetDalamudPhase(Socket sender)
@@ -100,11 +61,9 @@ namespace Launcher
             data[0] = 0xff; //test other values and make enum later
 
             SendPacket(sender, Opcode.SetDalamud, data);
-        }
+        }       
 
-        public void BeginWorldInit(Socket sender) => SendPacket(sender, Opcode.BeginSpawning, new byte[0x08]);
-
-        public void SetMusic(Socket sender, byte musicId)
+        public void SetMusic(Socket sender, uint musicId)
         {
             byte[] data = new byte[0x08];            
             data[0] = (byte)musicId; //these numbers will not vary, so no need for blockcopy
@@ -123,24 +82,30 @@ namespace Launcher
         public void SetMap(Socket sender, uint zoneId)
         {
             byte[] data = new byte[0x10];
-            Buffer.BlockCopy(BitConverter.GetBytes(ZoneList.GetZone(zoneId).RegionId), 0, data, 0, sizeof(uint));
+            Buffer.BlockCopy(BitConverter.GetBytes(Zones.Find(x => x.Id == zoneId).RegionId), 0, data, 0, sizeof(uint));
             Buffer.BlockCopy(BitConverter.GetBytes(zoneId), 0, data, 0x04, sizeof(uint));            
             data[0x08] = 0x28;
             SendPacket(sender, Opcode.SetMap, data);           
-        }
+        }       
 
-        private void SendPacket(Socket sender, Opcode opcode, byte[] data)
+        public void TeleportPlayer(Socket handler, uint zoneId)
         {
-            GamePacket gamePacket = new GamePacket
-            {
-                Opcode = (ushort)opcode,
-                Data = data
-            };
+            Debug debug = new Debug();
+            Zone zone = Zones.Find(x => x.Id == zoneId);
+            UserFactory.Instance.User.Character.Position = ZoneList.EntryPoints.Find(x => x.ZoneId == zoneId);
 
-            Packet packet = new Packet(new SubPacket(gamePacket) { SourceId = CharacterId, TargetId = CharacterId });
-            sender.Send(packet.ToBytes());
+            SetIsZoning(handler);
+            SetDalamudPhase(handler);
+            SetMusic(handler, zone.GetCurrentBGM());
+            SetWeather(handler, Weather.Clear);
+            SetMap(handler, zoneId);
+            WorldMaster.Spawn(handler, 0x01);
+            debug.Spawn(handler);
+            zone.Spawn(handler);//spawn zone             
+            UserFactory.Instance.User.Character.Spawn(handler);//spawn player character
         }
-        
+
+
     }
 
     [Serializable]

@@ -2,38 +2,43 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Sockets;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Launcher
 {
-    public sealed class UserRepository
+    public sealed class UserFactory
     {
-        private static UserRepository _instance = null;
+        private static UserFactory _instance = null;
         private static readonly object _padlock = new object();
         private static List<User> _userList = new List<User>();
         private static readonly Log _log = Log.Instance;
         private static Preferences _preferences = Preferences.Instance;
 
-        private const string USERS_FILE = @"user_data.dat";        
+        private const string USERS_FILE = @"user_data.dat"; 
+        
+        public User User { get; private set; }
 
-        public static UserRepository Instance
+        public static UserFactory Instance
         {
-            get
-            {
-                lock (_padlock)
-                {
+            get {
+                lock (_padlock) {
                     if (_instance == null)                    
-                        _instance = new UserRepository();                    
+                        _instance = new UserFactory();                    
 
                     return _instance;
                 }
-
             }
         }
 
-        private UserRepository() => LoadUsers();
+        private UserFactory() => LoadUsers();
+
+        public void LoadUser(string uname, string pwd)
+        {
+            User = _userList.Find(x => x.Uname == uname && x.Pwd == pwd);
+        }
 
         #region User CRUD
         public static void AddUser(int id, string name, string pwd)
@@ -59,13 +64,11 @@ namespace Launcher
             throw new NotImplementedException();
         }
 
-        public static void UpdateUser(User user)
+        public void UpdateUser()
         {
-            _userList[_userList.FindIndex(x => x.Id == user.Id)] = user;
+            _userList[_userList.FindIndex(x => x.Id == User.Id)] = User;
             WriteFile("");
-        }
-
-        public User GetUser(string uname, string pwd) => _userList.Find(x => x.Uname == uname && x.Pwd == pwd);       
+        }        
         #endregion
 
         public static void CreateRepositoryFile()
@@ -118,6 +121,19 @@ namespace Launcher
             {
                 CreateRepositoryFile();
             }         
+        }
+
+        public void SendUserCharacterList(Socket handler, Blowfish blowfish)
+        {
+            GamePacket characterList = new GamePacket
+            {
+                Opcode = 0x0d,
+                Data = User.GetCharacters(0) //only one account supported so far.          
+            };
+
+            Packet characterListPacket = new Packet(characterList);
+            handler.Send(characterListPacket.ToBytes(blowfish));
+            _log.Info("Character list sent.");
         }
     }
 }
