@@ -59,10 +59,10 @@ namespace Launcher
                             break;
 
                         case 0x03:
-                            ProcessCommand(sp);
+                            ProcessGamePacket(sp);
                             break;
 
-                        case 0x07:
+                        case 0x07: //delete actor request?
                              _log.Warning("[" + _world.Name + "] Received: 0x07");
                             
                             break;
@@ -88,24 +88,22 @@ namespace Launcher
         /// Processes the command for the gamepacket inside the current subpacket.
         /// </summary> 
         ///<param name="subpacket">The received subpacket.</param>
-        private void ProcessCommand(SubPacket subpacket)
+        private void ProcessGamePacket(SubPacket subpacket)
         {
             //_world.Sender = _connection.socket;
-            ushort command = (ushort)(subpacket.Data[0x03] << 8 | subpacket.Data[0x02]);           
+            ushort opcode = (ushort)(subpacket.Data[0x03] << 8 | subpacket.Data[0x02]);           
 
-            switch (command)
+            switch (opcode)
             {
-                case 0x01: //ping
+                case (ushort)ClientOpcode.Ping:
                     Pong(subpacket);
                     break;
 
-                case 0x02: //unknown                  
-                    Packet unknown = new Packet(subpacket);
-                    _connection.Send(unknown.ToBytes());
-                    _log.Warning("Received command 0x02");
+                case (ushort)ClientOpcode.Unknown0x02: //unknown                  
+                    SendPlayerCharacterId();
                     break;
 
-                case 0x03: //chat message received
+                case (ushort)ClientOpcode.ChatMessage: //chat message received
                     ProcessChatMessage(subpacket.Data);                    
                     break;
 
@@ -117,14 +115,14 @@ namespace Launcher
                     break;
 
                 case 0x01ce: //friend list request 
-                    _log.Warning("[" + _world.Name + "] Friend list request....");
+                    //_log.Warning("[" + _world.Name + "] Friend list request....");
                     break;
 
                 case 0x01cb: //black list request
-                    _log.Warning("[" + _world.Name + "] Black list request....");
+                    //_log.Warning("[" + _world.Name + "] Black list request....");
                     break;
 
-                case 0xca: 
+                case (ushort)ClientOpcode.PlayerPosition: 
                     UpdatePlayerPosition(subpacket.Data);
                     break;
 
@@ -136,12 +134,11 @@ namespace Launcher
                 case 0x133: //group created                    
                     break;
 
-                case 0x12d: //event start request
-                    _log.Warning("Received event request: 0x" + command.ToString("X"));                    
+                case (ushort)ClientOpcode.EventRequest:                                    
                     ProcessEventRequest(subpacket.Data);
                     break;
 
-                case 0x12f:       
+                case (ushort)ClientOpcode.DataRequest:       
                     uint targetId = (uint)(subpacket.Data[0x13] << 24 | subpacket.Data[0x12] << 16 | subpacket.Data[0x11] << 8 | subpacket.Data[0x10]);
                     string request = Encoding.ASCII.GetString(subpacket.Data).Substring(0x14, 0x20).Trim(new[] { '\0' });
                     uint sequence = (uint)(subpacket.Data[0x37] << 24 | subpacket.Data[0x36] << 16 | subpacket.Data[0x35] << 8 | subpacket.Data[0x34]);
@@ -253,16 +250,38 @@ namespace Launcher
                                //maybe verify if sequence number is the same? after the second packet, the remaining sequence numbers are the same.
                             }
 
-                            _connection.socket.Send(DataRequestResponseQueue.Dequeue().ToBytes());
+                            //_connection.socket.Send(DataRequestResponseQueue.Dequeue().ToBytes());
 
                             break;
                     }
                     break;
 
+                case (ushort)ClientOpcode.SelectTarget:
+                    TargetSelected(subpacket.Data);
+                    break;
+
+                case (ushort)ClientOpcode.LockOnTarget:
+                    _log.Warning("Target locked");
+                    break;
+
                 default:
-                    _log.Error("[" + _world.Name + "] Unknown command: 0x" + command.ToString("X"));                    
+                    _log.Error("[" + _world.Name + "] Unknown command: 0x" + opcode.ToString("X"));                    
                     break;
             }
+        }
+
+        private void SendPlayerCharacterId()
+        {
+            byte[] data = new byte[0x10];
+            Buffer.BlockCopy(BitConverter.GetBytes(UserFactory.Instance.User.Character.Id), 0, data, 0x08, 0x04);
+            _connection.Send(new Packet(new GamePacket { Opcode = (ushort)ServerOpcode.Unknown0x02, Data = data }).ToBytes());
+        }
+
+        private void TargetSelected(byte[] data)
+        {
+            uint targetId = (uint)(data[0x13] << 24 | data[0x12] << 16 | data[0x11] << 8 | data[0x10]);
+            uint unknown = (uint)(data[0x17] << 24 | data[0x16] << 16 | data[0x15] << 8 | data[0x014]);
+            UserFactory.Instance.User.Character.LockTargetActor(_connection.socket, targetId);
         }
 
         private void UpdatePlayerPosition(byte[] data)
@@ -304,18 +323,19 @@ namespace Launcher
             string eventType = Encoding.ASCII.GetString(data, 0x21, 14);
             ushort command = (ushort)(data[0x15] << 8 | data[0x14]);
 
+            _log.Warning("Received event request: 0x12d");
             _log.Warning("event: " + eventType + ", command: " + command.ToString("X2"));
 
             if (eventType.IndexOf("commandForced") >= 0)
             {
                 switch (command)
                 {
-                    case 0x5209: //battle stance
+                    case (ushort)Command.BattleStance:
                         playerCharacter.SetMainState(_connection.socket, MainState.Active, 0xbf);
                         playerCharacter.BattleActionResult(_connection.socket, command);
                         playerCharacter.EndClientOrderEvent(_connection.socket, eventType);
                         break;
-                    case 0x520a: //normal stance
+                    case (ushort)Command.NormalStance:
                         playerCharacter.SetMainState(_connection.socket, MainState.Passive, 0xbf);
                         playerCharacter.BattleActionResult(_connection.socket, command);
                         playerCharacter.EndClientOrderEvent(_connection.socket, eventType);
@@ -336,64 +356,23 @@ namespace Launcher
                         _log.Success("Player is now dismounted.");
                         break;
 
-                    case 0x5e26: //do emote
+                    case (ushort)Command.DoEmote:
                         _log.Warning("emote id:" + data[0x45].ToString("X2"));
                         playerCharacter.DoEmote(_connection.socket);
                         break;
                 }
             }
-
-            //GamePacket gp = new GamePacket
-            //{
-            //    Opcode = 0x134,
-            //    Data = new byte[]
-            //    {
-            //        0x02, 0xBF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-            //    }
-            //};
-
-            //Packet p = new Packet(new SubPacket(gp) { SourceId = _user.Character.Id, TargetId = _user.Character.Id });
-            //_connection.Send(p.ToBytes());
-
-
-            //data = new byte[]
-            //    {
-            //        0x41, 0x29, 0x9B, 0x02, 0x62, 0x00, 0x00, 0x7C, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            //        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            //        0x01, 0x00, 0x00, 0x00, 0x09, 0x52, 0x10, 0x08, 0x41, 0x29, 0x9B, 0x02, 0x00, 0x00, 0x00, 0x00,
-            //        0x01, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00
-            //    };
-
-            //Buffer.BlockCopy(BitConverter.GetBytes(_user.Character.Id), 0, data, 0, 4);
-
-            // gp = new GamePacket
-            //{
-            //    Opcode = 0x139,
-            //    Data = data
-            //};
-
-            // p = new Packet(new SubPacket(gp) { SourceId = _user.Character.Id, TargetId = _user.Character.Id });
-            //_connection.Send(p.ToBytes());
-
-            //data = new byte[]
-            //    {
-            //        0x41, 0x29, 0x9B, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x63, 0x6F, 0x6D, 0x6D, 0x61, 0x6E, 0x64,
-            //        0x46, 0x6F, 0x72, 0x63, 0x65, 0x64, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            //        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xF2, 0xD4, 0x09, 0x30, 0xA9, 0x09, 0x0A,
-            //    };
-            //Buffer.BlockCopy(BitConverter.GetBytes(_user.Character.Id), 0, data, 0, 4);
-
-            //gp = new GamePacket
-            //{
-            //    Opcode = 0x131,
-            //    Data = data
-            //};
-
-            // p = new Packet(new SubPacket(gp) { SourceId = _user.Character.Id, TargetId = _user.Character.Id });
-            //_connection.Send(p.ToBytes());
-
-
-
+            else if (eventType.IndexOf("commandContent") >= 0)
+            {
+                switch (command)
+                {
+                    case (ushort)Command.Teleport:
+                        TestPackets.Teleport(UserFactory.Instance.User.Character.Id, _connection.socket);
+                        _log.Success("Sent teleport sequence.");
+                        break;
+                   
+                }
+            }
         }
 
         /// <summary>
@@ -460,7 +439,7 @@ namespace Launcher
                         break;
 
                     case @"\spawngate":
-                        TestPackets.SpawnAetheryte(UserFactory.Instance.User.Character.Id, UserFactory.Instance.User.Character.Position, _connection.socket);
+                        //TestPackets.SpawnAetheryte(UserFactory.Instance.User.Character.Id, UserFactory.Instance.User.Character.Position, _connection.socket);
                         break;
 
                     case @"\setemote":
@@ -469,7 +448,7 @@ namespace Launcher
                         Buffer.BlockCopy(BitConverter.GetBytes(Convert.ToByte(split[2])), 0, emote, Convert.ToByte(value), 1);       
                         _connection.Send(new Packet(new GamePacket
                         {
-                            Opcode = (ushort)Opcode.DoEmote,
+                            Opcode = (ushort)ServerOpcode.DoEmote,
                             Data = emote
                         }).ToBytes());
 
@@ -477,12 +456,24 @@ namespace Launcher
 
                     case @"\setmap": //teleport
                         //get map entry point
-                        if(!value.Equals("") && value != null)
-                        {                            
+                        if (!value.Equals("") && value != null)
+                        {
                             _world.TeleportPlayer(_connection.socket, Convert.ToUInt32(value));
-                        }                       
+                        }
 
-                        break;
+                        //if (!value.Equals("") && value != null)
+                        //{
+                        //    Position pos = Aetheryte.AetheryteList.Find(x => x.Value.Id == 1280040).Value.Position;
+                        //    Position pos = UserFactory.Instance.User.Character.Position;
+                        //    pos.X = 0;
+                        //    pos.Y = 0;
+                        //    pos.Z = 0;
+                        //    _user.Character.Position.R = value[4];
+                        //    pos.ZoneId = Convert.ToUInt32(value);
+
+                        //    UserFactory.Instance.User.Character.SetPosition(_connection.socket, pos, 2);
+                        //}
+                        break;                        
 
                     case @"\getposition":
                         Position current = UserFactory.Instance.User.Character.Position;
@@ -533,9 +524,11 @@ namespace Launcher
                     
 
                     case @"\spawn":
-                        //TestPackets.SendTest(_user.Character.Id, _user.Character.Position, _connection.socket);
-                        TestPackets.TeleportInn(UserFactory.Instance.User.Character.Id, UserFactory.Instance.User.Character.Position, _connection.socket);                      
-
+                        PlayerCharacter pc = UserFactory.Instance.User.Character;
+                        TestPackets.SendTest(pc.Id, pc.Position, _connection.socket);
+                        //TestPackets.TeleportInn(UserFactory.Instance.User.Character.Id, UserFactory.Instance.User.Character.Position, _connection.socket);                      
+                        //Aetheryte ae = new Aetheryte(1280007, 20925, new Position(128, 582.47f, 54.52f, -1.2f, 0f, 0));
+                        
                         _log.Info("sent test");
 
                         break;
@@ -562,6 +555,25 @@ namespace Launcher
 
                     case @"\additem":
                         Inventory.AddItem(_connection.socket);
+                        break;
+
+                    case @"\inventory":
+                        UserFactory.Instance.User.Character.Inventory.UpdateInventory(_connection.socket);
+                        break;
+                    case @"\gear":
+                        UserFactory.Instance.User.Character.Inventory.EquippedGear(_connection.socket);
+                        break;
+                    case @"\removeactor":
+                        GamePacket gps = new GamePacket
+                        {
+                            Opcode = 0x7,
+                            Data = new byte[8]
+                        };
+                        Packet packet = new Packet(new SubPacket(gps) { SourceId = UserFactory.Instance.User.Character.Id, TargetId = UserFactory.Instance.User.Character.Id });
+                        _connection.Send(packet.ToBytes());
+                        //UserFactory.Instance.User.Character.SetPosition(_connection.socket, ZoneList.EntryPoints.Find(x => x.ZoneId == Convert.ToUInt32(value)), 2, 1);
+                        UserFactory.Instance.User.Character.Position = ZoneList.EntryPoints.Find(x => x.ZoneId == Convert.ToUInt32(value));
+                        _world.Initialize(_connection.socket);
                         break;
 
                     default:

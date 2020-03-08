@@ -143,8 +143,16 @@ namespace Launcher
                 byte[] data = new byte[0x28];
                 Buffer.BlockCopy(BitConverter.GetBytes(command.Key), 0, data, 0, sizeof(ushort));
                 Buffer.BlockCopy(Encoding.ASCII.GetBytes(command.Value), 0, data, 0x02, command.Value.Length);
-                SendPacket(handler, Opcode.PlayerCommand, data);
+                SendPacket(handler, ServerOpcode.PlayerCommand, data);
             }
+        }
+
+        public void LockTargetActor(Socket handler, uint targetId)
+        {
+            CurrentTarget = targetId; //store target id
+            byte[] data = new byte[0x08];
+            Buffer.BlockCopy(BitConverter.GetBytes(CurrentTarget), 0, data, 0, sizeof(uint));           
+            SendPacket(handler, ServerOpcode.SetTarget, data);         
         }
 
         public override void Spawn(Socket sender, ushort spawnType = 0x01, ushort isZoning = 0, ushort actorIndex = 0)
@@ -167,19 +175,19 @@ namespace Launcher
             SetIsZoning(sender);
 
             /* Grand Company packets here */
-            SendPacket(sender, Opcode.SetGrandCompany, new byte[] { 0x02, 0x7F, 0x0B, 0x7F, 0x00, 0x00, 0x00, 0x00 });
+            SendPacket(sender, ServerOpcode.SetGrandCompany, new byte[] { 0x02, 0x7F, 0x0B, 0x7F, 0x00, 0x00, 0x00, 0x00 });
 
             //Set Player title
-            SendPacket(sender, Opcode.SetTitle, new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
+            SendPacket(sender, ServerOpcode.SetTitle, new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
 
             //set current job
-            SendPacket(sender, Opcode.SetCurrentJob, new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
+            SendPacket(sender, ServerOpcode.SetCurrentJob, new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
 
             SetSpecialEventWork(sender);
 
             /* Chocobo mounts packet here */
-            SendPacket(sender, Opcode.SetChocoboName, new byte[] { 0x42, 0x6f, 0x6b, 0x6f, 0x00, 0x00, 0x00, 0x00 });
-            SendPacket(sender, Opcode.SetHasChocobo, new byte[] { 0x1f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });            
+            SendPacket(sender, ServerOpcode.SetChocoboName, new byte[] { 0x42, 0x6f, 0x6b, 0x6f, 0x00, 0x00, 0x00, 0x00 });
+            SendPacket(sender, ServerOpcode.SetHasChocobo, new byte[] { 0x1f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });            
 
             GetAchievementPoints(sender);
             GetAchievementsLatest(sender);
@@ -213,25 +221,25 @@ namespace Launcher
         {
             byte[] data = new byte[0x18];
             data[0x02] = 0x12;
-            SendPacket(handler, Opcode.SetSpecialEventWork, data);
+            SendPacket(handler, ServerOpcode.SetSpecialEventWork, data);
         }
 
         private void GetAchievementPoints(Socket handler)
         {
             byte[] data = new byte[0x08];
-            SendPacket(handler, Opcode.AchievementPoints, data);
+            SendPacket(handler, ServerOpcode.AchievementPoints, data);
         }
 
         private void GetAchievementsLatest(Socket handler)
         {
             byte[] data = new byte[0x20];
-            SendPacket(handler, Opcode.AchievementsLatest, data);
+            SendPacket(handler, ServerOpcode.AchievementsLatest, data);
         }
 
         private void GetAchievementsCompleted(Socket handler)
         {
             byte[] data = new byte[0x80];
-            SendPacket(handler, Opcode.AchievementsCompeted, data);
+            SendPacket(handler, ServerOpcode.AchievementsCompeted, data);
         }
 
         public void WriteProperties(Socket sender)
@@ -372,7 +380,7 @@ namespace Launcher
             data[0x30] = 0x01; //figure out
             data[0x35] = 0x01; //figure out
 
-            SendPacket(sender, Opcode.BattleActionResult01, data);
+            SendPacket(sender, ServerOpcode.BattleActionResult01, data);
         }
 
         public void EndClientOrderEvent(Socket sender, string eventType)
@@ -385,7 +393,7 @@ namespace Launcher
             Buffer.BlockCopy(BitConverter.GetBytes(0x09d4f200), 0, data, 0x28, sizeof(uint));
             Buffer.BlockCopy(BitConverter.GetBytes(0x0a09a930), 0, data, 0x2c, sizeof(uint));
 
-            SendPacket(sender, Opcode.EndClientOrderEvent, data);
+            SendPacket(sender, ServerOpcode.EndClientOrderEvent, data);
         }
 
         public void ToggleMount(Socket sender, Command command)
@@ -394,7 +402,7 @@ namespace Launcher
             byte[] data = new byte[0x08];
             Buffer.BlockCopy(BitConverter.GetBytes((ushort)(command == Command.MountChocobo ? 0x53 : ActorRepository.Instance.Zones.Find(x=>x.Id==Position.ZoneId).GetCurrentBGM())), 0, data, 0, 2);
             Buffer.BlockCopy(BitConverter.GetBytes((ushort)MusicMode.FadeStart), 0, data, 0x02, 2);
-            SendPacket(sender, Opcode.SetMusic, data);
+            SendPacket(sender, ServerOpcode.SetMusic, data);
 
             //set player state
             data = new byte[0x08];
@@ -402,7 +410,7 @@ namespace Launcher
             if (command == Command.MountChocobo)
             {
                 data[0x05] = 0x1f; //mounted     
-                SendPacket(sender, Opcode.SetChocoboMounted, data);
+                SendPacket(sender, ServerOpcode.SetChocoboMounted, data);
             }
             else
                 SetMainState(sender, MainState.Passive, 0xbf);         
@@ -412,7 +420,7 @@ namespace Launcher
             Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, data, 0, 4);
             Buffer.BlockCopy(BitConverter.GetBytes((uint)Animation.MountChocobo), 0, data, 0x4, 4);
             data[0x27] = 0x08; //8 animation slots to be played in sequence?
-            SendPacket(sender, Opcode.CommandResult, data);
+            SendPacket(sender, ServerOpcode.CommandResult, data);
 
             //set chocobo speeds (this packet is originally sent 3 times for unknown reasons)
             if (command == Command.MountChocobo)
@@ -429,9 +437,9 @@ namespace Launcher
                     0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
                 };
 
-                SendPacket(sender, Opcode.SetSpeed, data);
-                SendPacket(sender, Opcode.SetSpeed, data);
-                SendPacket(sender, Opcode.SetSpeed, data);
+                SendPacket(sender, ServerOpcode.SetSpeed, data);
+                SendPacket(sender, ServerOpcode.SetSpeed, data);
+                SendPacket(sender, ServerOpcode.SetSpeed, data);
             }
             else
             {
@@ -447,7 +455,7 @@ namespace Launcher
                 data = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0xF8, 0x5F, 0x93, 0x65, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
             Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, data, 0, 4);
-            SendPacket(sender, Opcode.TextSheetMessage30b, data, sourceId: 0x5ff80001);
+            SendPacket(sender, ServerOpcode.TextSheetMessage30b, data, sourceId: 0x5ff80001);
 
             //command result 
             data = new byte[0x38];            
@@ -459,7 +467,7 @@ namespace Launcher
             Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, data, 0x28, 4);
             data[0x30] = 1;
             data[0x36] = 1;
-            SendPacket(sender, Opcode.CommandResultX1, data);
+            SendPacket(sender, ServerOpcode.CommandResultX1, data);
 
             //end event order
             if(command == Command.MountChocobo)
@@ -469,7 +477,7 @@ namespace Launcher
                 Buffer.BlockCopy(Encoding.ASCII.GetBytes("commandForced"), 0, data, 0x9, 4);
                 Buffer.BlockCopy(BitConverter.GetBytes(0x09d4f200), 0, data, 0x28, 4);
                 Buffer.BlockCopy(BitConverter.GetBytes(0x0a09a930), 0, data, 0x2c, 4);
-                SendPacket(sender, Opcode.EndClientOrderEvent, data);
+                SendPacket(sender, ServerOpcode.EndClientOrderEvent, data);
             }            
         }
 

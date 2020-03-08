@@ -192,7 +192,7 @@ namespace Launcher
             new Zone(205, 233, locationNameId: 54, classNameId: 16, musicSetId: 14, mapName: "wil0Office01"),
             new Zone(205, 180, locationNameId: 51, classNameId: 7, musicSetId: 0, mapName: "wil0Market01"),
             new Zone(207, 177, locationNameId: 57, classNameId: 11, musicSetId: 1, mapName: "_jail"),
-            new Zone(208, 201, locationNameId: 57, classNameId: 14, musicSetId: 0, mapName: "prv0Cottage00"),
+            new Zone(208, 201, locationNameId: 58, classNameId: 14, musicSetId: 0, mapName: "prv0Cottage00"),
             new Zone(209, 244, locationNameId: 55, classNameId: 19, musicSetId: 15, mapName: "prv0Inn01"),
             new Zone(805, 200, locationNameId: 56, classNameId: 13, musicSetId: 10, mapName: "sea1Cruise01"),
         };
@@ -255,7 +255,8 @@ namespace Launcher
             "Hall of Flames",               //54
             "Inn Room",                     //55
             "Strait of Merlthor",           //56
-            "-",                            //57
+            "Jail",                         //57
+            "Cottage"                       //58
         };
         public static string[] ClassName { get; } = new string[]
         {
@@ -292,7 +293,7 @@ namespace Launcher
             new Position(166, 356.09f, 3.74f, -701.62f, -1.4f, 15),//
             new Position(166, 356.09f, 3.74f, -701.62f, -1.4f, 16),//
             new Position(170, -27.015f, 181.798f,-79.72f, 2.513f, 15),
-            new Position(175, -110.157f, 202f, 171.345f, 0f, 15),
+            new Position(175, -237.6312f, 184.8451f, -5.752599f, -2.536515f, 15),
             new Position(184, 5.36433f, 196f, 133.656f, -2.84938f, 15),//
             new Position(184, -24.34f, 192f, 34.22f, 0.78f, 16),
             new Position(184, -24.34f, 192f, 34.22f, 0.78f, 15),
@@ -307,6 +308,8 @@ namespace Launcher
             new Position(240, 160.048f, 0f, 154.263f, 0f, 15),
             new Position(206, -124.852f, 15.920f, -1328.476f, 0f, 15),
             new Position(177, 0f, 0f, 0f, 0f, 15),
+            new Position(160, 0f, 0f, 0f, 0f, 15),
+            new Position(201, 0f, 0f, 0f, 0f, 15),
 
         };
     }

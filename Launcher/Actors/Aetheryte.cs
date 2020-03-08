@@ -9,12 +9,13 @@ namespace Launcher
 {
     public class Aetheryte : Actor
     {
-        public ushort ZoneId { get; set; }
         public string MapName { get; set; }
+        public uint PrivilegeLevel { get; set; }
+        public uint BaseModel { get; set; }
+        private float PushEventRadius { get; set; }
         //Aetherytes have many attributes in common, so we'll initialize base class' fields with all common values 
-        public Aetheryte(ushort zoneId, uint actorId, uint baseModel, uint body, Position position)
-        {
-            ZoneId = zoneId;
+        public Aetheryte(uint actorId, uint baseModel, Position position, uint body = 1024)
+        {           
             Id = actorId;
             Size = 2;
             HairColor = 1;
@@ -23,38 +24,42 @@ namespace Launcher
             PropFlag = 3;
             Model = new Model { Type = baseModel };
             AppearanceCode = 0x02;
-
             Position = position;
             GearSet = new GearSet { Body = body }; //body is the only appearance slot that has info for aetherytes.
 
-            float pushEventRadius = 3.0f;
+            BaseModel = baseModel;            
 
             if (baseModel == 20902)
             {
                 NameId = 4010014;
-                ClassPath = "AetheryteParent";                
-                pushEventRadius = 10.0f;
+                ClassPath = "AetheryteParent";
+                PushEventRadius = 10.0f;
             }
             else
             {
                 NameId = 4010015;
-                ClassPath = "AetheryteChild";               
+                ClassPath = "AetheryteChild";
+                PushEventRadius = 3.0f;
             }            
         }
 
         public override void Prepare(ushort actorIndex)
         {
+            float pushEventRadius = 3.0f;
+
+            //(Opcode opcode, string conditionName, float radius = 0, byte priority = 0, byte isDisabld)
+
             //Event conditions
             EventConditions = new List<EventCondition>();
-            //EventConditions.Add(new EventCondition(Opcode.SetTalkEventCondition, "talkDefault", 0, 0x04, 0));
-            //EventConditions.Add(new EventCondition(Opcode.SetNoticeEventcondition, "noticeEvent", 0, 0, 0x01));
-            //EventConditions.Add(new EventCondition(Opcode.SetNoticeEventcondition, "pushCommand", 0, 0x04, 0));
+            EventConditions.Add(new EventCondition{ Opcode = ServerOpcode.TalkEvent, EventName = "talkDefault", Priority = 0x04 });
+            EventConditions.Add(new EventCondition{ Opcode = ServerOpcode.NoticeEvent, EventName = "pushCommand", Priority = 0x04 });
+            EventConditions.Add(new EventCondition{ Opcode = ServerOpcode.NoticeEvent, EventName = "noticeEvent", IsDisabled = 0x01 });             
 
             //push event
-            //EventConditions.Add(new EventCondition(Opcode.SetPushEventConditionWithCircle, "pushCommandIn", pushEventRadius, 0x01, 0x01));
-            //EventConditions.Add(new EventCondition(Opcode.SetPushEventConditionWithCircle, "pushCommandOut", pushEventRadius, 0x11, 0x01));            
+            EventConditions.Add(new EventCondition{ Opcode = ServerOpcode.PushEventCircle, EventName = "pushCommandIn", ServerCodes = 0x44c00014, Radius = pushEventRadius, Direction = 0x01, IsSilent =  0x00 });
+            EventConditions.Add(new EventCondition { Opcode = ServerOpcode.PushEventCircle, EventName = "pushCommandOut", ServerCodes = 0x44c00014, Radius = pushEventRadius, Direction = 0x11, IsSilent = 0x00 });
 
-            Zone zone = ActorRepository.Instance.Zones.Find(x => x.Id == ZoneId);
+            Zone zone = ActorRepository.Instance.Zones.Find(x => x.Id == Position.ZoneId);
 
             string zoneName = zone.MapName
                 .Replace("Field", "Fld")
@@ -70,19 +75,12 @@ namespace Launcher
             //Actor number is the actor ordinal number in the area actor list. the position in the array.
             string name = char.ToLowerInvariant(ClassPath[0]) + ClassPath.Substring(1,10) + "_" + zoneName + "_" + ToStringBase63((int)actorIndex);
 
-            //bool isPrivate = zone.IsInn;
-            uint privLevel = 0;
-            //if (isPrivate)
-
-
             LuaParameters = new LuaParameters
             {
-                ActorName = name + "@" + ZoneId.ToString("X3") + privLevel.ToString("X2"),
+                ActorName = name + "@" + Position.ZoneId.ToString("X3") + PrivilegeLevel.ToString("X2"),
                 ClassName = ClassPath,
                 ServerCodes = 0x26000000
-            };
-
-            string m = LuaParameters.ActorName;
+            };           
 
             LuaParameters.Add("/Chara/Npc/Object/Aetheryte/" + ClassPath);            
             LuaParameters.Add(false);
@@ -112,7 +110,7 @@ namespace Launcher
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
             };
-            SendPacket(handler, Opcode.ActorInit, data);
+            SendPacket(handler, ServerOpcode.ActorInit, data);
         }
 
     }

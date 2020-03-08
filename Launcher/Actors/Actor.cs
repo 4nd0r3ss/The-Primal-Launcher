@@ -13,6 +13,7 @@ namespace Launcher
     {
         
         public uint TargetId { get; set; }
+        public uint CurrentTarget { get; set; }
 
         public uint Id { get; set; }
         public uint NameId { get; set; }        
@@ -42,13 +43,12 @@ namespace Launcher
 
         public Position Position { get; set; } = new Position();
         public LuaParameters LuaParameters { get; set; }
-        public uint[] Speeds { get; set; }          
+        public uint[] Speeds { get; set; }    
 
         public virtual void Spawn(Socket handler, ushort spawnType = 0, ushort isZoning = 0, ushort actorIndex = 0)
         {
             Prepare(actorIndex);
-            CreateActor(handler, 0x08);
-            //SetEventCondition(handler);
+            CreateActor(handler, 0x08);            
             SetEventConditions(handler);
             SetSpeeds(handler, Speeds);
             SetPosition(handler, Position, spawnType, isZoning);
@@ -64,39 +64,7 @@ namespace Launcher
         }
 
         public virtual void Prepare(ushort actorIndex) { }
-
-        public void SetEventCondition(Socket handler)
-        {
-            if(EventConditions==null)
-                EventConditions = new List<EventCondition>();
-
-            if (EventConditions.Count > 0) //not all actors have event conditions
-            {
-                foreach(var e in EventConditions)
-                {
-                    byte[] data;
-
-                    if(e.Opcode == Opcode.SetPushEventConditionWithCircle)
-                    {
-                        data = new byte[0x38];
-                        Buffer.BlockCopy(BitConverter.GetBytes(e.Radius), 0, data, 0, sizeof(uint));
-                        Buffer.BlockCopy(BitConverter.GetBytes(e.Option1), 0, data, 0x10, sizeof(byte));
-                        Buffer.BlockCopy(BitConverter.GetBytes(e.Option2), 0, data, 0x12, sizeof(byte));
-                        Buffer.BlockCopy(Encoding.ASCII.GetBytes(e.ConditionName), 0, data, 0x13, sizeof(byte));
-                    }
-                    else
-                    {
-                        data = new byte[0x28];
-                        Buffer.BlockCopy(BitConverter.GetBytes(e.Option1), 0, data, 0, sizeof(byte));
-                        Buffer.BlockCopy(BitConverter.GetBytes(e.Option2), 0, data, 0x1, sizeof(byte));
-                        Buffer.BlockCopy(Encoding.ASCII.GetBytes(e.ConditionName), 0, data, 0x2, sizeof(byte));
-                    }
-
-                    SendPacket(handler, e.Opcode, data);
-                }
-            }
-        }
-
+              
         public void SetEventConditions(Socket handler)
         {
             if (EventConditions.Count > 0) //not all actors have event conditions
@@ -104,32 +72,38 @@ namespace Launcher
                 foreach (var e in EventConditions)
                 {
                     byte[] data = new byte[0x28];
-                    byte[] conditionName = Encoding.ASCII.GetBytes(e.ConditionName);
-                    int conditionNameLength = e.ConditionName.Length;
+                    byte[] conditionName = Encoding.ASCII.GetBytes(e.EventName);
+                    int conditionNameLength = e.EventName.Length;
 
                     switch (e.Opcode)
                     {
-                        case Opcode.SetEmoteEventCondition:
+                        case ServerOpcode.EmoteEvent:
                             Buffer.BlockCopy(BitConverter.GetBytes(e.Priority), 0, data, 0, sizeof(byte));
                             Buffer.BlockCopy(BitConverter.GetBytes(e.IsDisabled), 0, data, 0x1, sizeof(byte));
                             Buffer.BlockCopy(BitConverter.GetBytes(e.EmoteId), 0, data, 0x2, sizeof(ushort));
                             Buffer.BlockCopy(conditionName, 0, data, 0x4, conditionNameLength);
                             break;
-                        case Opcode.SetPushEventConditionWithCircle:
+                        case ServerOpcode.PushEventCircle:
                             data = new byte[0x38];
                             Buffer.BlockCopy(BitConverter.GetBytes(e.Radius), 0, data, 0, sizeof(uint));
+                            Buffer.BlockCopy(BitConverter.GetBytes(e.ServerCodes), 0, data, 0x04, sizeof(uint));
+                            Buffer.BlockCopy(BitConverter.GetBytes(e.Radius), 0, data, 0x08, sizeof(uint));
                             Buffer.BlockCopy(BitConverter.GetBytes(e.Direction), 0, data, 0x10, sizeof(byte));
+                            Buffer.BlockCopy(BitConverter.GetBytes(e.Priority), 0, data, 0x11, sizeof(byte));
+                            Buffer.BlockCopy(BitConverter.GetBytes(e.IsSilent), 0, data, 0x12, sizeof(byte));
+                            Buffer.BlockCopy(conditionName, 0, data, 0x13, conditionNameLength);                            
+                            break;
+                        case ServerOpcode.PushEvenFan:
+                            data = new byte[0x40];
+                            Buffer.BlockCopy(BitConverter.GetBytes(e.Radius), 0, data, 0, sizeof(uint));
+                            Buffer.BlockCopy(BitConverter.GetBytes(e.ServerCodes), 0, data, 0x04, sizeof(uint));
+                            Buffer.BlockCopy(BitConverter.GetBytes(e.Radius), 0, data, 0x08, sizeof(uint));
+                            Buffer.BlockCopy(BitConverter.GetBytes(e.Direction), 0, data, 0x10, sizeof(byte));
+                            Buffer.BlockCopy(BitConverter.GetBytes(e.Priority), 0, data, 0x11, sizeof(byte));
                             Buffer.BlockCopy(BitConverter.GetBytes(e.IsSilent), 0, data, 0x12, sizeof(byte));
                             Buffer.BlockCopy(conditionName, 0, data, 0x13, conditionNameLength);
                             break;
-                        case Opcode.SetPushEventConditionWithFan:
-                            data = new byte[0x40];
-                            Buffer.BlockCopy(BitConverter.GetBytes(e.Radius), 0, data, 0, sizeof(uint));
-                            Buffer.BlockCopy(BitConverter.GetBytes(e.Direction), 0, data, 0x18, sizeof(byte));
-                            Buffer.BlockCopy(BitConverter.GetBytes(e.IsSilent), 0, data, 0x1a, sizeof(byte));
-                            Buffer.BlockCopy(conditionName, 0, data, 0x1b, conditionNameLength);
-                            break;
-                        case Opcode.SetPushEventConditionWithTriggerBox:
+                        case ServerOpcode.PushEventTriggerBox:
                             data = new byte[0x40];
                             Buffer.BlockCopy(BitConverter.GetBytes(e.BgObjectId), 0, data, 0, sizeof(uint));
                             Buffer.BlockCopy(BitConverter.GetBytes(e.LayoutId), 0, data, 0x4, sizeof(uint));
@@ -138,8 +112,8 @@ namespace Launcher
                             Buffer.BlockCopy(conditionName, 0, data, 0x17, conditionNameLength);
                             Buffer.BlockCopy(Encoding.ASCII.GetBytes(e.ReactionName), 0, data, 0x38, e.ReactionName.Length);
                             break;
-                        case Opcode.SetNoticeEventcondition:
-                        case Opcode.SetTalkEventCondition:
+                        case ServerOpcode.NoticeEvent:
+                        case ServerOpcode.TalkEvent:
                         default:
                             Buffer.BlockCopy(BitConverter.GetBytes(e.Priority), 0, data, 0, sizeof(byte));
                             Buffer.BlockCopy(BitConverter.GetBytes(e.IsDisabled), 0, data, 0x1, sizeof(byte));
@@ -168,35 +142,35 @@ namespace Launcher
 
             LuaParameters.WriteParameters(ref data, luaParameters);          
 
-            SendPacket(handler, Opcode.LoadActorScript, data);
+            SendPacket(handler, ServerOpcode.LoadClassScript, data);
         }
 
         public void SetIsZoning(Socket handler)
         {
             byte[] data = new byte[0x08];
             /* will be properly implemented later */
-            SendPacket(handler, Opcode.SetIsZoning, data);
+            SendPacket(handler, ServerOpcode.SetIsZoning, data);
         }
 
         public void SetIcon(Socket handler)
         {
             byte[] data = new byte[0x08];
             /* will be properly implemented later */
-            SendPacket(handler, Opcode.SetIcon, data);
+            SendPacket(handler, ServerOpcode.SetIcon, data);
         }
 
         public void SetAllStatus(Socket handler)
         {
             byte[] data = new byte[0x28];
             /* will be properly implemented later */
-            SendPacket(handler, Opcode.SetAllStatus, data);
+            SendPacket(handler, ServerOpcode.SetAllStatus, data);
         }
 
         public void SetSubState(Socket handler)
         {
             byte[] data = new byte[0x08];
             /* will be properly implemented later */
-            SendPacket(handler, Opcode.SetSubState, data);
+            SendPacket(handler, ServerOpcode.SetSubState, data);
 
         }
 
@@ -205,17 +179,17 @@ namespace Launcher
             byte[] data = new byte[0x08];
             data[0] = (byte)state;
             data[0x01] = type;
-            SendPacket(handler, Opcode.SetMainState, data);
+            SendPacket(handler, ServerOpcode.SetMainState, data);
         }
 
         public void CreateActor(Socket handler, byte code)
         {
             byte[] data = new byte[0x08];
             data[0] = code;
-            SendPacket(handler, Opcode.CreateActor, data);
+            SendPacket(handler, ServerOpcode.CreateActor, data);
         }
 
-        public void SendUnknown(Socket handler) => SendPacket(handler, Opcode.Unknown, new byte[0x18]);
+        public void SendUnknown(Socket handler) => SendPacket(handler, ServerOpcode.Unknown, new byte[0x18]);
 
         public void SetName(Socket handler, int isCustom = 0, byte[] customName = null)
         {
@@ -229,7 +203,7 @@ namespace Launcher
             else
                 Buffer.BlockCopy(BitConverter.GetBytes(NameId), 0, data, 0x00, sizeof(uint));
 
-            SendPacket(handler, Opcode.SetName, data);
+            SendPacket(handler, ServerOpcode.SetName, data);
         }               
 
         public void SetPosition(Socket handler, Position position, ushort spawnType = 0, ushort isZonning = 0)
@@ -245,7 +219,7 @@ namespace Launcher
             Buffer.BlockCopy(BitConverter.GetBytes(spawnType), 0, data, 0x24, sizeof(ushort));
             Buffer.BlockCopy(BitConverter.GetBytes(isZonning), 0, data, 0x26, sizeof(ushort));
 
-            SendPacket(handler, Opcode.SetPosition, data);
+            SendPacket(handler, ServerOpcode.SetPosition, data);
         }
                
         public void SetSpeeds(Socket handler, uint[] value = null)
@@ -272,7 +246,7 @@ namespace Launcher
 
             data[0x80] = 0x04; //only 4 stated discovered so far.
 
-            SendPacket(handler, Opcode.SetSpeed, data);
+            SendPacket(handler, ServerOpcode.SetSpeed, data);
         }
 
         public void SetAppearance(Socket handler)
@@ -325,10 +299,10 @@ namespace Launcher
 
             data[0x100] = (byte)AppearanceSlots.Count;
 
-            SendPacket(handler, Opcode.SetAppearance, data);
+            SendPacket(handler, ServerOpcode.SetAppearance, data);
         }
 
-        public void SendPacket(Socket handler, Opcode opcode, byte[] data, uint sourceId = 0, uint targetId = 0)
+        public void SendPacket(Socket handler, ServerOpcode opcode, byte[] data, uint sourceId = 0, uint targetId = 0)
         {
             GamePacket gamePacket = new GamePacket
             {
@@ -353,7 +327,7 @@ namespace Launcher
         {
             byte[] data = new byte[] { 0x00, 0xB0, 0x00, 0x05, 0x41, 0x29, 0x9B, 0x02, 0x6E, 0x52, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
             Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, data, 0x04, 4);
-            SendPacket(handler, Opcode.DoEmote, data);
+            SendPacket(handler, ServerOpcode.DoEmote, data);
         }
 
         /// <summary>
@@ -362,16 +336,15 @@ namespace Launcher
         [Serializable]
         public class EventCondition
         {
-            public Opcode Opcode { get; set; }
-            public string ConditionName { get; set; }
+            public ServerOpcode Opcode { get; set; }
+            public string EventName { get; set; }
             public ushort EmoteId { get; set; }
-
             public float Radius { get; set; }       //circle size
-
             public byte Priority { get; set; }      //unknown
             public byte IsDisabled { get; set; }    //0x1 won't fire event.
             public byte IsSilent { get; set; }      //0x1 do NOT lock UI and player.
             public byte Direction { get; set; }     //possible values: 0x11 leave circle, 0x1 enter circle.
+            public uint ServerCodes { get; set; }
 
             //For BG objects
             public uint BgObjectId { get; set; }
@@ -382,14 +355,7 @@ namespace Launcher
             public byte Option1 { get; set; }
             public byte Option2 { get; set; }
 
-            public EventCondition(Opcode opcode, string conditionName, float radius, byte opt1, byte opt2)
-            {
-                Opcode = opcode;
-                Radius = radius;
-                Option1 = opt1;
-                Option2 = opt2;
-                ConditionName = conditionName;
-            }
+            public EventCondition() {}
         }
 
         /// <summary>
@@ -591,11 +557,23 @@ namespace Launcher
         #endregion  
     }
 
-    public enum Opcode
-    {
+    public enum ClientOpcode
+    {        
+        Ping = 0x01,
+        DataRequest = 0x12f,
+        EventRequest = 0x12d,
+        PlayerPosition = 0xca,
+        Unknown0x02 = 0x02,
+        ChatMessage = 0x03,
+        SelectTarget = 0xcd,
+        LockOnTarget = 0xcc
+    }
+
+    public enum ServerOpcode
+    {        
+        Unknown0x02 = 0x02,
         Unknown = 0x0f,
-        CreateActor = 0xca,
-        LoadActorScript = 0xcc,
+        CreateActor = 0xca,        
         SetPosition = 0xce,
         SetSpeed = 0xd0,
         SetAppearance = 0xd6,
@@ -614,6 +592,16 @@ namespace Launcher
         CommandResultX1 = 0x139,
         CommandResult = 0x13c,
         DoEmote = 0xe1,
+
+        //Delete actors
+        MassDeleteStart = 0x06,
+        MassDeleteEnd = 0x07,
+
+        //Targeting
+        UnloadClassScript = 0xcd,
+        SetTarget = 0xd3,
+        LoadClassScript = 0xcc,
+
 
         //text sheet 
         TextSheetMessage30b = 0x157,
@@ -637,12 +625,12 @@ namespace Launcher
         EndClientOrderEvent = 0x131,
 
         //event conditions
-        SetTalkEventCondition = 0x012e,
-        SetNoticeEventcondition = 0x016b,
-        SetEmoteEventCondition = 0x016c,
-        SetPushEventConditionWithCircle = 0x016f,
-        SetPushEventConditionWithFan = 0x0170,
-        SetPushEventConditionWithTriggerBox = 0x0175
+        TalkEvent = 0x012e,
+        NoticeEvent = 0x016b,
+        EmoteEvent = 0x016c,
+        PushEventCircle = 0x016f,
+        PushEvenFan = 0x0170,
+        PushEventTriggerBox = 0x0175
     }
 
     public enum MainState
@@ -664,7 +652,12 @@ namespace Launcher
     public enum Command
     {
         MountChocobo = 0x2eee,
-        UmountChocobo = 0x2eef
+        UmountChocobo = 0x2eef,
+        Teleport = 0x5e9c,
+        DoEmote = 0x5e26,
+        BattleStance = 0x5209,
+        NormalStance = 0x520a,
+        Logout = 0x5e9b
     }
 
     public enum BGMMode
