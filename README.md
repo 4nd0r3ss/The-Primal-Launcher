@@ -13,4 +13,13 @@ Some of the main features are:
 - Built-in game update downloader and update using original updater for a complete experience;
 - Built-in micro web-server to handle http requests using original login window and mock-up login screen mimicking the original one (cand be edited!);
 
-
+What works so far
+=================
+- Game update files download;
+- Game update to v1.23b and binaries patch;
+- Dummy login page
+- Character creation & delete
+- Game start (no intro cutscene or battle for now)
+- Some in-game custom commands
+- Mounting
+- Static objects load
