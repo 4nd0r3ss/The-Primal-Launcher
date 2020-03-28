@@ -71,6 +71,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Actors\Debug.cs" />
+    <Compile Include="Actors\GearGraphics.cs" />
+    <Compile Include="Actors\ItemGraphics.cs" />
     <Compile Include="BitField.cs" />
     <Compile Include="Blowfish.cs" />
     <Compile Include="Actors\Aetheryte.cs" />
@@ -86,7 +88,8 @@
     <Compile Include="Downloader.Designer.cs">
       <DependentUpon>Downloader.cs</DependentUpon>
     </Compile>
-    <Compile Include="GameDataFileDecoder.cs" />
+    <Compile Include="Enum.cs" />
+    <Compile Include="GameDataFile.cs" />
     <Compile Include="Packets\GamePacket.cs" />
     <Compile Include="Packets\HttpPacket.cs" />
     <Compile Include="Packets\MessagePacket.cs" />

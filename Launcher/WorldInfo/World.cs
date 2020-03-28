@@ -44,8 +44,7 @@ namespace Launcher
             SetMap(handler, currentZone);
             Spawn(handler, 0x01);
             debug.Spawn(handler);          
-            zone.Spawn(handler);//spawn zone      
-            playerCharacter.Inventory = new Inventory();
+            zone.Spawn(handler);//spawn zone               
             playerCharacter.Spawn(handler);//spawn player character
             zone.SpawnActors(handler);
         }
@@ -100,13 +99,10 @@ namespace Launcher
             SetMap(handler, currentZone);
             Spawn(handler, 0x01);
             debug.Spawn(handler);
-            zone.Spawn(handler);//spawn zone      
-            playerCharacter.Inventory = new Inventory();
+            zone.Spawn(handler);//spawn zone                  
             playerCharacter.Spawn(handler);//spawn player character
             zone.SpawnActors(handler);
         }
-
-
     }
 
     [Serializable]

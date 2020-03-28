@@ -61,10 +61,7 @@ namespace Launcher
                 for(int i=0;i<Actors.Count;i++)
                     Actors[i].Spawn(sender, actorIndex: (ushort)i);
             }
-            catch(Exception e)
-            {
-                _log.Error(e.Message);
-            }
+            catch(Exception e){ _log.Error(e.Message); }
 
             _log.Success("Loaded " + Actors.Count + " actors in zone " + PlaceName);
         }

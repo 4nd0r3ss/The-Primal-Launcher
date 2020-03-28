@@ -128,9 +128,9 @@ namespace Launcher
             };
         }        
 
-        public static  GearSet GetInitialGearSet(CharacterClass cClass, uint tribe)
+        public static  GearGraphics GetInitialGearSet(CharacterClass cClass, uint tribe)
         {
-            return new GearSet
+            return new GearGraphics
             {
                 MainWeapon = cClass.InitialGear[0],
                 SecondaryWeapon = cClass.InitialGear[0x01],

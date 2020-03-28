@@ -25,7 +25,7 @@ namespace Launcher
             Model = new Model { Type = baseModel };
             AppearanceCode = 0x02;
             Position = position;
-            GearSet = new GearSet { Body = body }; //body is the only appearance slot that has info for aetherytes.
+            GearGraphics = new GearGraphics { Body = body }; //body is the only appearance slot that has info for aetherytes.
 
             BaseModel = baseModel;            
 

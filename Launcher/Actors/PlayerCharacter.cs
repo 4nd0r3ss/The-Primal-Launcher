@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Net.Sockets;
 using System.Text;
+using System.Linq;
 
 namespace Launcher
 {
@@ -49,7 +51,9 @@ namespace Launcher
             string tmp = Encoding.ASCII.GetString(info).Trim(new[] { '\0' }).Replace('-', '+').Replace('_', '/');
 
             //decoded packet info
-            data = Convert.FromBase64String(tmp);            
+            data = Convert.FromBase64String(tmp);
+
+            File.WriteAllBytes("charcreate.txt", data);
 
             //General
             Size = data[0x09];
@@ -91,7 +95,8 @@ namespace Launcher
             Classes[CurrentClassId].Level = 1; //having a class level > 0 makes it active.
             Classes[CurrentClassId].IsCurrent = true; //current class the player will start with.
 
-            GearSet = CharacterClass.GetInitialGearSet(Classes[CurrentClassId], Model.Id);
+            GearGraphics = CharacterClass.GetInitialGearSet(Classes[CurrentClassId], Model.Id);
+            LoadDefaultItems(Model.Id, CurrentClassId);
 
             Position initial = Position.GetInitialPosition(InitialTown);
             Position = new Position
@@ -102,10 +107,7 @@ namespace Launcher
                 Z = initial.Z,
                 R = initial.R
             };
-
-
-            Inventory = new Inventory() { ActorId = Id };
-
+                             
             //Lua
             LuaParameters = new LuaParameters
             {
@@ -122,7 +124,21 @@ namespace Launcher
             LuaParameters.Add(0);
             LuaParameters.Add(false);
             LuaParameters.Add(true);
-        }       
+        }
+
+        private void LoadDefaultItems(byte tribe, byte job)
+        {
+            int setNumber = (tribe * 100) + job;
+            DataTable defaultSet = GameDataFile.Instance.GetGameData("boot_skillequip");
+            uint[] itemGraphicId = defaultSet.Select("id = '" + setNumber + "'")[0].ItemArray.Select(Convert.ToUInt32).ToArray();
+
+            GearGraphics = new GearGraphics();
+            GearGraphics.SetToSlots(itemGraphicId);
+
+            Inventory = new Inventory();
+            //Inventory = new Inventory();
+            Inventory.AddDefaultGearItems(itemGraphicId);
+        }
 
         private List<KeyValuePair<uint, string>> Commands { get; } = new List<KeyValuePair<uint, string>>
         {

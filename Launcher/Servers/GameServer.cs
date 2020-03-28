@@ -149,6 +149,8 @@ namespace Launcher
                         case "charaWork/exp":
                             _log.Warning("Request: " + request + " for target: 0x" + targetId.ToString("X") + " sequence: 0x" +sequence.ToString("X"));
 
+                            UserFactory.Instance.User.Character.Inventory.Update(_connection.socket);
+
                             if (DataRequestResponseQueue.Count == 0)
                             {
 
@@ -323,8 +325,10 @@ namespace Launcher
             string eventType = Encoding.ASCII.GetString(data, 0x21, 14);
             ushort command = (ushort)(data[0x15] << 8 | data[0x14]);
 
-            _log.Warning("Received event request: 0x12d");
-            _log.Warning("event: " + eventType + ", command: " + command.ToString("X2"));
+            //File.WriteAllBytes(command + ".txt", data);
+
+            //_log.Warning("Received event request: 0x12d");
+            //_log.Warning("event: " + eventType + ", command: " + command.ToString("X2"));
 
             if (eventType.IndexOf("commandForced") >= 0)
             {
@@ -359,6 +363,10 @@ namespace Launcher
                     case (ushort)Command.DoEmote:
                         _log.Warning("emote id:" + data[0x45].ToString("X2"));
                         playerCharacter.DoEmote(_connection.socket);
+                        break;
+
+                    case (ushort)Command.ChangeEquipment:
+                        playerCharacter.Inventory.SwitchGear(_connection.socket, data);
                         break;
                 }
             }
@@ -519,9 +527,7 @@ namespace Launcher
 
                             UserFactory.Instance.User.Character.SetPosition(_connection.socket, pos, 2);
                         }                        
-                        break;
-
-                    
+                        break;                    
 
                     case @"\spawn":
                         PlayerCharacter pc = UserFactory.Instance.User.Character;
@@ -554,14 +560,22 @@ namespace Launcher
                         break;
 
                     case @"\additem":
-                        Inventory.AddItem(_connection.socket);
+                        uint quantiy = 1;
+
+                        if (split.Length > 2)
+                            quantiy = Convert.ToUInt32(split[2]);
+
+                        UserFactory.Instance.User.Character.Inventory.AddItemToBag(_connection.socket, value.Replace("_", " ").Replace("'","''"), quantiy);
                         break;
 
                     case @"\inventory":
-                        UserFactory.Instance.User.Character.Inventory.UpdateInventory(_connection.socket);
+                        UserFactory.Instance.User.Character.Inventory.Update(_connection.socket);
                         break;
-                    case @"\gear":
-                        UserFactory.Instance.User.Character.Inventory.EquippedGear(_connection.socket);
+                    case @"\equip":
+                        UserFactory.Instance.User.Character.Inventory.EquipGear(_connection.socket, Convert.ToByte(value), Convert.ToByte(split[2]));
+                        break;
+                    case @"\unequip":
+                        UserFactory.Instance.User.Character.Inventory.UnequipGear(_connection.socket, Convert.ToByte(value));
                         break;
                     case @"\removeactor":
                         GamePacket gps = new GamePacket

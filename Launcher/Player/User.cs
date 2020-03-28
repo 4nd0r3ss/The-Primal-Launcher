@@ -77,7 +77,7 @@ namespace Launcher
                     PlayerCharacter character = characterList.Find(x => x.Slot == i);
 
                     byte[] name = Encoding.ASCII.GetBytes(Encoding.ASCII.GetString(character.CharacterName).Trim(new[] { '\0' }));
-                    byte[] gearSet = character.GearSet.ToBytes();
+                    byte[] gearSet = character.GearGraphics.ToBytes();
                     byte[] worldName = Encoding.ASCII.GetBytes(WorldFactory.GetWorld(character.WorldId).Name);
                     CharacterClass currentClass = character.Classes[character.CurrentClassId];
 
