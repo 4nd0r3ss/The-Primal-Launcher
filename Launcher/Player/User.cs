@@ -60,21 +60,25 @@ namespace Launcher
 
         public byte[] GetCharacters(int accountId)
         {
+            int numSlots = 2;
+            ushort characterSlotSize = 0x1d0;
             List<PlayerCharacter> characterList = AccountList[accountId].CharacterList;
-            byte[] result = new byte[(PlayerCharacter.SLOT_SIZE * 2) + 0x10];
+            byte[] result = new byte[(characterSlotSize * numSlots) + 0x10];
 
             result[0x08] = 0x01; //list sequence (?)
-            result[0x09] = 2; //no logic for 8 character slots yet, 2 only.
+            result[0x09] = (byte)numSlots; //no logic for 8 character slots yet, 2 only.
 
-            for (int i = 0; i < 2/*characterList.Count*/; i++)
+            for (int i = 0; i < numSlots/*characterList.Count*/; i++)
             {
-                byte[] characterSlot = new byte[PlayerCharacter.SLOT_SIZE];
+                byte[] characterSlot = new byte[characterSlotSize];
                 characterSlot[0x08] = (byte)i;
-                characterSlot[0x09] = 0x00; //0X01 = inactive, 0x02 = rename char, 0x08 = legacy
+                characterSlot[0x09] = 0x00; //0X01 = inactive, 0x02 = rename char, 0x08 = legacy                
 
                 if (characterList.Count >= (i + 1))
                 {
                     PlayerCharacter character = characterList.Find(x => x.Slot == i);
+
+                    Buffer.BlockCopy(BitConverter.GetBytes(character.Position.ZoneId), 0, characterSlot, 0xc, sizeof(uint));
 
                     byte[] name = Encoding.ASCII.GetBytes(Encoding.ASCII.GetString(character.CharacterName).Trim(new[] { '\0' }));
                     byte[] gearSet = character.GearGraphics.ToBytes();
@@ -82,7 +86,7 @@ namespace Launcher
                     CharacterClass currentClass = character.Classes[character.CurrentClassId];
 
                     Buffer.BlockCopy(BitConverter.GetBytes(character.Id), 0, characterSlot, 0x04, 0x04); //sequence?                    
-                    Buffer.BlockCopy(name, 0, characterSlot, 0x10, name.Length);
+                    Buffer.BlockCopy(name, 0, characterSlot, 0x10, name.Length);                   
                     Buffer.BlockCopy(worldName, 0, characterSlot, 0x30, worldName.Length);
 
                     //Base64 info
@@ -135,8 +139,9 @@ namespace Launcher
                     Buffer.BlockCopy(base64Info, 0, characterSlot, 0x40, base64Info.Length);
                 }
                 //Write character slot into slot list.
-                Buffer.BlockCopy(characterSlot, 0, result, ((PlayerCharacter.SLOT_SIZE * i) + 0x10), characterSlot.Length);
+                Buffer.BlockCopy(characterSlot, 0, result, ((characterSlotSize * i) + 0x10), characterSlot.Length);
             }
+            //File.WriteAllBytes("getChracaters.txt", result);
             return result;
         }
     }

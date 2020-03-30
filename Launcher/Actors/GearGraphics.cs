@@ -127,7 +127,7 @@ namespace Launcher
 
                     break;
                 case 8:
-
+                    Head = ItemGraphics.Head.First(x => x.Key == equipId).Value;
                     break;
                 case 9:
                     Body = ItemGraphics.Body.First(x => x.Key == equipId).Value;

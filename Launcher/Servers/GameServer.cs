@@ -560,12 +560,12 @@ namespace Launcher
                         break;
 
                     case @"\additem":
-                        uint quantiy = 1;
+                        uint quantity = 1;
 
                         if (split.Length > 2)
-                            quantiy = Convert.ToUInt32(split[2]);
+                            quantity = Convert.ToUInt32(split[2]);
 
-                        UserFactory.Instance.User.Character.Inventory.AddItemToBag(_connection.socket, value.Replace("_", " ").Replace("'","''"), quantiy);
+                        UserFactory.Instance.User.Character.Inventory.AddItem(ref UserFactory.Instance.User.Character.Inventory.Bag, value.Replace("_", " ").Replace("'","''"), quantity, _connection.socket);
                         break;
 
                     case @"\inventory":

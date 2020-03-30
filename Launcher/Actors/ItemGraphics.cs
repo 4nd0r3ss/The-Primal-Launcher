@@ -11,6 +11,7 @@ namespace Launcher
         //Implemented in a dirty way while I don't find the numbers to calculate the graphic ID
         public static Dictionary<uint, uint> Throwing = new Dictionary<uint, uint>
         {
+            {0,0},
             {3910001, 415237140},
             {3910005, 415237130},
             {3910006, 415238174},
@@ -59,6 +60,7 @@ namespace Launcher
 
         public static Dictionary<uint, uint> Weapon = new Dictionary<uint, uint>
         {
+            {0,0},
             {4020001, 60818432},
             {4020002, 60818442},
             {4020003, 60818452},
@@ -703,6 +705,7 @@ namespace Launcher
 
         public static Dictionary<uint, uint> Head = new Dictionary<uint, uint>
         {
+            {0,0},
             {8010001, 3072},
             {8010002, 3104},
             {8010003, 3200},
@@ -1420,6 +1423,7 @@ namespace Launcher
 
         public static Dictionary<uint, uint> Body = new Dictionary<uint, uint>
         {
+            {0,0},
             {8030001, 2336},
             {8030002, 2337},
             {8030003, 2338},
@@ -2232,6 +2236,7 @@ namespace Launcher
 
         public static Dictionary<uint, uint> Legs = new Dictionary<uint, uint>
         {
+            {0,0},
             {8050001, 2048},
             {8050002, 2051},
             {8050003, 2049},
@@ -2738,6 +2743,7 @@ namespace Launcher
 
         public static Dictionary<uint, uint> Hands = new Dictionary<uint, uint>
         {
+            {0,0},
             {8070001, 2304},
             {8070002, 2080},
             {8070003, 2081},
@@ -3123,6 +3129,7 @@ namespace Launcher
 
         public static Dictionary<uint, uint> Feet = new Dictionary<uint, uint>
         {
+            {0,0},
             {8080001, 2240},
             {8080002, 2241},
             {8080003, 2242},
@@ -3599,6 +3606,7 @@ namespace Launcher
 
         public static Dictionary<uint, uint> Waist = new Dictionary<uint, uint>
         {
+            {0,0},
             {8090001, 2048},
             {8090002, 122880},
             {8090003, 123904},
@@ -3704,6 +3712,7 @@ namespace Launcher
 
         public static Dictionary<uint, uint> Wrist = new Dictionary<uint, uint>
         {
+            {0,0},
             {9010001, 2048},
             {9010002, 2048},
             {9010003, 1024},
@@ -3772,6 +3781,7 @@ namespace Launcher
 
         public static Dictionary<uint, uint> Ears = new Dictionary<uint, uint>
         {
+            {0,0},
             {9030001, 205824},
             {9030002, 2048},
             {9030003, 2048},
@@ -3840,6 +3850,7 @@ namespace Launcher
 
         public static Dictionary<uint, uint> Neck = new Dictionary<uint, uint>
         {
+            {0,0},
             {9040001, 2048},
             {9040002, 2048},
             {9040003, 1024},
@@ -3912,6 +3923,7 @@ namespace Launcher
 
         public static Dictionary<uint, uint> Finger = new Dictionary<uint, uint>
         {
+            {0,0},
             {9050001, 205824},
             {9050002, 2048},
             {9050003, 2048},

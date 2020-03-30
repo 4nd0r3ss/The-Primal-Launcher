@@ -11,14 +11,6 @@ namespace Launcher
     [Serializable]
     public class PlayerCharacter : Actor
     {
-        #region Packet build
-        public static readonly ushort OPCODE = 0xd;
-        public static readonly byte MAX_SLOTS = 0x03;//0x08; //01 = ?? 08 = num slots
-        public static readonly int SLOT_SIZE = 0x1d0;
-        #endregion
-
-
-
         #region Info        
         public byte[] CharacterName { get; set; } = new byte[0x20];
         public byte WorldId { get; set; }
@@ -137,7 +129,7 @@ namespace Launcher
 
             Inventory = new Inventory();
             //Inventory = new Inventory();
-            Inventory.AddDefaultGearItems(itemGraphicId);
+            Inventory.AddDefaultItems(itemGraphicId);
         }
 
         private List<KeyValuePair<uint, string>> Commands { get; } = new List<KeyValuePair<uint, string>>

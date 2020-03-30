@@ -79,7 +79,32 @@ namespace Launcher
         EmoteEvent = 0x016c,
         PushEventCircle = 0x016f,
         PushEvenFan = 0x0170,
-        PushEventTriggerBox = 0x0175
+        PushEventTriggerBox = 0x0175,
+
+
+        //Inventory
+        InventoryStart = 0x016d,
+        InventoryEnd = 0x016e,
+        ChunkStart = 0x0146,
+        ChunkEnd = 0x0147,
+
+        x01InventoryChunk = 0x0148,
+        x08InventoryChunk = 0x0149,
+        x16InventoryChunk = 0x014a,
+        x32InventoryChunk = 0x014b,
+        x64InventoryChunk = 0x014c,
+
+        x01SetEquipment = 0x14d,
+        x08SetEquipment = 0x14e,
+        x16SetEquipment = 0x14f,
+        x32SetEquipment = 0x150,
+        x64SetEquipment = 0x151,
+
+        x01RemoveEquipment = 0x152,
+        x08RemoveEquipment = 0x153,
+        x16RemoveEquipment = 0x154,
+        x32RemoveEquipment = 0x155,
+        x64RemoveEquipment = 0x156,
     }
 
     public enum MainState
@@ -123,5 +148,28 @@ namespace Launcher
         Channel2 = 0x06
     }
 
+    [Serializable]
+    public enum InventoryMaxSlots
+    {
+        Bag = 0xc8,
+        Currency = 0x140,
+        KeyItems = 0x500,
+        Loot = 0x0a,
+        MeldRequest = 0x04,
+        Bazaar = 0x0a,
+        Equipment = 0x23,
+        GearSlots = 0x14
+    }
 
+    [Serializable]
+    public enum InventoryType
+    {
+        Bag = 0,
+        Currency = 0x63,
+        KeyItems = 0x64,
+        Loot = 0x04,
+        MeldRequest = 0x05,
+        Bazaar = 0x07,
+        Equipment = 0xfe
+    }
 }

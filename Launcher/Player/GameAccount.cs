@@ -19,17 +19,17 @@ namespace Launcher
         public List<PlayerCharacter> CharacterList { get; set; } = new List<PlayerCharacter>();
         #endregion
 
-        public byte[] GetCharacterListInfo()
-        {
-            byte[] characterData = new byte[(PlayerCharacter.SLOT_SIZE * PlayerCharacter.MAX_SLOTS) + 0x10];
-            characterData[0x08] = 0x02;
-            characterData[0x09] = 0x02;
-            for(int i=0;i< PlayerCharacter.MAX_SLOTS; i++)
-            {
-                characterData[(PlayerCharacter.SLOT_SIZE * i) + 0x10 + 0x08] = (byte)i;
-            }
+        //public byte[] GetCharacterListInfo()
+        //{
+        //    byte[] characterData = new byte[(PlayerCharacter.SLOT_SIZE * PlayerCharacter.MAX_SLOTS) + 0x10];
+        //    characterData[0x08] = 0x02;
+        //    characterData[0x09] = 0x02;
+        //    for(int i=0;i< PlayerCharacter.MAX_SLOTS; i++)
+        //    {
+        //        characterData[(PlayerCharacter.SLOT_SIZE * i) + 0x10 + 0x08] = (byte)i;
+        //    }
 
-            return characterData;
-        }
+        //    return characterData;
+        //}
     }
 }
