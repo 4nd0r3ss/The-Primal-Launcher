@@ -18,6 +18,7 @@ namespace Launcher
         #endregion       
 
         #region Background
+        public byte Tribe { get; set; }
         public byte Guardian { get; set; }
         public byte BirthMonth { get; set; }
         public byte BirthDay { get; set; }
@@ -25,7 +26,7 @@ namespace Launcher
         #endregion        
 
         #region Class/Job
-        public byte CurrentClassId { get; set; }
+        public byte CurrentJobId { get; set; }
         public byte CurrentJob { get; set; }        
         #endregion
         
@@ -81,25 +82,18 @@ namespace Launcher
             BirthDay = data[0x29];
             InitialTown = data[0x48];
             Model = Model.GetTribe(data[0x08]);
+            Tribe = data[0x08];
 
             //Starting class
-            CurrentClassId = data[0x2a];
-            Classes[CurrentClassId].Level = 1; //having a class level > 0 makes it active.
-            Classes[CurrentClassId].IsCurrent = true; //current class the player will start with.
+            CurrentJobId = data[0x2a];
+            Classes[CurrentJobId].Level = 1; //having a class level > 0 makes it active.
+            Classes[CurrentJobId].IsCurrent = true; //current class the player will start with.
 
-            GearGraphics = CharacterClass.GetInitialGearSet(Classes[CurrentClassId], Model.Id);
-            LoadDefaultItems(Model.Id, CurrentClassId);
+            GearGraphics = CharacterClass.GetInitialGearSet(Classes[CurrentJobId], Model.Id);
+            LoadDefaultItems(Model.Id, CurrentJobId);
+           
+            Position = Position.GetInitialPosition(InitialTown);
 
-            Position initial = Position.GetInitialPosition(InitialTown);
-            Position = new Position
-            {
-                ZoneId = initial.ZoneId,
-                X = initial.X,
-                Y = initial.Y,
-                Z = initial.Z,
-                R = initial.R
-            };
-                             
             //Lua
             LuaParameters = new LuaParameters
             {
@@ -120,16 +114,20 @@ namespace Launcher
 
         private void LoadDefaultItems(byte tribe, byte job)
         {
-            int setNumber = (tribe * 100) + job;
+            int equipmentSetNumber = (Tribe * 100) + CurrentJobId;
+            uint underShirtId = (uint)8040000 + Tribe;
+            uint underGarmentId = (uint)8060000 + Tribe;
+
             DataTable defaultSet = GameDataFile.Instance.GetGameData("boot_skillequip");
-            uint[] itemGraphicId = defaultSet.Select("id = '" + setNumber + "'")[0].ItemArray.Select(Convert.ToUInt32).ToArray();
+            uint[] itemGraphicIds = defaultSet.Select("id = '" + equipmentSetNumber + "'")[0].ItemArray.Select(Convert.ToUInt32).ToArray();
 
             GearGraphics = new GearGraphics();
-            GearGraphics.SetToSlots(itemGraphicId);
+            GearGraphics.SetToSlots(itemGraphicIds, underShirtId, underGarmentId);
 
             Inventory = new Inventory();
-            //Inventory = new Inventory();
-            Inventory.AddDefaultItems(itemGraphicId);
+            Inventory.AddDefaultItems(itemGraphicIds, underShirtId, underGarmentId);
+            //Inventory.AddDefaultItems(itemGraphicIds);
+
         }
 
         private List<KeyValuePair<uint, string>> Commands { get; } = new List<KeyValuePair<uint, string>>
@@ -206,7 +204,7 @@ namespace Launcher
             LoadActorScript(sender, LuaParameters);
 
             //Send inventory
-            Inventory.SendPackets(sender);
+            Inventory.SendInventories(sender);
 
             //Send properties
             WriteProperties(sender);
@@ -261,7 +259,7 @@ namespace Launcher
                 if(i<5 && i != 3) property.Add(string.Format("charaWork.property[{0}]", i), (byte)1);
 
             //Current class info
-            CharacterClass currentClass = Classes[CurrentClassId];
+            CharacterClass currentClass = Classes[CurrentJobId];
             property.Add("charaWork.parameterSave.hp[0]", currentClass.Hp); //always start with HP filled up
             property.Add("charaWork.parameterSave.hpMax[0]", currentClass.MaxHp);
             property.Add("charaWork.parameterSave.mp", currentClass.Mp); //always start with MP filled up

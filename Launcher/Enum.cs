@@ -41,6 +41,8 @@ namespace Launcher
         CommandResultX1 = 0x139,
         CommandResult = 0x13c,
         DoEmote = 0xe1,
+        ChangeJob = 0x1a4,
+        ParticleAnimation = 0xda,
 
         //Delete actors
         MassDeleteStart = 0x06,
@@ -54,6 +56,7 @@ namespace Launcher
 
         //text sheet 
         TextSheetMessage30b = 0x157,
+        TextSheetMessage50b = 0x15a,
 
         //World specific
         SetDalamud = 0x10,
@@ -128,14 +131,15 @@ namespace Launcher
         ChangeEquipment = 0x2ee9,
         MountChocobo = 0x2eee,
         UmountChocobo = 0x2eef,
+        EquipSouldStone = 0x2ef1,
 
         Logout = 0x5e9b,
         Teleport = 0x5e9c,
         DoEmote = 0x5e26,
         BattleStance = 0x5209,
         NormalStance = 0x520a,
-        
-        
+
+
     }
 
     public enum BGMMode

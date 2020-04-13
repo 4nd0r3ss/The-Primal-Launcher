@@ -166,12 +166,15 @@ namespace Launcher
             SendPacket(handler, ServerOpcode.SetAllStatus, data);
         }
 
-        public void SetSubState(Socket handler)
+        public void SetSubState(Socket handler, byte substate = 0)
         {
-            byte[] data = new byte[0x08];
             /* will be properly implemented later */
-            SendPacket(handler, ServerOpcode.SetSubState, data);
+            byte[] data = new byte[0x08];
 
+            if (substate > 0)
+                Buffer.BlockCopy(BitConverter.GetBytes(substate), 0, data, 0x03, 1);
+
+            SendPacket(handler, ServerOpcode.SetSubState, data);
         }
 
         public void SetMainState(Socket handler, MainState state, byte type)
@@ -277,12 +280,12 @@ namespace Launcher
                 { 0x13, GearGraphics.Neck },
                 { 0x14, GearGraphics.RightEar },
                 { 0x15, GearGraphics.LeftEar },
-                { 0x16, GearGraphics.LeftIndex },
-                { 0x17, GearGraphics.RightIndex },
-                { 0x18, GearGraphics.RightFinger },
-                { 0x19, GearGraphics.LeftFinger },
-                { 0x1a, 0 },
-                { 0x1b, 0 }
+                { 0x16, GearGraphics.Wrists },
+                { 0x17, 0 },
+                { 0x18, GearGraphics.LeftFinger },
+                { 0x19, GearGraphics.RightFinger },
+                { 0x1a, GearGraphics.RightIndex },
+                { 0x1b, GearGraphics.LeftIndex }
             };
 
             using (MemoryStream stream = new MemoryStream(data))

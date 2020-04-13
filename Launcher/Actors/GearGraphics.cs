@@ -19,13 +19,16 @@ namespace Launcher
         public uint Pouch { get; set; }
         public uint Head { get; set; }
         public uint Body { get; set; }
+        public uint Undershirt { get; set; }
         public uint Hands { get; set; }
         public uint Legs { get; set; }
+        public uint Undergarment { get; set; }
         public uint Feet { get; set; }
         public uint Waist { get; set; }
         public uint Neck { get; set; }
         public uint RightEar { get; set; }
         public uint LeftEar { get; set; }
+        public uint Wrists { get; set; }
         public uint LeftIndex { get; set; }
         public uint RightIndex { get; set; }
         public uint RightFinger { get; set; }
@@ -35,17 +38,19 @@ namespace Launcher
         /// Stores all default graphic id values to their respective slots. 
         /// </summary>
         /// <param name="graphicId"></param>
-        public void SetToSlots(uint[] graphicId)
+        public void SetToSlots(uint[] graphicId, uint underShirtId = 0, uint underGarmentId = 0)
         {
             MainWeapon = graphicId[1];
             SecondaryWeapon = graphicId[2];
             SPMainWeapon = graphicId[3];
             SPSecondaryWeapon = graphicId[4];
             Throwing = graphicId[5];
-            //Pack = graphicId[6];
+            //Pack = graphicId[6]; //this breaks the game
             Pouch = graphicId[7];
             Head = graphicId[8];
+            Undershirt = ItemGraphics.Body.First(x => x.Key == underShirtId).Value;
             Body = graphicId[9];
+            Undergarment = ItemGraphics.Legs.First(x => x.Key == underGarmentId).Value;
             Legs = graphicId[10];
             Hands = graphicId[11];
             Feet = graphicId[12];
@@ -53,11 +58,11 @@ namespace Launcher
             Neck = graphicId[14];
             RightEar = graphicId[15];
             LeftEar = graphicId[16];
-            LeftIndex = graphicId[17];
-            RightIndex = graphicId[18];
-            RightFinger = graphicId[19];
-            LeftFinger = graphicId[20];
-            //Unknown1 = graphicId[21];
+            Wrists = graphicId[17];
+            LeftIndex = graphicId[18];
+            RightIndex = graphicId[19];
+            RightFinger = graphicId[20];
+            LeftFinger = graphicId[21];
             //Unknown2 = graphicId[22];
         }
 
@@ -73,26 +78,28 @@ namespace Launcher
             {
                 using (BinaryWriter bw = new BinaryWriter(ms))
                 {
-                    bw.Write(MainWeapon);
-                    bw.Write(SecondaryWeapon);
-                    bw.Write(SPMainWeapon);
-                    bw.Write(SPSecondaryWeapon);
-                    bw.Write(Throwing);
-                    bw.Write(Pack);
-                    bw.Write(Pouch);
-                    bw.Write(Head);
-                    bw.Write(Body);
-                    bw.Write(Legs);
-                    bw.Write(Hands);
-                    bw.Write(Feet);
-                    bw.Write(Waist);
-                    bw.Write(Neck);
-                    bw.Write(RightEar);
-                    bw.Write(LeftEar);
-                    bw.Write(LeftIndex);
-                    bw.Write(RightIndex);
-                    bw.Write(RightFinger);
-                    bw.Write(LeftFinger);
+                    bw.Write(MainWeapon);           //0
+                    bw.Write(SecondaryWeapon);      //1
+                    bw.Write(SPMainWeapon);         //2
+                    bw.Write(SPSecondaryWeapon);    //3
+                    bw.Write(Throwing);             //4
+                    bw.Write(Pack);                 //5
+                    bw.Write(Pouch);                //6
+                    bw.Write(Head);                 //7
+                    bw.Write(Body);                 //8
+                    bw.Write(Legs);                 //9
+                    bw.Write(Hands);                //10
+                    bw.Write(Feet);                 //11
+                    bw.Write(Waist);                //12
+                    bw.Write(Neck);                 //13
+                    bw.Write(RightEar);             //14
+                    bw.Write(LeftEar);              //15
+                    bw.Write(Wrists);               //16                    
+                    bw.Write(0);                    //17 //TODO: include an user option to show bracelet graphics in both or one wrist only.
+                    bw.Write(RightFinger);          //18
+                    bw.Write(LeftFinger);           //19
+                    //bw.Write(RightIndex);           //20
+                    //bw.Write(LeftIndex);            //21  
                 }
             }
             return result;
@@ -118,7 +125,7 @@ namespace Launcher
                     Throwing = ItemGraphics.Throwing.First(x => x.Key == equipId).Value;
                     break;
                 case 5:
-                    
+
                     break;
                 case 6:
 
@@ -130,16 +137,22 @@ namespace Launcher
                     Head = ItemGraphics.Head.First(x => x.Key == equipId).Value;
                     break;
                 case 9:
-                    Body = ItemGraphics.Body.First(x => x.Key == equipId).Value;
+                    Undershirt = ItemGraphics.Body.First(x => x.Key == equipId).Value;
                     break;
                 case 10:
-                    Body = ItemGraphics.Body.First(x => x.Key == equipId).Value;
+                    if (equipId == 0)
+                        Body = Undershirt;
+                    else
+                        Body = ItemGraphics.Body.First(x => x.Key == equipId).Value;
                     break;
                 case 11:
-                    Legs = ItemGraphics.Legs.First(x => x.Key == equipId).Value;
+                    Undergarment = ItemGraphics.Legs.First(x => x.Key == equipId).Value;
                     break;
                 case 12:
-                    Legs = ItemGraphics.Legs.First(x => x.Key == equipId).Value;
+                    if (equipId == 0)
+                        Legs = Undergarment;
+                    else
+                        Legs = ItemGraphics.Legs.First(x => x.Key == equipId).Value;
                     break;
                 case 13:
                     Hands = ItemGraphics.Hands.First(x => x.Key == equipId).Value;
@@ -153,7 +166,7 @@ namespace Launcher
                 case 16:
                     Neck = ItemGraphics.Neck.First(x => x.Key == equipId).Value;
                     break;
-                case 17:                   
+                case 17:
                     uint graphId = ItemGraphics.Ears.First(x => x.Key == equipId).Value;
                     LeftEar = graphId;
                     RightEar = graphId;
@@ -162,15 +175,18 @@ namespace Launcher
 
                     break;
                 case 19:
-
+                    Wrists = ItemGraphics.Wrist.First(x => x.Key == equipId).Value;
                     break;
                 case 20:
 
-                    break;              
+                    break;
+                case 21:
+                    RightFinger = ItemGraphics.Finger.First(x => x.Key == equipId).Value;
+                    break;
+                case 22:
+                    LeftFinger = ItemGraphics.Finger.First(x => x.Key == equipId).Value;
+                    break;
             }
-
-
-
         }
     }
 }

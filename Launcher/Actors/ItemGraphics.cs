@@ -2743,7 +2743,7 @@ namespace Launcher
 
         public static Dictionary<uint, uint> Hands = new Dictionary<uint, uint>
         {
-            {0,0},
+            {0,1024}, //default graphic (no equipment in slot)
             {8070001, 2304},
             {8070002, 2080},
             {8070003, 2081},
@@ -3129,7 +3129,7 @@ namespace Launcher
 
         public static Dictionary<uint, uint> Feet = new Dictionary<uint, uint>
         {
-            {0,0},
+            {0,1152}, //default graphic (no equipment in slot)
             {8080001, 2240},
             {8080002, 2241},
             {8080003, 2242},
