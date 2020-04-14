@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Data;
 using System.IO;
 using System.Net.Sockets;
@@ -27,11 +28,12 @@ namespace Launcher
 
         #region Class/Job
         public byte CurrentJobId { get; set; }
-        public byte CurrentJob { get; set; }        
+        public byte CurrentJob { get; set; } //specialized job?  
         #endregion
         
         public Inventory Inventory { get; set; }
-        public Dictionary<byte, CharacterClass> Classes { get; set; } = CharacterClass.GetClassList();        
+        public Dictionary<byte, Job> Jobs { get; set; } = Job.LoadAll();
+        public OrderedDictionary GeneralParameters { get; set; } = new OrderedDictionary();
 
         public void Setup(byte[] data)
         {
@@ -44,9 +46,7 @@ namespace Launcher
             string tmp = Encoding.ASCII.GetString(info).Trim(new[] { '\0' }).Replace('-', '+').Replace('_', '/');
 
             //decoded packet info
-            data = Convert.FromBase64String(tmp);
-
-            File.WriteAllBytes("charcreate.txt", data);
+            data = Convert.FromBase64String(tmp);            
 
             //General
             Size = data[0x09];
@@ -81,17 +81,16 @@ namespace Launcher
             BirthMonth = data[0x28];
             BirthDay = data[0x29];
             InitialTown = data[0x48];
-            Model = Model.GetTribe(data[0x08]);
             Tribe = data[0x08];
-
+            GetBaseModel(Tribe);
+            GeneralParameters = GeneralParameter.Get(Tribe);
+            
             //Starting class
             CurrentJobId = data[0x2a];
-            Classes[CurrentJobId].Level = 1; //having a class level > 0 makes it active.
-            Classes[CurrentJobId].IsCurrent = true; //current class the player will start with.
-
-            GearGraphics = CharacterClass.GetInitialGearSet(Classes[CurrentJobId], Model.Id);
-            LoadDefaultItems(Model.Id, CurrentJobId);
-           
+            Jobs[CurrentJobId].Level = 50; //having a class level > 0 makes it active.
+            Jobs[CurrentJobId].IsCurrent = true; //current class the player will start with.                        
+            LoadInitialEquipment();  
+            
             Position = Position.GetInitialPosition(InitialTown);
 
             //Lua
@@ -112,22 +111,20 @@ namespace Launcher
             LuaParameters.Add(true);
         }
 
-        private void LoadDefaultItems(byte tribe, byte job)
+        private void LoadInitialEquipment()
         {
-            int equipmentSetNumber = (Tribe * 100) + CurrentJobId;
+            int equipmentSetNumber = (Tribe * 100) + CurrentJobId;            
             uint underShirtId = (uint)8040000 + Tribe;
             uint underGarmentId = (uint)8060000 + Tribe;
 
-            DataTable defaultSet = GameDataFile.Instance.GetGameData("boot_skillequip");
+            DataTable defaultSet = GameData.Instance.GetGameData("boot_skillequip");
             uint[] itemGraphicIds = defaultSet.Select("id = '" + equipmentSetNumber + "'")[0].ItemArray.Select(Convert.ToUInt32).ToArray();
 
             GearGraphics = new GearGraphics();
             GearGraphics.SetToSlots(itemGraphicIds, underShirtId, underGarmentId);
 
-            Inventory = new Inventory();
+            Inventory = new Inventory();           
             Inventory.AddDefaultItems(itemGraphicIds, underShirtId, underGarmentId);
-            //Inventory.AddDefaultItems(itemGraphicIds);
-
         }
 
         private List<KeyValuePair<uint, string>> Commands { get; } = new List<KeyValuePair<uint, string>>
@@ -259,12 +256,13 @@ namespace Launcher
                 if(i<5 && i != 3) property.Add(string.Format("charaWork.property[{0}]", i), (byte)1);
 
             //Current class info
-            CharacterClass currentClass = Classes[CurrentJobId];
+            Job currentClass = Jobs[CurrentJobId];
             property.Add("charaWork.parameterSave.hp[0]", currentClass.Hp); //always start with HP filled up
             property.Add("charaWork.parameterSave.hpMax[0]", currentClass.MaxHp);
             property.Add("charaWork.parameterSave.mp", currentClass.Mp); //always start with MP filled up
             property.Add("charaWork.parameterSave.mpMax", currentClass.MaxMp);
             property.Add("charaWork.parameterTemp.tp", currentClass.Tp);
+
             property.Add("charaWork.parameterSave.state_mainSkill[0]", currentClass.Id);
             property.Add("charaWork.parameterSave.state_mainSkillLevel", (short)currentClass.Level);
 
@@ -272,8 +270,8 @@ namespace Launcher
             //property.Add(sender, Id, string.Format("charaWork.statusShownTime[{0}]", i), ); 
 
             //Write character's parameters
-            for (int i = 0; i < Model.InitialParameters.Length; i++)
-                property.Add(string.Format("charaWork.battleTemp.generalParameter[{0}]", i), Model.InitialParameters[i]);
+            for (int i = 0; i < GeneralParameters.Count; i++)
+                property.Add(string.Format("charaWork.battleTemp.generalParameter[{0}]", i), GeneralParameters[i]);
 
             //unknown
             property.Add("charaWork.battleTemp.castGauge_speed[0]", 1.0f);
@@ -281,8 +279,23 @@ namespace Launcher
             property.Add("charaWork.commandBorder", (byte)0x20);
             property.Add("charaWork.battleSave.negotiationFlag[0]", true);
 
-            //Command table -- figure this out
+            //Add character commands
+            //DataTable commandTable = GameData.Instance.GetGameData("command");
+            //DataRow[] commandRows = commandTable.Select("(id > 0 AND id < 23000) OR (id > 24000 AND id < 26000)"); //(id > 0 AND id < 23000) OR (id > 24000 AND id < 26000)
+
+            //for (int i = 0; i < commandRows.Length; i++)
+            //{
+            //    uint commandId = (uint)commandRows[i].ItemArray[0];
+            //    property.Add(string.Format("charaWork.command[{0}]", i), (0xA0F00000 | (ushort)commandId));
+            //}
+
+
+            //for (int i = 0; i < commandRows.Length; i++)
+            //    property.Add(string.Format("charaWork.commandCategory[{0}]", i), (byte)1);
+
+
             uint[] command = new uint[64];
+            
             command[0] = 0xA0F00000 | 21001;
             command[1] = 0xA0F00000 | 21001;
             command[2] = 0xA0F00000 | 21002;
@@ -299,18 +312,29 @@ namespace Launcher
             command[13] = 0xA0F00000 | 22013;
             command[14] = 0xA0F00000 | 29497;
             command[15] = 0xA0F00000 | 22015;
-            command[32] = 0xA0F00000 | 27191;
-            command[33] = 0xA0F00000 | 22302;
-            command[34] = 0xA0F00000 | 28466;
+            //command[15] = 0xA0F00000 | 22001; //synthesize
+            //command[16] = 0xA0F00000 | 24312; //sit
+            //command[17] = 0xA0F00000 | 24220; //teleport
+            //command[18] = 0xA0F00000 | 24101; //talk
+            //command[19] = 0xA0F00000 | 24238; //check
+                       
+            //hotbar
+            command[32] = 0xA0F00000 | 27150; //index 32 ~ 61 - hotbar
+            
 
-            for(int i = 0; i < command.Length; i++)
-                if(command[i] != 0) property.Add(string.Format("charaWork.command[{0}]", i), command[i]);
+            //????
+            //command[62] = 0xA0F00000 | 27150;
+            //command[63] = 0xA0F00000 | 27150;        
 
-            for(int i = 0; i < 64; i++)
+            for (int i = 0; i < command.Length; i++)
+                if (command[i] != 0) property.Add(string.Format("charaWork.command[{0}]", i), command[i]);
+
+            for (int i = 0; i < 64; i++)
                 property.Add(string.Format("charaWork.commandCategory[{0}]", i), (byte)1);
+                       
 
             //for(int i = 0; i < 4096; i++)
-                property.Add(string.Format("charaWork.commandAcquired[{0}]", 1150), true);
+            property.Add(string.Format("charaWork.commandAcquired[{0}]", 1150), true);
 
             for (int i = 0; i < 36; i++)
                 property.Add(string.Format("charaWork.additionalCommandAcquired[{0}]", i), false);
@@ -329,7 +353,7 @@ namespace Launcher
             property.Add("charaWork.depictionJudge", 0xa0f50911);
 
             //for (int i = 0; i < 40; i++)
-                //property.Add(string.Format("playerWork.questScenario[{0}]", (uint)0), true);
+                //property.Add(string.Format("playerWork.questScenario[{0}]", (uint)1), true);
 
             //GuildLeve - local
             //for (int i = 0; i < 40; i++)
@@ -363,7 +387,7 @@ namespace Launcher
             property.Add("playerWork.restBonusExpRate", 0f);
 
             //From PlayerCharacter obj
-            property.Add("playerWork.tribe", Model.Id);
+            property.Add("playerWork.tribe", Tribe);
             property.Add("playerWork.guardian", Guardian);
             property.Add("playerWork.birthdayMonth", BirthMonth);
             property.Add("playerWork.birthdayDay", BirthDay);
@@ -487,6 +511,171 @@ namespace Launcher
             }            
         }
 
+        public void EquipSoulStone(Socket sender)
+        {
+            SendPacket(sender, ServerOpcode.ChangeJob, new byte[] { 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
 
+            SendPacket(sender, ServerOpcode.ParticleAnimation, new byte[] { 0x29, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00 });
+
+            //send text sheet should be a method in the world class.
+            byte[] text = new byte[]
+            {
+                0x41, 0x29, 0x9B, 0x02, 0x01, 0x00, 0xF8, 0x5F, 0x97, 0x75, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x06, 0x02, 0x9B, 0x29, 0x41, 0x00, 0x00, 0x00, 0x00, 0x10,
+                0x0F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+            };
+            Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, text, 0, 4);
+            Buffer.BlockCopy(BitConverter.GetBytes(Id).Reverse().ToArray(), 0, text, 0x17, 4);            
+            SendPacket(sender, ServerOpcode.TextSheetMessage50b, text, sourceId: 0x5ff80001);
+
+            SetSubState(sender, 0x0c);
+            SetSpeeds(sender);
+            SetSpeeds(sender);
+            SetSpeeds(sender);
+
+            byte[] commandResult = new byte[]
+            {
+                0x41, 0x29, 0x9B, 0x02, 0x62, 0x00, 0x00, 0x7C, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x01, 0x00, 0x00, 0x00, 0xF1, 0x2E, 0x10, 0x08, 0x41, 0x29, 0x9B, 0x02, 0x00, 0x00, 0x00, 0x00,
+                0x01, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00
+            };
+            Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, text, 0, 4);
+            Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, text, 0x28, 4);
+        }
+
+        public void CharaWorkExp(Socket sender)
+        {
+            Inventory.Update(sender);
+
+            MemoryStream jobLevels = new MemoryStream();
+            MemoryStream jobLevelCaps = new MemoryStream();
+
+            BinaryWriter jobLevelsWriter = new BinaryWriter(jobLevels);
+            BinaryWriter jobLevelCapsWriter = new BinaryWriter(jobLevelCaps);
+            
+            foreach (var item in Jobs)
+            {
+                Job job = item.Value;
+                jobLevelsWriter.Write(job.Level);
+                jobLevelCapsWriter.Write(job.LevelCap);
+            }
+
+            Property property = new Property(sender, Id);
+            property.Add("charaWork.battleSave.skillLevel", jobLevels.ToArray());
+            property.Add("charaWork.battleSave.skillLevelCap", jobLevelCaps.ToArray());
+            property.FinishWriting();
+
+            //cleanup
+            jobLevelsWriter.Dispose();
+            jobLevelCapsWriter.Dispose();   
+            jobLevels.Dispose();
+            jobLevelCaps.Dispose();
+        }
+    }
+
+    [Serializable]
+    public class GeneralParameter
+    {
+        //static initial attribute values. 
+        //TODO: try to find these values in the game data files.
+        private static List<ushort[]> Initial = new List<ushort[]>
+        {
+            //--, --, --, str, vit, dex, int, mnd, pie, fir, ice, wnd, ear, lit, wat, acc, eva, att, def, --, --, --, --, attMagP, heaMagP, enhMagP, enfMagP, magAcc, magEva
+            new ushort[]{0,0,0,16,15,14,16,13,16,16,13,15,15,15,16,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, //midlander
+            new ushort[]{0,0,0,18,17,15,13,15,12,15,16,14,14,18,13,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, //highlander
+            new ushort[]{0,0,0,14,13,18,17,12,16,12,14,18,17,14,15,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, //wildwood
+            new ushort[]{0,0,0,15,14,15,18,15,13,14,16,12,17,15,16,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, //duskwight
+            new ushort[]{0,0,0,13,13,17,16,15,16,14,13,15,16,17,15,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, //plainsfolk
+            new ushort[]{0,0,0,12,12,15,16,17,18,17,12,16,18,15,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, //dunesfolk
+            new ushort[]{0,0,0,16,15,17,13,14,15,18,15,13,15,12,17,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, //seeker of the sun
+            new ushort[]{0,0,0,13,12,16,14,18,17,13,18,15,14,16,14,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, //keeper of the moon
+            new ushort[]{0,0,0,17,18,13,12,16,14,13,17,17,12,13,18,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, //sea wolf
+            new ushort[]{0,0,0,15,16,12,15,17,15,18,14,16,13,14,18,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, //hellsguard
+        };
+
+        /// <summary>
+        /// This method creates a dictionary with all the attricute points alloted to a slot identified by name. It was modeled like that so the values can be edited.
+        /// </summary>
+        /// <param name="tribeId"></param>
+        /// <returns></returns>
+        public static OrderedDictionary Get(byte tribeId)
+        {
+            int index = 0; //midlander male, female
+
+            switch (tribeId)
+            {
+                case 3: //highlander male
+                    index = 1;
+                    break;
+                case 4: //wildwood male
+                case 5: //wildwood female
+                    index = 2;
+                    break;
+                case 6: //duskwight male 
+                case 7: //duskwight female
+                    index = 3;
+                    break;
+                case 8: //plainsfolk male
+                case 9: //plainsfolk female
+                    index = 4;
+                    break;
+                case 10: //dunesfolk male
+                case 11: //dunesfolk female
+                    index = 5;
+                    break;
+                case 12: //seeker of the sun
+                    index = 6;
+                    break;
+                case 13: //keeper of the moon
+                    index = 7;
+                    break;
+                case 14: //sea wolf
+                    index = 8;
+                    break;
+                case 15: //hellsguard     
+                    index = 9;
+                    break;               
+            }
+
+            return new OrderedDictionary
+            {
+                {"unknown1", Initial[index][0]},
+                {"unknown2", Initial[index][1]},
+                {"unknown3", Initial[index][2]},
+
+                {"strength", Initial[index][3]},
+                {"vitality", Initial[index][4]},
+                {"dexterity", Initial[index][5]},
+                {"intelligence", Initial[index][6]},
+                {"mind", Initial[index][7]},
+                {"piety", Initial[index][8]},
+
+                {"fire", Initial[index][9]},
+                {"ice", Initial[index][10]},
+                {"wind", Initial[index][11]},
+                {"earth", Initial[index][12]},
+                {"lightning", Initial[index][13]},
+                {"water", Initial[index][14]},
+
+                {"accuracy", Initial[index][15]},
+                {"evasion", Initial[index][16]},
+                {"attack", Initial[index][17]},
+                {"defense", Initial[index][18]},
+
+                {"unknown4", Initial[index][19]},
+                {"unknown5", Initial[index][20]},
+                {"unknown6", Initial[index][21]},
+                {"unknown7", Initial[index][22]},
+
+                {"attack magic potency", Initial[index][23]},
+                {"healing magic potency", Initial[index][24]},
+                {"enhance magic potency", Initial[index][25]},
+                {"enfeeble magic potency", Initial[index][26]},
+
+                {"magic accuracy", Initial[index][27]},
+                {"magic avasion", Initial[index][28]},
+            };
+        }
     }
 }

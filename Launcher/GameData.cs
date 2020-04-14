@@ -7,34 +7,34 @@ using System.Xml;
 
 namespace Launcher
 {
-    class GameDataFile
-    {        
+    class GameData
+    {
         public Dictionary<string, uint> Index { get; set; }
         public string Language { get; set; } = "en"; //default lang is english. Opitons are: ja, en, de, fr, chs.
 
-        private static GameDataFile _instance = null;
+        private static GameData _instance = null;
         private static readonly object _padlock = new object();
 
-        public static GameDataFile Instance
+        public static GameData Instance
         {
             get
             {
                 lock (_padlock)
                 {
                     if (_instance == null)
-                        _instance = new GameDataFile();
+                        _instance = new GameData();
 
                     return _instance;
                 }
             }
         }
 
-        private GameDataFile()
+        private GameData()
         {
             LoadGameDataIndex();
         }
 
-        private FileStream GetFilestream(string file) => new FileStream(GetFilePath(Convert.ToUInt32(file)), FileMode.Open, FileAccess.Read, FileShare.ReadWrite);        
+        private FileStream GetFilestream(string file) => new FileStream(GetFilePath(Convert.ToUInt32(file)), FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
 
         public DataTable GetGameData(string indexName)
         {

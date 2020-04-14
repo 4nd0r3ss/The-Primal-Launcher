@@ -14,6 +14,7 @@
     <Deterministic>true</Deterministic>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -24,10 +25,10 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationRevision>1</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
+    <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -50,6 +51,18 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestCertificateThumbprint>003AD3DBB7FD86D6312ACCA55FF2E096384232C7</ManifestCertificateThumbprint>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestKeyFile>Launcher_TemporaryKey.pfx</ManifestKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <GenerateManifests>true</GenerateManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignManifests>true</SignManifests>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Ionic.Zlib, Version=1.9.1.5, Culture=neutral, PublicKeyToken=edbe51ad942a3f5c, processorArchitecture=MSIL">
@@ -76,8 +89,7 @@
     <Compile Include="BitField.cs" />
     <Compile Include="Blowfish.cs" />
     <Compile Include="Actors\Aetheryte.cs" />
-    <Compile Include="Actors\Appearance.cs" />
-    <Compile Include="Actors\CharacterClass.cs" />
+    <Compile Include="Actors\Job.cs" />
     <Compile Include="Actors\Group.cs" />
     <Compile Include="Actors\Inventory.cs" />
     <Compile Include="Actors\Property.cs" />
@@ -89,7 +101,7 @@
       <DependentUpon>Downloader.cs</DependentUpon>
     </Compile>
     <Compile Include="Enum.cs" />
-    <Compile Include="GameDataFile.cs" />
+    <Compile Include="GameData.cs" />
     <Compile Include="Packets\GamePacket.cs" />
     <Compile Include="Packets\HttpPacket.cs" />
     <Compile Include="Packets\MessagePacket.cs" />
@@ -178,6 +190,7 @@
     <EmbeddedResource Include="ucLogWindow.resx">
       <DependentUpon>ucLogWindow.cs</DependentUpon>
     </EmbeddedResource>
+    <None Include="Launcher_TemporaryKey.pfx" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

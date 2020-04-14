@@ -138,8 +138,8 @@ namespace Launcher
         DoEmote = 0x5e26,
         BattleStance = 0x5209,
         NormalStance = 0x520a,
-
-
+        
+        
     }
 
     public enum BGMMode

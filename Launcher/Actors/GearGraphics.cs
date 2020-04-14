@@ -38,7 +38,7 @@ namespace Launcher
         /// Stores all default graphic id values to their respective slots. 
         /// </summary>
         /// <param name="graphicId"></param>
-        public void SetToSlots(uint[] graphicId, uint underShirtId = 0, uint underGarmentId = 0)
+        public void SetToSlots(uint[] graphicId, uint underShirtId, uint underGarmentId)
         {
             MainWeapon = graphicId[1];
             SecondaryWeapon = graphicId[2];
@@ -62,7 +62,7 @@ namespace Launcher
             LeftIndex = graphicId[18];
             RightIndex = graphicId[19];
             RightFinger = graphicId[20];
-            LeftFinger = graphicId[21];
+            LeftFinger = graphicId[21];            
             //Unknown2 = graphicId[22];
         }
 
@@ -99,7 +99,8 @@ namespace Launcher
                     bw.Write(RightFinger);          //18
                     bw.Write(LeftFinger);           //19
                     //bw.Write(RightIndex);           //20
-                    //bw.Write(LeftIndex);            //21  
+                    //bw.Write(LeftIndex);            //21                    
+                    
                 }
             }
             return result;
@@ -125,7 +126,7 @@ namespace Launcher
                     Throwing = ItemGraphics.Throwing.First(x => x.Key == equipId).Value;
                     break;
                 case 5:
-
+                    
                     break;
                 case 6:
 
@@ -166,15 +167,15 @@ namespace Launcher
                 case 16:
                     Neck = ItemGraphics.Neck.First(x => x.Key == equipId).Value;
                     break;
-                case 17:
+                case 17:                   
                     uint graphId = ItemGraphics.Ears.First(x => x.Key == equipId).Value;
                     LeftEar = graphId;
                     RightEar = graphId;
                     break;
                 case 18:
-
+                    
                     break;
-                case 19:
+                case 19:                   
                     Wrists = ItemGraphics.Wrist.First(x => x.Key == equipId).Value;
                     break;
                 case 20:
@@ -187,6 +188,9 @@ namespace Launcher
                     LeftFinger = ItemGraphics.Finger.First(x => x.Key == equipId).Value;
                     break;
             }
+
+
+
         }
     }
 }

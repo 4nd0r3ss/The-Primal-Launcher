@@ -10,8 +10,7 @@ namespace Launcher
     public class Aetheryte : Actor
     {
         public string MapName { get; set; }
-        public uint PrivilegeLevel { get; set; }
-        public uint BaseModel { get; set; }
+        public uint PrivilegeLevel { get; set; }       
         private float PushEventRadius { get; set; }
         //Aetherytes have many attributes in common, so we'll initialize base class' fields with all common values 
         public Aetheryte(uint actorId, uint baseModel, Position position, uint body = 1024)
@@ -22,7 +21,7 @@ namespace Launcher
             SkinColor = 1;
             EyeColor = 1;
             PropFlag = 3;
-            Model = new Model { Type = baseModel };
+            BaseModel = baseModel;
             AppearanceCode = 0x02;
             Position = position;
             GearGraphics = new GearGraphics { Body = body }; //body is the only appearance slot that has info for aetherytes.

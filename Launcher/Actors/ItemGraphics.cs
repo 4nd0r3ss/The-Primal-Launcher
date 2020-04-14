@@ -1423,7 +1423,7 @@ namespace Launcher
 
         public static Dictionary<uint, uint> Body = new Dictionary<uint, uint>
         {
-            {0,0},
+            {0,0 },
             {8030001, 2336},
             {8030002, 2337},
             {8030003, 2338},
@@ -2236,7 +2236,7 @@ namespace Launcher
 
         public static Dictionary<uint, uint> Legs = new Dictionary<uint, uint>
         {
-            {0,0},
+            {0,0 }, //server crash preventing
             {8050001, 2048},
             {8050002, 2051},
             {8050003, 2049},

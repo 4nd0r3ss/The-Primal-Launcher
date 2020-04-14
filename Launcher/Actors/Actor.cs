@@ -5,6 +5,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using System.Data;
 
 namespace Launcher
 {
@@ -36,9 +37,8 @@ namespace Launcher
         #endregion        
 
         public Face Face { get; set; }
-
         public GearGraphics GearGraphics { get; set; } = new GearGraphics();
-        public Model Model { get; set; } = Model.GetTribe(0); //objects wont have a tribe, so we load zeros by default.
+        public uint BaseModel { get; set; } //objects wont have a tribe, so we load zeros by default.
         public uint AppearanceCode { get; set; }
 
         public Position Position { get; set; } = new Position();
@@ -170,7 +170,7 @@ namespace Launcher
         {
             /* will be properly implemented later */
             byte[] data = new byte[0x08];
-
+            
             if (substate > 0)
                 Buffer.BlockCopy(BitConverter.GetBytes(substate), 0, data, 0x03, 1);
 
@@ -258,7 +258,8 @@ namespace Launcher
 
             Dictionary<uint, uint> AppearanceSlots = new Dictionary<uint, uint>
             {
-                { 0x00, Model.Type }, //slot number, value
+                //slot number, value
+                { 0x00, BaseModel }, 
                 { 0x01, AppearanceCode },
                 { 0x02, (uint)(SkinColor | HairColor << 10 | EyeColor << 20) },
                 { 0x03, BitField.PrimitiveConversion.ToUInt32(Face) },
@@ -428,6 +429,14 @@ namespace Launcher
 
             //actorName = String.Format("{0}_{1}_{2}@{3:X3}{4:X2}", className, zoneName, classNumber, zoneId, privLevel);
         }
+
+        public void GetBaseModel(byte id)
+        {
+            DataTable itemNames = GameData.Instance.GetGameData("tribe");
+            DataRow[] selected = itemNames.Select("id = '" + id + "'");
+            int model = (int)selected[0][1]; //had to do this as it was throwing cast error
+            BaseModel = (uint)model;
+        }
     }
 
     /// <summary>
@@ -558,5 +567,32 @@ namespace Launcher
             return input;
         }
         #endregion  
-    }   
+    }
+
+    [Serializable]
+    public struct Face
+    {
+        [BitField.BitfieldLength(5)]
+        public uint Characteristics;
+        [BitField.BitfieldLength(3)]
+        public uint CharacteristicsColor;
+        [BitField.BitfieldLength(6)]
+        public uint Type;
+        [BitField.BitfieldLength(2)]
+        public uint Ears;
+        [BitField.BitfieldLength(2)]
+        public uint Mouth;
+        [BitField.BitfieldLength(2)]
+        public uint Features;
+        [BitField.BitfieldLength(3)]
+        public uint Nose;
+        [BitField.BitfieldLength(3)]
+        public uint EyeShape;
+        [BitField.BitfieldLength(1)]
+        public uint IrisSize;
+        [BitField.BitfieldLength(3)]
+        public uint EyeBrows;
+        [BitField.BitfieldLength(2)]
+        public uint Unknown;
+    }
 }

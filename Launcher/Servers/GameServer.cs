@@ -148,15 +148,15 @@ namespace Launcher
                     {
                         case "charaWork/exp":
                             _log.Warning("Request: " + request + " for target: 0x" + targetId.ToString("X") + " sequence: 0x" +sequence.ToString("X"));
-
-                            UserFactory.Instance.User.Character.Inventory.Update(_connection.socket);
+                            File.WriteAllBytes("charawork-exp_" + DateTime.Now.Ticks.ToString() + ".txt", subpacket.Data);
 
                             if (DataRequestResponseQueue.Count == 0)
                             {
+                                UserFactory.Instance.User.Character.Inventory.Update(_connection.socket);
 
                                 byte[] data = new byte[]
                                 {
-                                0x72, 0x5F, 0x38, 0x43, 0x39, 0x2F, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00,
+                                0x72, 0x5F, 0x38, 0x43, 0x39, 0x2F, 0x00, 0x00, 0x00, 0x00, 0x32, 0x00, 0x00, 0x00, 0x00, 0x00,
                                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -173,7 +173,8 @@ namespace Launcher
                                     Data = data
                                 };
                                 Packet packet = new Packet(new SubPacket(gp) { SourceId = UserFactory.Instance.User.Character.Id, TargetId = UserFactory.Instance.User.Character.Id });
-                                //_connection.Send(packet.ToBytes());
+                                _connection.socket.Send(packet.ToBytes());
+
                                 //DataRequestResponseQueue.Enqueue(packet);
 
                                 ////////////////////////////////////
@@ -196,9 +197,8 @@ namespace Launcher
                                     Opcode = 0x137,
                                     Data = data
                                 };
-                                packet = new Packet(new SubPacket(gp) { SourceId = UserFactory.Instance.User.Character.Id, TargetId = UserFactory.Instance.User.Character.Id });
-                                //_connection.Send(packet.ToBytes());
-                                //DataRequestResponseQueue.Enqueue(packet);
+                                packet = new Packet(new SubPacket(gp) { SourceId = UserFactory.Instance.User.Character.Id, TargetId = UserFactory.Instance.User.Character.Id });                                
+                                DataRequestResponseQueue.Enqueue(packet);
 
                                 ///////////////////////////////////////////
                                 ///
@@ -220,9 +220,8 @@ namespace Launcher
                                     Opcode = 0x137,
                                     Data = data
                                 };
-                                packet = new Packet(new SubPacket(gp) { SourceId = UserFactory.Instance.User.Character.Id, TargetId = UserFactory.Instance.User.Character.Id });
-                                //_connection.Send(packet.ToBytes());
-                                //DataRequestResponseQueue.Enqueue(packet);
+                                packet = new Packet(new SubPacket(gp) { SourceId = UserFactory.Instance.User.Character.Id, TargetId = UserFactory.Instance.User.Character.Id });                                
+                                DataRequestResponseQueue.Enqueue(packet);
                                 ///////////////////////////////////////
                                 ///
                                 data = new byte[]
@@ -243,16 +242,11 @@ namespace Launcher
                                     Opcode = 0x137,
                                     Data = data
                                 };
-                                packet = new Packet(new SubPacket(gp) { SourceId = UserFactory.Instance.User.Character.Id, TargetId = UserFactory.Instance.User.Character.Id });
-                                //_connection.Send(packet.ToBytes());
-                                //DataRequestResponseQueue.Enqueue(packet);
-                            }
-                            else
-                            {
-                               //maybe verify if sequence number is the same? after the second packet, the remaining sequence numbers are the same.
-                            }
+                                packet = new Packet(new SubPacket(gp) { SourceId = UserFactory.Instance.User.Character.Id, TargetId = UserFactory.Instance.User.Character.Id });                                
+                                DataRequestResponseQueue.Enqueue(packet);
+                            }                           
 
-                            //_connection.socket.Send(DataRequestResponseQueue.Dequeue().ToBytes());
+                            _connection.socket.Send(DataRequestResponseQueue.Dequeue().ToBytes());
 
                             break;
                     }
@@ -328,7 +322,8 @@ namespace Launcher
             //File.WriteAllBytes(command + ".txt", data);
 
             //_log.Warning("Received event request: 0x12d");
-            //_log.Warning("event: " + eventType + ", command: " + command.ToString("X2"));
+            _log.Warning("event: " + eventType + ", command: " + command.ToString("X2"));
+            File.WriteAllBytes("eventrequest_" + DateTime.Now.Ticks.ToString() + ".txt", data);
 
             if (eventType.IndexOf("commandForced") >= 0)
             {
@@ -367,6 +362,9 @@ namespace Launcher
 
                     case (ushort)Command.ChangeEquipment:
                         playerCharacter.Inventory.SwitchGear(_connection.socket, data);
+                        break;
+                    case (ushort)Command.EquipSouldStone:
+                        playerCharacter.EquipSoulStone(_connection.socket);
                         break;
                 }
             }

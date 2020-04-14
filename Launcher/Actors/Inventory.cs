@@ -17,9 +17,9 @@ namespace Launcher
         public Dictionary<ushort, object> Loot = new Dictionary<ushort, object>();
         public Dictionary<ushort, object> MeldRequest = new Dictionary<ushort, object>();
         public Dictionary<ushort, object> Bazaar = new Dictionary<ushort, object>();
-
+        
         public Dictionary<ushort, ushort> GearSlots = new Dictionary<ushort, ushort>();
-
+        
         public Inventory()
         {
             AddEmptySlots(ref Bag, InventoryMaxSlots.Bag);
@@ -27,7 +27,7 @@ namespace Launcher
             AddEmptySlots(ref KeyItems, InventoryMaxSlots.KeyItems);
             AddEmptySlots(ref Loot, InventoryMaxSlots.Loot);
             AddEmptySlots(ref MeldRequest, InventoryMaxSlots.MeldRequest);
-            AddEmptySlots(ref Bazaar, InventoryMaxSlots.Bazaar);
+            AddEmptySlots(ref Bazaar, InventoryMaxSlots.Bazaar);                      
         }
 
         #region Packet Handling
@@ -95,7 +95,7 @@ namespace Launcher
         /// <param name="quantity"></param>
         public void AddItem(ref Dictionary<ushort, object> inventory, string itemName, uint quantity, Socket sender = null)
         {
-            DataTable itemNames = GameDataFile.Instance.GetGameData("xtx/itemName");
+            DataTable itemNames = GameData.Instance.GetGameData("xtx/itemName");
             DataRow[] selected = itemNames.Select("strc0 = '" + itemName + "'");
 
             if (selected.Length > 0)
@@ -114,8 +114,8 @@ namespace Launcher
         /// <param name="sender"></param>
         public void AddItemById(ref Dictionary<ushort, object> inventory, uint itemId, uint quantity, Socket sender = null)
         {
-            DataTable itemsData = GameDataFile.Instance.GetGameData("itemData");
-            DataTable itemsStack = GameDataFile.Instance.GetGameData("_item");
+            DataTable itemsData = GameData.Instance.GetGameData("itemData");
+            DataTable itemsStack = GameData.Instance.GetGameData("_item");
 
             DataRow itemData = itemsData.Select("id = '" + itemId + "'")[0];
             DataRow itemStack = itemsStack.Select("id = '" + itemId + "'")[0];
@@ -192,13 +192,13 @@ namespace Launcher
         /// </summary>
         /// <param name="graphId">An arrray with selected class default equipment graphic codes from game data table boot_skillequip</param>
         public void AddDefaultItems(uint[] graphId, uint underShirtId, uint underGarmentId)
-        {
+        {          
             //equipment
             AddEquipmentPiece(ItemGraphics.Weapon, 0, graphicId: graphId[1]);
             //AddDefaultItem(ItemGraphics.Weapon, graphId[2]); //leaving this on crashes the game. Seems that no class starts with a secondary weapon/tool. The value for archer/bard is for quiver graphics only.
-            AddEquipmentPiece(ItemGraphics.Head, 8, graphicId: graphId[8]);
+            AddEquipmentPiece(ItemGraphics.Head, 8, graphicId: graphId[8]);            
             AddEquipmentPiece(ItemGraphics.Body, 9, itemId: underShirtId);
-            AddEquipmentPiece(ItemGraphics.Body, 10, graphicId: graphId[9]);
+            AddEquipmentPiece(ItemGraphics.Body, 10, graphicId: graphId[9]);           
             AddEquipmentPiece(ItemGraphics.Legs, 11, itemId: underGarmentId);
             AddEquipmentPiece(ItemGraphics.Legs, 12, graphicId: graphId[10]);
             AddEquipmentPiece(ItemGraphics.Hands, 13, graphicId: graphId[11]);
@@ -206,23 +206,23 @@ namespace Launcher
             AddEquipmentPiece(ItemGraphics.Waist, 15, graphicId: graphId[13]);
 
             // giveaway on me =)
-            AddItem(ref Bag, "Potion", 10);
-            AddItem(ref Currency, "Gil", 200);
+            AddItem(ref Bag, "Potion", 10);             
+            AddItem(ref Currency, "Gil", 200);           
         }
-
+              
         /// <summary>
         /// Sends all inventories packets. Used when spawning player.
         /// </summary>
         /// <param name="sender"></param>
         public void SendInventories(Socket sender)
-        {
-            InventoryStart(sender);
-            SendInventory(sender, Bag, InventoryMaxSlots.Bag, InventoryType.Bag);
-            SendInventory(sender, Loot, InventoryMaxSlots.Loot, InventoryType.Loot);
-            SendInventory(sender, MeldRequest, InventoryMaxSlots.MeldRequest, InventoryType.MeldRequest);
-            SendInventory(sender, Bazaar, InventoryMaxSlots.Bazaar, InventoryType.Bazaar);
-            SendInventory(sender, Currency, InventoryMaxSlots.Currency, InventoryType.Currency);
-            SendInventory(sender, KeyItems, InventoryMaxSlots.KeyItems, InventoryType.KeyItems);
+        {           
+            InventoryStart(sender);                    
+            SendInventory(sender, Bag, InventoryMaxSlots.Bag, InventoryType.Bag);                           
+            SendInventory(sender, Loot, InventoryMaxSlots.Loot, InventoryType.Loot);           
+            SendInventory(sender, MeldRequest, InventoryMaxSlots.MeldRequest, InventoryType.MeldRequest);           
+            SendInventory(sender, Bazaar, InventoryMaxSlots.Bazaar, InventoryType.Bazaar);     
+            SendInventory(sender, Currency, InventoryMaxSlots.Currency, InventoryType.Currency);    
+            SendInventory(sender, KeyItems, InventoryMaxSlots.KeyItems, InventoryType.KeyItems);  
             InventoryEnd(sender);
         }
 
@@ -232,12 +232,12 @@ namespace Launcher
         /// <param name="sender"></param>
         public void Update(Socket sender)
         {
-            InventoryStart(sender);
+            InventoryStart(sender); 
             SendInventory(sender, Bag, InventoryMaxSlots.Bag, InventoryType.Bag);
             SendGearSlots(sender);
             InventoryEnd(sender);
         }
-
+        
         /// <summary>
         ///  Used to send a test item to the loot list. Part of chat window commands for test purpose.
         /// </summary>
@@ -290,7 +290,7 @@ namespace Launcher
                 Data = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }
             }).ToBytes());
         }
-
+          
         /// <summary>
         /// Send packets containing all items in the specified inventory.
         /// </summary>
@@ -323,7 +323,7 @@ namespace Launcher
                     else if (itemCount >= 08 || itemCount < 08)
                         itemCount = SendItemsChunk(sender, ServerOpcode.x08InventoryChunk, 08, itemCount, ref index, ref items);
                 }
-            }
+            }  
 
             ChunkEnd(sender);
         }
@@ -348,8 +348,8 @@ namespace Launcher
             {
                 int numItemsInChunk = 0;
 
-                using (MemoryStream data = new MemoryStream())
-                {
+                using(MemoryStream data = new MemoryStream())
+                {                   
                     //write items
                     for (int j = 0; j < chunkSize; j++)
                     {
@@ -363,10 +363,10 @@ namespace Launcher
                         {
                             data.Write(itemList[index + j].ToBytes(), 0, itemSlotSize);
                             numItemsInChunk++;
-                        }
+                        }                             
                     }
-
-                    if (chunkSize == 8)
+                    
+                    if(chunkSize == 8)
                         data.Write(BitConverter.GetBytes((long)numItemsInChunk), 0, sizeof(long));
 
                     //send chunk                   
@@ -420,7 +420,7 @@ namespace Launcher
         public ushort AddEquipmentToBag(uint equipId)
         {
             ushort slot = 0xffff;
-            DataTable itemsData = GameDataFile.Instance.GetGameData("itemData");
+            DataTable itemsData = GameData.Instance.GetGameData("itemData");
             DataRow itemData = itemsData.Select("id = '" + equipId + "'")[0];
 
             int itemKind = (int)itemData.ItemArray[4];
