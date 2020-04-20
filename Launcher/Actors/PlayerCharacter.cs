@@ -35,6 +35,8 @@ namespace Launcher
         public Dictionary<byte, Job> Jobs { get; set; } = Job.LoadAll();
         public OrderedDictionary GeneralParameters { get; set; } = new OrderedDictionary();
 
+        public Queue<byte[]> PacketQueue { get; set; }
+
         public void Setup(byte[] data)
         {
             //Character ID
@@ -160,6 +162,8 @@ namespace Launcher
 
         public override void Spawn(Socket sender, ushort spawnType = 0x01, ushort isZoning = 0, ushort actorIndex = 0)
         {
+            PacketQueue = null;
+
             //For packet creation            
             TargetId = Id;
 
@@ -247,7 +251,7 @@ namespace Launcher
 
         public void WriteProperties(Socket sender)
         {
-            Property property = new Property(sender, Id);
+            Property property = new Property(sender, Id, @"/_init");
 
             property.Add("charaWork.eventSave.bazaarTax", (byte)5);
             property.Add("charaWork.battleSave.potencial", 6.6f);
@@ -544,33 +548,33 @@ namespace Launcher
             Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, text, 0x28, 4);
         }
 
-        public void CharaWorkExp(Socket sender)
+        public byte[] CharaWorkExp(Socket sender)
         {
-            Inventory.Update(sender);
-
-            MemoryStream jobLevels = new MemoryStream();
-            MemoryStream jobLevelCaps = new MemoryStream();
-
-            BinaryWriter jobLevelsWriter = new BinaryWriter(jobLevels);
-            BinaryWriter jobLevelCapsWriter = new BinaryWriter(jobLevelCaps);
-            
-            foreach (var item in Jobs)
+            if(PacketQueue == null || PacketQueue.Count == 0)
             {
-                Job job = item.Value;
-                jobLevelsWriter.Write(job.Level);
-                jobLevelCapsWriter.Write(job.LevelCap);
+                Inventory.Update(sender);
+
+                Queue<short> jobLevel = new Queue<short>();
+                Queue<short> jobLevelCap = new Queue<short>();
+                int count = 0;
+
+                foreach (var item in Jobs)
+                {
+                    count++;
+                    if (count > 52)
+                        break;
+                    Job job = item.Value;
+                    jobLevel.Enqueue(job.Level);
+                    jobLevelCap.Enqueue(job.MaxLevel);
+                }
+
+                Property property = new Property(sender, Id, @"charaWork/exp");
+                property.Add("charaWork.battleSave.skillLevel", jobLevel);
+                property.Add("charaWork.battleSave.skillLevelCap", jobLevelCap, true);            
+                PacketQueue = property.PacketQueue;
             }
 
-            Property property = new Property(sender, Id);
-            property.Add("charaWork.battleSave.skillLevel", jobLevels.ToArray());
-            property.Add("charaWork.battleSave.skillLevelCap", jobLevelCaps.ToArray());
-            property.FinishWriting();
-
-            //cleanup
-            jobLevelsWriter.Dispose();
-            jobLevelCapsWriter.Dispose();   
-            jobLevels.Dispose();
-            jobLevelCaps.Dispose();
+            return PacketQueue.Dequeue();
         }
     }
 

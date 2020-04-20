@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
 using System.Text;
@@ -18,33 +19,37 @@ namespace Launcher
         
         private readonly byte _maxBytes = 0x7d;
 
-        public byte[] Target { get; set; } = Encoding.ASCII.GetBytes(@"/_init");
+        public byte[] Command { get; set; }
+        public Queue<byte[]> PacketQueue { get; set; }
 
-        public Property(Socket sender, uint actorId)
+        public Property(Socket sender, uint actorId, string command)
         {
             _sender = sender;
             _actorId = actorId;
+            PacketQueue = new Queue<byte[]>();
 
-            InitWrite();
+            Command = Encoding.ASCII.GetBytes(command);
+
+            InitWrite(1);
         }
 
-        private void InitWrite()
+        private void InitWrite(int startPosition)
         {
             _buffer = new byte[0x88];
             _ms = new MemoryStream(_buffer);
             _bw = new BinaryWriter(_ms);
-            _bw.Seek(1, SeekOrigin.Begin);
+            _bw.Seek(startPosition, SeekOrigin.Begin);
             _index = 0;           
         }
 
-        public void Add(string id, object value)
+        public void Add(string id, object value, bool isLastItem = false)
         {   
             
             uint hashedId = MurmurHash2(id, 0);     
 
             if(value is bool)
             {
-                if (_index + 6 + 1 + Target.Length <= _maxBytes) //if there is space to write... | +1 = wrapper byte
+                if (_index + 6 + 1 + Command.Length <= _maxBytes) //if there is space to write... | +1 = wrapper byte
                 {
                     try
                     {
@@ -63,7 +68,7 @@ namespace Launcher
             }
             else if(value is byte || value is sbyte)
             {
-                if (_index + 6 + 1 + Target.Length <= _maxBytes) 
+                if (_index + 6 + 1 + Command.Length <= _maxBytes) 
                 {
                     try
                     {
@@ -81,7 +86,7 @@ namespace Launcher
             }
             else if(value is ushort || value is short)
             {
-                if (_index + 7 + 1 + Target.Length <= _maxBytes)
+                if (_index + 7 + 1 + Command.Length <= _maxBytes)
                 {
                     try
                     {
@@ -102,7 +107,7 @@ namespace Launcher
             }           
             else if(value is uint || value is int)
             {
-                if (_index + 9 + 1 + Target.Length <= _maxBytes)
+                if (_index + 9 + 1 + Command.Length <= _maxBytes)
                 {
                     try
                     {
@@ -125,7 +130,7 @@ namespace Launcher
             {
                 byte[] val = BitConverter.GetBytes((float)value);
 
-                if (_index + 5 + 1 + val.Length + Target.Length <= _maxBytes)
+                if (_index + 5 + 1 + val.Length + Command.Length <= _maxBytes)
                 {
                     try
                     {
@@ -140,7 +145,53 @@ namespace Launcher
                 {
                     SendPacket(id, value);
                 }
-            }            
+            }  
+            else if (value is Queue<short> buffer)
+            {                
+                int numBytesToWriteInitial = 0x73 - (1 + 1 + 4 + 2 + Command.Length);
+                int numBytesToWriteFromBuffer = numBytesToWriteInitial; //size - arr start - hashkey - arr end - trailing - maxbytes [how many bytes from the buffer we can write now]
+                int numBytesInBuffer = buffer.Count * sizeof(short); //note: number of bytes in buffer != array length  
+                int pageCount = 0;
+
+                numBytesToWriteFromBuffer = numBytesToWriteFromBuffer % 2 > 0 ? numBytesToWriteFromBuffer - 1 : numBytesToWriteFromBuffer;
+                numBytesToWriteFromBuffer = numBytesInBuffer < numBytesToWriteFromBuffer ? numBytesInBuffer : numBytesToWriteFromBuffer;
+
+                short wrapper = (short)(isLastItem ? 0x8f03 : 0xb103);
+
+                while (buffer.Count > 0)
+                {
+                    InitWrite(0);
+
+                    byte totalSize = (byte)(1 + 4 + 2 + Command.Length + numBytesToWriteFromBuffer);
+                    _bw.Write((byte)totalSize); //total size
+                    _bw.Write((byte)(pageCount == 0 ? 0x5f : 0x0b)); //array start/continue                   
+                    _bw.Write(hashedId); //hashed key                  
+
+                    for (int i = 0; i < (numBytesToWriteFromBuffer / 2); i++)
+                        _bw.Write(buffer.Dequeue());
+
+                    _bw.Write((short)(pageCount == 0 ? 0xb101 : wrapper)); //array wrap/continue
+                    _bw.Write(Command);
+
+                    pageCount++;
+
+                    //enqueue this packet    
+                    PacketQueue.Enqueue(new Packet(new GamePacket { Opcode = 0x137, Data = _buffer }).ToBytes());
+                    //_sender.Send(new Packet(new GamePacket { Opcode = 0x137, Data = _buffer }).ToBytes());
+
+                    //debug
+                    //File.WriteAllBytes("levelTest_" + hashedId.ToString("X") + "_" + pageCount + ".txt", _buffer);
+
+                    //reset stream
+                    _bw.Dispose();
+                    _ms.Dispose();
+
+                    //recalculate bytes to write                   
+                    numBytesInBuffer = buffer.Count * sizeof(short); //note: number of bytes in buffer != array length  
+                    numBytesToWriteFromBuffer = numBytesToWriteInitial % 2 > 0 ? numBytesToWriteInitial - 1 : numBytesToWriteInitial;
+                    numBytesToWriteFromBuffer = numBytesInBuffer < numBytesToWriteFromBuffer ? numBytesInBuffer : numBytesToWriteFromBuffer;
+                }
+            }
         }
 
         public void FinishWriting()
@@ -151,30 +202,23 @@ namespace Launcher
 
         private void SendPacket(string id = null, object value = null)
         {
-            _bw.Write((byte)(_writeMore ? (0x60 + Target.Length) : (0x82 + Target.Length))); //write wrap byte
+            _bw.Write((byte)(_writeMore ? (0x60 + Command.Length) : (0x82 + Command.Length))); //write wrap byte
             _index += 1;            
 
-            _bw.Write(Target);
-            _index += (ushort)Target.Length;
+            _bw.Write(Command);
+            _index += (ushort)Command.Length;
 
             _bw.Seek(0, SeekOrigin.Begin);
-            _bw.Write((byte)_index);            
+            _bw.Write((byte)_index);
 
-            GamePacket gamePacket = new GamePacket
-            {
-                Opcode = 0x137,
-                Data = _buffer
-            };
+            _sender.Send(new Packet(new GamePacket { Opcode = 0x137, Data = _buffer }).ToBytes());
 
             _bw.Dispose();
             _ms.Dispose();
 
-            Packet packet = new Packet(new SubPacket(gamePacket) { SourceId = _actorId, TargetId = _actorId});
-            _sender.Send(packet.ToBytes());
-
             if (_writeMore)
             {
-                InitWrite();
+                InitWrite(1);
                 Add(id, value);
             }           
         }
