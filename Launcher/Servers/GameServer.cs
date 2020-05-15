@@ -138,18 +138,13 @@ namespace Launcher
                     ProcessEventRequest(subpacket.Data);
                     break;
 
-                case (ushort)ClientOpcode.DataRequest:       
-                    uint targetId = (uint)(subpacket.Data[0x13] << 24 | subpacket.Data[0x12] << 16 | subpacket.Data[0x11] << 8 | subpacket.Data[0x10]);
-                    string request = Encoding.ASCII.GetString(subpacket.Data).Substring(0x14, 0x20).Trim(new[] { '\0' });
-                    uint sequence = (uint)(subpacket.Data[0x37] << 24 | subpacket.Data[0x36] << 16 | subpacket.Data[0x35] << 8 | subpacket.Data[0x34]);
+                case (ushort)ClientOpcode.DataRequest:                           
+                    string request = Encoding.ASCII.GetString(subpacket.Data).Substring(0x14, 0x20).Trim(new[] { '\0' }); 
 
-                    //Implemented a queue of packets to send in order. if this doesnt work in the future, implement a dictionary with sequence number as key.
                     switch (request)
                     {
-                        case "charaWork/exp":
-                            //_log.Warning("Request: " + request + " for target: 0x" + targetId.ToString("X") + " sequence: 0x" +sequence.ToString("X"));
-                            _connection.Send(UserFactory.Instance.User.Character.CharaWorkExp(_connection.socket));      
-                            //UserFactory.Instance.User.Character.CharaWorkExp(_connection.socket);
+                        case "charaWork/exp":                           
+                            _connection.Send(UserFactory.Instance.User.Character.CharaWorkExp(_connection.socket));   
                          break;
                     }
                     break;
@@ -233,12 +228,12 @@ namespace Launcher
                 {
                     case (ushort)Command.BattleStance:
                         playerCharacter.SetMainState(_connection.socket, MainState.Active, 0xbf);
-                        playerCharacter.BattleActionResult(_connection.socket, command);
+                        playerCharacter.SendActionResult(_connection.socket, (ushort)Command.BattleStance);
                         playerCharacter.EndClientOrderEvent(_connection.socket, eventType);
                         break;
                     case (ushort)Command.NormalStance:
                         playerCharacter.SetMainState(_connection.socket, MainState.Passive, 0xbf);
-                        playerCharacter.BattleActionResult(_connection.socket, command);
+                        playerCharacter.SendActionResult(_connection.socket, (ushort)Command.NormalStance);
                         playerCharacter.EndClientOrderEvent(_connection.socket, eventType);
                         break;
                     case (ushort)Command.MountChocobo:
@@ -299,6 +294,7 @@ namespace Launcher
                 string command;
                 string value = "";
                 string[] split = null;
+                PlayerCharacter pc = UserFactory.Instance.User.Character;
 
                 if (message.IndexOf(' ') > 0)
                 {
@@ -392,20 +388,15 @@ namespace Launcher
                             SendMessage(MessageType.System, "Current position: X: " + current.X + ", Y: " + current.Y + ", Z: " + current.Z + ", R: " + current.R);
                         break;
 
-                    case @"\playbg":
+                    case @"\resetlevel":                        
+                        pc.Jobs[pc.CurrentJobId].Level = 1;
+                        pc.Jobs[pc.CurrentJobId].TotalExp = 0;
+                        Property property = new Property(_connection.socket, pc.Id, @"charaWork/stateForAll");
+                        property.Add("charaWork.battleSave.skillLevel[" + (pc.CurrentJobId - 1) + "]", 1);
+                        property.Add("charaWork.parameterSave.state_mainSkillLevel", 1);
+                        property.FinishWriting();
 
-                        GamePacket gp = new GamePacket
-                        {
-                            Opcode = 0xd9,
-                            Data = new byte[]
-                            {
-                                0x73, 0x74, 0x74, 0x30, 0x00, 0x00, 0x00, 0x00
-                            }
-                        };
-
-                        Packet p = new Packet(new SubPacket(gp) { SourceId = 0x44d80036, TargetId = UserFactory.Instance.User.Character.Id });
-
-                        _connection.Send(p.ToBytes());
+                        pc.UpdateExp(_connection.socket);
 
                         break;
 
@@ -429,8 +420,7 @@ namespace Launcher
                         }                        
                         break;                    
 
-                    case @"\spawn":
-                        PlayerCharacter pc = UserFactory.Instance.User.Character;
+                    case @"\spawn":                       
                         TestPackets.SendTest(pc.Id, pc.Position, _connection.socket);
                         //TestPackets.TeleportInn(UserFactory.Instance.User.Character.Id, UserFactory.Instance.User.Character.Position, _connection.socket);                      
                         //Aetheryte ae = new Aetheryte(1280007, 20925, new Position(128, 582.47f, 54.52f, -1.2f, 0f, 0));
@@ -468,18 +458,15 @@ namespace Launcher
                         UserFactory.Instance.User.Character.Inventory.AddItem(ref UserFactory.Instance.User.Character.Inventory.Bag, value.Replace("_", " ").Replace("'","''"), quantity, _connection.socket);
                         break;
 
-                    case @"\inventory":
-                        UserFactory.Instance.User.Character.Inventory.Update(_connection.socket);
+                    case @"\addexp":
+                        if (split.Length > 1)
+                        {
+
+                            UserFactory.Instance.User.Character.AddExp(_connection.socket, Convert.ToInt32(split[1]));
+                        }
+
                         break;
-                    case @"\equip":
-                        UserFactory.Instance.User.Character.Inventory.EquipGear(_connection.socket, Convert.ToByte(value), Convert.ToByte(split[2]));
-                        break;
-                    case @"\exptest":
-                        UserFactory.Instance.User.Character.CharaWorkExp(_connection.socket);
-                        break;
-                    case @"\unequip":
-                        UserFactory.Instance.User.Character.Inventory.UnequipGear(_connection.socket, Convert.ToByte(value));
-                        break;
+                   
                     case @"\removeactor":
                         GamePacket gps = new GamePacket
                         {

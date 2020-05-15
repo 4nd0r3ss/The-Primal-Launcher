@@ -94,10 +94,10 @@
     <Compile Include="Actors\Inventory.cs" />
     <Compile Include="Actors\Property.cs" />
     <Compile Include="Clock.cs" />
-    <Compile Include="Downloader.cs">
+    <Compile Include="UI\Downloader.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Downloader.Designer.cs">
+    <Compile Include="UI\Downloader.Designer.cs">
       <DependentUpon>Downloader.cs</DependentUpon>
     </Compile>
     <Compile Include="Enum.cs" />
@@ -113,10 +113,10 @@
     <Compile Include="Servers\LobbyServer.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="Patcher.cs" />
-    <Compile Include="MainWindow.cs">
+    <Compile Include="UI\MainWindow.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MainWindow.Designer.cs">
+    <Compile Include="UI\MainWindow.Designer.cs">
       <DependentUpon>MainWindow.cs</DependentUpon>
     </Compile>
     <Compile Include="Preferences.cs" />
@@ -126,28 +126,28 @@
     <Compile Include="Servers\Server.cs" />
     <Compile Include="Servers\UpdateServer.cs" />
     <Compile Include="TestPackets.cs" />
-    <Compile Include="ucAbout.cs">
+    <Compile Include="UI\ucAbout.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="ucAbout.Designer.cs">
+    <Compile Include="UI\ucAbout.Designer.cs">
       <DependentUpon>ucAbout.cs</DependentUpon>
     </Compile>
-    <Compile Include="ucGameUpdate.cs">
+    <Compile Include="UI\ucGameUpdate.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="ucGameUpdate.Designer.cs">
+    <Compile Include="UI\ucGameUpdate.Designer.cs">
       <DependentUpon>ucGameUpdate.cs</DependentUpon>
     </Compile>
-    <Compile Include="ucOptions.cs">
+    <Compile Include="UI\ucOptions.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="ucOptions.Designer.cs">
+    <Compile Include="UI\ucOptions.Designer.cs">
       <DependentUpon>ucOptions.cs</DependentUpon>
     </Compile>
-    <Compile Include="ucLogWindow.cs">
+    <Compile Include="UI\ucLogWindow.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="ucLogWindow.Designer.cs">
+    <Compile Include="UI\ucLogWindow.Designer.cs">
       <DependentUpon>ucLogWindow.cs</DependentUpon>
     </Compile>
     <Compile Include="Updater.cs" />
@@ -163,10 +163,10 @@
     <Compile Include="Repositories\WorldFactory.cs" />
     <Compile Include="WorldInfo\Zone.cs" />
     <Compile Include="Zip.cs" />
-    <EmbeddedResource Include="Downloader.resx">
+    <EmbeddedResource Include="UI\Downloader.resx">
       <DependentUpon>Downloader.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="MainWindow.resx">
+    <EmbeddedResource Include="UI\MainWindow.resx">
       <DependentUpon>MainWindow.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -178,19 +178,18 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="ucAbout.resx">
+    <EmbeddedResource Include="UI\ucAbout.resx">
       <DependentUpon>ucAbout.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ucGameUpdate.resx">
+    <EmbeddedResource Include="UI\ucGameUpdate.resx">
       <DependentUpon>ucGameUpdate.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ucOptions.resx">
+    <EmbeddedResource Include="UI\ucOptions.resx">
       <DependentUpon>ucOptions.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ucLogWindow.resx">
+    <EmbeddedResource Include="UI\ucLogWindow.resx">
       <DependentUpon>ucLogWindow.cs</DependentUpon>
     </EmbeddedResource>
-    <None Include="Launcher_TemporaryKey.pfx" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -201,9 +200,6 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.6.1">

@@ -89,7 +89,7 @@ namespace Launcher
             
             //Starting class
             CurrentJobId = data[0x2a];
-            Jobs[CurrentJobId].Level = 50; //having a class level > 0 makes it active.
+            Jobs[CurrentJobId].Level = 1; //having a class level > 0 makes it active.
             Jobs[CurrentJobId].IsCurrent = true; //current class the player will start with.                        
             LoadInitialEquipment();  
             
@@ -209,6 +209,8 @@ namespace Launcher
 
             //Send properties
             WriteProperties(sender);
+
+            UpdateExp(sender);
         }
 
         public void SendGroupPackets(Socket sender)
@@ -399,20 +401,110 @@ namespace Launcher
 
             property.FinishWriting();
         }
-        
-        public void BattleActionResult(Socket sender, ushort command)
+
+        public void UpdateExp(Socket sender)
         {
+            Property prop = new Property(sender, Id, "charaWork/battleStateForSelf");
+            prop.Add("charaWork.battleSave.skillPoint[" + (CurrentJobId - 1) + "]", (int)Jobs[CurrentJobId].TotalExp);
+            prop.FinishWriting();
+        }
+
+        public void AddExp(Socket sender, int exp)
+        {
+            //we want to add exp only if level is below cap.
+            if(Jobs[CurrentJobId].Level < Jobs[CurrentJobId].LevelCap){
+                //add exp bonus multiplier TODO:put multiplier definition somewhere else (add as an option in UI?)
+                float expBonus = 1.2f;
+                Jobs[CurrentJobId].TotalExp += Convert.ToInt64(exp * expBonus);
+
+                //send add exp command result
+                SendActionResult(sender, 0, new List<CommandResult> {
+                    new CommandResult
+                    {
+                        TargetId = Id,
+                        Amount = (ushort)(exp * expBonus),
+                        TextId = 33934,
+                        Param = (byte)(expBonus > 1 ? ((expBonus -1) * 100) : 0)
+                    }
+                });
+
+                //calculate leveling
+                long totalExp = Jobs[CurrentJobId].TotalExp;
+                short currentLevel = Jobs[CurrentJobId].Level;
+                short levelsToUp = 0;
+
+                while (totalExp >= Job.ExpTable[currentLevel])
+                {
+                    totalExp -= Job.ExpTable[currentLevel];                   
+                    levelsToUp++;                                      
+                }
+
+                if (levelsToUp > 0)
+                {
+                    Jobs[CurrentJobId].TotalExp = (currentLevel + levelsToUp) >= Jobs[CurrentJobId].LevelCap ? 0 : totalExp;
+                    LevelUp(sender, levelsToUp);
+                }
+
+                //refresh exp values in game client UI.
+                UpdateExp(sender);
+            }                        
+        }
+
+        private void LevelUp(Socket sender, short numLevels)
+        {
+            Jobs[CurrentJobId].Level += numLevels;           
+            short level = Jobs[CurrentJobId].Level;           
+
+            SendActionResult(sender, 0, new List<CommandResult> {
+                new CommandResult
+                {
+                    TargetId = Id,
+                    Amount = (ushort)level,
+                    TextId = 33909
+                }
+            });
+
+            Property property = new Property(sender, Id, @"charaWork/stateForAll");
+            property.Add("charaWork.battleSave.skillLevel[" + (CurrentJobId - 1) + "]", level);
+            property.Add("charaWork.parameterSave.state_mainSkillLevel", level);
+            property.FinishWriting();
+        }
+        
+        public void SendActionResult(Socket sender, uint command, List<CommandResult> resultList = null, ushort animationId = 0)
+        {
+            int numResults = resultList != null ? resultList.Count : 0;
+
             byte[] data = new byte[0x38];
 
             Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, data, 0, sizeof(uint));            
-            Buffer.BlockCopy(BitConverter.GetBytes(command), 0, data, 0x24, sizeof(ushort));
-            Buffer.BlockCopy(BitConverter.GetBytes(0x0810), 0, data, 0x26, sizeof(ushort));
-            Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, data, 0x28, sizeof(uint));
-            data[0x04] = 0x62; //figure out
-            data[0x07] = 0x7c; //figure out
-            data[0x20] = 0x01; //figure out
-            data[0x30] = 0x01; //figure out
-            data[0x35] = 0x01; //figure out
+            Buffer.BlockCopy(BitConverter.GetBytes(animationId), 0, data, 0x04, sizeof(ushort));
+
+            if(resultList != null)
+            {
+                Buffer.BlockCopy(BitConverter.GetBytes(numResults), 0, data, 0x20, sizeof(int)); //#results
+                Buffer.BlockCopy(BitConverter.GetBytes(command), 0, data, 0x24, sizeof(uint));
+
+                Buffer.BlockCopy(BitConverter.GetBytes(0x0810), 0, data, 0x26, sizeof(ushort)); //unknown
+
+                foreach(var result in resultList)
+                {
+                    byte[] resultBytes = result.ToBytes();
+                    Buffer.BlockCopy(resultBytes, 0, data, 0x28, resultBytes.Length); //unknown
+                }
+            }
+
+            //data[0x20] = 0x01; //num actions
+            //Buffer.BlockCopy(BitConverter.GetBytes(0x0810), 0, data, 0x26, sizeof(ushort));
+            
+
+            //Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, data, 0x28, sizeof(uint));
+            /////[0x04] = 0x62; //figure out
+            //data[0x07] = 0x7c; //figure out
+            
+            //data[0x30] = 0x01; //figure out
+            //data[0x35] = 0x01; //figure out
+
+            //TODO: add logic to choose appropriate opcode
 
             SendPacket(sender, ServerOpcode.BattleActionResult01, data);
         }
@@ -565,7 +657,7 @@ namespace Launcher
                         break;
                     Job job = item.Value;
                     jobLevel.Enqueue(job.Level);
-                    jobLevelCap.Enqueue(job.MaxLevel);
+                    jobLevelCap.Enqueue(job.LevelCap);
                 }
 
                 Property property = new Property(sender, Id, @"charaWork/exp");

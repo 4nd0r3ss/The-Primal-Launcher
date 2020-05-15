@@ -535,19 +535,24 @@ namespace Launcher
             uint itemUniqueId = 0;
             ServerOpcode opcode;
 
+            //equip item
             if (pattern == 0x05050505)
             {
                 gearSlot = (byte)(request[0x58] - 1);
                 itemUniqueId = (uint)(request[0x5e] << 24 | request[0x5f] << 16 | request[0x60] << 8 | request[0x61]);
                 opcode = ServerOpcode.x01SetEquipment;
 
+                //search the bag for the item to be equipped.
                 foreach (var slot in Bag)
                 {
                     Item item = (Item)slot.Value;
-
+                    //if item is found
                     if (item.UniqueId == itemUniqueId)
                     {
+                        //get the item bag slot
                         invSlot = (byte)item.InventorySlot;
+
+                        //chage the graphics in appearance slot to the piece being equipped
                         UserFactory.Instance.User.Character.GearGraphics.Set(gearSlot, item.Id);
 
                         if (GearSlots.Any(x => x.Key == gearSlot))
@@ -558,6 +563,8 @@ namespace Launcher
                         break;
                     }
                 }
+
+
                 SendSwitchGearResult(sender, opcode, gearSlot, invSlot);
             }
             else
