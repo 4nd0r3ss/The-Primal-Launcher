@@ -93,7 +93,7 @@ namespace Launcher
         /// <param name="sender"></param>
         /// <param name="itemName"></param>
         /// <param name="quantity"></param>
-        public void AddItem(ref Dictionary<ushort, object> inventory, string itemName, uint quantity, Socket sender = null)
+        public void AddItem(ref Dictionary<ushort, object> inventory, string itemName, uint quantity = 1, Socket sender = null)
         {
             DataTable itemNames = GameData.Instance.GetGameData("xtx/itemName");
             DataRow[] selected = itemNames.Select("strc0 = '" + itemName + "'");
@@ -521,25 +521,42 @@ namespace Launcher
         }
 
         /// <summary>
-        /// Called from gear menu to swap gear in a gear slot.
+        /// Get an item from the character's bag by its unique id.
+        /// </summary>
+        /// <param name="uniqueId"></param>
+        /// <returns></returns>
+        public Item GetBagItemByUniqueId(uint uniqueId)
+        {
+            Item result = null;
+
+            foreach (var slot in Bag)
+            {
+                Item item = (Item)slot.Value;
+
+                //if item is found
+                if (item.UniqueId == uniqueId)
+                {
+                    result = item;
+                    break;
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Called from gear menu to change gear in a gear slot.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="request"></param>
-        public void SwitchGear(Socket sender, byte[] request)
-        {
-            //we read the bytes in the index below to be able to differentiate equip/unequip packets. It's the fastest way I can think of.
-            uint pattern = (uint)(request[0x53] << 24 | request[0x52] << 16 | request[0x51] << 8 | request[0x50]);
-
-            byte gearSlot = 0;
-            byte invSlot = 0;
-            uint itemUniqueId = 0;
+        public void ChangeGear(Socket sender, byte gearSlot, uint itemUniqueId)
+        {           
+            byte invSlot = 0;           
             ServerOpcode opcode;
 
             //equip item
-            if (pattern == 0x05050505)
-            {
-                gearSlot = (byte)(request[0x58] - 1);
-                itemUniqueId = (uint)(request[0x5e] << 24 | request[0x5f] << 16 | request[0x60] << 8 | request[0x61]);
+            if (itemUniqueId > 0)
+            {               
                 opcode = ServerOpcode.x01SetEquipment;
 
                 //search the bag for the item to be equipped.
@@ -564,19 +581,16 @@ namespace Launcher
                     }
                 }
 
-
-                SendSwitchGearResult(sender, opcode, gearSlot, invSlot);
+                SendChangeGearResult(sender, opcode, gearSlot, invSlot);
             }
             else
-            {
-                gearSlot = (byte)(request[0x51] - 1);
-
+            {              
                 if (gearSlot != 0x09 && gearSlot != 0x0b && gearSlot != 0) //can't unequip underwear and main weapon, just switch to another piece.
                 {
                     GearSlots.Remove(gearSlot);
                     UserFactory.Instance.User.Character.GearGraphics.Set(gearSlot, 0);
                     opcode = ServerOpcode.x01RemoveEquipment;
-                    SendSwitchGearResult(sender, opcode, gearSlot, invSlot);
+                    SendChangeGearResult(sender, opcode, gearSlot, invSlot);
                 }
                 else
                 {
@@ -586,13 +600,13 @@ namespace Launcher
         }
 
         /// <summary>
-        /// Send switch gear result packets and updates character appearance.
+        /// Send change gear result packets and updates character appearance.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="opcode"></param>
         /// <param name="gearSlot"></param>
         /// <param name="invSlot"></param>
-        private void SendSwitchGearResult(Socket sender, ServerOpcode opcode, byte gearSlot, byte invSlot)
+        private void SendChangeGearResult(Socket sender, ServerOpcode opcode, byte gearSlot, byte invSlot)
         {
             InventoryStart(sender);
             ChunkStart(sender, InventoryMaxSlots.Equipment, InventoryType.Equipment);

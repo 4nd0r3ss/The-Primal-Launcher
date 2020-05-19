@@ -28,7 +28,7 @@ namespace Launcher
 
         #region Class/Job
         public byte CurrentJobId { get; set; }
-        public byte CurrentJob { get; set; } //specialized job?  
+        public byte CurrentClassId { get; set; } 
         #endregion
         
         public Inventory Inventory { get; set; }
@@ -88,9 +88,9 @@ namespace Launcher
             GeneralParameters = GeneralParameter.Get(Tribe);
             
             //Starting class
-            CurrentJobId = data[0x2a];
-            Jobs[CurrentJobId].Level = 1; //having a class level > 0 makes it active.
-            Jobs[CurrentJobId].IsCurrent = true; //current class the player will start with.                        
+            CurrentClassId = data[0x2a];
+            Jobs[CurrentClassId].Level = 1; //having a class level > 0 makes it active.
+            Jobs[CurrentClassId].IsCurrent = true; //current class the player will start with.                        
             LoadInitialEquipment();  
             
             Position = Position.GetInitialPosition(InitialTown);
@@ -115,7 +115,7 @@ namespace Launcher
 
         private void LoadInitialEquipment()
         {
-            int equipmentSetNumber = (Tribe * 100) + CurrentJobId;            
+            int equipmentSetNumber = (Tribe * 100) + CurrentClassId;            
             uint underShirtId = (uint)8040000 + Tribe;
             uint underGarmentId = (uint)8060000 + Tribe;
 
@@ -187,8 +187,8 @@ namespace Launcher
             //Set Player title
             SendPacket(sender, ServerOpcode.SetTitle, new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
 
-            //set current job
-            SendPacket(sender, ServerOpcode.SetCurrentJob, new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
+            //current job
+            SendCurrentJob(sender);
 
             SetSpecialEventWork(sender);
 
@@ -262,7 +262,7 @@ namespace Launcher
                 if(i<5 && i != 3) property.Add(string.Format("charaWork.property[{0}]", i), (byte)1);
 
             //Current class info
-            Job currentClass = Jobs[CurrentJobId];
+            Job currentClass = Jobs[CurrentClassId];
             property.Add("charaWork.parameterSave.hp[0]", currentClass.Hp); //always start with HP filled up
             property.Add("charaWork.parameterSave.hpMax[0]", currentClass.MaxHp);
             property.Add("charaWork.parameterSave.mp", currentClass.Mp); //always start with MP filled up
@@ -343,7 +343,7 @@ namespace Launcher
             property.Add(string.Format("charaWork.commandAcquired[{0}]", 1150), true);
 
             for (int i = 0; i < 36; i++)
-                property.Add(string.Format("charaWork.additionalCommandAcquired[{0}]", i), false);
+                property.Add(string.Format("charaWork.additionalCommandAcquired[{0}]", i), true);
 
             for (int i = 0; i < 40; i++)
                 property.Add(string.Format("charaWork.parameterSave.commandSlot_compatibility[{0}]", i), true);
@@ -405,17 +405,17 @@ namespace Launcher
         public void UpdateExp(Socket sender)
         {
             Property prop = new Property(sender, Id, "charaWork/battleStateForSelf");
-            prop.Add("charaWork.battleSave.skillPoint[" + (CurrentJobId - 1) + "]", (int)Jobs[CurrentJobId].TotalExp);
+            prop.Add("charaWork.battleSave.skillPoint[" + (CurrentClassId - 1) + "]", (int)Jobs[CurrentClassId].TotalExp);
             prop.FinishWriting();
         }
 
         public void AddExp(Socket sender, int exp)
         {
             //we want to add exp only if level is below cap.
-            if(Jobs[CurrentJobId].Level < Jobs[CurrentJobId].LevelCap){
+            if(Jobs[CurrentClassId].Level < Jobs[CurrentClassId].LevelCap){
                 //add exp bonus multiplier TODO:put multiplier definition somewhere else (add as an option in UI?)
                 float expBonus = 1.2f;
-                Jobs[CurrentJobId].TotalExp += Convert.ToInt64(exp * expBonus);
+                Jobs[CurrentClassId].TotalExp += Convert.ToInt64(exp * expBonus);
 
                 //send add exp command result
                 SendActionResult(sender, 0, new List<CommandResult> {
@@ -429,8 +429,8 @@ namespace Launcher
                 });
 
                 //calculate leveling
-                long totalExp = Jobs[CurrentJobId].TotalExp;
-                short currentLevel = Jobs[CurrentJobId].Level;
+                long totalExp = Jobs[CurrentClassId].TotalExp;
+                short currentLevel = Jobs[CurrentClassId].Level;
                 short levelsToUp = 0;
 
                 while (totalExp >= Job.ExpTable[currentLevel])
@@ -441,7 +441,7 @@ namespace Launcher
 
                 if (levelsToUp > 0)
                 {
-                    Jobs[CurrentJobId].TotalExp = (currentLevel + levelsToUp) >= Jobs[CurrentJobId].LevelCap ? 0 : totalExp;
+                    Jobs[CurrentClassId].TotalExp = (currentLevel + levelsToUp) >= Jobs[CurrentClassId].LevelCap ? 0 : totalExp;
                     LevelUp(sender, levelsToUp);
                 }
 
@@ -452,38 +452,61 @@ namespace Launcher
 
         private void LevelUp(Socket sender, short numLevels)
         {
-            Jobs[CurrentJobId].Level += numLevels;           
-            short level = Jobs[CurrentJobId].Level;           
+            Jobs[CurrentClassId].Level += numLevels;   
 
             SendActionResult(sender, 0, new List<CommandResult> {
                 new CommandResult
                 {
                     TargetId = Id,
-                    Amount = (ushort)level,
+                    Amount = (ushort)Jobs[CurrentClassId].Level,
                     TextId = 33909
                 }
             });
 
+            UpdateLevel(sender);
+        }
+
+        public void LevelDown(Socket sender, short toLevel)
+        {
+            if(toLevel > 0)
+            {
+                Jobs[CurrentClassId].Level = toLevel;
+                Jobs[CurrentClassId].TotalExp = 0;
+                UpdateLevel(sender);
+                UpdateExp(sender);
+            }            
+        }
+
+        private void UpdateLevel(Socket sender)
+        {            
             Property property = new Property(sender, Id, @"charaWork/stateForAll");
-            property.Add("charaWork.battleSave.skillLevel[" + (CurrentJobId - 1) + "]", level);
-            property.Add("charaWork.parameterSave.state_mainSkillLevel", level);
+            property.Add("charaWork.battleSave.skillLevel[" + (CurrentClassId - 1) + "]", Jobs[CurrentClassId].Level);
+            property.Add("charaWork.parameterSave.state_mainSkillLevel", Jobs[CurrentClassId].Level);
+            property.FinishWriting();            
+        }
+
+        private void UpdateClass(Socket sender)
+        {
+            Property property = new Property(sender, Id, @"charaWork/stateForAll");
+            property.Add("charaWork.parameterSave.state_mainSkill[0]", CurrentClassId);
+            property.Add("charaWork.parameterSave.state_mainSkillLevel", Jobs[CurrentClassId]);
             property.FinishWriting();
         }
         
-        public void SendActionResult(Socket sender, uint command, List<CommandResult> resultList = null, ushort animationId = 0)
+        public void SendActionResult(Socket sender, Command command, List<CommandResult> resultList = null, uint animationId = 0, uint unknown = 0)
         {
             int numResults = resultList != null ? resultList.Count : 0;
 
             byte[] data = new byte[0x38];
 
             Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, data, 0, sizeof(uint));            
-            Buffer.BlockCopy(BitConverter.GetBytes(animationId), 0, data, 0x04, sizeof(ushort));
+            Buffer.BlockCopy(BitConverter.GetBytes(animationId), 0, data, 0x04, sizeof(uint));
+            Buffer.BlockCopy(BitConverter.GetBytes(unknown), 0, data, 0x1c, sizeof(uint));
 
             if(resultList != null)
             {
                 Buffer.BlockCopy(BitConverter.GetBytes(numResults), 0, data, 0x20, sizeof(int)); //#results
-                Buffer.BlockCopy(BitConverter.GetBytes(command), 0, data, 0x24, sizeof(uint));
-
+                Buffer.BlockCopy(BitConverter.GetBytes((short)command), 0, data, 0x24, sizeof(short));
                 Buffer.BlockCopy(BitConverter.GetBytes(0x0810), 0, data, 0x26, sizeof(ushort)); //unknown
 
                 foreach(var result in resultList)
@@ -492,19 +515,6 @@ namespace Launcher
                     Buffer.BlockCopy(resultBytes, 0, data, 0x28, resultBytes.Length); //unknown
                 }
             }
-
-            //data[0x20] = 0x01; //num actions
-            //Buffer.BlockCopy(BitConverter.GetBytes(0x0810), 0, data, 0x26, sizeof(ushort));
-            
-
-            //Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, data, 0x28, sizeof(uint));
-            /////[0x04] = 0x62; //figure out
-            //data[0x07] = 0x7c; //figure out
-            
-            //data[0x30] = 0x01; //figure out
-            //data[0x35] = 0x01; //figure out
-
-            //TODO: add logic to choose appropriate opcode
 
             SendPacket(sender, ServerOpcode.BattleActionResult01, data);
         }
@@ -544,7 +554,7 @@ namespace Launcher
             //send command answer
             data = new byte[0x28];
             Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, data, 0, 4);
-            Buffer.BlockCopy(BitConverter.GetBytes((uint)Animation.MountChocobo), 0, data, 0x4, 4);
+            Buffer.BlockCopy(BitConverter.GetBytes(0x7c000062), 0, data, 0x4, 4);
             data[0x27] = 0x08; //8 animation slots to be played in sequence?
             SendPacket(sender, ServerOpcode.CommandResult, data);
 
@@ -586,7 +596,7 @@ namespace Launcher
             //command result 
             data = new byte[0x38];            
             Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, data, 0, 4);
-            Buffer.BlockCopy(BitConverter.GetBytes((uint)Animation.MountChocobo), 0, data, 0x4, 4);
+            Buffer.BlockCopy(BitConverter.GetBytes(0x7c000062), 0, data, 0x4, 4);
             Buffer.BlockCopy(BitConverter.GetBytes((uint)1), 0, data, 0x20, 4);
             Buffer.BlockCopy(BitConverter.GetBytes((ushort)command), 0, data, 0x24, 2);
             Buffer.BlockCopy(BitConverter.GetBytes((ushort)0x810), 0, data, 0x26, 2); //unknown
@@ -607,37 +617,63 @@ namespace Launcher
             }            
         }
 
-        public void EquipSoulStone(Socket sender)
+        public void EquipSoulStone(Socket sender, byte[] data)
         {
-            SendPacket(sender, ServerOpcode.ChangeJob, new byte[] { 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
-
-            SendPacket(sender, ServerOpcode.ParticleAnimation, new byte[] { 0x29, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00 });
-
-            //send text sheet should be a method in the world class.
-            byte[] text = new byte[]
+            if(CurrentJobId == 0)
             {
+                byte jobIndex = 13;
+
+                if (CurrentClassId == 7 || CurrentClassId == 8)
+                    jobIndex = 11;
+                else if (CurrentClassId == 22 || CurrentClassId == 23)
+                    jobIndex = 4;
+
+                CurrentJobId = (byte)(CurrentClassId + jobIndex);
+                SendCurrentJob(sender);
+                PlayAnimationEffect(sender, Job.AnimationEffectId(CurrentJobId));
+
+                //send text sheet should be a method in the world class.
+                byte[] text = new byte[]
+                {
                 0x41, 0x29, 0x9B, 0x02, 0x01, 0x00, 0xF8, 0x5F, 0x97, 0x75, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00,
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x06, 0x02, 0x9B, 0x29, 0x41, 0x00, 0x00, 0x00, 0x00, 0x10,
                 0x0F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-            };
-            Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, text, 0, 4);
-            Buffer.BlockCopy(BitConverter.GetBytes(Id).Reverse().ToArray(), 0, text, 0x17, 4);            
-            SendPacket(sender, ServerOpcode.TextSheetMessage50b, text, sourceId: 0x5ff80001);
+                };
+                Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, text, 0, 4);
+                Buffer.BlockCopy(BitConverter.GetBytes(Id).Reverse().ToArray(), 0, text, 0x17, 4);
+                SendPacket(sender, ServerOpcode.TextSheetMessage50b, text, sourceId: 0x5ff80001);
 
-            SetSubState(sender, 0x0c);
-            SetSpeeds(sender);
-            SetSpeeds(sender);
-            SetSpeeds(sender);
+                SetSubState(sender, 0x0c);
+                SetSpeeds(sender);
+                SetSpeeds(sender);
+                SetSpeeds(sender);
 
-            byte[] commandResult = new byte[]
+                SendActionResult(sender, Command.EquipSouldStone, new List<CommandResult> {
+                    new CommandResult
+                    {
+                        TargetId = Id,
+                        EffectId = 1,
+                        Sequence = 1
+                    }
+                }, 0x7c000062);
+            }
+            else
             {
-                0x41, 0x29, 0x9B, 0x02, 0x62, 0x00, 0x00, 0x7C, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x01, 0x00, 0x00, 0x00, 0xF1, 0x2E, 0x10, 0x08, 0x41, 0x29, 0x9B, 0x02, 0x00, 0x00, 0x00, 0x00,
-                0x01, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00
-            };
-            Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, text, 0, 4);
-            Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, text, 0x28, 4);
+                CurrentJobId = 0;
+                SendCurrentJob(sender);
+            }
+            
+
+            UpdateLevel(sender);
+            UpdateClass(sender);
+            UpdateExp(sender);
+        }
+
+        private void SendCurrentJob(Socket sender)
+        {
+            byte[] data = new byte[0x08];
+            data[0] = CurrentJobId;
+            SendPacket(sender, ServerOpcode.SetCurrentJob, data);
         }
 
         public byte[] CharaWorkExp(Socket sender)
@@ -667,6 +703,90 @@ namespace Launcher
             }
 
             return PacketQueue.Dequeue();
+        }
+
+        public void ChangeGear(Socket sender, byte[] data)
+        {
+            //we read the bytes in the index below to be able to differentiate equip/unequip packets. It's the fastest way I can think of.
+            uint pattern = (uint)(data[0x53] << 24 | data[0x52] << 16 | data[0x51] << 8 | data[0x50]);
+            bool isEquipping = pattern == 0x05050505 ? true : false;
+            byte gearSlot = 0;            
+            uint itemUniqueId = 0;    
+            
+            if (isEquipping)
+            {
+                gearSlot = (byte)(data[0x58] - 1);
+                itemUniqueId = (uint)(data[0x5e] << 24 | data[0x5f] << 16 | data[0x60] << 8 | data[0x61]);   
+                
+                //if a weapon is being equipped
+                if(gearSlot == 0)
+                {                    
+                    Item weaponToEquip = Inventory.GetBagItemByUniqueId(itemUniqueId);                    
+
+                    if (weaponToEquip == null)
+                    {
+                        Log.Instance.Error("Something went wrong... The requested item wasn't found in the inventory.");
+                        return;
+                    }
+
+                    Item equippedWeapon = (Item)Inventory.Bag[Inventory.GearSlots[0]];
+                    ushort equippedCategory = Convert.ToUInt16(equippedWeapon.Id.ToString().Substring(0, 3));
+                    ushort toEquipCategory = Convert.ToUInt16(weaponToEquip.Id.ToString().Substring(0, 3));
+                   
+                    if(equippedCategory != toEquipCategory)
+                    {
+                        byte jobToChangeTo = Job.Category[toEquipCategory];
+                        CurrentClassId = jobToChangeTo;
+
+                        //for now, if the job is not activated, activate it.
+                        short level = Jobs[CurrentClassId].Level;
+                        Jobs[CurrentClassId].Level = level == 0 ? (short)1 : level;
+
+                        //if a soul stone is equipped, remove it.
+                        if(CurrentJobId != 0)
+                        {
+                            CurrentJobId = 0;
+                            SendCurrentJob(sender);
+                        }                  
+                       
+                        data = new byte[] { 0x41, 0x29, 0x9B, 0x02, 0x01, 0x00, 0xF8, 0x5F, 0x89, 0x77, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00,
+                                            0x02, 0x00, 0x00, 0x6B, 0x1E, 0x4C, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00,
+                                            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0F,
+                                            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                                            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+                        Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, data, 0, 4);
+                        SendPacket(sender, ServerOpcode.TextSheetMessage70b, data, sourceId: 0x5ff80001);
+
+                        SendActionResult(sender, Command.ChangeEquipment, new List<CommandResult> {
+                            new CommandResult
+                            {
+                                TargetId = Id,
+                                EffectId = 1,
+                                Sequence = 1
+                            }
+                        }, 0x7c000062, 0x40000000);
+
+                        UpdateLevel(sender);
+                        UpdateClass(sender);
+                        UpdateExp(sender);       
+                        Inventory.ChangeGear(sender, gearSlot, itemUniqueId); 
+                    }
+
+                    return;
+                }
+            }
+            else            
+                gearSlot = (byte)(data[0x51] - 1);
+
+            Inventory.ChangeGear(sender, gearSlot, itemUniqueId);
+        }      
+
+        public void PlayAnimationEffect(Socket sender, AnimationEffect animation)
+        {
+            byte[] data = new byte[0x08];
+            data[0] = (byte)animation;
+            data[0x03] = 0x04;
+            SendPacket(sender, ServerOpcode.PlayAnimationEffect, data);
         }
     }
 

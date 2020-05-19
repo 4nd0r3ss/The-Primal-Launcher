@@ -76,7 +76,7 @@ namespace Launcher
                 74000, 78000, 81000, 85000, 89000, 92000, 96000, 100000, 100000, 110000
         };
 
-        public static Dictionary<byte, ushort> ExpTextIds = new Dictionary<byte, ushort>()
+        public static Dictionary<byte, ushort> ExpTextIds = new Dictionary<byte, ushort>
         {
             { 2, 33934 },   //Pugilist
             { 3, 33935 },   //Gladiator
@@ -98,5 +98,37 @@ namespace Launcher
             { 40, 33954 },  //Botanist
             { 41, 33955 }   //Fisher
         };
+
+        //TODO: find a better way to do this.
+        public static Dictionary<ushort, byte> Category = new Dictionary<ushort, byte>
+        {
+            {402, 2}, {403, 3},{404, 4},{407, 7},{408, 8},                                      //Disciples of War
+            {502, 22},{503, 23},                                                                //Disciples of Magic
+            {601, 29},{602, 30}, {603, 31},{604, 32},{605, 33},{606, 34},{607, 35},{608, 36},   //Disciples of the Hand
+            {701, 39},{702, 40},{703, 41}                                                       //Disciples of the Land
+        };
+
+        public static AnimationEffect AnimationEffectId(byte jobId)
+        {
+            switch (jobId)
+            {
+                case 0x0f:
+                    return AnimationEffect.ChangeTo_MNK;
+                case 0x10:
+                    return AnimationEffect.ChangeTo_PAL;
+                case 0x11:
+                    return AnimationEffect.ChangeTo_WAR;
+                case 0x12:
+                    return AnimationEffect.ChangeTo_BRD;
+                case 0x13:
+                    return AnimationEffect.ChangeTo_DRG;
+                case 0x1a:
+                    return AnimationEffect.ChangeTo_BLM;
+                case 0x1b:
+                    return AnimationEffect.ChangeTo_WHM;
+                default:
+                    return 0;
+            }
+        }
     }
 }

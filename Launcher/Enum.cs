@@ -42,7 +42,7 @@ namespace Launcher
         CommandResult = 0x13c,
         DoEmote = 0xe1,
         ChangeJob = 0x1a4,
-        ParticleAnimation = 0xda,
+        PlayAnimationEffect = 0xda,
 
         //Delete actors
         MassDeleteStart = 0x06,
@@ -57,6 +57,7 @@ namespace Launcher
         //text sheet 
         TextSheetMessage30b = 0x157,
         TextSheetMessage50b = 0x15a,
+        TextSheetMessage70b = 0x15b,
 
         //World specific
         SetDalamud = 0x10,
@@ -121,11 +122,6 @@ namespace Launcher
         Mounting = 0x0f
     }
 
-    public enum Animation
-    {
-        MountChocobo = 0x7c000062
-    }
-
     public enum Command
     {
         ChangeEquipment = 0x2ee9,
@@ -175,5 +171,17 @@ namespace Launcher
         MeldRequest = 0x05,
         Bazaar = 0x07,
         Equipment = 0xfe
+    }
+
+    public enum AnimationEffect
+    {
+        ChangeClass  = 0x02,
+        ChangeTo_WAR = 0x27,
+        ChangeTo_MNK = 0x28,
+        ChangeTo_PAL = 0x29,
+        ChangeTo_WHM = 0x30,
+        ChangeTo_BLM = 0x31,
+        ChangeTo_DRG = 0x32,
+        ChangeTo_BRD = 0x33,       
     }
 }

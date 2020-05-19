@@ -228,12 +228,12 @@ namespace Launcher
                 {
                     case (ushort)Command.BattleStance:
                         playerCharacter.SetMainState(_connection.socket, MainState.Active, 0xbf);
-                        playerCharacter.SendActionResult(_connection.socket, (ushort)Command.BattleStance);
+                        playerCharacter.SendActionResult(_connection.socket, Command.BattleStance);
                         playerCharacter.EndClientOrderEvent(_connection.socket, eventType);
                         break;
                     case (ushort)Command.NormalStance:
                         playerCharacter.SetMainState(_connection.socket, MainState.Passive, 0xbf);
-                        playerCharacter.SendActionResult(_connection.socket, (ushort)Command.NormalStance);
+                        playerCharacter.SendActionResult(_connection.socket, Command.NormalStance);
                         playerCharacter.EndClientOrderEvent(_connection.socket, eventType);
                         break;
                     case (ushort)Command.MountChocobo:
@@ -258,10 +258,10 @@ namespace Launcher
                         break;
 
                     case (ushort)Command.ChangeEquipment:
-                        playerCharacter.Inventory.SwitchGear(_connection.socket, data);
+                        playerCharacter.ChangeGear(_connection.socket, data);
                         break;
                     case (ushort)Command.EquipSouldStone:
-                        playerCharacter.EquipSoulStone(_connection.socket);
+                        playerCharacter.EquipSoulStone(_connection.socket, data);
                         break;
                 }
             }
@@ -291,19 +291,23 @@ namespace Launcher
 
             if (message.Substring(0, 1).Equals(@"\")) //is command
             {
-                string command;
-                string value = "";
-                string[] split = null;
                 PlayerCharacter pc = UserFactory.Instance.User.Character;
+                string command;
+                bool hasParameters = false;
+                List<string> parameters = new List<string>();                
 
                 if (message.IndexOf(' ') > 0)
                 {
-                    split = message.Split(' ');
-                    command = split[0];
-                    value = split[1];
+                    parameters.AddRange(message.Split(' '));                   
+                    command = parameters[0];
+                    parameters.RemoveAt(0);
+                    
                 }
                 else                
-                    command = message;                              
+                    command = message;
+
+                if (parameters.Count > 0)
+                    hasParameters = true;
 
                 switch (command)
                 {
@@ -314,17 +318,16 @@ namespace Launcher
                         SendMessage(MessageType.System, "Available commands:");
                         SendMessage(MessageType.System, @"\setweather {weather name}");
                         SendMessage(MessageType.System, @"\setmusic {music id}");
-
                         break;
 
                     case @"\setweather":
-                        value = value.First().ToString().ToUpper() + value.Substring(1);
+                        string wheatherName = parameters[0].First().ToString().ToUpper() + parameters[0].Substring(1);
 
-                        if (Enum.IsDefined(typeof(Weather), value))
+                        if (Enum.IsDefined(typeof(Weather), wheatherName))
                         {
-                            _world.SetWeather(_connection.socket, (Weather)Enum.Parse(typeof(Weather), value));
+                            _world.SetWeather(_connection.socket, (Weather)Enum.Parse(typeof(Weather), wheatherName));
 
-                            switch (value)
+                            switch (wheatherName)
                             {
                                 case "Dalamudthunder":
                                     _world.SetMusic(_connection.socket, 29); //set music to "Answers", I THINK it was the original track for this weather.
@@ -336,7 +339,7 @@ namespace Launcher
                         break;
 
                     case @"\setmusic":
-                        if(byte.TryParse(value, out byte id))
+                        if(byte.TryParse(parameters[0], out byte id))
                             _world.SetMusic(_connection.socket, id);
                         else
                             SendMessage(MessageType.System, "Invalid music id.");
@@ -349,7 +352,7 @@ namespace Launcher
                     case @"\setemote":
                         byte[] emote = new byte[] { 0x00, 0xB0, 0x00, 0x05, 0x41, 0x29, 0x9B, 0x02, 0x6E, 0x52, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
                         Buffer.BlockCopy(BitConverter.GetBytes(UserFactory.Instance.User.Character.Id), 0, emote, 0x04, 4);
-                        Buffer.BlockCopy(BitConverter.GetBytes(Convert.ToByte(split[2])), 0, emote, Convert.ToByte(value), 1);       
+                        Buffer.BlockCopy(BitConverter.GetBytes(Convert.ToByte(parameters[1])), 0, emote, Convert.ToByte(parameters[0]), 1);       
                         _connection.Send(new Packet(new GamePacket
                         {
                             Opcode = (ushort)ServerOpcode.DoEmote,
@@ -360,10 +363,8 @@ namespace Launcher
 
                     case @"\setmap": //teleport
                         //get map entry point
-                        if (!value.Equals("") && value != null)
-                        {
-                            _world.TeleportPlayer(_connection.socket, Convert.ToUInt32(value));
-                        }
+                        if (!parameters[0].Equals("") && parameters[0] != null)                        
+                            _world.TeleportPlayer(_connection.socket, Convert.ToUInt32(parameters[0]));                        
 
                         //if (!value.Equals("") && value != null)
                         //{
@@ -382,22 +383,19 @@ namespace Launcher
                     case @"\getposition":
                         Position current = UserFactory.Instance.User.Character.Position;
 
-                        if(value != "" && value == "hex")
+                        if(parameters[0] != "" && parameters[0] == "hex")
                             SendMessage(MessageType.System, "Current position: X: " + current.X.ToString("X") + ", Y: " + current.Y.ToString("X") + ", Z: " + current.Z.ToString("X") + ", R: " + current.R.ToString("X"));
                         else
                             SendMessage(MessageType.System, "Current position: X: " + current.X + ", Y: " + current.Y + ", Z: " + current.Z + ", R: " + current.R);
                         break;
 
-                    case @"\resetlevel":                        
-                        pc.Jobs[pc.CurrentJobId].Level = 1;
-                        pc.Jobs[pc.CurrentJobId].TotalExp = 0;
-                        Property property = new Property(_connection.socket, pc.Id, @"charaWork/stateForAll");
-                        property.Add("charaWork.battleSave.skillLevel[" + (pc.CurrentJobId - 1) + "]", 1);
-                        property.Add("charaWork.parameterSave.state_mainSkillLevel", 1);
-                        property.FinishWriting();
+                    case @"\resetlevel":
+                        short level = 1;
 
-                        pc.UpdateExp(_connection.socket);
-
+                        if (hasParameters) 
+                            Int16.TryParse(parameters[0], out level);                           
+                       
+                        pc.LevelDown(_connection.socket, level);
                         break;
 
                     //case @"\spawn":
@@ -405,18 +403,18 @@ namespace Launcher
                     //    break;
 
                     case @"\teleport":
-                        if(split.Length > 2)
+                        if(parameters.Count > 2)
                         {
                             //Position pos = Aetheryte.AetheryteList.Find(x => x.Value.Id == 1280040).Value.Position;
-                            Position pos = UserFactory.Instance.User.Character.Position;
-                            pos.X = Convert.ToSingle(split[1]);
-                            pos.Y = Convert.ToSingle(split[2]);
-                            pos.Z = Convert.ToSingle(split[3]);
-                            //_user.Character.Position.R = value[4];
-                            if (split.Length > 4)
-                                pos.ZoneId = Convert.ToUInt32(split[4]);
+                            Position pos = pc.Position;
+                            pos.X = Convert.ToSingle(parameters[0]);
+                            pos.Y = Convert.ToSingle(parameters[1]);
+                            pos.Z = Convert.ToSingle(parameters[2]);
+                            //_user.Character.Position.R = value[3];
+                            if (parameters.Count > 4)
+                                pos.ZoneId = Convert.ToUInt32(parameters[3]);
 
-                            UserFactory.Instance.User.Character.SetPosition(_connection.socket, pos, 2);
+                            pc.SetPosition(_connection.socket, pos, 2);
                         }                        
                         break;                    
 
@@ -430,17 +428,30 @@ namespace Launcher
                         break;
 
                     case @"\text":
+
+                        data = new byte[] { 0x41, 0x29, 0x9B, 0x02, 0x01, 0x00, 0xF8, 0x5F, 0x89, 0x77, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00,
+                                            0x02, 0x00, 0x00, 0x6B, 0x1E, 0x4C, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00,
+                                            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0F,
+                                            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                                            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+
+                        if(parameters.Count>0)
+                            Buffer.BlockCopy(BitConverter.GetBytes(Convert.ToUInt32(parameters[0])), 0, data, 0x08, 4);
+
+                        Buffer.BlockCopy(BitConverter.GetBytes(pc.Id), 0, data, 0, 4);  
+
                         GamePacket g = new GamePacket
                         {
-                            Opcode = 0x166,
-                            Data = new byte[]
-                           {
-                               0x01, 0x00, 0xF8, 0x5F, 0x39, 0x85, 0x20, 0x00//, 0x00, 0x00, 0x00, 0x00, 0x28, 0x0F, 0x00, 0x00,
-                                //0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-                           }
+                            Opcode = (ushort)ServerOpcode.TextSheetMessage70b,
+                            Data = data
                         };
 
-                        Packet pk = new Packet(g);
+                        SubPacket sb = new SubPacket(g)
+                        {
+                            SourceId = 0x5ff80001
+                        };
+
+                        Packet pk = new Packet(sb);                        
 
                         _connection.Send(pk.ToBytes());
                         break;
@@ -450,21 +461,22 @@ namespace Launcher
                         break;
 
                     case @"\additem":
-                        uint quantity = 1;
+                        pc.Inventory.AddItem(ref pc.Inventory.Bag,
+                            parameters[0].Replace("_", " ").Replace("'", "''"),
+                            (parameters.Count > 2 ? Convert.ToUInt32(parameters[1]) : 1),
+                            _connection.socket);
+                        break;
 
-                        if (split.Length > 2)
-                            quantity = Convert.ToUInt32(split[2]);
-
-                        UserFactory.Instance.User.Character.Inventory.AddItem(ref UserFactory.Instance.User.Character.Inventory.Bag, value.Replace("_", " ").Replace("'","''"), quantity, _connection.socket);
+                    case @"\addkeyitem":   
+                        pc.Inventory.AddItem(ref pc.Inventory.KeyItems, 
+                            parameters[0].Replace("_", " ").Replace("'", "''"), 
+                            (parameters.Count > 2 ? Convert.ToUInt32(parameters[1]) : 1), //TODO: should key items be always 1?
+                            _connection.socket);
                         break;
 
                     case @"\addexp":
-                        if (split.Length > 1)
-                        {
-
-                            UserFactory.Instance.User.Character.AddExp(_connection.socket, Convert.ToInt32(split[1]));
-                        }
-
+                        if (hasParameters)  
+                            UserFactory.Instance.User.Character.AddExp(_connection.socket, Convert.ToInt32(parameters[0]));   
                         break;
                    
                     case @"\removeactor":
@@ -476,8 +488,29 @@ namespace Launcher
                         Packet packet = new Packet(new SubPacket(gps) { SourceId = UserFactory.Instance.User.Character.Id, TargetId = UserFactory.Instance.User.Character.Id });
                         _connection.Send(packet.ToBytes());
                         //UserFactory.Instance.User.Character.SetPosition(_connection.socket, ZoneList.EntryPoints.Find(x => x.ZoneId == Convert.ToUInt32(value)), 2, 1);
-                        UserFactory.Instance.User.Character.Position = ZoneList.EntryPoints.Find(x => x.ZoneId == Convert.ToUInt32(value));
+                        UserFactory.Instance.User.Character.Position = ZoneList.EntryPoints.Find(x => x.ZoneId == Convert.ToUInt32(parameters[0]));
                         _world.Initialize(_connection.socket);
+                        break;
+
+                    case @"\anim":
+
+                        byte animid = 0x29;
+                        byte another = 0x04;
+                        if (hasParameters)
+                            animid = Convert.ToByte(parameters[0]);
+
+                        if (parameters.Count > 1)
+                            another = Convert.ToByte(parameters[1]);
+
+                        byte[] anim = new byte[] { 0x29, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00 };
+                        anim[0] = animid;                                             
+                        anim[3] = another;                                             
+                        
+                        _connection.Send(new Packet(new GamePacket
+                        {
+                            Opcode = (ushort)ServerOpcode.PlayAnimationEffect,
+                            Data = anim
+                        }).ToBytes());
                         break;
 
                     default:

@@ -314,8 +314,11 @@ namespace Launcher
                 Data = data
             };
 
+            if (sourceId == 0)
+                sourceId = Id;
+
             //Packet packet = new Packet(new SubPacket(gamePacket) { SourceId = sourceId > 0 ? sourceId : Id, TargetId = targetId > 0 ? targetId : TargetId });
-            Packet packet = new Packet(new SubPacket(gamePacket) { SourceId = Id, TargetId = TargetId });
+            Packet packet = new Packet(new SubPacket(gamePacket) { SourceId = sourceId, TargetId = TargetId });
             handler.Send(packet.ToBytes());
         }
 
