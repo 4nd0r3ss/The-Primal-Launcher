@@ -48,11 +48,6 @@ namespace Launcher
                 txtPatchPath.Text = path;
         }
 
-        private void radioButton2_CheckedChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void BtnPatchExe_Click(object sender, EventArgs e) => Task.Run(() => { Patcher.PatchExecutableFiles(); });        
+        private void BtnPatchExe_Click(object sender, EventArgs e) => Task.Run(() => { Patcher.PatchExecutableFiles(); });
     }
 }

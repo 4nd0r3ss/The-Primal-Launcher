@@ -11,6 +11,7 @@ namespace Launcher
         Ping = 0x01,
         DataRequest = 0x12f,
         EventRequest = 0x12d,
+        EventResult = 0x12e,
         PlayerPosition = 0xca,
         Unknown0x02 = 0x02,
         ChatMessage = 0x03,
@@ -85,6 +86,8 @@ namespace Launcher
         PushEvenFan = 0x0170,
         PushEventTriggerBox = 0x0175,
 
+        StartEventRequest = 0x130,
+        //EventResult = 0x12e,
 
         //Inventory
         InventoryStart = 0x016d,
@@ -134,8 +137,8 @@ namespace Launcher
         DoEmote = 0x5e26,
         BattleStance = 0x5209,
         NormalStance = 0x520a,
-        
-        
+
+
     }
 
     public enum BGMMode
@@ -175,13 +178,63 @@ namespace Launcher
 
     public enum AnimationEffect
     {
-        ChangeClass  = 0x02,
+        ChangeClass = 0x02,
         ChangeTo_WAR = 0x27,
         ChangeTo_MNK = 0x28,
         ChangeTo_PAL = 0x29,
         ChangeTo_WHM = 0x30,
         ChangeTo_BLM = 0x31,
         ChangeTo_DRG = 0x32,
-        ChangeTo_BRD = 0x33,       
+        ChangeTo_BRD = 0x33,
+    }
+
+    [Serializable]
+    public enum Weather
+    {
+        Clear = 8001,
+        Fine = 8002,
+        Cloudy = 8003,
+        Foggy = 8004,
+        Windy = 8005,
+        Blustery = 8006,
+        Rainy = 8007,
+        Showery = 8008,
+        Thundery = 8009,
+        Stormy = 8010,
+        Dusty = 8011,
+        Sandy = 8012,
+        Hot = 8013,
+        Blistering = 8014,
+        Snowy = 8015,
+        Wintry = 8016,
+        Gloomy = 8017,
+        Seasonal = 8027,
+        Primal = 8028,
+        Fireworks = 8029,
+        Dalamud = 8030,
+        Aurora = 8031,
+        Dalamudthunder = 8032,
+        Day = 8065,
+        Twilight = 8066
+    }
+
+    [Serializable]
+    public enum CityState
+    {
+        Limsa = 193,
+        Gridania = 166,
+        UlDah = 184
+    }
+
+    public enum AetheryteType
+    {
+        Crystal = 0x51a6,
+        Shard = 0x51a7,
+        Gate = 0x51bd
+    }
+
+    public enum Region
+    {
+        //Thanalan = 
     }
 }

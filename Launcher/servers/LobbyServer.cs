@@ -11,7 +11,7 @@ namespace Launcher
     {        
         private const int PORT = 54994;     
         private PlayerCharacter _newCharacter = new PlayerCharacter();
-        private UserFactory _userFactory = UserFactory.Instance;
+        private UserRepository _userFactory = UserRepository.Instance;
 
         public LobbyServer()
         {
@@ -177,7 +177,7 @@ namespace Launcher
                     break;
             }
 
-            byte[] worldName = Encoding.ASCII.GetBytes(WorldFactory.GetWorld(worldId).Name);
+            byte[] worldName = World.GetNameBytes(); 
             Buffer.BlockCopy(worldName, 0, responseData, 0x40, worldName.Length);   
             Buffer.BlockCopy(_newCharacter.CharacterName, 0, responseData, 0x20, 0x20);            
 
@@ -208,22 +208,22 @@ namespace Launcher
             //when you create a new character, the game client calls SelectCharacter right after,
             //however the received packet does not contain the character id for some reason. 
             //the code below fix this as we need it to get the world id.
-            if (UserFactory.Instance.User.Character == null)
-                UserFactory.Instance.User.Character = _newCharacter;
+            if (UserRepository.Instance.User.Character == null)
+                UserRepository.Instance.User.Character = _newCharacter;
             //if (selectedCharacterId == 0)
                 //selectedCharacterId = _newCharacter.Id;
 
             //Get world info
             byte worldId = _userFactory.User.Character.WorldId;
-            World world = WorldFactory.GetWorld(worldId);            
+            //World world = WorldFactory.GetWorld(worldId);            
 
             byte[] response = new byte[0x98];
             response[0] = sequence;
             Buffer.BlockCopy(characterId, 0, response, 0x8, characterId.Length);
             Buffer.BlockCopy(characterId, 0, response, 0xc, characterId.Length);
             response[0x14] = 0x1;
-            Buffer.BlockCopy(BitConverter.GetBytes(world.Port), 0, response, 0x56, 0x2);
-            Buffer.BlockCopy(Encoding.ASCII.GetBytes(world.Address), 0, response, 0x58, world.Address.Length);
+            Buffer.BlockCopy(BitConverter.GetBytes(World.Port), 0, response, 0x56, 0x2);
+            Buffer.BlockCopy(Encoding.ASCII.GetBytes(World.Address), 0, response, 0x58, World.Address.Length);
             Buffer.BlockCopy(ticket, 0, response, 0x90, ticket.Length);
 
             GamePacket characterSelected = new GamePacket

@@ -9,7 +9,7 @@ namespace Launcher
     {
         private const int PORT = 80;
         public static readonly string HTTP_SERVER_VERSION = "Primal-Http-Server/0.1"; //for html headers
-        private static UserFactory _userFactory = UserFactory.Instance;        
+        private static UserRepository _userFactory = UserRepository.Instance;        
 
         public HttpServer() => Start("Http", PORT);
 

@@ -84,7 +84,7 @@ namespace Launcher
 
                         byte[] name = Encoding.ASCII.GetBytes(Encoding.ASCII.GetString(character.CharacterName).Trim(new[] { '\0' }));
                         byte[] gearSet = character.GearGraphics.ToBytes();
-                        byte[] worldName = Encoding.ASCII.GetBytes(WorldFactory.GetWorld(character.WorldId).Name);
+                        byte[] worldName = World.GetNameBytes(); // WorldFactory.GetWorld(character.WorldId).Name);
                         Job currentClass = character.Jobs[character.CurrentClassId];
 
                         Buffer.BlockCopy(BitConverter.GetBytes(character.Id), 0, characterSlot, 0x04, 0x04); //sequence?                    

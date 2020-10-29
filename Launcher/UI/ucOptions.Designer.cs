@@ -37,8 +37,14 @@
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.radioButton3 = new System.Windows.Forms.RadioButton();
             this.radioButton2 = new System.Windows.Forms.RadioButton();
-            this.radioButton1 = new System.Windows.Forms.RadioButton();
+            this.radio_webserver = new System.Windows.Forms.RadioButton();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.radioButton4 = new System.Windows.Forms.RadioButton();
+            this.radioButton5 = new System.Windows.Forms.RadioButton();
+            this.radioButton6 = new System.Windows.Forms.RadioButton();
             this.groupBox3.SuspendLayout();
+            this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
             // txtGameInstallPath
@@ -105,7 +111,7 @@
             // 
             this.groupBox3.Controls.Add(this.radioButton3);
             this.groupBox3.Controls.Add(this.radioButton2);
-            this.groupBox3.Controls.Add(this.radioButton1);
+            this.groupBox3.Controls.Add(this.radio_webserver);
             this.groupBox3.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.groupBox3.Location = new System.Drawing.Point(30, 117);
             this.groupBox3.Name = "groupBox3";
@@ -135,23 +141,80 @@
             this.radioButton2.TabStop = true;
             this.radioButton2.Text = "Log-in automatically using default user";
             this.radioButton2.UseVisualStyleBackColor = true;
-            this.radioButton2.CheckedChanged += new System.EventHandler(this.radioButton2_CheckedChanged);
             // 
-            // radioButton1
+            // radio_webserver
             // 
-            this.radioButton1.AutoSize = true;
-            this.radioButton1.Location = new System.Drawing.Point(13, 23);
-            this.radioButton1.Name = "radioButton1";
-            this.radioButton1.Size = new System.Drawing.Size(208, 17);
-            this.radioButton1.TabIndex = 0;
-            this.radioButton1.TabStop = true;
-            this.radioButton1.Text = "Use built-in web server (recommended)";
-            this.radioButton1.UseVisualStyleBackColor = true;
+            this.radio_webserver.AutoSize = true;
+            this.radio_webserver.Location = new System.Drawing.Point(13, 23);
+            this.radio_webserver.Name = "radio_webserver";
+            this.radio_webserver.Size = new System.Drawing.Size(208, 17);
+            this.radio_webserver.TabIndex = 0;
+            this.radio_webserver.TabStop = true;
+            this.radio_webserver.Text = "Use built-in web server (recommended)";
+            this.radio_webserver.UseVisualStyleBackColor = true;
+            // 
+            // groupBox1
+            // 
+            this.groupBox1.Controls.Add(this.radioButton6);
+            this.groupBox1.Controls.Add(this.radioButton5);
+            this.groupBox1.Controls.Add(this.radioButton4);
+            this.groupBox1.Controls.Add(this.label3);
+            this.groupBox1.Location = new System.Drawing.Point(30, 242);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(289, 100);
+            this.groupBox1.TabIndex = 17;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "Game server region";
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(13, 20);
+            this.label3.MaximumSize = new System.Drawing.Size(280, 0);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(252, 26);
+            this.label3.TabIndex = 0;
+            this.label3.Text = "Show original game server names from the selected region. For character creation " +
+    "only.";
+            // 
+            // radioButton4
+            // 
+            this.radioButton4.AutoSize = true;
+            this.radioButton4.Location = new System.Drawing.Point(13, 61);
+            this.radioButton4.Name = "radioButton4";
+            this.radioButton4.Size = new System.Drawing.Size(92, 17);
+            this.radioButton4.TabIndex = 1;
+            this.radioButton4.TabStop = true;
+            this.radioButton4.Text = "North America";
+            this.radioButton4.UseVisualStyleBackColor = true;
+            // 
+            // radioButton5
+            // 
+            this.radioButton5.AutoSize = true;
+            this.radioButton5.Location = new System.Drawing.Point(130, 61);
+            this.radioButton5.Name = "radioButton5";
+            this.radioButton5.Size = new System.Drawing.Size(54, 17);
+            this.radioButton5.TabIndex = 2;
+            this.radioButton5.TabStop = true;
+            this.radioButton5.Text = "Japan";
+            this.radioButton5.UseVisualStyleBackColor = true;
+            // 
+            // radioButton6
+            // 
+            this.radioButton6.AutoSize = true;
+            this.radioButton6.Location = new System.Drawing.Point(217, 61);
+            this.radioButton6.Name = "radioButton6";
+            this.radioButton6.Size = new System.Drawing.Size(59, 17);
+            this.radioButton6.TabIndex = 3;
+            this.radioButton6.TabStop = true;
+            this.radioButton6.Text = "Europe";
+            this.radioButton6.UseVisualStyleBackColor = true;
             // 
             // ucOptions
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.txtGameInstallPath);
@@ -163,6 +226,8 @@
             this.Size = new System.Drawing.Size(605, 427);
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -179,6 +244,11 @@
         private System.Windows.Forms.GroupBox groupBox3;
         private System.Windows.Forms.RadioButton radioButton3;
         private System.Windows.Forms.RadioButton radioButton2;
-        private System.Windows.Forms.RadioButton radioButton1;
+        private System.Windows.Forms.RadioButton radio_webserver;
+        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.RadioButton radioButton6;
+        private System.Windows.Forms.RadioButton radioButton5;
+        private System.Windows.Forms.RadioButton radioButton4;
+        private System.Windows.Forms.Label label3;
     }
 }

@@ -42,7 +42,7 @@ namespace Launcher
             throw new NotImplementedException();
         }
 
-        public static World GetWorld(string name) => LoadWorlds().Find(x => x.Name == name);
+        //public static World GetWorld(string name) => LoadWorlds().Find(x => x.Name == name);
         public static World GetWorld(byte id) => LoadWorlds().Find(x => x.ServerId == (int)id);
        
 
@@ -53,10 +53,10 @@ namespace Launcher
             worlds.Add(new World()
             {
                 ServerId = 1,
-                Name = "Primal Launcher",
+                //Name = "Primal Launcher",
                 Population = 0x61,
-                Address = "127.0.0.1",
-                Port = 54992
+                //Address = "127.0.0.1",
+                //Port = 54992
             });            
             
             try
@@ -80,11 +80,20 @@ namespace Launcher
             {
                 try
                 {
-                    using (var fileStream = new FileStream(_userFilePath + Preferences.AppFolder + SERVERS_FILE, FileMode.Open))
+                    //using (var fileStream = new FileStream(_userFilePath + Preferences.AppFolder + SERVERS_FILE, FileMode.Open))
+                    //{
+                    //    var bFormatter = new BinaryFormatter();                        
+                    //     worlds = (List<World>)bFormatter.Deserialize(fileStream); 
+                    //}                    
+
+                    worlds.Add(new World()
                     {
-                        var bFormatter = new BinaryFormatter();                        
-                         worlds = (List<World>)bFormatter.Deserialize(fileStream); 
-                    }                    
+                        ServerId = 1,
+                        //Name = "Primal Launcher",
+                        Population = 0x61,
+                        //Address = "127.0.0.1",
+                        //Port = 54992
+                    });
                 }
                 catch (Exception) {_log.Error("There is a problem with the world file. Please try again."); }
             }
@@ -102,8 +111,8 @@ namespace Launcher
             serverListData[0x09] = (byte)numServers; //store counter
 
             for (int i = 0; i < numServers; i++)
-            {                
-                byte[] name = Encoding.ASCII.GetBytes(worldList[i].Name);
+            {
+                byte[] name = Encoding.ASCII.GetBytes("CHANGE NAME");// worldList[i].Name);
                 byte[] server = new byte[_size];
                 
                 server[0x00] = (byte)worldList[i].ServerId;

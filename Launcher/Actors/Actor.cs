@@ -12,14 +12,17 @@ namespace Launcher
     [Serializable]
     public class Actor
     {
-        
-        public uint TargetId { get; set; }
+
+        public uint TargetId { get; set; } //remove this
         public uint CurrentTarget { get; set; }
 
         public uint Id { get; set; }
-        public uint NameId { get; set; }        
+        public uint NameId { get; set; }
+        public uint ClassId { get; set; }
+        public string ClassName { get; set; }
         public string ClassPath { get; set; }
-        public byte PropFlag { get; set; }
+        public uint ClassCode { get; set; }
+        //public byte PropFlag { get; set; }
         public List<EventCondition> EventConditions { get; set; } = new List<EventCondition>();
 
         #region General
@@ -38,33 +41,57 @@ namespace Launcher
 
         public Face Face { get; set; }
         public GearGraphics GearGraphics { get; set; } = new GearGraphics();
-        public uint BaseModel { get; set; } //objects wont have a tribe, so we load zeros by default.
+        public uint BaseModel { get; set; }
         public uint AppearanceCode { get; set; }
 
         public Position Position { get; set; } = new Position();
         public LuaParameters LuaParameters { get; set; }
-        public uint[] Speeds { get; set; }    
+        public uint[] Speeds { get; set; }
 
-        public virtual void Spawn(Socket handler, ushort spawnType = 0, ushort isZoning = 0, ushort actorIndex = 0)
+        public virtual void Spawn(Socket handler, ushort spawnType = 0, ushort isZoning = 0, int changingZone = 0, ushort actorIndex = 0)
         {
             Prepare(actorIndex);
-            CreateActor(handler, 0x08);            
+            CreateActor(handler, 0x08);
             SetEventConditions(handler);
             SetSpeeds(handler, Speeds);
             SetPosition(handler, Position, spawnType, isZoning);
             SetAppearance(handler);
             SetName(handler);
-            SetMainState(handler, MainState.Passive, 0);
+            SetMainState(handler, MainState.Passive);
             SetSubState(handler);
             SetAllStatus(handler);
             SetIcon(handler);
-            SetIsZoning(handler);
+            SetIsZoning(handler, false);
             LoadActorScript(handler, LuaParameters);
             ActorInit(handler);
         }
 
-        public virtual void Prepare(ushort actorIndex) { }
-              
+        public virtual void Prepare(ushort actorIndex = 0)
+        {
+            Zone zone = World.Instance.Zones.Find(x => x.Id == Position.ZoneId);
+            Id = 4 << 28 | zone.Id << 19 | (uint)actorIndex; // 0x46700087;           
+
+            LuaParameters = new LuaParameters
+            {
+                ActorName = GenerateActorName(actorIndex) /*+ "@" + Position.ZoneId.ToString("X3") + "00"*/,
+                ClassName = ClassName,
+                ClassCode = ClassCode
+            };
+
+            LuaParameters.Add(ClassPath + ClassName);
+            LuaParameters.Add(false);
+            LuaParameters.Add(false);
+            LuaParameters.Add(false);
+            LuaParameters.Add(false);
+            LuaParameters.Add(false);
+            LuaParameters.Add(ClassId);
+            LuaParameters.Add(false);
+            LuaParameters.Add(false);
+            LuaParameters.Add((uint)0);
+            LuaParameters.Add((uint)0);
+            LuaParameters.Add("TEST");
+        }
+
         public void SetEventConditions(Socket handler)
         {
             if (EventConditions.Count > 0) //not all actors have event conditions
@@ -86,17 +113,18 @@ namespace Launcher
                         case ServerOpcode.PushEventCircle:
                             data = new byte[0x38];
                             Buffer.BlockCopy(BitConverter.GetBytes(e.Radius), 0, data, 0, sizeof(uint));
-                            Buffer.BlockCopy(BitConverter.GetBytes(e.ServerCodes), 0, data, 0x04, sizeof(uint));
-                            Buffer.BlockCopy(BitConverter.GetBytes(e.Radius), 0, data, 0x08, sizeof(uint));
+                            Buffer.BlockCopy(BitConverter.GetBytes(0x44533088), 0, data, 0x04, sizeof(uint));
+                            Buffer.BlockCopy(BitConverter.GetBytes(100.0f), 0, data, 0x08, sizeof(uint));
+                            Buffer.BlockCopy(BitConverter.GetBytes(0), 0, data, 0x0c, sizeof(uint));
                             Buffer.BlockCopy(BitConverter.GetBytes(e.Direction), 0, data, 0x10, sizeof(byte));
-                            Buffer.BlockCopy(BitConverter.GetBytes(e.Priority), 0, data, 0x11, sizeof(byte));
+                            Buffer.BlockCopy(BitConverter.GetBytes(0), 0, data, 0x11, sizeof(byte));
                             Buffer.BlockCopy(BitConverter.GetBytes(e.IsSilent), 0, data, 0x12, sizeof(byte));
-                            Buffer.BlockCopy(conditionName, 0, data, 0x13, conditionNameLength);                            
+                            Buffer.BlockCopy(conditionName, 0, data, 0x13, conditionNameLength);
                             break;
                         case ServerOpcode.PushEvenFan:
                             data = new byte[0x40];
                             Buffer.BlockCopy(BitConverter.GetBytes(e.Radius), 0, data, 0, sizeof(uint));
-                            Buffer.BlockCopy(BitConverter.GetBytes(e.ServerCodes), 0, data, 0x04, sizeof(uint));
+                            Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, data, 0x04, sizeof(uint));
                             Buffer.BlockCopy(BitConverter.GetBytes(e.Radius), 0, data, 0x08, sizeof(uint));
                             Buffer.BlockCopy(BitConverter.GetBytes(e.Direction), 0, data, 0x10, sizeof(byte));
                             Buffer.BlockCopy(BitConverter.GetBytes(e.Priority), 0, data, 0x11, sizeof(byte));
@@ -134,21 +162,21 @@ namespace Launcher
 
         public virtual void LoadActorScript(Socket handler, LuaParameters luaParameters)
         {
-            byte[] data = new byte[0x108];           
+            byte[] data = new byte[0x108];
 
-            Buffer.BlockCopy(BitConverter.GetBytes(luaParameters.ServerCodes), 0, data, 0, sizeof(uint));
+            Buffer.BlockCopy(BitConverter.GetBytes(luaParameters.ClassCode), 0, data, 0, sizeof(uint));
             Buffer.BlockCopy(Encoding.ASCII.GetBytes(luaParameters.ActorName), 0, data, 0x04, luaParameters.ActorName.Length);
             Buffer.BlockCopy(Encoding.ASCII.GetBytes(luaParameters.ClassName), 0, data, 0x24, luaParameters.ClassName.Length);
 
-            LuaParameters.WriteParameters(ref data, luaParameters);          
+            LuaParameters.WriteParameters(ref data, luaParameters);
 
             SendPacket(handler, ServerOpcode.LoadClassScript, data);
         }
 
-        public void SetIsZoning(Socket handler)
+        public void SetIsZoning(Socket handler, bool isZoning = false)
         {
             byte[] data = new byte[0x08];
-            /* will be properly implemented later */
+            data[0] = (byte)(isZoning ? 1 : 0);
             SendPacket(handler, ServerOpcode.SetIsZoning, data);
         }
 
@@ -170,14 +198,14 @@ namespace Launcher
         {
             /* will be properly implemented later */
             byte[] data = new byte[0x08];
-            
+
             if (substate > 0)
                 Buffer.BlockCopy(BitConverter.GetBytes(substate), 0, data, 0x03, 1);
 
             SendPacket(handler, ServerOpcode.SetSubState, data);
         }
 
-        public void SetMainState(Socket handler, MainState state, byte type)
+        public void SetMainState(Socket handler, MainState state, byte type = 0)
         {
             byte[] data = new byte[0x08];
             data[0] = (byte)state;
@@ -197,21 +225,24 @@ namespace Launcher
         public void SetName(Socket handler, int isCustom = 0, byte[] customName = null)
         {
             byte[] data = new byte[0x28];
-            
-            if(customName != null)
+
+            if (customName != null)
             {
                 Buffer.BlockCopy(customName, 0, data, 0x04, customName.Length);
                 Buffer.BlockCopy(BitConverter.GetBytes(isCustom), 0, data, 0, sizeof(int));
-            }                
+            }
             else
                 Buffer.BlockCopy(BitConverter.GetBytes(NameId), 0, data, 0x00, sizeof(uint));
 
             SendPacket(handler, ServerOpcode.SetName, data);
-        }               
+        }
 
-        public void SetPosition(Socket handler, Position position, ushort spawnType = 0, ushort isZonning = 0)
+        public void SetPosition(Socket handler, Position position, ushort spawnType = 0, ushort isZonning = 0, int changingZone = 0)
         {
             byte[] data = new byte[0x28];
+
+            if (changingZone == 0)
+                changingZone = (int)Id;
 
             Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, data, 0x04, sizeof(uint));
             Buffer.BlockCopy(BitConverter.GetBytes(position.X), 0, data, 0x08, sizeof(int));
@@ -224,30 +255,30 @@ namespace Launcher
 
             SendPacket(handler, ServerOpcode.SetPosition, data);
         }
-               
+
         public void SetSpeeds(Socket handler, uint[] value = null)
-        {         
+        {
             byte[] data = new byte[0x88];
 
             if (value == null) //load defaults
             {
                 value = new uint[0x04];
                 value[0] = 0;           //Stopped
-                value[1] = 0x40000000;  //Walking
-                value[2] = 0x40d00000; // 0x40a00000;  //Running
+                value[1] = 0x40000000;  //Walking speed
+                value[2] = 0x40d00000; // 0x40a00000;  //Running speed
                 value[3] = 0x40a00000;  //Acive
             }
 
             byte index = 0;
-            for(int i = 0; i < value.Length; i++)
+            for (int i = 0; i < value.Length; i++)
             {
                 Buffer.BlockCopy(BitConverter.GetBytes(value[i]), 0, data, index, sizeof(uint));
                 index += 0x04;
                 data[index] = (byte)i;
                 index += 0x04;
-            }            
+            }
 
-            data[0x80] = 0x04; //only 4 stated discovered so far.
+            data[0x80] = 0x04; //only 4 states discovered so far.
 
             SendPacket(handler, ServerOpcode.SetSpeed, data);
         }
@@ -259,7 +290,7 @@ namespace Launcher
             Dictionary<uint, uint> AppearanceSlots = new Dictionary<uint, uint>
             {
                 //slot number, value
-                { 0x00, BaseModel }, 
+                { 0x00, BaseModel },
                 { 0x01, AppearanceCode },
                 { 0x02, (uint)(SkinColor | HairColor << 10 | EyeColor << 20) },
                 { 0x03, BitField.PrimitiveConversion.ToUInt32(Face) },
@@ -318,7 +349,7 @@ namespace Launcher
                 sourceId = Id;
 
             //Packet packet = new Packet(new SubPacket(gamePacket) { SourceId = sourceId > 0 ? sourceId : Id, TargetId = targetId > 0 ? targetId : TargetId });
-            Packet packet = new Packet(new SubPacket(gamePacket) { SourceId = sourceId, TargetId = TargetId });
+            Packet packet = new Packet(new SubPacket(gamePacket) { SourceId = Id, TargetId = TargetId });
             handler.Send(packet.ToBytes());
         }
 
@@ -362,7 +393,7 @@ namespace Launcher
             public byte Option1 { get; set; }
             public byte Option2 { get; set; }
 
-            public EventCondition() {}
+            public EventCondition() { }
         }
 
         /// <summary>
@@ -374,16 +405,21 @@ namespace Launcher
         {
             var lookup = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-            var secondDigit = lookup.Substring((int)Math.Floor(number / (double)lookup.Length), 1);
+            var startIndex = (int)Math.Floor(number / (double)lookup.Length);
+            var secondDigit = lookup.Substring(startIndex, 1);
             var firstDigit = lookup.Substring(number % lookup.Length, 1);
 
             return secondDigit + firstDigit;
         }
-              
-        public void GenerateActorName(int actorNumber)
+
+        public string GenerateActorName(int actorNumber)
         {
+            Zone zone = World.Instance.Zones.Find(x => x.Id == Position.ZoneId);            
+            uint zoneId = zone.Id;
+            uint privLevel = 0;
+
             //get actor zone name
-            string zoneName = ActorRepository.Instance.Zones.Find(x => x.Id == Position.ZoneId).MapName
+            string zoneName = zone.MapName
                 .Replace("Field", "Fld")
                 .Replace("Dungeon", "Dgn")
                 .Replace("Town", "Twn")
@@ -393,44 +429,30 @@ namespace Launcher
                 .Replace("Ship", "Shp")
                 .Replace("Office", "Ofc");
 
-
-            ////Format Class Name
-            //string className = this.className.Replace("Populace", "Ppl")
-            //                                 .Replace("Monster", "Mon")
-            //                                 .Replace("Crowd", "Crd")
-            //                                 .Replace("MapObj", "Map")
-            //                                 .Replace("Object", "Obj")
-            //                                 .Replace("Retainer", "Rtn")
-            //                                 .Replace("Standard", "Std");
-
-            //className = Char.ToLowerInvariant(className[0]) + className.Substring(1);
-
-            ////Format Zone Name
-            //string zoneName = 
-            //if (zone is PrivateArea)
+            //if (zone.ZoneType == ZoneType.Inn)
             //{
-            //    //Check if "normal"
             //    zoneName = zoneName.Remove(zoneName.Length - 1, 1) + "P";
+            //    //privLevel = ((PrivateArea)zone).GetPrivateAreaType();
             //}
-            //zoneName = Char.ToLowerInvariant(zoneName[0]) + zoneName.Substring(1);
 
-            //try
-            //{
-            //    className = className.Substring(0, 20 - zoneName.Length);
-            //}
-            //catch (ArgumentOutOfRangeException e)
-            //{ }
+            zoneName = Char.ToLowerInvariant(zoneName[0]) + zoneName.Substring(1);
 
-            ////Convert actor number to base 63
-            //string classNumber = Utils.ToStringBase63(actorNumber);
+            //Format Class Name
+            string className = ClassName.Replace("Populace", "ppl")
+                                        .Replace("Monster", "Mon")
+                                        .Replace("Crowd", "Crd")
+                                        .Replace("MapObj", "Map")
+                                        .Replace("Object", "Obj")
+                                        .Replace("Retainer", "Rtn")
+                                        .Replace("Standard", "Std");
 
-            ////Get stuff after @
-            //uint zoneId = zone.actorId;
-            //uint privLevel = 0;
-            //if (zone is PrivateArea)
-            //    privLevel = ((PrivateArea)zone).GetPrivateAreaType();
+            className = Char.ToLowerInvariant(className[0]) + className.Substring(1);
 
-            //actorName = String.Format("{0}_{1}_{2}@{3:X3}{4:X2}", className, zoneName, classNumber, zoneId, privLevel);
+            if(ClassName.Length > 6 && (ClassName.Length + (zoneName.Length + 4)) > 25)
+                try{ className = className.Substring(0, 21 - zoneName.Length); }
+                catch (ArgumentOutOfRangeException e) { Log.Instance.Error(e.Message); }
+                        
+            return string.Format("{0}_{1}_{2}@{3:X3}{4:X2}", className, zoneName, ToStringBase63(actorNumber), zoneId, privLevel);
         }
 
         public void GetBaseModel(byte id)
@@ -450,8 +472,8 @@ namespace Launcher
     {
         public string ActorName { get; set; }
         public string ClassName { get; set; }
-        public uint ServerCodes { get; set; }
-        public List<KeyValuePair<byte, object>> List { get; set; }  = new List<KeyValuePair<byte, object>>();
+        public uint ClassCode { get; set; }
+        public List<KeyValuePair<byte, object>> List { get; set; } = new List<KeyValuePair<byte, object>>();
 
         /// <summary>
         /// Adds one single Lua parameter to the parameter list of the instanced obj.
@@ -488,7 +510,7 @@ namespace Launcher
             //Write Params - using binary writer bc sizes, types, #items can vary.
             using (MemoryStream stream = new MemoryStream(data))
             {
-                using(BinaryWriter writer = new BinaryWriter(stream))
+                using (BinaryWriter writer = new BinaryWriter(stream))
                 {
                     writer.Seek(0x44, SeekOrigin.Begin); //points to the right position
 
@@ -511,7 +533,7 @@ namespace Launcher
                                 string str = (string)parameter.Value;
                                 writer.Write(Encoding.ASCII.GetBytes(str), 0, Encoding.ASCII.GetByteCount(str));
                                 writer.Write((byte)0);
-                                break;                           
+                                break;
                             case 0x05: //null
                                 break;
                             case 0x06:
@@ -532,8 +554,8 @@ namespace Launcher
                     }
 
                     writer.Write((byte)0x0f);
-                }               
-            }            
+                }
+            }
         }
 
         #region Endian swappers
@@ -613,7 +635,7 @@ namespace Launcher
             byte[] result = new byte[0x0e];
 
             using (MemoryStream ms = new MemoryStream(result))
-            using(BinaryWriter bw = new BinaryWriter(ms))
+            using (BinaryWriter bw = new BinaryWriter(ms))
             {
                 bw.Write(TargetId);
                 bw.Write(Amount);

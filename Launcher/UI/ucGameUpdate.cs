@@ -210,67 +210,67 @@ namespace Launcher
 
             string filesPath = Preferences.Instance.Options.UserFilesPath + Preferences.AppFolder + @"update\";
 
-            foreach(var file in _filesToDownload)
-            {                
+            foreach (var file in _filesToDownload)
+            {
 
-                string currentFilePath = filesPath + file.Key.Replace('/','\\');
+                string currentFilePath = filesPath + file.Key.Replace('/', '\\');
                 lblUpdate.Text = "Applying file " + file.Key.Replace('/', '\\');
                 //byte[] fileData = File.ReadAllBytes(currentFilePath);
 
                 //try
                 //{
-                    using (FileStream fs = File.Open(currentFilePath, FileMode.Open))
+                using (FileStream fs = File.Open(currentFilePath, FileMode.Open))
+                {
+                    fs.Seek(0, SeekOrigin.Begin);
+                    byte[] buffer = new byte[0x10];
+                    fs.Read(buffer, 0, buffer.Length);
+                    string fileType = Encoding.ASCII.GetString(buffer);
+
+                    if (fileType.IndexOf("ZIPATCH") < 0)
+                        throw new Exception("Bad file header. Download update files again.");
+
+                    fs.Seek(0x10, SeekOrigin.Begin);
+
+                    using (MemoryStream ms = new MemoryStream())
                     {
-                        fs.Seek(0, SeekOrigin.Begin);
-                        byte[] buffer = new byte[0x10];
-                        fs.Read(buffer, 0, buffer.Length);
-                        string fileType = Encoding.ASCII.GetString(buffer);
+                        fs.CopyTo(ms);
+                        ms.Seek(0, SeekOrigin.Begin);
 
-                        if (fileType.IndexOf("ZIPATCH") < 0)
-                            throw new Exception("Bad file header. Download update files again.");
+                        BinaryReader br = new BinaryReader(ms);
 
-                        fs.Seek(0x10, SeekOrigin.Begin);
-
-                        using (MemoryStream ms = new MemoryStream())
+                        //while there are bytes to read
+                        while (br.BaseStream.Position != br.BaseStream.Length)
                         {
-                            fs.CopyTo(ms);
-                            ms.Seek(0, SeekOrigin.Begin);                           
-                          
-                            BinaryReader br = new BinaryReader(ms);
+                            string operation = Encoding.ASCII.GetString(BitConverter.GetBytes(br.ReadUInt32()));
 
-                            //while there are bytes to read
-                            while(br.BaseStream.Position != br.BaseStream.Length)
+                            switch (operation)
                             {
-                                string operation = Encoding.ASCII.GetString(BitConverter.GetBytes(br.ReadUInt32()));
-
-                                switch (operation)
-                                {
-                                    case "ETRY":
-                                        ProcessETRY(ref br);
-                                        break;
-                                    case "FHDR":
-                                        ProcessFHDR(ref br);
-                                        break;
-                                    case "HIST":
-                                        ProcessHIST(ref br);
-                                        break;
-                                    case "APLY":
-                                        ProcessAPLY(ref br);
-                                        break;
-                                    case "ADIR":
-                                        ProcessADIR(ref br);
-                                        break;
-                                    case "DIFF":
-                                        ProcessDIFF(ref br);
-                                        break;
-                                    case "DELD":
-                                        ProcessDELD(ref br);
-                                        break;
-                                }
-                            }                            
-                        }                      
+                                case "ETRY":
+                                    ProcessETRY(ref br);
+                                    break;
+                                case "FHDR":
+                                    ProcessFHDR(ref br);
+                                    break;
+                                case "HIST":
+                                    ProcessHIST(ref br);
+                                    break;
+                                case "APLY":
+                                    ProcessAPLY(ref br);
+                                    break;
+                                case "ADIR":
+                                    ProcessADIR(ref br);
+                                    break;
+                                case "DIFF":
+                                    ProcessDIFF(ref br);
+                                    break;
+                                case "DELD":
+                                    ProcessDELD(ref br);
+                                    break;
+                            }
+                        }
                     }
-                    //break;
+                }
+                //break;
                 //}catch(Exception e){ throw e; }       
             }
 

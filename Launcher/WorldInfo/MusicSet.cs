@@ -8,7 +8,7 @@ namespace Launcher
 {
     [Serializable]
     public class MusicSet
-    {       
+    {
         public uint DayMusic { get; private set; }
         public uint NightMusic { get; private set; }
         public uint BattleMusic { get; private set; }
@@ -41,7 +41,15 @@ namespace Launcher
             {16, new MusicSet(51, 51, 13)}
         };
 
-        public static MusicSet Get(int id) => MusicSets[id];
+        public static MusicSet Get(int id)
+        {
+            MusicSet musicSet = new MusicSet(0, 0, 0);
+
+            if (MusicSets.ContainsKey(id))
+                musicSet = MusicSets[id];
+
+            return musicSet;
+        }
     }
 
     [Serializable]

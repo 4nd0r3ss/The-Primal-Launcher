@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace Launcher
 {
-    public sealed class UserFactory
+    public sealed class UserRepository
     {
-        private static UserFactory _instance = null;
+        private static UserRepository _instance = null;
         private static readonly object _padlock = new object();
         private static List<User> _userList = new List<User>();
         private static readonly Log _log = Log.Instance;
@@ -21,19 +21,19 @@ namespace Launcher
         
         public User User { get; private set; }
 
-        public static UserFactory Instance
+        public static UserRepository Instance
         {
             get {
                 lock (_padlock) {
                     if (_instance == null)                    
-                        _instance = new UserFactory();                    
+                        _instance = new UserRepository();                    
 
                     return _instance;
                 }
             }
         }
 
-        private UserFactory() => LoadUsers();
+        private UserRepository() => LoadUsers();
 
         public void LoadUser(string uname, string pwd)
         {

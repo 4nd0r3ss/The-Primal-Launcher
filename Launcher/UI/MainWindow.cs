@@ -33,8 +33,8 @@ namespace Launcher
 
 
             //first thing is to check game installation.
-            if (Updater.GameInstallationOk())
-            {                
+            if (true)
+            {
                 ucLogWindow.Instance.BringToFront();
 
                 //default user control button color
@@ -54,9 +54,9 @@ namespace Launcher
 
                 //disable launch button
                 btnLaunchGame.Enabled = false;
-            }            
+            }
 
-            
+
 
             _log.Info("Welcome to Primal Launcher!");         
         }
@@ -145,6 +145,11 @@ namespace Launcher
             //);
 
             //Process.Start(Preferences.Instance.Options.GameInstallPath + "ffxivgame.exe", "  sqex0002" + commandLine + "!////");
+        }
+
+        private void lblAppName_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
