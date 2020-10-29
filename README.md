@@ -2,7 +2,7 @@
 
 Introduction
 ============
-This project aims to transform the long-abandoned FFXIV1.0 in a single player experience for those who want to know this game's rich story and lore. 
+This project aims to transform the long-abandoned FFXIV1.0 in a single player experience for those who want to experience this game's rich story and lore. 
 
 Features
 ========
@@ -10,16 +10,35 @@ Unlike the other great efforts to bring this game back to life, PL has no compli
 
 Some of the main features are:
 - 1 Click binaries patching process and binaries backup creation;
-- Built-in game update downloader and update using original updater for a complete experience;
-- Built-in micro web-server to handle http requests using original login window and mock-up login screen mimicking the original one (cand be edited!);
+- Built-in game update files downloader and updater;
+- Built-in micro web-server to handle http requests using original login window and mock-up login screen mimicking the original one (can be edited!);
 
 What works so far
 =================
+
+Update/login
 - Game update files download;
 - Game update to v1.23b and binaries patch;
-- Dummy login page
-- Character creation & delete
+- Dummy login web page
+
+Lobby
+- Character create/delete
+- Legacy tag
+- Rename character
 - Game start (no intro cutscene or battle for now)
-- Some in-game custom commands
-- Mounting
-- Static objects load
+
+In-game general
+- Change class/job
+- Currency add/remove
+- Items add/remove
+- Mounting (limited)
+- Map static objects (aetheryte crystals, gates and shards)
+- Add/remove exp
+- Level up/down
+
+In-game main menu
+- Attributes - Character initial attributes, currency, key items
+- Gear - Equip/unequip items (items attr not applied to character yet)
+- Inventory - manage items
+- Teleport - Teleport from main menu works but it's limited, total anima 
+
