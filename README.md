@@ -23,7 +23,7 @@ Update/login
 
 Lobby
 - Character create/delete
-- Legacy tag
+- Character Legacy tag
 - Rename character
 - Game start (no intro cutscene or battle for now)
 
@@ -32,13 +32,22 @@ In-game general
 - Currency add/remove
 - Items add/remove
 - Mounting (limited)
-- Map static objects (aetheryte crystals, gates and shards)
+- Map static objects (aetheryte crystals, gates and shards, no interaction)
 - Add/remove exp
 - Level up/down
 
 In-game main menu
 - Attributes - Character initial attributes, currency, key items
-- Gear - Equip/unequip items (items attr not applied to character yet)
+- Gear - Equip/unequip items (items attr not applied to character stat yet)
 - Inventory - manage items
-- Teleport - Teleport from main menu works but it's limited, total anima 
+- Teleport - Teleport from main menu works but it's limited, total anima for display only
+
+Battle
+- No battle so far
+
+Map
+- PL Custom teleport command (can visit any map in the game, including jail and cottage)
+
+Dungeons
+- It's possible to find the dungeon by walking around the map but no instancing so far.
 
