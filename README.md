@@ -2,7 +2,7 @@
 
 Introduction
 ============
-This project aims to transform the long-abandoned FFXIV1.0 in a single player experience for those who want to experience this game's rich story and lore. 
+This project aims to transform the long-abandoned PC videogame FFXIV1.0 in a single player experience for those who want to experience this game's rich story and lore. 
 
 Features
 ========
