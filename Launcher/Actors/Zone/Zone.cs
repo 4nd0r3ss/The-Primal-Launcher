@@ -25,15 +25,16 @@ namespace Launcher
 
         public List<Actor> Actors = new List<Actor>(); //list to keep all actors which are currentl in this zone.
 
-        public Zone(uint regionId, uint zoneId, byte locationNameId, byte musicSetId, int classNameId = -1, bool isMountAllowed = true, ZoneType zoneType = ZoneType.Default, string mapName = null)
+        public Zone(uint regionId, uint zoneId, byte locationNameId, byte musicSetId, int classNameId = -1, bool isMountAllowed = false, ZoneType zoneType = ZoneType.Default, string mapName = null)
         {
-            Id = zoneId;            
+            Id = zoneId; 
+            Name = Encoding.ASCII.GetBytes("_areaMaster");
             RegionId = regionId;
             MapName = mapName;
             PlaceName = ZoneList.LocationName[locationNameId];
             ClassName = classNameId < 0 ? null : "ZoneMaster" + ZoneList.ClassName[classNameId];
             MusicSet = MusicSet.Get(musicSetId);           
-            MountAllowed = isMountAllowed;
+            MountAllowed = isMountAllowed;                    
 
             LuaParameters = new LuaParameters
             {
@@ -54,9 +55,22 @@ namespace Launcher
                 LuaParameters.Add(((byte)zoneType & (1 << i)) != 0);
         }
 
+        public override void Spawn(Socket handler, ushort spawnType = 0, ushort isZoning = 0, int changingZone = 0, ushort actorIndex = 0)
+        {
+            Prepare(actorIndex);
+            CreateActor(handler);
+            SetSpeeds(handler);
+            SetPosition(handler, 1, isZoning);
+            SetName(handler);
+            SetMainState(handler);            
+            SetIsZoning(handler);
+            LoadActorScript(handler);
+        }
+
         public override void Prepare(ushort actorIndex = 0)
         {           
             Actors.AddRange(ActorRepository.Instance.Aetherytes.FindAll(x => x.Position.ZoneId == Id));
+            Actors.AddRange(ActorRepository.Instance.LoadZoneNpc(Id));
         }
 
         public void SpawnActors(Socket sender)
@@ -64,7 +78,7 @@ namespace Launcher
             try
             {
                 for (int i = 0; i < Actors.Count; i++)
-                    Actors[i].Spawn(sender, actorIndex: (ushort)i);
+                    Actors[i].Spawn(sender, actorIndex: (ushort)(i+1));
             }
             catch (Exception e) { _log.Error(e.Message); }
 
@@ -87,19 +101,19 @@ namespace Launcher
         
         public static string[] LocationName { get; } = new string[]
         {
-            "Lower La Noscea",      //0
-            "Western La Noscea",    //1
-            "Eastern La Noscea",    //2
-            "Mistbeard Cove",       //3
-            "Cassiopeia Hollow",    //4
-            "Limsa Lominsa",        //5
-            "U'Ghamaro Mines",      //6
-            "La Noscea",            //7
-            "Sailors Ward",         //8
-            "Upper La Noscea",      //9
-            "Shposhae",             //10
-            "Locke's Lie",          //11
-            "Turtleback Island",    //12
+            "Lower La Noscea",              //0
+            "Western La Noscea",            //1
+            "Eastern La Noscea",            //2
+            "Mistbeard Cove",               //3
+            "Cassiopeia Hollow",            //4
+            "Limsa Lominsa",                //5
+            "U'Ghamaro Mines",              //6
+            "La Noscea",                    //7
+            "Sailors Ward",                 //8
+            "Upper La Noscea",              //9
+            "Shposhae",                     //10
+            "Locke's Lie",                  //11
+            "Turtleback Island",            //12
             "Coerthas Central Highlands",   //13
             "Coerthas Eastern Highlands",   //14
             "Coerthas Eastern Lowlands",    //15

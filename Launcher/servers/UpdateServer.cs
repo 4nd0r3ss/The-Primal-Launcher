@@ -24,8 +24,9 @@ namespace Launcher
 
         private static void LaunchGame()
         {
-            _log.Info("Launching ffxivboot.exe.");
-            Process.Start(new ProcessStartInfo { FileName = Preferences.Instance.Options.GameInstallPath + @"\ffxivboot.exe" });
+            Log.Instance.Info("Launching ffxivboot.exe.");
+            string path = Preferences.Instance.Options.GameInstallPath;
+            Process.Start(new ProcessStartInfo { FileName = path + @"\ffxivboot.exe" });
         }       
 
         public override void ProcessIncoming(ref StateObject _connection)
@@ -42,23 +43,23 @@ namespace Launcher
                 if (stringData.IndexOf("game") > 0)
                 {
                     _connection.Send(Updater.CheckGameVer());
-                    ServerShutDown(); //sending shutdown after server's final task.
+                    //ServerShutDown(); //sending shutdown after server's final task.
                 }
             }                            
         }
 
         public override void ServerTransition()
         {
-            if(Preferences.Instance.Options.UseExternalHttpServer)
-            {                              
-                _log.Warning("Using external HTTP server. You can change this in the options pane.");               
-                UserRepository.Instance.LoadUser("FFXIVPlayer", "FFXIVPlayer");  //if using external http server, load default user.
-                Task.Run(() => { new LobbyServer(); });                   
-            }           
-            else
-            {
-                Task.Run(() => { new HttpServer(); });
-            }    
+            //if(Preferences.Instance.Options.UseExternalHttpServer)
+            //{                              
+            //    Log.Instance.Warning("Using external HTTP server. You can change this in the options pane.");               
+            //    UserRepository.Instance.LoadUser("FFXIVPlayer", "FFXIVPlayer");  //if using external http server, load default user.
+            //    //Task.Run(() => { new LobbyServer(); });                   
+            //}           
+            //else
+            //{
+            //    //Task.Run(() => { new HttpServer(); });
+            //}    
         }
     }
 }

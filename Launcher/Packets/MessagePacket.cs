@@ -5,36 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Launcher
-{
-    public enum MessageType
-    {
-        None    = 0,
-        Say     = 1,
-        Shout   = 2,
-        Tell    = 3,
-        Party   = 4,
-
-        LinkShell1 = 5,
-        LinkShell2 = 6,
-        LinkShell3 = 7,
-        LinkShell4 = 8,
-        LinkShell5 = 9,
-        LinkShell6 = 10,
-        LinkShell7 = 11,
-        LinkShell8 = 12,
-
-        SaySpam         = 22,
-        ShoutSpam       = 23,
-        TellSpam        = 24,
-        CustomEmote     = 25,
-        EmoteSpam       = 26,
-        StandardEmote   = 27,
-        UrgentMessage   = 28,
-        GeneralInfo     = 29,
-        System          = 32,
-        SystemError     = 33
-    }
-       
+{   
     public class MessagePacket : GamePacket
     {       
         public string Message { get; set; }
@@ -44,7 +15,7 @@ namespace Launcher
 
         public MessagePacket()
         {
-            Opcode = 0x0003;
+            //Opcode = 0x0003;
         }
 
         public void ProcessData()

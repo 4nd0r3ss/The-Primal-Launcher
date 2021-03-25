@@ -13,9 +13,11 @@ namespace Launcher
     public class PlayerCharacter : Actor
     {
         #region Info        
-        public byte[] CharacterName { get; set; } = new byte[0x20];
+        
         public byte WorldId { get; set; }
         public byte Slot { get; set; }
+        public DateTime? LastLogin { get; set; }
+        public bool IsNew { get; set; }
         #endregion       
 
         #region Background
@@ -31,9 +33,12 @@ namespace Launcher
         public byte CurrentClassId { get; set; }
         #endregion
 
+        public uint TotalAnima { get; set; }
         public Inventory Inventory { get; set; }
         public Dictionary<byte, Job> Jobs { get; set; } = Job.LoadAll();
-        public OrderedDictionary GeneralParameters { get; set; } = new OrderedDictionary();
+        public OrderedDictionary GeneralParameters { get; set; }
+        public PartyGroup PartyGroup { get; set; }
+        public RetainerGroup RetainerGroup { get; set; }
 
         public Queue<byte[]> PacketQueue { get; set; }
 
@@ -41,6 +46,16 @@ namespace Launcher
         {
             //Character ID
             Id = NewId();
+            IsNew = true;
+
+            ClassPath = "/Chara/Player/Player_work";
+
+            State.Type = MainStateType.Player;
+
+            //speeds 
+            Speeds.Walking = ActorSpeed.Walking;  //Walking speed
+            Speeds.Running = ActorSpeed.Running; // 0x40a00000;  //Running speed
+            Speeds.Active = ActorSpeed.Active;  //Acive
 
             //prepare packet info for decoding
             byte[] info = new byte[0x90];
@@ -51,8 +66,8 @@ namespace Launcher
             data = Convert.FromBase64String(tmp);
 
             //General
-            Size = data[0x09];
-            Voice = data[0x26];
+            Appearance.Size = data[0x09];
+            Appearance.Voice = data[0x26];
             SkinColor = (ushort)(data[0x23] >> 8 | data[0x22]);
 
             //Head
@@ -103,14 +118,22 @@ namespace Launcher
             };
 
             //Actor Lua parameters
-            LuaParameters.Add("/Chara/Player/Player_work");
+            LuaParameters.Add(ClassPath);
             LuaParameters.Add(true);
             LuaParameters.Add(false);
             LuaParameters.Add(false);
             LuaParameters.Add(true);
             LuaParameters.Add(0);
             LuaParameters.Add(false);
+
+            //add timer placeholders
+            for(int i = 0; i < 20; i++)            
+                LuaParameters.Add(0);           
+
             LuaParameters.Add(true);
+
+            PartyGroup = new PartyGroup();
+            RetainerGroup = new RetainerGroup();
         }
 
         public override void Prepare(ushort actorIndex = 0){}
@@ -120,13 +143,10 @@ namespace Launcher
             int equipmentSetNumber = (Tribe * 100) + CurrentClassId;
             uint underShirtId = (uint)8040000 + Tribe;
             uint underGarmentId = (uint)8060000 + Tribe;
-
             DataTable defaultSet = GameData.Instance.GetGameData("boot_skillequip");
-            uint[] itemGraphicIds = defaultSet.Select("id = '" + equipmentSetNumber + "'")[0].ItemArray.Select(Convert.ToUInt32).ToArray();
-
-            GearGraphics = new GearGraphics();
-            GearGraphics.SetToSlots(itemGraphicIds, underShirtId, underGarmentId);
-
+            uint[] itemGraphicIds = defaultSet.Select("id = '" + equipmentSetNumber + "'")[0].ItemArray.Select(Convert.ToUInt32).ToArray();   
+            
+            Appearance.SetToSlots(itemGraphicIds, underShirtId, underGarmentId);
             Inventory = new Inventory();
             Inventory.AddDefaultItems(itemGraphicIds, underShirtId, underGarmentId);
         }
@@ -154,8 +174,11 @@ namespace Launcher
             }
         }
 
-        public void LockTargetActor(Socket handler, uint targetId)
+        public void SelectTarget(Socket handler, byte[] srcData)
         {
+            uint targetId = (uint)(srcData[0x13] << 24 | srcData[0x12] << 16 | srcData[0x11] << 8 | srcData[0x10]);
+            uint unknown = (uint)(srcData[0x17] << 24 | srcData[0x16] << 16 | srcData[0x15] << 8 | srcData[0x014]);
+
             CurrentTarget = targetId; //store target id
             byte[] data = new byte[0x08];
             Buffer.BlockCopy(BitConverter.GetBytes(CurrentTarget), 0, data, 0, sizeof(uint));
@@ -169,35 +192,42 @@ namespace Launcher
             //For packet creation            
             TargetId = Id;
 
-            SetIsZoning(sender, (isZoning == 0 ? false : true));
-            SendGroupPackets(sender);
+            //SendGroupPackets(sender);
+
+            
+
+            
+            //opening director goes here
             CreateActor(sender, 0x08);
             CommandSequence(sender);
             SetSpeeds(sender);
-            SetPosition(sender, Position, spawnType, isZoning, changingZone);
+            SetPosition(sender, spawnType, isZoning, changingZone);
             SetAppearance(sender);
-            SetName(sender, -1, CharacterName); //-1 = it's a custom name.
+            SetName(sender, -1, Name); //-1 = it's a custom name.
             SendUnknown(sender);
-            SetMainState(sender, MainState.Passive, 0xbf);
+            SetMainState(sender);
             SetSubState(sender);
             SetAllStatus(sender);
             SetIcon(sender);
+            SetIsZoning(sender, false);// (isZoning == 0 ? false : true));
 
 
             /* Grand Company packets here */
-            SendPacket(sender, ServerOpcode.SetGrandCompany, new byte[] { 0x02, 0x7F, 0x0B, 0x7F, 0x00, 0x00, 0x00, 0x00 });
+            //SendPacket(sender, ServerOpcode.SetGrandCompany, new byte[] { 0x02, 0x7F, 0x0B, 0x7F, 0x00, 0x00, 0x00, 0x00 });
 
             //Set Player title
-            SendPacket(sender, ServerOpcode.SetTitle, new byte[] { 0x8f, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
+           // SendPacket(sender, ServerOpcode.SetTitle, new byte[] { 0x8f, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
 
             //current job
-            SendCurrentJob(sender);
+            //SendCurrentJob(sender);
 
             SetSpecialEventWork(sender);
+            
 
             /* Chocobo mounts packet here */
-            SendPacket(sender, ServerOpcode.SetChocoboName, new byte[] { 0x42, 0x6f, 0x6b, 0x6f, 0x00, 0x00, 0x00, 0x00 });
-            SendPacket(sender, ServerOpcode.SetHasChocobo, new byte[] { 0x1f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
+            //SendPacket(sender, ServerOpcode.SetChocoboName, new byte[] { 0x42, 0x6f, 0x6b, 0x6f, 0x00, 0x00, 0x00, 0x00 });
+            //SendPacket(sender, ServerOpcode.SetHasChocobo, new byte[] { 0x1f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
+            //SendPacket(sender, ServerOpcode.SetHasGobbue, new byte[] { 0x1, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
 
             GetAchievementPoints(sender);
             GetAchievementsLatest(sender);
@@ -205,7 +235,40 @@ namespace Launcher
 
             ///* Set mounts packets */            
 
-            LoadActorScript(sender, LuaParameters);
+
+
+            //Actor Lua parameters
+            LuaParameters = new LuaParameters
+            {
+                ActorName = string.Format("_pc{0:00000000}", Id),
+                ClassName = "Player",
+                ClassCode = 0x30400000
+            };
+            LuaParameters.Add("/Chara/Player/Player_work");
+
+            //notpening
+            //LuaParameters.Add(true);
+            //LuaParameters.Add(false);
+            //LuaParameters.Add(false);
+
+            //opning 
+            LuaParameters.Add(false);
+            LuaParameters.Add(false);
+            LuaParameters.Add(true);
+            LuaParameters.Add(DirectorCode.Opening);
+
+            LuaParameters.Add(true);
+            LuaParameters.Add(0);
+            LuaParameters.Add(false);
+
+            //add timer placeholders
+            for (int i = 0; i < 20; i++)
+            {
+                LuaParameters.Add(0);
+            }
+
+            LuaParameters.Add(true);
+            LoadActorScript(sender);
 
             //Send inventory
             Inventory.SendInventories(sender);
@@ -213,20 +276,38 @@ namespace Launcher
             //Send properties
             GetWork(sender);
 
-            UpdateExp(sender);
+            //UpdateExp(sender);
         }
+
+        public override void SetPosition(Socket handler, ushort spawnType = 0, ushort isZonning = 0, int changingZone = 0, bool isPlayer = false)
+        {
+            base.SetPosition(handler, spawnType, 0, changingZone, true);
+        }       
 
         public void SendGroupPackets(Socket sender)
         {
-            Group group = new Group
-            {
-                Character = this,
-                Sender = sender
-            };
+            PartyGroup.SendPackets(sender);
+            RetainerGroup.SendPackets(sender);
+            SendActiveLinkshell(sender);
+        }
 
-            group.SendPartyPackets();
-            group.SendRetainerPackets();
-            group.SendLinkshellPackets();
+        public void SetGroupInitWork(Socket sender, byte[] data)
+        {            
+            byte groupSequence = data[0x10];
+
+            if (groupSequence == 0x01)
+                PartyGroup.InitWork(sender);
+            else
+                RetainerGroup.InitWork(sender);
+        }
+
+        public void SendActiveLinkshell(Socket sender)
+        {
+            byte[] data = new byte[0x78];
+
+            Buffer.BlockCopy(BitConverter.GetBytes(0x4e22), 0, data, 0x40, sizeof(ushort));           
+
+            SendPacket(sender, ServerOpcode.ActiveLinkshell, data);
         }
 
         private void SetSpecialEventWork(Socket handler)
@@ -256,7 +337,9 @@ namespace Launcher
 
         public void GetWork(Socket sender)
         {
-            Property property = new Property(sender, Id, @"/_init");
+            WorkProperties property = new WorkProperties(sender, Id, @"/_init");
+
+           
 
             property.Add("charaWork.eventSave.bazaarTax", (byte)5);
             property.Add("charaWork.battleSave.potencial", 6.6f);
@@ -406,7 +489,7 @@ namespace Launcher
 
         public void UpdateExp(Socket sender)
         {
-            Property prop = new Property(sender, Id, "charaWork/battleStateForSelf");
+            WorkProperties prop = new WorkProperties(sender, Id, "charaWork/battleStateForSelf");
             prop.Add("charaWork.battleSave.skillPoint[" + (CurrentClassId - 1) + "]", (int)Jobs[CurrentClassId].TotalExp);
             prop.FinishWriting();
         }
@@ -482,7 +565,7 @@ namespace Launcher
 
         private void UpdateLevel(Socket sender)
         {
-            Property property = new Property(sender, Id, @"charaWork/stateForAll");
+            WorkProperties property = new WorkProperties(sender, Id, @"charaWork/stateForAll");
             property.Add("charaWork.battleSave.skillLevel[" + (CurrentClassId - 1) + "]", Jobs[CurrentClassId].Level);
             property.Add("charaWork.parameterSave.state_mainSkillLevel", Jobs[CurrentClassId].Level);
             property.FinishWriting();
@@ -490,7 +573,7 @@ namespace Launcher
 
         private void UpdateClass(Socket sender)
         {
-            Property property = new Property(sender, Id, @"charaWork/stateForAll");
+            WorkProperties property = new WorkProperties(sender, Id, @"charaWork/stateForAll");
             property.Add("charaWork.parameterSave.state_mainSkill[0]", CurrentClassId);
             property.Add("charaWork.parameterSave.state_mainSkillLevel", Jobs[CurrentClassId]);
             property.FinishWriting();
@@ -520,39 +603,26 @@ namespace Launcher
             }
 
             SendPacket(sender, ServerOpcode.BattleActionResult01, data);
-        }
-
-        public void EndClientOrderEvent(Socket sender, string eventType)
-        {
-            byte[] data = new byte[0x30];
-
-            Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, data, 0, sizeof(uint));
-            Buffer.BlockCopy(Encoding.ASCII.GetBytes(eventType), 0, data, 0x08, eventType.Length);
-
-            Buffer.BlockCopy(BitConverter.GetBytes(0x09d4f200), 0, data, 0x28, sizeof(uint));
-            Buffer.BlockCopy(BitConverter.GetBytes(0x0a09a930), 0, data, 0x2c, sizeof(uint));
-
-            SendPacket(sender, ServerOpcode.EndClientOrderEvent, data);
-        }
+        }       
 
         public void ToggleMount(Socket sender, Command command)
         {
             //change to chocobo bgm
-            byte[] data = new byte[0x08];
-            Buffer.BlockCopy(BitConverter.GetBytes((ushort)(command == Command.MountChocobo ? 0x53 : World.Instance.Zones.Find(x => x.Id == Position.ZoneId).GetCurrentBGM())), 0, data, 0, 2);
-            Buffer.BlockCopy(BitConverter.GetBytes((ushort)MusicMode.FadeStart), 0, data, 0x02, 2);
-            SendPacket(sender, ServerOpcode.SetMusic, data);
+            World.Instance.SetMusic(sender, (ushort)(command == Command.MountChocobo ? 0x53 : World.Instance.Zones.Find(x => x.Id == Position.ZoneId).GetCurrentBGM()), MusicMode.FadeStart);           
 
             //set player state
-            data = new byte[0x08];
+            byte[] data = new byte[0x08];
 
             if (command == Command.MountChocobo)
             {
-                data[0x05] = 0x1f; //mounted     
+                data[0x05] = 0x2; //0x1f = twin adder chocobo, 0x1 = maelstrom chocobo     
                 SendPacket(sender, ServerOpcode.SetChocoboMounted, data);
             }
             else
-                SetMainState(sender, MainState.Passive, 0xbf);
+            {
+                State.Main = MainState.Passive;
+                SetMainState(sender);
+            }               
 
             //send command answer
             data = new byte[0x28];
@@ -587,14 +657,13 @@ namespace Launcher
                 SetSpeeds(sender);
             }
 
-            //text sheet message ('you call [chocobo name]' chat message?) (should be sent by world?)
+            //text sheet message
             if (command == Command.MountChocobo)
                 data = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0xF8, 0x5F, 0x91, 0x65, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00 };
             else
                 data = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0xF8, 0x5F, 0x93, 0x65, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
-            Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, data, 0, 4);
-            SendPacket(sender, ServerOpcode.TextSheetMessage30b, data, sourceId: 0x5ff80001);
+            World.Instance.SendTextSheetMessage(sender, ServerOpcode.TextSheetMessage30b, data);
 
             //command result 
             data = new byte[0x38];
@@ -614,8 +683,6 @@ namespace Launcher
                 data = new byte[0x30];
                 Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, data, 0, 4);
                 Buffer.BlockCopy(Encoding.ASCII.GetBytes("commandForced"), 0, data, 0x9, 4);
-                Buffer.BlockCopy(BitConverter.GetBytes(0x09d4f200), 0, data, 0x28, 4);
-                Buffer.BlockCopy(BitConverter.GetBytes(0x0a09a930), 0, data, 0x2c, 4);
                 SendPacket(sender, ServerOpcode.EndClientOrderEvent, data);
             }
         }
@@ -646,12 +713,12 @@ namespace Launcher
                 Buffer.BlockCopy(BitConverter.GetBytes(Id).Reverse().ToArray(), 0, text, 0x17, 4);
                 SendPacket(sender, ServerOpcode.TextSheetMessage50b, text, sourceId: 0x5ff80001);
 
-                SetSubState(sender, 0x0c);
+                //SetSubState(sender, 0x0c);
                 SetSpeeds(sender);
                 SetSpeeds(sender);
                 SetSpeeds(sender);
 
-                SendActionResult(sender, Command.EquipSouldStone, new List<CommandResult> {
+                SendActionResult(sender, Command.EquipSoulStone, new List<CommandResult> {
                     new CommandResult
                     {
                         TargetId = Id,
@@ -699,7 +766,7 @@ namespace Launcher
                     jobLevelCap.Enqueue(job.LevelCap);
                 }
 
-                Property property = new Property(sender, Id, @"charaWork/exp");
+                WorkProperties property = new WorkProperties(sender, Id, @"charaWork/exp");
                 property.Add("charaWork.battleSave.skillLevel", jobLevel);
                 property.Add("charaWork.battleSave.skillLevelCap", jobLevelCap, true);
                 PacketQueue = property.PacketQueue;
@@ -787,10 +854,104 @@ namespace Launcher
         public void PlayAnimationEffect(Socket sender, AnimationEffect animation)
         {
             byte[] data = new byte[0x08];
-            data[0] = (byte)animation;
+            Buffer.BlockCopy(BitConverter.GetBytes((ushort)animation), 0, data, 0, sizeof(ushort));           
             data[0x03] = 0x04;
             SendPacket(sender, ServerOpcode.PlayAnimationEffect, data);
         }
+
+        public void MapUIChange(Socket sender, uint code)
+        {
+            byte[] data = new byte[0x08];
+            Buffer.BlockCopy(BitConverter.GetBytes(code), 0, data, 0, sizeof(uint)); // (0x02 & 0xff);           
+            //Buffer.BlockCopy(BitConverter.GetBytes(unknown), 0, data, 0x04, sizeof(uint)); // (0x02 & 0xff);           
+            SendPacket(sender, ServerOpcode.MapUiChange, data);
+        }
+        public void ToggleUIControl(Socket sender, UIControl control, uint unknown = 0x02)
+        {
+            byte[] data = new byte[0x08];
+            Buffer.BlockCopy(BitConverter.GetBytes((uint)control), 0, data, 0, sizeof(uint)); // (0x02 & 0xff);           
+            Buffer.BlockCopy(BitConverter.GetBytes(unknown), 0, data, 0x04, sizeof(uint)); // (0x02 & 0xff);           
+            SendPacket(sender, ServerOpcode.SetUIControl, data);
+        }
+
+        public void GetBlackList(Socket sender)
+        {
+            byte[] data = new byte[0x666];
+            Buffer.BlockCopy(BitConverter.GetBytes(1), 0, data, 0x04, sizeof(uint));         
+            Buffer.BlockCopy(Encoding.ASCII.GetBytes("Test2"), 0, data, 0x08, sizeof(uint));   
+            SendPacket(sender, ServerOpcode.SendBlackList, data);
+        }
+
+        public void GetFriendlist(Socket sender)
+        {
+            byte[] data = new byte[0x666];
+            Buffer.BlockCopy(BitConverter.GetBytes(1), 0, data, 0x04, sizeof(uint));
+            Buffer.BlockCopy(Encoding.ASCII.GetBytes("Test"), 0, data, 0x08, sizeof(uint));           
+            SendPacket(sender, ServerOpcode.SendFriendList, data);
+        }
+
+        public void UpdatePosition(byte[] data)
+        {
+            //get player character
+            PlayerCharacter playerCharacter = User.Instance.Character;
+
+            //get player position from packet
+            playerCharacter.Position.X = BitConverter.ToSingle(new byte[] { data[0x18], data[0x19], data[0x1a], data[0x1b] }, 0);
+            playerCharacter.Position.Y = BitConverter.ToSingle(new byte[] { data[0x1c], data[0x1d], data[0x1e], data[0x1f] }, 0);
+            playerCharacter.Position.Z = BitConverter.ToSingle(new byte[] { data[0x20], data[0x21], data[0x22], data[0x23] }, 0);
+            playerCharacter.Position.R = BitConverter.ToSingle(new byte[] { data[0x24], data[0x25], data[0x26], data[0x27] }, 0);
+
+            byte[] unknown = new byte[] { data[0x2a], data[0x2b], data[0x2c], data[0x2d], data[0x2e], data[0x2e] };
+
+            //save player position 
+            User.Instance.AccountList[0].CharacterList[playerCharacter.Slot] = playerCharacter;
+            User.Instance.Save();
+
+            //print player position on PL ui.
+            //ucLogWindow.Instance.PrintPlayerPosition(playerCharacter.Position, unknown);
+
+            //check eorzea time and change BGM if necessary
+            //ActorRepository.Instance.Zones.Find(x => x.Id == playerCharacter.Position.ZoneId).GetCurrentBGM();
+
+            //uint unknown0 = (uint)(data[0x17] << 24 | data[0x16] << 16 | data[0x15] << 8 | data[0x14]);
+            //ushort moveState = (ushort)(data[0x29] << 8 | data[0x28]);
+            //ushort unknown1 = (ushort)(data[0x2b] << 8 | data[0x2a]);
+            //uint unknown2 = (uint)(data[0x2f] << 24 | data[0x2e] << 16 | data[0x2d] << 8 | data[0x2c]);
+
+            //_log.Warning("Player position: X=" + _user.Character.Position.X + ", Y=" + _user.Character.Position.Y + ", Z=" + _user.Character.Position.Z + ", R=" + _user.Character.Position.R);
+            //if(unknown1 != 0x19 && unknown1 != 0xed)
+            //_log.Warning("U0=0x" + unknown0.ToString("X") + ", U1=0x" + unknown1.ToString("X") + ", U2=0x" + unknown2.ToString("X") + ", MS=0x"+ moveState.ToString("X"));
+        }
+
+        public uint NewId()
+        {
+            Random rnd = new Random();
+            byte[] id = new byte[0x4];
+            rnd.NextBytes(id);
+            return BitConverter.ToUInt32(id, 0);
+        }
+
+        public void Unknown0x02(Socket sender)
+        {
+            byte[] data = new byte[0x10];
+            Buffer.BlockCopy(BitConverter.GetBytes(User.Instance.Character.Id), 0, data, 0x08, 0x04);
+            SendPacket(sender, ServerOpcode.Unknown0x02, data);           
+        }
+
+        #region Events      
+        public void EndClientOrderEvent(Socket sender, string eventType)
+        {
+            byte[] data = new byte[0x30];
+
+            Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, data, 0, sizeof(uint));
+            Buffer.BlockCopy(Encoding.ASCII.GetBytes(eventType), 0, data, 0x08, eventType.Length);
+
+            Buffer.BlockCopy(BitConverter.GetBytes(0x09d4f200), 0, data, 0x28, sizeof(uint));
+            Buffer.BlockCopy(BitConverter.GetBytes(0x0a09a930), 0, data, 0x2c, sizeof(uint));
+
+            SendPacket(sender, ServerOpcode.EndClientOrderEvent, data);
+        }
+        #endregion
     }
 
     [Serializable]

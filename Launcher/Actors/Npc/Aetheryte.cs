@@ -8,19 +8,24 @@ using System.Threading.Tasks;
 namespace Launcher
 {
     public class Aetheryte : Actor
-    {
-        public string MapName { get; set; }
-        public uint PrivilegeLevel { get; set; }       
+    {       
+        public uint PrivilegeLevel { get; set; }   
+        public uint TeleportMenuPageId { get; set; }
+        public uint TeleportMenuId { get; set; }
+        public uint AnimaCost { get; set; }
         private float PushEventRadius { get; set; }
         private AetheryteType AetheryteType { get; set; }
                 
-        public Aetheryte(uint classId, AetheryteType type, Position position, uint body = 1024)
+        public Aetheryte(uint classId, AetheryteType type, Position position, uint menuPageId = 0, uint menuId = 0, uint body = 1024)
         {
             ClassId = classId;
-            AppearanceCode = 0x02;
+            Appearance.Size = 0x02;
             Position = position;
             AetheryteType = type;
-            GearGraphics = new GearGraphics { Body = body }; //body is the only appearance slot that has info for aetherytes.
+            TeleportMenuPageId = menuPageId;
+            TeleportMenuId = menuId;
+            AnimaCost = 2; //calculated by distance from current location?
+            Appearance = new Appearance { Body = body }; 
 
             switch (AetheryteType)
             {
@@ -44,17 +49,16 @@ namespace Launcher
                     ClassId = 0x001250A0;
                     ClassCode = 0x33800000;
                     break;
-            }
-            
+            }            
         }
 
         public override void Prepare(ushort actorIndex)
         {
             float pushEventRadius = 3.0f;
             Zone zone = World.Instance.Zones.Find(x => x.Id == Position.ZoneId);
-            EventConditions = new List<EventCondition>();           
-            
-            BaseModel = (uint)AetheryteType;
+            EventConditions = new List<EventCondition>();
+
+            Appearance.BaseModel = (uint)AetheryteType;
 
             if (AetheryteType != AetheryteType.Shard)
             {
@@ -70,7 +74,7 @@ namespace Launcher
             base.Prepare(actorIndex);     
         }
 
-        public override void ActorInit(Socket handler)
+        public override void Init(Socket handler)
         {
             byte[] data =
             {

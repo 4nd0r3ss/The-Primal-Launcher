@@ -23,8 +23,7 @@ namespace Launcher
     }
 
     abstract class Server
-    {
-        protected static Log _log = Log.Instance;
+    {        
         protected Blowfish _blowfish;
         private readonly ManualResetEvent _allDone = new ManualResetEvent(false);                
         private readonly Socket _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -36,9 +35,9 @@ namespace Launcher
             try
             {
                 _socket.Bind(new IPEndPoint(IPAddress.Parse(Preferences.Instance.Options.ServerAddress), port));
-                _log.Info(serverName + " server started @ port " + port);
+                Log.Instance.Info(serverName + " server started @ port " + port);
             }
-            catch (Exception) { _log.Info("It looks like port " + port + " is in use by another process. Aborting."); }
+            catch (Exception) { Log.Instance.Info("It looks like port " + port + " is in use by another process. Aborting."); }
 
             try
             {
@@ -46,13 +45,13 @@ namespace Launcher
                 while (_listening)
                 {
                     _allDone.Reset();
-                    _log.Info("Waiting for connection...");
+                    Log.Instance.Info("Waiting for connection...");
                     _socket.BeginAccept(new AsyncCallback(AcceptCallback), _socket);
                     _allDone.WaitOne();                   
                 }
-                _log.Warning(serverName + " server has been shut down.");
+                Log.Instance.Warning(serverName + " server has been shut down.");
             }
-            catch (Exception) { _log.Info("Could not start the " + serverName + " server. Please try again."); }
+            catch (Exception) { Log.Instance.Info("Could not start the " + serverName + " server. Please try again."); }
         }
 
         private void AcceptCallback(IAsyncResult ar)

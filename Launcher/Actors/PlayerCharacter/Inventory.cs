@@ -34,7 +34,7 @@ namespace Launcher
         private void ChunkStart(Socket sender, InventoryMaxSlots maxSize, InventoryType type)
         {
             byte[] data = new byte[0x08];
-            Buffer.BlockCopy(BitConverter.GetBytes(UserRepository.Instance.User.Character.Id), 0, data, 0, sizeof(uint));
+            Buffer.BlockCopy(BitConverter.GetBytes(User.Instance.Character.Id), 0, data, 0, sizeof(uint));
             Buffer.BlockCopy(BitConverter.GetBytes((ushort)maxSize), 0, data, 0x04, sizeof(ushort));
             Buffer.BlockCopy(BitConverter.GetBytes((ushort)type), 0, data, 0x06, sizeof(ushort));
             SendPacket(sender, ServerOpcode.ChunkStart, data);
@@ -58,7 +58,7 @@ namespace Launcher
                 Data = data
             };
 
-            Packet packet = new Packet(new SubPacket(gamePacket) { SourceId = UserRepository.Instance.User.Character.Id, TargetId = UserRepository.Instance.User.Character.Id });
+            Packet packet = new Packet(new SubPacket(gamePacket) { SourceId = User.Instance.Character.Id, TargetId = User.Instance.Character.Id });
             handler.Send(packet.ToBytes());
         }
         #endregion
@@ -217,12 +217,13 @@ namespace Launcher
         public void SendInventories(Socket sender)
         {           
             InventoryStart(sender);                    
-            SendInventory(sender, Bag, InventoryMaxSlots.Bag, InventoryType.Bag);                           
-            SendInventory(sender, Loot, InventoryMaxSlots.Loot, InventoryType.Loot);           
-            SendInventory(sender, MeldRequest, InventoryMaxSlots.MeldRequest, InventoryType.MeldRequest);           
-            SendInventory(sender, Bazaar, InventoryMaxSlots.Bazaar, InventoryType.Bazaar);     
-            SendInventory(sender, Currency, InventoryMaxSlots.Currency, InventoryType.Currency);    
-            SendInventory(sender, KeyItems, InventoryMaxSlots.KeyItems, InventoryType.KeyItems);  
+            SendInventory(sender, Bag, InventoryMaxSlots.Bag, InventoryType.Bag);
+            SendInventory(sender, Currency, InventoryMaxSlots.Currency, InventoryType.Currency);
+            SendInventory(sender, KeyItems, InventoryMaxSlots.KeyItems, InventoryType.KeyItems);
+            SendInventory(sender, Bazaar, InventoryMaxSlots.Bazaar, InventoryType.Bazaar);
+            SendInventory(sender, MeldRequest, InventoryMaxSlots.MeldRequest, InventoryType.MeldRequest);
+            SendInventory(sender, Loot, InventoryMaxSlots.Loot, InventoryType.Loot);
+            SendGearSlots(sender);
             InventoryEnd(sender);
         }
 
@@ -254,7 +255,7 @@ namespace Launcher
 
             //Chunk start
             byte[] b = { 0x00, 0x00, 0x00, 0x00, 0x0a, 0x00, 0x04, 0x00 };
-            Buffer.BlockCopy(BitConverter.GetBytes(UserRepository.Instance.User.Character.Id), 0, b, 0, 4);
+            Buffer.BlockCopy(BitConverter.GetBytes(User.Instance.Character.Id), 0, b, 0, 4);
             handler.Send(new Packet(new GamePacket
             {
                 Opcode = 0x146,
@@ -570,7 +571,7 @@ namespace Launcher
                         invSlot = (byte)item.InventorySlot;
 
                         //chage the graphics in appearance slot to the piece being equipped
-                        UserRepository.Instance.User.Character.GearGraphics.Set(gearSlot, item.Id);
+                        User.Instance.Character.Appearance.Set(gearSlot, item.Id);
 
                         if (GearSlots.Any(x => x.Key == gearSlot))
                             GearSlots[gearSlot] = invSlot; //if there is anything in the slot, replace
@@ -588,7 +589,7 @@ namespace Launcher
                 if (gearSlot != 0x09 && gearSlot != 0x0b && gearSlot != 0) //can't unequip underwear and main weapon, just switch to another piece.
                 {
                     GearSlots.Remove(gearSlot);
-                    UserRepository.Instance.User.Character.GearGraphics.Set(gearSlot, 0);
+                    User.Instance.Character.Appearance.Set(gearSlot, 0);
                     opcode = ServerOpcode.x01RemoveEquipment;
                     SendChangeGearResult(sender, opcode, gearSlot, invSlot);
                 }
@@ -620,7 +621,7 @@ namespace Launcher
             InventoryEnd(sender);
 
             Update(sender);
-            UserRepository.Instance.User.Character.SetAppearance(sender);
+            User.Instance.Character.SetAppearance(sender);
         }
 
         /// <summary>

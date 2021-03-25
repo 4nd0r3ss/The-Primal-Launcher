@@ -1,4 +1,6 @@
-﻿using System;
+﻿using MaterialSkin;
+using MaterialSkin.Controls;
+using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -8,131 +10,54 @@ using System.Windows.Forms;
 
 namespace Launcher
 {
-    public partial class MainWindow : Form
+    public partial class MainWindow : MaterialForm
     {
-        private Log _log = Log.Instance;
-
-        #region Main window click & drag stuff
-        public const int WM_NCLBUTTONDOWN = 0xA1;
-        public const int HT_CAPTION = 0x2;
-
-        [System.Runtime.InteropServices.DllImportAttribute("user32.dll")]
-        public static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
-        [System.Runtime.InteropServices.DllImportAttribute("user32.dll")]
-        public static extern bool ReleaseCapture();
-        #endregion
-
         public MainWindow()
         {
             InitializeComponent();
 
-            //load default user control (log window)
-            pnlMain.Controls.Add(ucLogWindow.Instance);
-            ucLogWindow.Instance.Dock = DockStyle.Fill;
-
+            var materialSkinManager = MaterialSkinManager.Instance;
+            materialSkinManager.AddFormToManage(this);
+            materialSkinManager.Theme = MaterialSkinManager.Themes.LIGHT;
+            materialSkinManager.ColorScheme = new ColorScheme((Primary)0x800101, (Primary)0x630101, (Primary)0x800101, (Accent)0xf5d800, TextShade.WHITE);
 
 
             //first thing is to check game installation.
             if (true)
             {
-                ucLogWindow.Instance.BringToFront();
+                //ucLogWindow.Instance.BringToFront();
 
                 //default user control button color
-                btnLogWindow.BackColor = Color.White;
-                btnLogWindow.ForeColor = Color.Maroon;
+                //btnLogWindow.BackColor = Color.White;
+                //btnLogWindow.ForeColor = Color.Maroon;
             }
             else
             {
                 //load game update user control
-                pnlMain.Controls.Add(ucGameUpdate.Instance);
+                //pnlMain.Controls.Add(ucGameUpdate.Instance);
                 ucGameUpdate.Instance.Dock = DockStyle.Fill;
                 ucGameUpdate.Instance.BringToFront();
 
                 //default user control button color
-                btnGameUpdate.BackColor = Color.White;
-                btnGameUpdate.ForeColor = Color.Maroon;
+                //btnGameUpdate.BackColor = Color.White;
+                //btnGameUpdate.ForeColor = Color.Maroon;
 
                 //disable launch button
                 btnLaunchGame.Enabled = false;
             }
 
-
-
-            _log.Info("Welcome to Primal Launcher!");         
-        }
-
-        private void BtnLaunchGame_Click(object sender, EventArgs e) =>  Task.Run(() => { new UpdateServer(); });    
-
-        private void TopFrame_MouseDown(object sender, MouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Left)
-            {
-                ReleaseCapture();
-                SendMessage(Handle, WM_NCLBUTTONDOWN, HT_CAPTION, 0);
-            }
-        }
-
-        private void btnClose_Click(object sender, EventArgs e) => Application.Exit();
-
-        private void btnMinimize_Click(object sender, EventArgs e) => this.WindowState = FormWindowState.Minimized;
-
-        private void ButtonColorsSetup(object sender)
-        {
-            Button btn = sender as Button;
-
-            foreach (Button b in pnlButtons.Controls)
-            {
-                b.BackColor = Color.DarkRed;
-                b.ForeColor = Color.White;
-            }
-
-            btn.BackColor = Color.White;
-            btn.ForeColor = Color.Maroon;
-        }
-
-        private void btnLogWindow_Click(object sender, EventArgs e)
-        {            
-            ucLogWindow.Instance.BringToFront();
-            ButtonColorsSetup(sender);
-        }      
-
-        private void btnOptions_Click(object sender, EventArgs e)
-        {
-            if (!pnlMain.Controls.Contains(ucOptions.Instance))
-            {
-                pnlMain.Controls.Add(ucOptions.Instance);
-                ucOptions.Instance.Dock = DockStyle.Fill;
-            }
             
-            ucOptions.Instance.BringToFront();
-            ButtonColorsSetup(sender);
+
         }
 
-        private void btnAbout_Click(object sender, EventArgs e)
+        private void BtnLaunchGame_Click(object sender, EventArgs e)
         {
-            if (!pnlMain.Controls.Contains(ucAbout.Instance))
-            {
-                pnlMain.Controls.Add(ucAbout.Instance);
-                ucAbout.Instance.Dock = DockStyle.Fill;
-            }
-            ucAbout.Instance.BringToFront();
-            ButtonColorsSetup(sender);
+            Task.Run(() => { new UpdateServer();});
+            Task.Run(() => { new HttpServer(); });          
         }
-
-        private void btnGameUpdate_Click(object sender, EventArgs e)
-        {
-            if (!pnlMain.Controls.Contains(ucGameUpdate.Instance))
-            {
-                pnlMain.Controls.Add(ucGameUpdate.Instance);
-                ucGameUpdate.Instance.Dock = DockStyle.Fill;
-            }
-            ucGameUpdate.Instance.BringToFront();
-            ButtonColorsSetup(sender);
-        }
-
+        
         private void Launch()
-        {           
-
+        {          
             string sessionId = "1";
             uint ticks = (uint)DateTime.Now.Ticks;
             string commandLine = string.Format(" T ={0} /LANG =en-us /REGION =2 /SERVER_UTC =1356916742 /SESSION_ID ={1}", ticks, sessionId);
@@ -145,11 +70,48 @@ namespace Launcher
             //);
 
             //Process.Start(Preferences.Instance.Options.GameInstallPath + "ffxivgame.exe", "  sqex0002" + commandLine + "!////");
-        }
+        }       
 
-        private void lblAppName_Click(object sender, EventArgs e)
+        private void MainWindow_Load(object sender, EventArgs e)
         {
-
+            Log.Instance.Info("Welcome to Primal Launcher!");
+            Task.Run(() => { new GameServer(); });
+            Task.Run(() => { new LobbyServer(); });
         }
+
+        public void WriteLogMessage(string message)
+        {
+            LbxOutput.Invoke((MethodInvoker)(() =>
+            {
+                LbxOutput.Items.Insert(0, message);
+            }));
+        }
+
+        private void Lbxoutput_DrawItem(object sender, DrawItemEventArgs e)
+        {
+            e.DrawBackground();
+            e.DrawFocusRectangle();
+            e.Graphics.DrawString(
+                LbxOutput.Items[e.Index].ToString(),
+                new Font(FontFamily.GenericMonospace, 8, FontStyle.Regular),
+                new SolidBrush(Log.Instance.GetMessageColor(LbxOutput.Items[e.Index].ToString())), e.Bounds);
+        }
+
+        //public void PrintPlayerPosition(Position position, byte[] unknown)
+        //{
+        //    lblPCPositionZone.Text = position.ZoneId.ToString();
+        //    lblPCPositionX.Text = position.X.ToString();
+        //    lblPCPositionY.Text = position.Y.ToString();
+        //    lblPCPositionZ.Text = position.Z.ToString();
+        //    lblPCPositionR.Text = position.R.ToString();
+
+
+
+
+        //    //"x: " + position.X + ", y: " + position.Y + ", z: " + position.Z + ", r: " + position.R + ", region id: " + position.ZoneId + ", unknown: " +
+        //    //unknown[0].ToString("X2") + " " + unknown[1].ToString("X2") + " " + unknown[2].ToString("X2") + " " +
+        //    //unknown[3].ToString("X2") + " " + unknown[4].ToString("X2") + " " + unknown[5].ToString("X2");
+
+        //}
     }
 }

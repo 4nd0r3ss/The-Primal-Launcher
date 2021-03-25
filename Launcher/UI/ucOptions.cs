@@ -11,8 +11,7 @@ using System.Windows.Forms;
 namespace Launcher
 {
     public partial class ucOptions : UserControl
-    {
-        private Preferences Config { get; set; } = Preferences.Instance;
+    {       
         private static ucOptions _instance;
         public static ucOptions Instance
         {
@@ -28,13 +27,13 @@ namespace Launcher
             InitializeComponent();
 
             //Get paths from configuration file.  
-            txtGameInstallPath.Text = Config.Options.GameInstallPath;
-            txtPatchPath.Text = Config.Options.UserFilesPath + Preferences.AppFolder;
+            txtGameInstallPath.Text = Preferences.Instance.Options.GameInstallPath;
+            txtPatchPath.Text = Preferences.Instance.Options.UserFilesPath + Preferences.AppFolder;
         }            
         
         private void btnChangeGameInstallPath_Click_1(object sender, EventArgs e)
         {
-            string path = Config.SelectFolder();
+            string path = Preferences.Instance.SelectFolder();
 
             if (path != null)
                 txtGameInstallPath.Text = path;
@@ -42,7 +41,7 @@ namespace Launcher
 
         private void btnChangePatchPath_Click_1(object sender, EventArgs e)
         {
-            string path = Config.SelectFolder();
+            string path = Preferences.Instance.SelectFolder();
 
             if (path != null)
                 txtPatchPath.Text = path;

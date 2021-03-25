@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Sockets;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,6 +12,8 @@ namespace Launcher
     [Serializable]
     public class User
     {
+        private const string USER_FILE = @"user_data.dat";
+
         private static User _instance = null;
         public int Id { get; set; }
         public string Uname { get; set; }
@@ -25,7 +29,7 @@ namespace Launcher
             {
                 if (_instance == null)
                 {
-                    _instance = new User();
+                    _instance = Load("FFXIVUser", "FFXIVUser");
                 }
                 return _instance;
             }
@@ -82,9 +86,9 @@ namespace Launcher
                     {
                         Buffer.BlockCopy(BitConverter.GetBytes(character.Position.ZoneId), 0, characterSlot, 0xc, sizeof(uint));
 
-                        byte[] name = Encoding.ASCII.GetBytes(Encoding.ASCII.GetString(character.CharacterName).Trim(new[] { '\0' }));
-                        byte[] gearSet = character.GearGraphics.ToBytes();
-                        byte[] worldName = World.GetNameBytes(); // WorldFactory.GetWorld(character.WorldId).Name);
+                        byte[] name = Encoding.ASCII.GetBytes(Encoding.ASCII.GetString(character.Name).Trim(new[] { '\0' }));
+                        byte[] gearSet = character.Appearance.ToBytes();
+                        byte[] worldName = World.Instance.GetNameBytes(character.WorldId); // WorldFactory.GetWorld(character.WorldId).Name);
                         Job currentClass = character.Jobs[character.CurrentClassId];
 
                         Buffer.BlockCopy(BitConverter.GetBytes(character.Id), 0, characterSlot, 0x04, 0x04); //sequence?                    
@@ -104,12 +108,12 @@ namespace Launcher
                                 bw.Write(name);
                                 bw.Write((byte)0); //name end byte
                                 bw.Write((ulong)0x040000001c); //??                           
-                                bw.Write(character.BaseModel);
-                                bw.Write(character.Size);
+                                bw.Write(character.Appearance.BaseModel);
+                                bw.Write(character.Appearance.Size);
                                 bw.Write(character.SkinColor | (uint)(character.HairColor << 10) | (uint)(character.EyeColor << 20));
                                 bw.Write(BitField.PrimitiveConversion.ToUInt32(character.Face));
                                 bw.Write(character.HairHighlightColor | (uint)(character.HairStyle << 10) | character.Face.CharacteristicsColor << 20);
-                                bw.Write(character.Voice);
+                                bw.Write(character.Appearance.Voice);
                                 bw.Write(gearSet);
                                 bw.Write((ulong)0);
                                 bw.Write((uint)0x01);
@@ -147,5 +151,82 @@ namespace Launcher
             //File.WriteAllBytes("getChracaters.txt", result);
             return result;
         }
+
+        public static User Load(string uname, string pwd)
+        {           
+            if (File.Exists(Preferences.Instance.Options.UserFilesPath + Preferences.AppFolder + USER_FILE))
+            {
+                try
+                {         
+                    using (var fileStream = new FileStream(Preferences.Instance.Options.UserFilesPath + Preferences.AppFolder + USER_FILE, FileMode.Open))
+                    {
+                        var bFormatter = new BinaryFormatter();                       
+                        User user = (User)bFormatter.Deserialize(fileStream);
+                        Log.Instance.Success("Loaded saved user.");
+                        return user;
+                    }                    
+                }
+                catch (Exception e) { Log.Instance.Error("There is a problem with the user file. Please try again."); throw e; }
+            }
+            else
+            {
+                User user = CreateNewUser(1, "FFXIVUser", "FFXIVUser");
+                WriteFile(user);
+                return Load(uname, pwd);
+            }
+        }
+
+        public static User CreateNewUser(int id, string name, string pwd)
+        {
+            User newUser = new User()
+            {
+                Id = id,
+                Uname = name,
+                Pwd = pwd
+            };
+
+            newUser.AccountList.Add(new GameAccount()
+            {
+                Id = 1,
+                Name = "FFXIV1.0 Primal Launcher"
+            });
+
+            return newUser;
+        }
+
+        private static void WriteFile(User user)
+        {
+            try //Create repository file with user list.
+            {
+                using (var fileStream = new FileStream(Preferences.Instance.Options.UserFilesPath + Preferences.AppFolder + USER_FILE, FileMode.Create))
+                {
+                    var bFormatter = new BinaryFormatter();
+                    try
+                    {
+                        bFormatter.Serialize(fileStream, user);
+                    }
+                    catch (Exception e) { throw e; }
+                }
+            }
+            catch (Exception e) { Log.Instance.Error("Could not write user file. Please check app permissions."); throw e; }
+        }
+
+        public void SendUserCharacterList(Socket handler, Blowfish blowfish)
+        {
+            GamePacket characterList = new GamePacket
+            {
+                Opcode = 0x0d,
+                Data = GetCharacters(0) //only one account supported so far.          
+            };
+
+            Packet characterListPacket = new Packet(characterList);
+            handler.Send(characterListPacket.ToBytes(blowfish));
+            Log.Instance.Info("Character list sent.");
+        }
+
+        public void Save()
+        {
+            WriteFile(Instance);
+        }       
     }
 }

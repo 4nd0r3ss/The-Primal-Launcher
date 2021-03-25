@@ -1,5 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using MaterialSkin.Controls;
 using System.Drawing;
+using System.Windows.Forms;
 
 namespace Launcher
 {
@@ -37,8 +38,19 @@ namespace Launcher
         
         private Log() { }
 
-        private void SendMessage(string type, string msg) => ucLogWindow.Instance.WriteLogMessage(type + " " + msg); 
+        private void SendMessage(string type, string msg)
+        {
+            //Change Form1 to whatever your form is called
+            foreach (Form frm in Application.OpenForms)
+            {
+                if (frm.GetType() == typeof(MainWindow))
+                {
+                    MainWindow frmTemp = (MainWindow)frm;
+                    frmTemp.WriteLogMessage(type + " " + msg);
 
+                }
+            }
+        }
         #region Message types
         public void Info(string msg) => SendMessage(_info, msg);
         public void Success(string msg) => SendMessage(_success, msg);

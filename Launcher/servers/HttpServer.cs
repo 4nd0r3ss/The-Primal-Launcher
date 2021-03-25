@@ -8,8 +8,7 @@ namespace Launcher
     class HttpServer : Server
     {
         private const int PORT = 80;
-        public static readonly string HTTP_SERVER_VERSION = "Primal-Http-Server/0.1"; //for html headers
-        private static UserRepository _userFactory = UserRepository.Instance;        
+        public static readonly string HTTP_SERVER_VERSION = "Primal-Http-Server/0.1"; //for html headers        
 
         public HttpServer() => Start("Http", PORT);
 
@@ -21,7 +20,7 @@ namespace Launcher
             //if (Preferences.Instance.Options.ShowLoginPage && request.IndexOf("GET /login") >= 0)
             //{
                 response = PackPage(@"login/index.html");
-                _log.Info("Login page sent.");
+                Log.Instance.Info("Login page sent.");
             //}
             //else
             //{
@@ -29,17 +28,17 @@ namespace Launcher
                 //string[] tmp = request.Split(' ');
                 //string queryString = tmp[1].Substring(11);
                 //tmp = queryString.Split('&');
-                string uname = "FFXIVPlayer";// tmp[0].Substring(6);
-                string pwd = "FFXIVPlayer";// tmp[1].Substring(4);  
+                string uname = "FFXIVUser";// tmp[0].Substring(6);
+                string pwd = "FFXIVUser";// tmp[1].Substring(4);  
                 //-->
 
-                _userFactory.LoadUser(uname, pwd); //get current user stored data
+                User.Load(uname, pwd); //get current user stored data
 
-                if (_userFactory.User != null)
+                if (User.Instance != null)
                 {
-                    response = HttpPacket.AuthPage(_userFactory.User.Id);
-                    _log.Info("Authorization page sent.");
-                    ServerShutDown();
+                    response = HttpPacket.AuthPage(User.Instance.Id);
+                    Log.Instance.Info("Authorization page sent.");
+                    //ServerShutDown();
                 }
                 else
                 {
@@ -51,9 +50,7 @@ namespace Launcher
             connection.socket.Disconnect(true);
         }            
        
-        private static byte[] PackPage(string file) => new HttpPacket(file).ToBytes();       
-
-        public override void ServerTransition() => Task.Run(() => { new LobbyServer(); });
+        private static byte[] PackPage(string file) => new HttpPacket(file).ToBytes();  
 
         public override void ReadCallback(IAsyncResult ar)
         {
@@ -75,6 +72,11 @@ namespace Launcher
               
            }
            
+        }
+
+        public override void ServerTransition()
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<servers>
+	<region id="EU">
+		<world id="0" name="Ragnarok" population="10"></world>
+	</region>
+	<region id="JP">
+		<world id="1" name="Aegis" population="10"></world>
+		<world id="2" name="Cornelia" population="10"></world>
+		<world id="3" name="Durandal" population="10"></world>
+		<world id="4" name="Figaro" population="10"></world>
+		<world id="5" name="Gungnir" population="10"></world>
+		<world id="6" name="Gyashl" population="10"></world>
+		<world id="7" name="Istory" population="10"></world>
+		<world id="8" name="Masamune" population="10"></world>
+		<world id="9" name="Melmond" population="10"></world>
+		<world id="10" name="Mysidia" population="10"></world>
+		<world id="11" name="Rabanastra" population="10"></world>
+		<world id="12" name="Ridill" population="10"></world>
+		<world id="13" name="Selbina" population="10"></world>
+		<world id="14" name="Wutai" population="10"></world>	
+	</region>
+	<region id="NA">
+		<world id="1" name="Balmung" population="10"></world>
+		<world id="2" name="Besaid" population="10"></world>
+		<world id="3" name="Excalibur" population="10"></world>
+		<world id="4" name="Fabul" population="10"></world>
+		<world id="5" name="Hyperion" population="10"></world>
+		<world id="6" name="Karnak" population="10"></world>
+		<world id="7" name="Kashuan" population="10"></world>
+		<world id="8" name="Lindblum" population="10"></world>
+		<world id="9" name="Midgardsormr" population="10"></world>
+		<world id="10" name="Palamecia" population="10"></world>
+		<world id="11" name="Sargatanas" population="10"></world>
+		<!--<world id="12" name="Saronia" population="10"></world>-->
+		<!--<world id="13" name="Trabia" population="10"></world>-->
+	</region>	
+</servers>
+
+

@@ -9,7 +9,7 @@ namespace Launcher
         private byte[] _data;
 
         #region Properties
-        private uint PlayerCharacterId { get; set; } = UserRepository.Instance.User.Character == null ? 0xe0006868 : UserRepository.Instance.User.Character.Id;
+        private uint PlayerCharacterId { get; set; } = User.Instance.Character == null ? 0xe0006868 : User.Instance.Character.Id;
         public ushort Size { get; set; }
         public ushort Type { get; set; } = 0x03;
         public uint SourceId { get; set; }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Ionic.Zlib;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -12,7 +13,7 @@ namespace Launcher
 
         #region Properties
         public byte IsAuthenticated { get; private set; } = 0x01; //0x00: isAuthenticated;
-        public byte IsEncoded { get; private set; } = 0x00; //0x01: isCompressed/encoded;
+        public byte IsCompressed { get; private set; } = 0x00; //0x01: isCompressed/encoded;
         public ushort ConnType { get; set; } //0x02: connectionType;
         public ushort Size { get; private set; } = 0x10; //0x04: packetSize;
         public ushort NumSubpackets { get; private set; } //0x06: numSubpackets;
@@ -50,7 +51,7 @@ namespace Launcher
 
             byte[] header = new byte[0x10];            
             header[0x00] = IsAuthenticated;
-            header[0x01] = IsEncoded;
+            header[0x01] = IsCompressed;
             Buffer.BlockCopy(BitConverter.GetBytes(Size), 0, header, 0x04, 0x02);
             header[0x06] = (byte)SubPacketList.Count;
             Buffer.BlockCopy(Server.GetTimeStampHex(), 0, header, 0x08, 0x04);   
@@ -143,7 +144,7 @@ namespace Launcher
             if(data.Any(b => b != 0))
             {                 
                 IsAuthenticated = data[0x00];
-                IsEncoded = data[0x01];
+                IsCompressed = data[0x01];
                 ConnType = (ushort)(data[0x03] << 8 | data[0x02]);
                 Size = (ushort)(data[0x05] << 8 | data[0x04]);
                 NumSubpackets = (ushort)(data[0x07] << 8 | data[0x06]);
@@ -194,6 +195,12 @@ namespace Launcher
                 catch (OverflowException) { break; }
 
             }
-        }        
+        } 
+        
+        public void Unzip()
+        {
+            byte[] result = ZlibStream.UncompressBuffer(Data);
+            Data = result;
+        }
     }
 }

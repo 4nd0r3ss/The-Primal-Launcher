@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Launcher
 {
-    class Property
+    class WorkProperties
     {
         public byte[] _buffer;
         private MemoryStream _ms;
@@ -22,7 +22,7 @@ namespace Launcher
         public byte[] Command { get; set; }
         public Queue<byte[]> PacketQueue { get; set; }
 
-        public Property(Socket sender, uint actorId, string command)
+        public WorkProperties(Socket sender, uint actorId, string command)
         {
             _sender = sender;
             _actorId = actorId;

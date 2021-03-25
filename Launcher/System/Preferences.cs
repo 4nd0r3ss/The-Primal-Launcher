@@ -20,6 +20,7 @@ namespace Launcher
         public bool ShowLoginPage { get; set; }
         public bool ChooseGameAccount { get; set; }
         public string UserFilesPath { get; set; }
+        public string ServerRegion { get; set; }
     }
 
     public class Preferences
@@ -96,7 +97,7 @@ namespace Launcher
                 Directory.CreateDirectory(_options.UserFilesPath + AppFolder);
                 SaveConfigFile();
             }
-               
+
         }
         #endregion
 

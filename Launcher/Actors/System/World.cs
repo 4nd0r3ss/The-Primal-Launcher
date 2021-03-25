@@ -17,8 +17,9 @@ namespace Launcher
         public static string Address { get; set; } = "127.0.0.1";
         public int ServerId { get; set; }
         public int Population { get; set; }
-        public static string Name { get; set; } = "CHANGE NAME"; //change this
-        public List<Zone> Zones { get; set;}       
+        public string ServerName { get; set; } = "CHANGE NAME"; //change this
+        public List<Zone> Zones { get; set;}
+        public List<OpeningDirector> Actors { get; set; }
         public static World Instance
         {
             get
@@ -35,25 +36,31 @@ namespace Launcher
         {
             Id = 0x5ff80001;
             Zones = ActorRepository.Instance.ZoneList();
+            Name = Encoding.ASCII.GetBytes("worldMaster");           
+
+            //Directors
+            Actors = new List<OpeningDirector>();
+            Actors.Add(new OpeningDirector(0x66080000));
+            Actors.Add(new OpeningDirector(0x66080001));
         }
 
-        public static byte[] GetNameBytes() => Encoding.ASCII.GetBytes(Name);
+        public byte[] GetNameBytes(byte id) => Encoding.ASCII.GetBytes(GetServerName(id));
 
         public override void Spawn(Socket handler, ushort spawnType = 0, ushort isZoning = 0, int changingZone = 0, ushort actorIndex = 0)
         {
             Prepare(actorIndex);
-            CreateActor(handler, 0x08);
-            SetSpeeds(handler, Speeds);
-            SetPosition(handler, Position, spawnType, isZoning);
+            CreateActor(handler);
+            SetSpeeds(handler);
+            SetPosition(handler, 1, isZoning);
             SetName(handler);
-            SetIsZoning(handler, false);
-            LoadActorScript(handler, LuaParameters);
-            ActorInit(handler);
+            SetMainState(handler);
+            SetIsZoning(handler);
+            LoadActorScript(handler);
         }
 
         public override void Prepare(ushort actorIndex = 0)
         {
-            LuaParameters = new LuaParameters { ActorName = "worldMaster", ClassName = "WorldMaster" };
+            LuaParameters = new LuaParameters { ActorName = "worldMaster", ClassName = "WorldMaster", ClassCode = 0x30400000 };
             LuaParameters.Add("/World/WorldMaster_event");
             LuaParameters.Add(false);
             LuaParameters.Add(false);
@@ -61,28 +68,48 @@ namespace Launcher
             LuaParameters.Add(false);
             LuaParameters.Add(false);
             LuaParameters.Add(null);
-            Speeds = new uint[] { 0, 0, 0, 0 };
-            Position = new Position();
+            
         }
 
-        public void Initialize(Socket handler)
+        public void Initialize(Socket sender)
         {
-            PlayerCharacter playerCharacter = UserRepository.Instance.User.Character;
+            PlayerCharacter playerCharacter = User.Instance.Character;
+            Debug debug = new Debug();
+           
+
+            ServerName = GetServerName(playerCharacter.WorldId);
+
+            ChatProcessor.SendMessage(sender, MessageType.GeneralInfo, "Welcome to " + ServerName + "!");
+            ChatProcessor.SendMessage(sender, MessageType.GeneralInfo, "Welcome to Eorzea!");
+            ChatProcessor.SendMessage(sender, MessageType.GeneralInfo, @"To get a list of available commands, type \help in the chat window and hit enter.");
+            
             uint currentZone = playerCharacter.Position.ZoneId;
             Zone zone = Zones.Find(x => x.Id == currentZone);
+            playerCharacter.SendGroupPackets(sender);
 
-            Debug debug = new Debug();
+            if (true) //if playercharacter didnt reach after-opening map
+            {
+                OpeningDirector opening0 = new OpeningDirector(0x66080000);
+                OpeningDirector opening1 = new OpeningDirector(0x66080001);
+                opening0.Spawn(sender);
+                opening0.StartClientOrderEvent(sender);
+            }
 
-            SetIsZoning(handler);
-            SetDalamudPhase(handler);
-            SetMusic(handler, zone.GetCurrentBGM());
-            SetWeather(handler, Weather.Clear);
-            SetMap(handler, zone);
-            Spawn(handler, 0x01);
-            debug.Spawn(handler);          
-            zone.Spawn(handler);//spawn zone               
-            playerCharacter.Spawn(handler);//spawn player character
-            zone.SpawnActors(handler);
+            //zone environment init
+            SetIsZoning(sender);
+            SetDalamudPhase(sender);
+            SetMusic(sender, zone.GetCurrentBGM());
+            SetWeather(sender, Weather.Clear);
+            SetMap(sender, zone);
+
+            //spawn actors
+            playerCharacter.Spawn(sender, spawnType: 0x01, isZoning: 0);//spawn player character
+            zone.Spawn(sender);//spawn zone
+            debug.Spawn(sender);
+            Spawn(sender, 0x01);            
+            zone.SpawnActors(sender);
+
+            //TestPackets.Populace(playerCharacter.Id, null, sender);
         }
 
         public void SetDalamudPhase(Socket sender)
@@ -90,14 +117,14 @@ namespace Launcher
             byte[] data = new byte[0x08];
             data[0] = 0xff; //test other values and make enum later
 
-            SendPacket(sender, ServerOpcode.SetDalamud, data);
+            SendPacket(sender, ServerOpcode.SetDalamud, data, sourceId: User.Instance.Character.Id);
         }       
 
-        public void SetMusic(Socket sender, uint musicId)
+        public void SetMusic(Socket sender, uint musicId, MusicMode mode = MusicMode.Play)
         {
             byte[] data = new byte[0x08];            
             data[0] = (byte)musicId; //these numbers will not vary, so no need for blockcopy
-            data[0x02] = (byte)MusicMode.Play;
+            data[0x02] = (byte)mode;
             SendPacket(sender, ServerOpcode.SetMusic, data);
         }
 
@@ -115,7 +142,7 @@ namespace Launcher
             Buffer.BlockCopy(BitConverter.GetBytes(zone.RegionId), 0, data, 0, sizeof(uint));
             Buffer.BlockCopy(BitConverter.GetBytes(zone.Id), 0, data, 0x04, sizeof(uint));            
             data[0x08] = 0x28;
-            SendPacket(sender, ServerOpcode.SetMap, data);           
+            SendPacket(sender, ServerOpcode.SetMap, data, sourceId: User.Instance.Character.Id);           
         }       
 
         public void TeleportPlayer(Socket sender, uint zoneId)
@@ -125,8 +152,19 @@ namespace Launcher
             if (entryPoint == null)
                 entryPoint = new Position() { ZoneId = zoneId };
 
-            PlayerCharacter playerCharacter = UserRepository.Instance.User.Character;
-            playerCharacter.Position = entryPoint;
+            ChangeZone(sender, entryPoint);
+        }
+
+        public void TeleportPlayer(Socket sender, Position position)
+        {
+            position.X = position.X + 3;
+            ChangeZone(sender, position);
+        }        
+
+        private void ChangeZone(Socket sender, Position position)
+        {
+            PlayerCharacter playerCharacter = User.Instance.Character;
+            playerCharacter.Position = position;
 
             uint currentZone = playerCharacter.Position.ZoneId;
             Zone zone = Zones.Find(x => x.Id == currentZone);
@@ -134,10 +172,7 @@ namespace Launcher
 
             SendPacket(sender, ServerOpcode.MassDeleteEnd, new byte[0x08], playerCharacter.Id, playerCharacter.Id);
 
-            byte[] e2 = new byte[0x08];
-            e2[0] = 0x15;// (0x02 & 0xff);
-            SendPacket(sender, ServerOpcode.MapUiChange, e2, playerCharacter.Id, playerCharacter.Id);
-
+            playerCharacter.MapUIChange(sender, 0x02);
             SetIsZoning(sender);
             SetDalamudPhase(sender);
             SetMusic(sender, zone.GetCurrentBGM());
@@ -147,55 +182,52 @@ namespace Launcher
             zone.Spawn(sender);//spawn zone 
             debug.Spawn(sender);
             Spawn(sender, 0x01);
-            playerCharacter.SetPosition(sender, entryPoint, 2, 1, -1);
+            playerCharacter.SetPosition(sender, 2, 1, -1);
             zone.SpawnActors(sender);
         }
 
-        public static XmlNodeList GetWorldListXml()
+        public XmlNodeList GetWorldListXml()
         {
             List<Actor> zoneNpcs = new List<Actor>();
             XmlNodeList rootNode = null;
             XmlDocument worldListFile = new XmlDocument();
-            string worldListPath = @"world\";
-            string fileNamePath = worldListPath + @"\WorldList.xml";
-            string file = "";
-            string regionId = "NA"; //TODO: add option to choose game server region 
-            string defaultXml = @"<?xml version=""1.0"" encoding=""UTF - 8""?><servers><region id = """ + regionId + @"""><world id = ""1"" name = ""Primal Launcher"" population = ""10""></world></region></servers>";
 
-            if (Directory.Exists(worldListPath) && File.Exists(fileNamePath))
-                file = File.ReadAllText(fileNamePath);
-            else
-                Log.Instance.Warning("Server list file not found!");
-
-            if (file == "")
-                file = defaultXml;
+            //From https://social.msdn.microsoft.com/Forums/vstudio/en-US/6990068d-ddee-41e9-86fc-01527dcd99b5/how-to-embed-xml-file-in-project-resources?forum=csharpgeneral
+            string file = string.Empty;          
+           
+            using (Stream stream = GetType().Assembly.GetManifestResourceStream("Launcher.Resources.xml.WorldList.xml"))
+            using (StreamReader sr = new StreamReader(stream))
+                file = sr.ReadToEnd();
 
             try
             {
                 //prepare xml nodes
                 worldListFile.LoadXml(file);
-                rootNode = worldListFile.SelectNodes("servers/region[@id = '" + regionId + "']/world");
+                rootNode = worldListFile.SelectNodes("servers/region[@id = '" + "NA" + "']/world");
             }
             catch (Exception e) { Log.Instance.Error(e.Message); }
 
             return rootNode;
         }
 
-        public string GetName(byte id)
+        public string GetServerName(byte id)
         {
             XmlNodeList worldListXml = GetWorldListXml();
             string worldName = "Primal Launcher";
 
             foreach (XmlNode node in worldListXml)
                 if (node.Attributes["id"].InnerText == id.ToString())
+                {
                     worldName = node.Attributes["name"].InnerText;
+                    break;
+                }                    
 
-            Name = worldName;
+            ServerName = worldName;
 
             return worldName;
         }
 
-        public static void SendWorldList(Socket handler, Blowfish blowfish)
+        public void SendWorldList(Socket handler, Blowfish blowfish)
         {
             XmlNodeList rootNode = GetWorldListXml();
 
@@ -242,27 +274,13 @@ namespace Launcher
             }
         }
 
-        public void TeleportMenuLevel2(Socket sender, byte[] data)
+        public void SendTextSheetMessage(Socket sender, ServerOpcode opcode, byte[] data) => SendPacket(sender, opcode, data);
+
+        public void GMActiveRequest(Socket sender)
         {
-            byte pageSelected = data[0x25];
-
-            byte[] teleportmenulevel2 =
-            {
-                0x41, 0x29, 0x9B, 0x02, 0x9C, 0x5E, 0xF0, 0xA0, 0x00, 0x63, 0x6F, 0x6D, 0x6D, 0x61, 0x6E, 0x64,
-                0x43, 0x6F, 0x6E, 0x74, 0x65, 0x6E, 0x74, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x64, 0x65, 0x6C, 0x65, 0x67, 0x61, 0x74,
-                0x65, 0x43, 0x6F, 0x6D, 0x6D, 0x61, 0x6E, 0x64, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x06, 0xA0, 0xF0, 0x5E, 0x9C, 0x02, 0x65,
-                0x76, 0x65, 0x6E, 0x74, 0x41, 0x65, 0x74, 0x68, 0x65, 0x72, 0x79, 0x74, 0x65, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00,
-                0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00,
-                0x04, 0x0F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x57, 0xE0, 0x3F, 0x40, 0x00, 0x00, 0x00,
-            };
-
-            teleportmenulevel2[0x62] = pageSelected;
-            Buffer.BlockCopy(BitConverter.GetBytes(UserRepository.Instance.User.Character.Id), 0, teleportmenulevel2, 0, 4);
-
-            SendPacket(sender, ServerOpcode.StartEventRequest, teleportmenulevel2);
+            byte[] data = new byte[0x08];
+            SendPacket(sender, ServerOpcode.GMTicketActiveRequest, data);
         }
+       
     }    
 }

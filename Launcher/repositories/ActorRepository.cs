@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
+using System.IO;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 
 namespace Launcher
 {
@@ -43,39 +47,38 @@ namespace Launcher
             //new Aetheryte(1280117, AetheryteType.Crystal, new Position(0,216f, 303f, -258f, 0f, 0), 2048),                 // 
             //new Aetheryte(1280118, AetheryteType.Crystal, new Position(0,1498f, 207f, 767f, 0f, 0), 2048),                 // 
             //new Aetheryte(1280119, AetheryteType.Crystal, new Position(0,-163f, 223f, 1151f, 0f, 0), 2048),                //
-            //new Aetheryte(1280126, AetheryteType.Crystal, new Position(0,484f, 19f, 672f, 0f, 0), 2048),                   // 
-            //new Aetheryte(1280127, AetheryteType.Crystal, new Position(0,-400f, 19f, 338f, 0f, 0), 2048),                  // 
+            //new Aetheryte(1280126, AetheryteType.Crystal, new Position(0,484f, 19f, 672f, 0f, 0), 2048),                   //            
             
             //Aetherytes - grouped by teleport menu pages
-            new Aetheryte(1280001, AetheryteType.Crystal, new Position(230,-395.1f, 42.5f, 337.12f, 0f, 0)),       // lanoscea_limsa
-            new Aetheryte(1280002, AetheryteType.Crystal, new Position(128,29.97f, 45.83f, -35.47f, 0f, 0)),       // lanoscea_beardedrock
-            new Aetheryte(1280003, AetheryteType.Crystal, new Position(129,-991.88f, 61.71f, -1120.79f, 0f, 0)),   // lanoscea_skullvalley
-            new Aetheryte(1280004, AetheryteType.Crystal, new Position(129,-1883.47f, 53.77f, -1372.68f, 0f, 0)),  // lanoscea_baldknoll
-            new Aetheryte(1280005, AetheryteType.Crystal, new Position(130,1123.29f, 45.7f, -928.69f, 0f, 0)),     // lanoscea_bloodshore
-            new Aetheryte(1280006, AetheryteType.Crystal, new Position(135,-278.181f, 77.63f, -2260.79f, 0f, 0)),  // lanoscea_ironlake
+            new Aetheryte(1280001, AetheryteType.Crystal, new Position(230,-395.1f, 42.5f, 337.12f, 0f, 0), 1, 1),       // lanoscea_limsa
+            new Aetheryte(1280002, AetheryteType.Crystal, new Position(128,29.97f, 45.83f, -35.47f, 0f, 0), 1, 2),       // lanoscea_beardedrock
+            new Aetheryte(1280003, AetheryteType.Crystal, new Position(129,-991.88f, 61.71f, -1120.79f, 0f, 0), 1, 3),   // lanoscea_skullvalley
+            new Aetheryte(1280004, AetheryteType.Crystal, new Position(129,-1883.47f, 53.77f, -1372.68f, 0f, 0), 1, 4),  // lanoscea_baldknoll
+            new Aetheryte(1280005, AetheryteType.Crystal, new Position(130,1123.29f, 45.7f, -928.69f, 0f, 0), 1, 5),     // lanoscea_bloodshore
+            new Aetheryte(1280006, AetheryteType.Crystal, new Position(135,-278.181f, 77.63f, -2260.79f, 0f, 0), 1, 6),  // lanoscea_ironlake
 
-            new Aetheryte(1280092, AetheryteType.Crystal, new Position(143,216f, 303f, -258f, 0f, 0)),             // coerthas_dragonhead
-            new Aetheryte(1280093, AetheryteType.Crystal, new Position(144,1122f, 271f, -1149f, 0f, 0)),           // coerthas_crookedfork
-            new Aetheryte(1280094, AetheryteType.Crystal, new Position(145,1498f, 207f, 767f, 0f, 0)),             // coerthas_glory
-            new Aetheryte(1280095, AetheryteType.Crystal, new Position(147,-163f, 223f, 1151f, 0f, 0)),            // coerthas_everlakes
-            new Aetheryte(1280096, AetheryteType.Crystal, new Position(148,-1761f, 270f, -198f, 0f, 0)),           // coerthas_riversmeet
+            new Aetheryte(1280092, AetheryteType.Crystal, new Position(143,216f, 303f, -258f, 0f, 0), 2, 1),             // coerthas_dragonhead
+            new Aetheryte(1280093, AetheryteType.Crystal, new Position(144,1122f, 271f, -1149f, 0f, 0), 2, 2),           // coerthas_crookedfork
+            new Aetheryte(1280094, AetheryteType.Crystal, new Position(145,1498f, 207f, 767f, 0f, 0), 2, 3),             // coerthas_glory
+            new Aetheryte(1280095, AetheryteType.Crystal, new Position(147,-163f, 223f, 1151f, 0f, 0), 2, 4),            // coerthas_everlakes
+            new Aetheryte(1280096, AetheryteType.Crystal, new Position(148,-1761f, 270f, -198f, 0f, 0), 2, 5),           // coerthas_riversmeet
 
-            new Aetheryte(1280061, AetheryteType.Crystal, new Position(206,-130.63f, 16.08f, -1323.99f, 0f, 0)),   // blackshroud_gridania
-            new Aetheryte(1280062, AetheryteType.Crystal, new Position(150,288f, 4f, -543.928f, 0f, 0)),           // blackshroud_bentbranch
-            new Aetheryte(1280063, AetheryteType.Crystal, new Position(151,1702f, 20f, -862f, 0f, 0)),             // blackshroud_nineivies
-            new Aetheryte(1280064, AetheryteType.Crystal, new Position(152,-1052f, 20f, -1760f, 0f, 0)),           // blackshroud_emeraldmoss
-            new Aetheryte(1280065, AetheryteType.Crystal, new Position(153,-1566.04f, -11.89f, -550.51f, 0f, 0)),  // blackshroud_crimsonbark
-            new Aetheryte(1280066, AetheryteType.Crystal, new Position(154,734f, -12f, 1126f, 0f, 0)),             // blackshroud_tranquil
+            new Aetheryte(1280061, AetheryteType.Crystal, new Position(206,-130.63f, 16.08f, -1323.99f, 0f, 0), 3, 1),   // blackshroud_gridania
+            new Aetheryte(1280062, AetheryteType.Crystal, new Position(150,288f, 4f, -543.928f, 0f, 0), 3, 2),           // blackshroud_bentbranch
+            new Aetheryte(1280063, AetheryteType.Crystal, new Position(151,1702f, 20f, -862f, 0f, 0), 3, 3),             // blackshroud_nineivies
+            new Aetheryte(1280064, AetheryteType.Crystal, new Position(152,-1052f, 20f, -1760f, 0f, 0), 3, 4),           // blackshroud_emeraldmoss
+            new Aetheryte(1280065, AetheryteType.Crystal, new Position(153,-1566.04f, -11.89f, -550.51f, 0f, 0), 3, 5),  // blackshroud_crimsonbark
+            new Aetheryte(1280066, AetheryteType.Crystal, new Position(154,734f, -12f, 1126f, 0f, 0), 3, 6),             // blackshroud_tranquil
 
-            new Aetheryte(1280031, AetheryteType.Crystal, new Position(175,-240.45f, 185.93f, -9.56f, 0f, 0)),     // thanalan_uldah
-            new Aetheryte(1280032, AetheryteType.Crystal, new Position(170,33f, 201f, -482f, 0f, 0)),              // thanalan_blackbrush
-            new Aetheryte(1280036, AetheryteType.Crystal, new Position(174,1686f, 297f, 995f, 0f, 0)),             // thanalan_brokenwater              
-            new Aetheryte(1280033, AetheryteType.Crystal, new Position(171,1250.9f, 264f, -544.2f, 0f, 0)),        // thanalan_drybone
-            new Aetheryte(1280034, AetheryteType.Crystal, new Position(172,-1315f, 57f, -147f, 0f, 0)),            // thanalan_horizon
-            new Aetheryte(1280035, AetheryteType.Crystal, new Position(173,-165f, 281f, -1699f, 0f, 0)),           // thanalan_bluefog  
+            new Aetheryte(1280031, AetheryteType.Crystal, new Position(175,-240.45f, 185.93f, -9.56f, 0f, 0), 4, 1),     // thanalan_uldah
+            new Aetheryte(1280032, AetheryteType.Crystal, new Position(170,33f, 201f, -482f, 0f, 0), 4, 2),              // thanalan_blackbrush
+            new Aetheryte(1280033, AetheryteType.Crystal, new Position(171,1250.9f, 264f, -544.2f, 0f, 0), 4, 3),        // thanalan_drybone
+            new Aetheryte(1280034, AetheryteType.Crystal, new Position(172,-1315f, 57f, -147f, 0f, 0), 4, 4),            // thanalan_horizon
+            new Aetheryte(1280035, AetheryteType.Crystal, new Position(173,-165f, 281f, -1699f, 0f, 0), 4, 5),           // thanalan_bluefog
+            new Aetheryte(1280036, AetheryteType.Crystal, new Position(174,1686f, 297f, 995f, 0f, 0), 4, 6),             // thanalan_brokenwater      
 
-            new Aetheryte(1280121, AetheryteType.Crystal, new Position(190,484f, 19f, 672f, 0f, 0)),               // mordhona_brittlebark
-            new Aetheryte(1280122, AetheryteType.Crystal, new Position(190,-400f, 19f, 338f, 0f, 0)),              // mordhona_revenantstoll
+            new Aetheryte(1280121, AetheryteType.Crystal, new Position(190,484f, 19f, 672f, 0f, 0), 5, 1),               // mordhona_brittlebark
+            new Aetheryte(1280122, AetheryteType.Crystal, new Position(190,-400f, 19f, 338f, 0f, 0), 5, 2),              // mordhona_revenantstoll
             
             //Aetheryte Gates
             new Aetheryte(1280007, AetheryteType.Gate, new Position(128,582.47f, 54.52f, -1.2f, 0f, 0)),        // cedarwood
@@ -188,6 +191,7 @@ namespace Launcher
                 new Zone(102, 252, locationNameId: 21, classNameId: 2, musicSetId: 0, mapName: "roc0Dungeon04"),
                 new Zone(102, 253, locationNameId: 21, classNameId: 2, musicSetId: 0, mapName: "roc0Dungeon04"),
                 new Zone(102, 256, locationNameId: 20, classNameId: 2, musicSetId: 0, mapName: "roc0Field02a"),
+
                 new Zone(103, 150, locationNameId: 22, classNameId: 3, musicSetId: 4, mapName: "fst0Field01"),
                 new Zone(103, 151, locationNameId: 23, classNameId: 3, musicSetId: 4, mapName: "fst0Field02"),
                 new Zone(103, 152, locationNameId: 24, classNameId: 3, musicSetId: 4, mapName: "fst0Field03"),
@@ -236,6 +240,7 @@ namespace Launcher
                 //new Zone(105, 251, locationNameId: 47, musicSetId: 0),
                 //new Zone(105, 264, locationNameId: 47, musicSetId: 0, mapName: "lak0Field01"),
                 new Zone(105, 266, locationNameId: 46, classNameId: 9, musicSetId: 8, mapName: "lak0Field01a"),
+
                 new Zone(106, 164, locationNameId: 22, classNameId: 5, musicSetId: 6, mapName: "fst0Battle01"),
                 new Zone(106, 165, locationNameId: 22, classNameId: 5, musicSetId: 6, mapName: "fst0Battle02"),
                 new Zone(106, 166, locationNameId: 22, classNameId: 5, musicSetId: 6, mapName: "fst0Battle03"),
@@ -264,6 +269,142 @@ namespace Launcher
                 new Zone(209, 244, locationNameId: 55, classNameId: 19, musicSetId: 15, mapName: "prv0Inn01"),
                 new Zone(805, 200, locationNameId: 56, classNameId: 13, musicSetId: 10, mapName: "sea1Cruise01"),
             };
+        }
+
+        public List<Actor> LoadZoneNpc(uint zoneId)
+        {
+            string npcListPath = @"" + zoneId.ToString("X") ;
+            string fileNamePath = npcListPath + @".npc.xml";
+            XmlDocument npcFile = new XmlDocument();
+            string file = GetResourceXmlResource(fileNamePath);
+            List<Actor> zoneNpcs = new List<Actor>();           
+
+            if (file != "")
+            {
+                try
+                {
+                    //get game data tables with actors data
+                    DataTable actorsGraphics = GameData.Instance.GetGameData("actorclass_graphic");
+                    DataTable actorsNameIds = GameData.Instance.GetGameData("actorclass");
+
+                    //prepare xml nodes
+                    npcFile.LoadXml(file);
+                    var PopulaceStandardList = npcFile.SelectNodes("npc/PopulaceStandard");
+
+                    //each npc node in xml 
+                    foreach (XmlNode node in PopulaceStandardList)
+                    {
+                        //XmlNode node = objNode.SelectSingleNode("PopulaceStandard");
+                        uint classId = Convert.ToUInt32(node.SelectSingleNode("classId").InnerText);
+                        uint state = node.SelectSingleNode("state") != null ? Convert.ToUInt32(node.SelectSingleNode("state").InnerText) : 0; //TODO: fix this as it is 2 bytes. so far it's alaways 0 so it's ok.
+                        ushort animation = node.SelectSingleNode("animation") != null ? Convert.ToUInt16(node.SelectSingleNode("animation").InnerText) : (ushort)0;
+                        int questIcon = node.SelectSingleNode("questIcon") != null ? Convert.ToInt32(node.SelectSingleNode("questIcon").InnerText) : -1;
+
+                        //get table lines with npc info
+                        DataRow actorGraphics = actorsGraphics.Select("id = '" + classId + "'")[0];
+                        DataRow actorNameId = actorsNameIds.Select("id = '" + classId + "'")[0];
+
+                        //Spawn position
+                        XmlNode positionNode = node.SelectSingleNode("position");
+                        Position position = new Position
+                        {
+                            ZoneId = zoneId,
+                            X = Convert.ToSingle(positionNode.Attributes["x"].Value),
+                            Y = Convert.ToSingle(positionNode.Attributes["y"].Value),
+                            Z = Convert.ToSingle(positionNode.Attributes["z"].Value),
+                            R = Convert.ToSingle(positionNode.Attributes["r"].Value)
+                        };
+
+                        Face face = new Face
+                        {
+                            Characteristics = Convert.ToByte(actorGraphics.ItemArray[7]),
+                            CharacteristicsColor = Convert.ToByte(actorGraphics.ItemArray[8]),
+                            Type = Convert.ToByte(actorGraphics.ItemArray[6]),
+                            Ears = Convert.ToByte(actorGraphics.ItemArray[15]),
+                            Mouth = Convert.ToByte(actorGraphics.ItemArray[14]),
+                            Features = Convert.ToByte(actorGraphics.ItemArray[13]),
+                            Nose = Convert.ToByte(actorGraphics.ItemArray[12]),
+                            EyeShape = Convert.ToByte(actorGraphics.ItemArray[11]),
+                            IrisSize = Convert.ToByte(actorGraphics.ItemArray[10]),
+                            EyeBrows = Convert.ToByte(actorGraphics.ItemArray[9])
+                        };
+
+                        Appearance appearance = new Appearance
+                        {
+                            BaseModel = Convert.ToUInt32(actorGraphics.ItemArray[1]),
+                            Size = Convert.ToUInt32(actorGraphics.ItemArray[2]),
+                            MainWeapon = Convert.ToUInt32(actorGraphics.ItemArray[20]),
+                            SecondaryWeapon = Convert.ToUInt32(actorGraphics.ItemArray[21]),
+                            SPMainWeapon = Convert.ToUInt32(actorGraphics.ItemArray[22]),
+                            SPSecondaryWeapon = Convert.ToUInt32(actorGraphics.ItemArray[23]),
+                            Throwing = Convert.ToUInt32(actorGraphics.ItemArray[24]),
+                            Pack = Convert.ToUInt32(actorGraphics.ItemArray[25]),
+                            Pouch = Convert.ToUInt32(actorGraphics.ItemArray[26]),
+                            Head = Convert.ToUInt32(actorGraphics.ItemArray[27]),
+                            Body = Convert.ToUInt32(actorGraphics.ItemArray[28]),
+                            Legs = Convert.ToUInt32(actorGraphics.ItemArray[29]),
+                            Hands = Convert.ToUInt32(actorGraphics.ItemArray[30]),
+                            Feet = Convert.ToUInt32(actorGraphics.ItemArray[31]),
+                            Waist = Convert.ToUInt32(actorGraphics.ItemArray[32]),
+                            Neck = Convert.ToUInt32(actorGraphics.ItemArray[33]),
+                            RightEar = Convert.ToUInt32(actorGraphics.ItemArray[34]),
+                            LeftEar = Convert.ToUInt32(actorGraphics.ItemArray[35]),
+                            RightIndex = Convert.ToUInt32(actorGraphics.ItemArray[36]),
+                            LeftIndex = Convert.ToUInt32(actorGraphics.ItemArray[37]),
+                            RightFinger = Convert.ToUInt32(actorGraphics.ItemArray[38]),
+                            LeftFinger = Convert.ToUInt32(actorGraphics.ItemArray[39])
+                        };
+
+                        SubState subState = new SubState
+                        {
+                            MotionPack = animation
+                        };
+
+                        //Npc obj
+                        PopulaceStandard npc = new PopulaceStandard
+                        {    
+                            ClassId = classId,
+                            NameId = Convert.ToInt32(actorNameId.ItemArray[1]),
+                            HairStyle = Convert.ToUInt16(actorGraphics.ItemArray[3]),
+                            HairHighlightColor = Convert.ToUInt16(actorGraphics.ItemArray[4]),
+                            HairColor = Convert.ToUInt16(actorGraphics.ItemArray[16]),
+                            SkinColor = Convert.ToUInt16(actorGraphics.ItemArray[17]),                            
+                            EyeColor = Convert.ToUInt16(actorGraphics.ItemArray[18]),
+                            Appearance = appearance,
+                            Face = face,
+                            Position = position,
+                            QuestIcon = questIcon,
+                            SubState = subState
+                        };
+
+                        zoneNpcs.Add(npc);
+                    }
+                }
+                catch (Exception e)
+                {
+                    _log.Warning(e.Message);
+                }
+            }
+
+            return zoneNpcs;
+        }
+
+        /// <summary>
+        /// Get the contents of a XML file configured as a resource.
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <returns></returns>
+        private string GetResourceXmlResource(string fileName)
+        {
+            //From https://social.msdn.microsoft.com/Forums/vstudio/en-US/6990068d-ddee-41e9-86fc-01527dcd99b5/how-to-embed-xml-file-in-project-resources?forum=csharpgeneral
+            string result = string.Empty;
+            Stream stream = this.GetType().Assembly.GetManifestResourceStream("Launcher.Resources.xml.zones." + fileName);
+            if(stream != null)
+                using (stream)            
+                    using (StreamReader sr = new StreamReader(stream))                
+                        result = sr.ReadToEnd();               
+           
+            return result;
         }
     }
 }

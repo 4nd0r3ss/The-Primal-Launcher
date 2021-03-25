@@ -10,8 +10,7 @@ namespace Launcher
     class LobbyServer : Server
     {        
         private const int PORT = 54994;     
-        private PlayerCharacter _newCharacter = new PlayerCharacter();
-        private UserRepository _userFactory = UserRepository.Instance;
+        private PlayerCharacter _newCharacter = new PlayerCharacter();       
 
         public LobbyServer()
         {
@@ -68,7 +67,7 @@ namespace Launcher
         private void UnknownPacketDebug(SubPacket sp)
         {
             //File.WriteAllBytes(counter + "unknown_packet.txt", sp.Data);       
-            _log.Error("[Lobby Server] Unknown packet");
+            Log.Instance.Error("[Lobby Server] Unknown packet");
         }
 
         private void StartSession(Packet packet)
@@ -87,7 +86,7 @@ namespace Launcher
             );  
 
             _connection.Send(Packet.AckPacket);
-            _log.Info("Security handshake packet sent.");
+            Log.Instance.Info("Security handshake packet sent.");
         }
 
         private void SendAccountList()
@@ -95,23 +94,23 @@ namespace Launcher
             GamePacket gamePacket = new GamePacket
             {
                 Opcode = GameAccount.OPCODE,
-                Data = _userFactory.User.GetAccountListData()
+                Data = User.Instance.GetAccountListData()
             };
 
             Packet packet = new Packet(gamePacket);
             _connection.Send(packet.ToBytes(_blowfish));
-            _log.Info("Account list sent.");
+            Log.Instance.Info("Account list sent.");
         }
 
         private void GetCharacters(SubPacket subPacket)
         {           
-            WorldFactory.SendWorldList(_connection.socket, _blowfish);         
-            _userFactory.SendUserCharacterList(_connection.socket, _blowfish);
+            World.Instance.SendWorldList(_connection.socket, _blowfish);         
+            User.Instance.SendUserCharacterList(_connection.socket, _blowfish);
         }
 
         private void ModifyCharacter(SubPacket subPacket)
         {
-            List<PlayerCharacter> userCharacters = _userFactory.User.AccountList[0].CharacterList;
+            List<PlayerCharacter> userCharacters = User.Instance.AccountList[0].CharacterList;
             byte[] responseData = new byte[0x50];
             byte command = subPacket.Data[0x21];
             byte worldId = subPacket.Data[0x22];
@@ -128,24 +127,24 @@ namespace Launcher
             {
                 case 0x01: //Reserve name
                     //As this is intended to be a single player experience, no name reserving is needed.                    
-                    Buffer.BlockCopy(subPacket.Data, 0x24, _newCharacter.CharacterName, 0, 0x20);
+                    Buffer.BlockCopy(subPacket.Data, 0x24, _newCharacter.Name, 0, 0x20);
                     _newCharacter.Slot = subPacket.Data[0x20];                                        
                     _newCharacter.WorldId = worldId;                   
-                    _log.Info("Character name reserved.");
+                    Log.Instance.Info("Character name reserved.");
                     break;
 
                 case 0x02: //Create character
                     _newCharacter.Setup(subPacket.Data);
                     userCharacters.Add(_newCharacter);
-                    _userFactory.UpdateUser();
+                    User.Instance.Save();
                     worldId = _newCharacter.WorldId;
                     //Buffer.BlockCopy(BitConverter.GetBytes(_newCharacter.Id), 0, responseData, 0x10, 0x04);
                     Buffer.BlockCopy(BitConverter.GetBytes(_newCharacter.Id), 0, responseData, 0x14, 0x04);
-                    _log.Success("Character ID#"+_newCharacter.Id.ToString("X")+": \"" + Encoding.ASCII.GetString(_newCharacter.CharacterName) + "\" created!");
+                    Log.Instance.Success("Character ID#"+_newCharacter.Id.ToString("X")+": \"" + Encoding.ASCII.GetString(_newCharacter.Name) + "\" created!");
                     break;
 
                 case 0x03: //Rename character
-                    _log.Info("Rename character");
+                    Log.Instance.Info("Rename character");
                     break;
 
                 case 0x04: //Delete character
@@ -164,22 +163,22 @@ namespace Launcher
                     //delete from list
                     userCharacters.RemoveAt(i);
                     //Update user info
-                    _userFactory.UpdateUser();
-                    _log.Warning("Character ID#" + id.ToString("X") + ": \"" + name + "\" was deleted.");                    
+                    User.Instance.Save();
+                    Log.Instance.Warning("Character ID#" + id.ToString("X") + ": \"" + name + "\" was deleted.");                    
                     break;
 
                 case 0x05: //Unknown
-                    _log.Error("Unknown Modifycharacter() command: 0x05");
+                    Log.Instance.Error("Unknown Modifycharacter() command: 0x05");
                     break;
 
                 case 0x06: //Rename retainer
-                    _log.Info("Rename retainer");
+                    Log.Instance.Info("Rename retainer");
                     break;
             }
 
-            byte[] worldName = World.GetNameBytes(); 
+            byte[] worldName = World.Instance.GetNameBytes(worldId); 
             Buffer.BlockCopy(worldName, 0, responseData, 0x40, worldName.Length);   
-            Buffer.BlockCopy(_newCharacter.CharacterName, 0, responseData, 0x20, 0x20);            
+            Buffer.BlockCopy(_newCharacter.Name, 0, responseData, 0x20, 0x20);            
 
             GamePacket response = new GamePacket
             {
@@ -203,18 +202,18 @@ namespace Launcher
             uint selectedCharacterId = BitConverter.ToUInt32(characterId, 0);
 
             //Keep selected character in the User obj 
-            _userFactory.User.Character = _userFactory.User.AccountList[0].CharacterList.Find(x => x.Id == selectedCharacterId);
+            User.Instance.Character = User.Instance.AccountList[0].CharacterList.Find(x => x.Id == selectedCharacterId);
 
             //when you create a new character, the game client calls SelectCharacter right after,
             //however the received packet does not contain the character id for some reason. 
             //the code below fix this as we need it to get the world id.
-            if (UserRepository.Instance.User.Character == null)
-                UserRepository.Instance.User.Character = _newCharacter;
+            if (User.Instance.Character == null)
+                User.Instance.Character = _newCharacter;
             //if (selectedCharacterId == 0)
                 //selectedCharacterId = _newCharacter.Id;
 
             //Get world info
-            byte worldId = _userFactory.User.Character.WorldId;
+            byte worldId = User.Instance.Character.WorldId;
             //World world = WorldFactory.GetWorld(worldId);            
 
             byte[] response = new byte[0x98];
@@ -232,14 +231,14 @@ namespace Launcher
                 Data = response
             };
 
-            ServerTransition();
-
             Packet characterSelectedPacket = new Packet(characterSelected);
             _connection.Send(characterSelectedPacket.ToBytes(_blowfish));
-            _log.Info("Character selected.");
-        }       
+            Log.Instance.Info("Character selected.");
+        }
 
-        public override void ServerTransition() => Task.Run(() => { new GameServer(); });
-        
+        public override void ServerTransition()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
