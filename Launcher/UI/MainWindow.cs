@@ -19,41 +19,13 @@ namespace Launcher
             var materialSkinManager = MaterialSkinManager.Instance;
             materialSkinManager.AddFormToManage(this);
             materialSkinManager.Theme = MaterialSkinManager.Themes.LIGHT;
-            materialSkinManager.ColorScheme = new ColorScheme((Primary)0x800101, (Primary)0x630101, (Primary)0x800101, (Accent)0xf5d800, TextShade.WHITE);
-
-
-            //first thing is to check game installation.
-            if (true)
-            {
-                //ucLogWindow.Instance.BringToFront();
-
-                //default user control button color
-                //btnLogWindow.BackColor = Color.White;
-                //btnLogWindow.ForeColor = Color.Maroon;
-            }
-            else
-            {
-                //load game update user control
-                //pnlMain.Controls.Add(ucGameUpdate.Instance);
-                ucGameUpdate.Instance.Dock = DockStyle.Fill;
-                ucGameUpdate.Instance.BringToFront();
-
-                //default user control button color
-                //btnGameUpdate.BackColor = Color.White;
-                //btnGameUpdate.ForeColor = Color.Maroon;
-
-                //disable launch button
-                btnLaunchGame.Enabled = false;
-            }
-
-            
-
+            materialSkinManager.ColorScheme = new ColorScheme((Primary)0x800101, (Primary)0x630101, (Primary)0x800101, (Accent)0xf5d800, TextShade.WHITE);         
         }
 
         private void BtnLaunchGame_Click(object sender, EventArgs e)
         {
             Task.Run(() => { new UpdateServer();});
-            Task.Run(() => { new HttpServer(); });          
+            Task.Run(() => { new HttpServer(); });
         }
         
         private void Launch()
@@ -74,6 +46,19 @@ namespace Launcher
 
         private void MainWindow_Load(object sender, EventArgs e)
         {
+            //first thing is to check game installation.
+            if (true)
+            {
+                //show log tab
+            }
+            else
+            {
+                //show update tab
+            }
+
+            //ActorRepository.Instance.GetZoneNpcs(0xc1);
+
+
             Log.Instance.Info("Welcome to Primal Launcher!");
             Task.Run(() => { new GameServer(); });
             Task.Run(() => { new LobbyServer(); });
@@ -97,21 +82,19 @@ namespace Launcher
                 new SolidBrush(Log.Instance.GetMessageColor(LbxOutput.Items[e.Index].ToString())), e.Bounds);
         }
 
-        //public void PrintPlayerPosition(Position position, byte[] unknown)
-        //{
-        //    lblPCPositionZone.Text = position.ZoneId.ToString();
-        //    lblPCPositionX.Text = position.X.ToString();
-        //    lblPCPositionY.Text = position.Y.ToString();
-        //    lblPCPositionZ.Text = position.Z.ToString();
-        //    lblPCPositionR.Text = position.R.ToString();
+        private void clock_ticker_Tick(object sender, EventArgs e)
+        {
+            lblEorzeaTime.Text = Clock.Instance.StringTime;
 
-
-
-
-        //    //"x: " + position.X + ", y: " + position.Y + ", z: " + position.Z + ", r: " + position.R + ", region id: " + position.ZoneId + ", unknown: " +
-        //    //unknown[0].ToString("X2") + " " + unknown[1].ToString("X2") + " " + unknown[2].ToString("X2") + " " +
-        //    //unknown[3].ToString("X2") + " " + unknown[4].ToString("X2") + " " + unknown[5].ToString("X2");
-
-        //}
+            if(User.Instance.Character != null)
+            {
+                Position pos = User.Instance.Character.Position;
+                lblLocation.Text = pos.ZoneId.ToString();
+                lblx.Text = string.Format("{0:0.0}", pos.X);
+                lbly.Text = string.Format("{0:0.0}", pos.Y);
+                lblz.Text = string.Format("{0:0.0}", pos.Z);
+                lblr.Text = string.Format("{0:0.0}", pos.R);
+            }            
+        }       
     }
 }

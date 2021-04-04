@@ -50,16 +50,5 @@ namespace Launcher
 
             return musicSet;
         }
-    }
-
-    [Serializable]
-    public enum MusicMode
-    {
-        Play = 0x01, //change music immediately
-        Crossfade = 0x02,
-        Layer = 0x03,
-        FadeStart = 0x04,
-        ChannelOne = 0x05,
-        ChannelTwo = 0x06
-    }
+    }  
 }

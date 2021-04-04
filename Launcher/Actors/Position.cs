@@ -64,7 +64,7 @@ namespace Launcher
     {
         public static List<Position> List { get; } = new List<Position>
         {
-            new Position(128, -8.48f, 45.36f, 139.5f, 2.02f, 15),
+            new Position(128, -8.48f, 45.36f, 139.5f, 2.02f, 15), //lanoscea
             new Position(133, -444.266f, 39.518f, 191f, 1.9f, 15),
             new Position(133, -8.062f, 45.429f, 139.364f, 2.955f, 15),
             new Position(150, 333.271f, 5.889f, -943.275f, 0.794f, 15),
@@ -73,12 +73,12 @@ namespace Launcher
             new Position(166, 356.09f, 3.74f, -701.62f, -1.4f, 16),//
             new Position(170, -27.015f, 181.798f,-79.72f, 2.513f, 15),
             new Position(175, -237.6312f, 184.8451f, -5.752599f, -2.536515f, 15),
-            new Position(184, 5.36433f, 196f, 133.656f, -2.84938f, 15),//
-            new Position(184, -24.34f, 192f, 34.22f, 0.78f, 16),
-            new Position(184, -24.34f, 192f, 34.22f, 0.78f, 15),
-            new Position(184, -22f, 196f, 87f, 1.8f, 15),
-            new Position(193, 0.016f, 10.35f, -36.91f, 0.025f, 15),//
-            new Position(193, -5f, 16.35f, 6f, 0.5f, 16),
+            new Position(184, 5.36433f, 196f, 133.656f, -2.84938f, 15),//uldah
+            new Position(184, -24.34f, 192f, 34.22f, 0.78f, 16),//uldah
+            new Position(184, -24.34f, 192f, 34.22f, 0.78f, 15),//uldah
+            new Position(184, -22f, 196f, 87f, 1.8f, 15),//uldah
+            new Position(193, 0.016f, 10.35f, -36.91f, 0.025f, 15),//rhotano sea
+            new Position(193, -5f, 16.35f, 6f, 0.5f, 16), //rhotano sea
             new Position(230, -838.1f, 6f, 231.94f, 1.1f, 15),
             new Position(244, 0.048f, 0f, -5.737f, 0f, 15),
             new Position(244, -160.048f, 0f, -165.737f, 0f, 15),

@@ -136,6 +136,34 @@ namespace Launcher
             RetainerGroup = new RetainerGroup();
         }
 
+        public void OpeningSequence(Socket sender)
+        {
+            if (IsNew)
+            {
+                Position = Position.GetInitialPosition(InitialTown);
+
+                switch (InitialTown)
+                {
+                    case 1: //Limsa
+
+                        break;
+                    case 2: //Gridania
+
+                        break;
+                    case 3: //Uldah
+
+                        break;
+                }
+
+                OpeningDirector opening0 = new OpeningDirector(0x66080000);
+                OpeningDirector opening1 = new OpeningDirector(0x66080001);
+                World.Instance.Actors.Add(opening0);
+                World.Instance.Actors.Add(opening1);
+                opening0.Spawn(sender);
+                opening0.StartClientOrderEvent(sender);
+            }
+        }
+
         public override void Prepare(ushort actorIndex = 0){}
 
         private void LoadInitialEquipment()
@@ -187,17 +215,10 @@ namespace Launcher
 
         public override void Spawn(Socket sender, ushort spawnType = 0x01, ushort isZoning = 0, int changingZone = 0, ushort actorIndex = 0)
         {
-            PacketQueue = null;
-
-            //For packet creation            
-            TargetId = Id;
+            PacketQueue = null;                     
+            TargetId = Id; //For packet creation  
 
             //SendGroupPackets(sender);
-
-            
-
-            
-            //opening director goes here
             CreateActor(sender, 0x08);
             CommandSequence(sender);
             SetSpeeds(sender);
@@ -211,7 +232,6 @@ namespace Launcher
             SetIcon(sender);
             SetIsZoning(sender, false);// (isZoning == 0 ? false : true));
 
-
             /* Grand Company packets here */
             //SendPacket(sender, ServerOpcode.SetGrandCompany, new byte[] { 0x02, 0x7F, 0x0B, 0x7F, 0x00, 0x00, 0x00, 0x00 });
 
@@ -221,8 +241,7 @@ namespace Launcher
             //current job
             //SendCurrentJob(sender);
 
-            SetSpecialEventWork(sender);
-            
+            SetSpecialEventWork(sender);            
 
             /* Chocobo mounts packet here */
             //SendPacket(sender, ServerOpcode.SetChocoboName, new byte[] { 0x42, 0x6f, 0x6b, 0x6f, 0x00, 0x00, 0x00, 0x00 });
@@ -231,52 +250,47 @@ namespace Launcher
 
             GetAchievementPoints(sender);
             GetAchievementsLatest(sender);
-            GetAchievementsCompleted(sender);
+            GetAchievementsCompleted(sender);    
+            LoadScript(sender);           
+            Inventory.SendInventories(sender);
+            GetWork(sender);           
+        }
 
-            ///* Set mounts packets */            
-
-
-
-            //Actor Lua parameters
+        public override void LoadScript(Socket sender)
+        {
             LuaParameters = new LuaParameters
             {
                 ActorName = string.Format("_pc{0:00000000}", Id),
                 ClassName = "Player",
                 ClassCode = 0x30400000
             };
-            LuaParameters.Add("/Chara/Player/Player_work");
+            LuaParameters.Add(ClassPath);
 
-            //notpening
-            //LuaParameters.Add(true);
-            //LuaParameters.Add(false);
-            //LuaParameters.Add(false);
-
-            //opning 
-            LuaParameters.Add(false);
-            LuaParameters.Add(false);
-            LuaParameters.Add(true);
-            LuaParameters.Add(DirectorCode.Opening);
+            if (IsNew) //opening 
+            {                
+                LuaParameters.Add(false);
+                LuaParameters.Add(false);
+                LuaParameters.Add(true);
+                LuaParameters.Add(DirectorCode.Opening);
+            }
+            else //no opening
+            {                
+                LuaParameters.Add(true);
+                LuaParameters.Add(false);
+                LuaParameters.Add(false);
+            }
 
             LuaParameters.Add(true);
             LuaParameters.Add(0);
             LuaParameters.Add(false);
 
             //add timer placeholders
-            for (int i = 0; i < 20; i++)
-            {
-                LuaParameters.Add(0);
-            }
+            for (int i = 0; i < 20; i++)           
+                LuaParameters.Add(0);           
 
             LuaParameters.Add(true);
-            LoadActorScript(sender);
 
-            //Send inventory
-            Inventory.SendInventories(sender);
-
-            //Send properties
-            GetWork(sender);
-
-            //UpdateExp(sender);
+            base.LoadScript(sender);
         }
 
         public override void SetPosition(Socket handler, ushort spawnType = 0, ushort isZonning = 0, int changingZone = 0, bool isPlayer = false)
@@ -337,9 +351,7 @@ namespace Launcher
 
         public void GetWork(Socket sender)
         {
-            WorkProperties property = new WorkProperties(sender, Id, @"/_init");
-
-           
+            WorkProperties property = new WorkProperties(sender, Id, @"/_init");           
 
             property.Add("charaWork.eventSave.bazaarTax", (byte)5);
             property.Add("charaWork.battleSave.potencial", 6.6f);
@@ -893,18 +905,18 @@ namespace Launcher
         public void UpdatePosition(byte[] data)
         {
             //get player character
-            PlayerCharacter playerCharacter = User.Instance.Character;
+            PlayerCharacter pc = User.Instance.Character;
 
             //get player position from packet
-            playerCharacter.Position.X = BitConverter.ToSingle(new byte[] { data[0x18], data[0x19], data[0x1a], data[0x1b] }, 0);
-            playerCharacter.Position.Y = BitConverter.ToSingle(new byte[] { data[0x1c], data[0x1d], data[0x1e], data[0x1f] }, 0);
-            playerCharacter.Position.Z = BitConverter.ToSingle(new byte[] { data[0x20], data[0x21], data[0x22], data[0x23] }, 0);
-            playerCharacter.Position.R = BitConverter.ToSingle(new byte[] { data[0x24], data[0x25], data[0x26], data[0x27] }, 0);
+            pc.Position.X = BitConverter.ToSingle(new byte[] { data[0x18], data[0x19], data[0x1a], data[0x1b] }, 0);
+            pc.Position.Y = BitConverter.ToSingle(new byte[] { data[0x1c], data[0x1d], data[0x1e], data[0x1f] }, 0);
+            pc.Position.Z = BitConverter.ToSingle(new byte[] { data[0x20], data[0x21], data[0x22], data[0x23] }, 0);
+            pc.Position.R = BitConverter.ToSingle(new byte[] { data[0x24], data[0x25], data[0x26], data[0x27] }, 0);
 
             byte[] unknown = new byte[] { data[0x2a], data[0x2b], data[0x2c], data[0x2d], data[0x2e], data[0x2e] };
 
             //save player position 
-            User.Instance.AccountList[0].CharacterList[playerCharacter.Slot] = playerCharacter;
+            User.Instance.AccountList[0].CharacterList[pc.Slot] = pc;
             User.Instance.Save();
 
             //print player position on PL ui.

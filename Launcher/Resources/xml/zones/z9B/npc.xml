@@ -1,0 +1,538 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<chara>
+  <npc>
+   
+    <populace className="PopulaceStandard">
+      <classId>1000458</classId>
+      <position x="55.82" y="4" z="-1212.23" r="1.91"/>
+      <animation>0</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+   
+   
+    <populace className="PopulaceStandard">
+      <classId>1099063</classId>
+      <position x="67.09" y="-6.8" z="-1215.63" r="0"/>
+      <animation>0</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+   
+    <populace className="PopulaceStandard">
+      <classId>1090490</classId>
+      <position x="73.39" y="-6.8" z="-1208.94" r="0"/>
+      <animation>0</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+  
+    
+    <populace className="PopulaceStandard">
+      <classId>1000230</classId>
+      <position x="55.94" y="4" z="-1196.44" r="1.67"/>
+      <animation>1060</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+   
+    <populace className="PopulaceStandard">
+      <classId>1000437</classId>
+      <position x="63.63" y="4" z="-1216.16" r="1.07"/>
+      <animation>1025</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+    <populace className="PopulaceStandard">
+      <classId>1000427</classId>
+      <position x="65.15" y="4.2" z="-1219.57" r="2.42"/>
+      <animation>1025</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+    <populace className="PopulaceStandard">
+      <classId>1000429</classId>
+      <position x="64.04" y="4" z="-1214.38" r="3.14"/>
+      <animation>1026</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+    <populace className="PopulaceStandard">
+      <classId>1000428</classId>
+      <position x="67.66" y="4.2" z="-1223.57" r="-0.58"/>
+      <animation>1016</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+    <populace className="PopulaceStandard">
+      <classId>1001707</classId>
+      <position x="64.18" y="-6.8" z="-1217.46" r="0.6"/>
+      <animation>1003</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+    <populace className="PopulaceStandard">
+      <classId>1001709</classId>
+      <position x="53.55" y="-7" z="-1216.54" r="1.61"/>
+      <animation>1151</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+    <populace className="PopulaceStandard">
+      <classId>1001706</classId>
+      <position x="65.26" y="-6.75" z="-1217.68" r="0.5"/>
+      <animation>1025</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+    <populace className="PopulaceStandard">
+      <classId>1001710</classId>
+      <position x="53.82" y="-7" z="-1213.1" r="1.57"/>
+      <animation>1056</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+    <populace className="PopulaceStandard">
+      <classId>1000430</classId>
+      <position x="67.34" y="4" z="-1208.33" r="-2.63"/>
+      <animation>1002</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+    <populace className="PopulaceStandard">
+      <classId>1001459</classId>
+      <position x="75.4" y="4.2" z="-1220.13" r="-1.43"/>
+      <animation>1041</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+    <populace className="PopulaceStandard">
+      <classId>1099046</classId>
+      <position x="72.19" y="4" z="-1207.91" r="1.17"/>
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" disabled="1"/>
+        <pushDefault radius="6.0" silent="false" outwards="false"/>
+      </events>
+    </populace>
+    <populace className="PopulaceStandard">
+      <classId>1099046</classId>
+      <position x="72.19" y="4" z="-1207.91" r="1.17"/>
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" disabled="1"/>
+        <pushDefault radius-="6.0" silent="false" outwards="false"/>
+      </events>
+    </populace>
+    <populace className="PopulaceStandard">
+      <classId>1000431</classId>
+      <position x="66.46" y="4" z="-1201.87" r="-1.26"/>
+      <animation>1026</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+    <populace className="PopulaceStandard">
+      <classId>1000432</classId>
+      <position x="66.15" y="4" z="-1199.99" r="-2.93"/>
+      <animation>1026</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+    <populace className="PopulaceStandard">
+      <classId>1000434</classId>
+      <position x="71.95" y="4" z="-1200.24" r="-1"/>
+      <animation>1025</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+    <populace className="PopulaceStandard">
+      <classId>1000433</classId>
+      <position x="75.45" y="4" z="-1202.3" r="-2.06"/>
+      <animation>1015</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+    <populace className="PopulaceStandard">
+      <classId>1000435</classId>
+      <position x="69.39" y="4" z="-1196.54" r="2.97"/>
+      <animation>1041</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+    <populace className="PopulaceStandard">
+      <classId>1000436</classId>
+      <position x="62.33" y="4" z="-1194.06" r="-2.53"/>
+      <animation>1025</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+    <populace className="PopulaceStandard">
+      <classId>1001951</classId>
+      <position x="66.94" y="4" z="-1194.13" r="-2.32"/>
+      <animation>1016</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+    <populace className="PopulaceStandard">
+      <classId>1700001</classId>
+      <position x="58.08" y="3.8" z="-1183.33" r="2.93"/>
+      <animation>0</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+    <populace className="PopulaceStandard">
+      <classId>1001708</classId>
+      <position x="54.04" y="-7" z="-1218.46" r="-0.59"/>
+      <animation>1151</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+    <populace className="PopulaceStandard">
+      <classId>1200288</classId>
+      <position x="98.77" y="3.59" z="-1213.67" r="2.47"/>
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+    <populace className="PopulaceStandard">
+      <classId>1000071</classId>
+      <position x="191.07" y="-0.85" z="-1147.25" r="1.63"/>
+      <animation>2026</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+    <populace className="PopulaceStandard">
+      <classId>1001433</classId>
+      <position x="192.07" y="-0.85" z="-1159.97" r="0.78"/>
+      <animation>1015</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+    <populace className="PopulaceStandard">
+      <classId>1001432</classId>
+      <position x="179.56" y="2.75" z="-1144.66" r="-2.97"/>
+      <animation>1041</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+    <populace className="PopulaceStandard">
+      <classId>1000951</classId>
+      <position x="162.79" y="-1.48" z="-1153.32" r="1.94"/>
+      <animation>0</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+    <populace className="PopulaceStandard">
+      <classId>1000951</classId>
+      <position x="107.96" y="9.4" z="-1211.89" r="0.3243"/>
+      <animation>1031</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+    <populace className="PopulaceStandard">
+      <classId>1000876</classId>
+      <position x="175.76" y="-1.25" z="-1151.11" r="-2.67"/>
+      <animation>1015</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+    <populace className="PopulaceStandard">
+      <classId>1000017</classId>
+      <position x="181.82" y="-1" z="-1154.03" r="-1.57"/>
+      <animation>1017</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+    <populace className="PopulaceStandard">
+      <classId>1000680</classId>
+      <position x="163.58" y="-1.44" z="-1153.96" r="2.23"/>
+      <animation>1015</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+    <populace className="PopulaceStandard">
+      <classId>1000683</classId>
+      <position x="161.5" y="-1.48" z="-1156.34" r="1.44"/>
+      <animation>1016</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+    <populace className="PopulaceStandard">
+      <classId>1000230</classId>
+      <position x="57.42" y="4" z="-1196.69" r="1.67"/>
+      <animation>1060</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+    <populace className="PopulaceStandard">
+      <classId>1001062</classId>
+      <position x="67.4" y="4" z="-1208.22" r="-2.63"/>
+      <animation>1005</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+    <populace className="PopulaceStandard">
+      <classId>1001057</classId>
+      <position x="64.89" y="4" z="-1209.33" r="1.74"/>
+      <animation>1002</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+    <populace className="PopulaceStandard">
+      <classId>1001060</classId>
+      <position x="71.83" y="4" z="-1200.14" r="-0.88"/>
+      <animation>1005</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+    <populace className="PopulaceStandard">
+      <classId>1001059</classId>
+      <position x="69.62" y="4" z="-1199.51" r="1.29"/>
+      <animation>1005</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+    <populace className="PopulaceStandard">
+      <classId>1001058</classId>
+      <position x="66.26" y="4" z="-1199.79" r="-2.71"/>
+      <animation>1005</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+    <populace className="PopulaceStandard">
+      <classId>1000562</classId>
+      <position x="64.41" y="4" z="-1199.61" r="1.71"/>
+      <animation>0</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+    <populace className="PopulaceStandard">
+      <classId>1000458</classId>
+      <position x="55.82" y="4" z="-1212.23" r="1.91"/>
+      <animation>0</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+    <populace className="PopulaceStandard">
+      <classId>1099047</classId>
+      <position x="105.945" y="10.851" z="-1217.8" r="0"/>
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" disabled="1"/>
+        <pushDefault radius-="6.0" silent="false" outwards="false"/>
+      </events>
+    </populace>
+    
+    <populace className="PopulaceStandard">
+      <classId>1001648</classId>
+      <position x="77.577" y="3.953" z="-1210.66" r="-0.518"/>
+      <animation>0</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+    
+    <!--
+     <populace className="PopulaceLinkshellManager">
+      <classId>1001183</classId>
+      <position x="59.81" y="4" z="-1221.17" r="0.87"/>
+      <animation>1015</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+    
+     <populace className="PopulaceShopSalesman">
+      <classId>1600100</classId>
+      <position x="55.34" y="4" z="-1210.62" r="0.99"/>
+      <animation>0</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+    
+    <populace className="PopulaceShopSalesman">
+      <classId>1600119</classId>
+      <position x="55.36" y="4" z="-1197.47" r="2.26"/>
+      <animation>0</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+    
+     <populace className="PopulaceShopSalesman">
+      <classId>1600092</classId>
+      <position x="72" y="-7.4" z="-1193" r="-1.46"/>
+      <animation>0</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+    
+     <populace className="PopulacePassiveGLPublisher">
+      <classId>1000456</classId>
+      <position x="56.59" y="4" z="-1205.44" r="2.4"/>
+      <animation>1015</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+     <populace className="PopulaceGuildlevePublisher">
+      <classId>1000457</classId>
+      <position x="56.99" y="4" z="-1204.07" r="1.01"/>
+      <animation>0</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+    <populace className="InstanceRaidGuide">
+      <classId>1002090</classId>
+      <position x="53.78" y="-7" z="-1205.78" r="1.54"/>
+      <animation>0</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+    <populace className="InstanceRaidGuide">
+      <classId>1002091</classId>
+      <position x="69.21" y="-7" z="-1206.64" r="-1.34"/>
+      <animation>0</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+    <populace className="PopulaceFlyingShip">
+      <classId>1500055</classId>
+      <position x="58.5" y="-7" z="-1202" r="-1.9"/>
+      <animation>1041</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+    
+      <populace className="PopulaceFlyingShip">
+      <classId>1500056</classId>
+      <position x="63.7" y="-7" z="-1201.4" r="1"/>
+      <animation>1015</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+    
+     <populace className="PopulaceRetainerManager">
+      <classId>1001184</classId>
+      <position x="55.39" y="4" z="-1194.95" r="1.09"/>
+      <animation>1041</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+   
+    <populace className="PopulaceCompanyWarp">
+      <classId>1500334</classId>
+      <position x="97.81" y="3.53" z="-1213.97" r="-0.21"/>
+      <animation>0</animation>
+      <events>
+        <talkDefault priority="4" disabled="0"/>
+        <noticeEvent priority="0" disabled="1"/>
+      </events>
+    </populace>
+    -->
+    
+    
+    
+  </npc>
+</chara>

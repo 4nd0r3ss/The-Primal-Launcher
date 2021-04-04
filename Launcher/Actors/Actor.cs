@@ -58,7 +58,7 @@ namespace Launcher
             SetAllStatus(sender);
             SetIcon(sender);
             SetIsZoning(sender, false);
-            LoadActorScript(sender);
+            LoadScript(sender);
             Init(sender);
         }
 
@@ -80,11 +80,11 @@ namespace Launcher
             LuaParameters.Add(false);
             LuaParameters.Add(false);
             LuaParameters.Add(false);
-            LuaParameters.Add(ClassId);
+            LuaParameters.Add((int)ClassId);
             LuaParameters.Add(false);
             LuaParameters.Add(false);
-            LuaParameters.Add((uint)0);
-            LuaParameters.Add((uint)0);
+            LuaParameters.Add((int)0);
+            LuaParameters.Add((int)0);
             //LuaParameters.Add("TEST");
         }
 
@@ -156,7 +156,7 @@ namespace Launcher
             //SendPacket(sender, Opcode.ActorInit, data);
         }
 
-        public virtual void LoadActorScript(Socket sender)
+        public virtual void LoadScript(Socket sender)
         {
             byte[] data = new byte[0x108];
 
@@ -322,7 +322,22 @@ namespace Launcher
             Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, data, 0x04, 4);
             SendPacket(sender, ServerOpcode.DoEmote, data);
         }
-         
+
+        public void ProcessEventRequest(Socket sender, ClientEventRequest eventRequest)
+        {
+            switch (eventRequest.Code)
+            {
+                case 0x05:
+                    NoticeEvent(sender, eventRequest);
+                    break;
+            }
+        }
+
+        public virtual void NoticeEvent(Socket sender, ClientEventRequest eventRequest) { }      
+
+        public virtual void PushDefault(Socket sender, ClientEventRequest eventRequest) { }
+
+
         /// <summary>
         /// Converts a number to a base 63 string. This function was taken from Ioncannon's code, all credit goes to him. 
         /// </summary>
@@ -343,18 +358,9 @@ namespace Launcher
         {
             Zone zone = World.Instance.Zones.Find(x => x.Id == Position.ZoneId);            
             uint zoneId = zone.Id;
-            uint privLevel = 0;
-
-            //get actor zone name
-            string zoneName = zone.MapName
-                .Replace("Field", "Fld")
-                .Replace("Dungeon", "Dgn")
-                .Replace("Town", "Twn")
-                .Replace("Battle", "Btl")
-                .Replace("Test", "Tes")
-                .Replace("Event", "Evt")
-                .Replace("Ship", "Shp")
-                .Replace("Office", "Ofc");
+            uint privLevel = 0;           
+            string zoneName = MinifyMapName(zone.MapName);
+            string className = MinifyClassName();
 
             //if (zone.ZoneType == ZoneType.Inn)
             //{
@@ -362,24 +368,39 @@ namespace Launcher
             //    //privLevel = ((PrivateArea)zone).GetPrivateAreaType();
             //}
 
-            zoneName = Char.ToLowerInvariant(zoneName[0]) + zoneName.Substring(1);
-
-            //Format Class Name
-            string className = ClassName.Replace("Populace", "ppl")
-                                        .Replace("Monster", "Mon")
-                                        .Replace("Crowd", "Crd")
-                                        .Replace("MapObj", "Map")
-                                        .Replace("Object", "Obj")
-                                        .Replace("Retainer", "Rtn")
-                                        .Replace("Standard", "Std");
-
+            zoneName = Char.ToLowerInvariant(zoneName[0]) + zoneName.Substring(1);      
             className = Char.ToLowerInvariant(className[0]) + className.Substring(1);
 
             if(className.Length > 6 && (className.Length + (zoneName.Length + 4)) > 25)
                 try{ className = className.Substring(0, 21 - zoneName.Length); }
-                catch (ArgumentOutOfRangeException e) { /*Log.Instance.Error(e.Message);*/ }
+                catch (ArgumentOutOfRangeException e) { Log.Instance.Error(e.Message); }
                         
             return string.Format("{0}_{1}_{2}@{3:X3}{4:X2}", className, zoneName, ToStringBase63(actorNumber), zoneId, privLevel);
+        }
+
+        protected string MinifyMapName(string mapName)
+        {
+            return mapName.Replace("Field", "Fld")
+                .Replace("Dungeon", "Dgn")
+                .Replace("Town", "Twn")
+                .Replace("Battle", "Btl")
+                .Replace("Test", "Tes")
+                .Replace("Event", "Evt")
+                .Replace("Ship", "Shp")
+                .Replace("Office", "Ofc");
+        }
+
+        protected string MinifyClassName()
+        {
+            return ClassName.Replace("Populace", "ppl")
+                .Replace("Monster", "Mon")
+                .Replace("Crowd", "Crd")
+                .Replace("MapObj", "Map")
+                .Replace("Object", "Obj")
+                .Replace("Retainer", "Rtn")
+                .Replace("Director", "Dire")
+                .Replace("Standard", "Std")
+                .Replace("Opening", "opening");
         }
 
         public void GetBaseModel(byte id)

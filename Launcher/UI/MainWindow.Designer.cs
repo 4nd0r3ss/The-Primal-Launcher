@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainWindow));
             this.materialTabSelector1 = new MaterialSkin.Controls.MaterialTabSelector();
             this.materialTabControl1 = new MaterialSkin.Controls.MaterialTabControl();
@@ -56,8 +57,22 @@
             this.lblPCPositionR = new System.Windows.Forms.Label();
             this.materialLabel2 = new MaterialSkin.Controls.MaterialLabel();
             this.materialDivider1 = new MaterialSkin.Controls.MaterialDivider();
+            this.clock_ticker = new System.Windows.Forms.Timer(this.components);
+            this.materialLabel3 = new MaterialSkin.Controls.MaterialLabel();
+            this.materialDivider2 = new MaterialSkin.Controls.MaterialDivider();
+            this.label1 = new System.Windows.Forms.Label();
+            this.label7 = new System.Windows.Forms.Label();
+            this.label8 = new System.Windows.Forms.Label();
+            this.label9 = new System.Windows.Forms.Label();
+            this.label10 = new System.Windows.Forms.Label();
+            this.lblLocation = new System.Windows.Forms.Label();
+            this.lblx = new System.Windows.Forms.Label();
+            this.lblz = new System.Windows.Forms.Label();
+            this.lbly = new System.Windows.Forms.Label();
+            this.lblr = new System.Windows.Forms.Label();
             this.materialTabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
+            this.materialCard2.SuspendLayout();
             this.materialCard1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -106,6 +121,18 @@
             // materialCard2
             // 
             this.materialCard2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
+            this.materialCard2.Controls.Add(this.lblr);
+            this.materialCard2.Controls.Add(this.lbly);
+            this.materialCard2.Controls.Add(this.lblz);
+            this.materialCard2.Controls.Add(this.lblx);
+            this.materialCard2.Controls.Add(this.lblLocation);
+            this.materialCard2.Controls.Add(this.label10);
+            this.materialCard2.Controls.Add(this.label9);
+            this.materialCard2.Controls.Add(this.label8);
+            this.materialCard2.Controls.Add(this.label7);
+            this.materialCard2.Controls.Add(this.label1);
+            this.materialCard2.Controls.Add(this.materialDivider2);
+            this.materialCard2.Controls.Add(this.materialLabel3);
             this.materialCard2.Depth = 0;
             this.materialCard2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(222)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
             this.materialCard2.Location = new System.Drawing.Point(17, 17);
@@ -366,6 +393,128 @@
             this.materialDivider1.Size = new System.Drawing.Size(190, 1);
             this.materialDivider1.TabIndex = 34;
             // 
+            // clock_ticker
+            // 
+            this.clock_ticker.Enabled = true;
+            this.clock_ticker.Tick += new System.EventHandler(this.clock_ticker_Tick);
+            // 
+            // materialLabel3
+            // 
+            this.materialLabel3.AutoSize = true;
+            this.materialLabel3.Depth = 0;
+            this.materialLabel3.Font = new System.Drawing.Font("Roboto", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.materialLabel3.Location = new System.Drawing.Point(18, 9);
+            this.materialLabel3.MouseState = MaterialSkin.MouseState.HOVER;
+            this.materialLabel3.Name = "materialLabel3";
+            this.materialLabel3.Size = new System.Drawing.Size(106, 19);
+            this.materialLabel3.TabIndex = 0;
+            this.materialLabel3.Text = "Player position";
+            // 
+            // materialDivider2
+            // 
+            this.materialDivider2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
+            this.materialDivider2.Depth = 0;
+            this.materialDivider2.Location = new System.Drawing.Point(12, 25);
+            this.materialDivider2.MouseState = MaterialSkin.MouseState.HOVER;
+            this.materialDivider2.Name = "materialDivider2";
+            this.materialDivider2.Size = new System.Drawing.Size(200, 1);
+            this.materialDivider2.TabIndex = 1;
+            this.materialDivider2.Text = "materialDivider2";
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(15, 39);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(51, 13);
+            this.label1.TabIndex = 2;
+            this.label1.Text = "Location:";
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(15, 63);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(15, 13);
+            this.label7.TabIndex = 3;
+            this.label7.Text = "x:";
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(114, 63);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(15, 13);
+            this.label8.TabIndex = 4;
+            this.label8.Text = "y:";
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(15, 87);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(15, 13);
+            this.label9.TabIndex = 5;
+            this.label9.Text = "z:";
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(114, 87);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(13, 13);
+            this.label10.TabIndex = 6;
+            this.label10.Text = "r:";
+            // 
+            // lblLocation
+            // 
+            this.lblLocation.AutoSize = true;
+            this.lblLocation.Location = new System.Drawing.Point(88, 39);
+            this.lblLocation.Name = "lblLocation";
+            this.lblLocation.Size = new System.Drawing.Size(10, 13);
+            this.lblLocation.TabIndex = 7;
+            this.lblLocation.Text = "-";
+            // 
+            // lblx
+            // 
+            this.lblx.AutoSize = true;
+            this.lblx.Location = new System.Drawing.Point(40, 63);
+            this.lblx.Name = "lblx";
+            this.lblx.Size = new System.Drawing.Size(13, 13);
+            this.lblx.TabIndex = 8;
+            this.lblx.Text = "0";
+            this.lblx.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // lblz
+            // 
+            this.lblz.AutoSize = true;
+            this.lblz.Location = new System.Drawing.Point(40, 87);
+            this.lblz.Name = "lblz";
+            this.lblz.Size = new System.Drawing.Size(13, 13);
+            this.lblz.TabIndex = 9;
+            this.lblz.Text = "0";
+            this.lblz.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // lbly
+            // 
+            this.lbly.AutoSize = true;
+            this.lbly.Location = new System.Drawing.Point(140, 63);
+            this.lbly.Name = "lbly";
+            this.lbly.Size = new System.Drawing.Size(13, 13);
+            this.lbly.TabIndex = 10;
+            this.lbly.Text = "0";
+            this.lbly.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // lblr
+            // 
+            this.lblr.AutoSize = true;
+            this.lblr.Location = new System.Drawing.Point(140, 87);
+            this.lblr.Name = "lblr";
+            this.lblr.Size = new System.Drawing.Size(13, 13);
+            this.lblr.TabIndex = 11;
+            this.lblr.Text = "0";
+            this.lblr.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
             // MainWindow
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
@@ -383,6 +532,8 @@
             this.Load += new System.EventHandler(this.MainWindow_Load);
             this.materialTabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
+            this.materialCard2.ResumeLayout(false);
+            this.materialCard2.PerformLayout();
             this.materialCard1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -417,6 +568,19 @@
         private MaterialSkin.Controls.MaterialLabel materialLabel2;
         private MaterialSkin.Controls.MaterialDivider materialDivider1;
         private System.Windows.Forms.ListBox LbxOutput;
+        private System.Windows.Forms.Timer clock_ticker;
+        private MaterialSkin.Controls.MaterialDivider materialDivider2;
+        private MaterialSkin.Controls.MaterialLabel materialLabel3;
+        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label lblr;
+        private System.Windows.Forms.Label lbly;
+        private System.Windows.Forms.Label lblz;
+        private System.Windows.Forms.Label lblx;
+        private System.Windows.Forms.Label lblLocation;
     }
 }
 

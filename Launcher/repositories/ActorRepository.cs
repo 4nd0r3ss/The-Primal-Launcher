@@ -271,7 +271,7 @@ namespace Launcher
             };
         }
 
-        public List<Actor> LoadZoneNpc(uint zoneId)
+        public List<Actor> GetZoneNpcs(uint zoneId)
         {
             string npcListPath = @"" + zoneId.ToString("X") ;
             string fileNamePath = npcListPath + @".npc.xml";
@@ -289,10 +289,11 @@ namespace Launcher
 
                     //prepare xml nodes
                     npcFile.LoadXml(file);
-                    var PopulaceStandardList = npcFile.SelectNodes("npc/PopulaceStandard");
-
+                    XmlElement root = npcFile.DocumentElement;
+                    XmlNode chara = root.FirstChild;
+                    
                     //each npc node in xml 
-                    foreach (XmlNode node in PopulaceStandardList)
+                    foreach (XmlNode node in chara.ChildNodes)
                     {
                         //XmlNode node = objNode.SelectSingleNode("PopulaceStandard");
                         uint classId = Convert.ToUInt32(node.SelectSingleNode("classId").InnerText);
@@ -304,80 +305,38 @@ namespace Launcher
                         DataRow actorGraphics = actorsGraphics.Select("id = '" + classId + "'")[0];
                         DataRow actorNameId = actorsNameIds.Select("id = '" + classId + "'")[0];
 
-                        //Spawn position
-                        XmlNode positionNode = node.SelectSingleNode("position");
-                        Position position = new Position
+                        switch (node.Name)
                         {
-                            ZoneId = zoneId,
-                            X = Convert.ToSingle(positionNode.Attributes["x"].Value),
-                            Y = Convert.ToSingle(positionNode.Attributes["y"].Value),
-                            Z = Convert.ToSingle(positionNode.Attributes["z"].Value),
-                            R = Convert.ToSingle(positionNode.Attributes["r"].Value)
-                        };
+                            case "populace":
+                                zoneNpcs.Add(new Populace
+                                {
+                                    ClassId = classId,
+                                    ClassName = node.Attributes["className"].Value,
+                                    NameId = Convert.ToInt32(actorNameId.ItemArray[1]),
+                                    HairStyle = Convert.ToUInt16(actorGraphics.ItemArray[3]),
+                                    HairHighlightColor = Convert.ToUInt16(actorGraphics.ItemArray[4]),
+                                    HairColor = Convert.ToUInt16(actorGraphics.ItemArray[16]),
+                                    SkinColor = Convert.ToUInt16(actorGraphics.ItemArray[17]),
+                                    EyeColor = Convert.ToUInt16(actorGraphics.ItemArray[18]),
+                                    Appearance = SetAppearance(actorGraphics),
+                                    Face = SetFace(actorGraphics),
+                                    Position = SetPosition(zoneId, node.SelectSingleNode("position")),
+                                    QuestIcon = questIcon,
+                                    SubState = new SubState { MotionPack = animation },
+                                    EventConditions = SetEvents(node.SelectSingleNode("events"))
+                                });
+                                break;
 
-                        Face face = new Face
+                            default:
+                                Log.Instance.Info("Unhandled actor '" + node.Name + "' sent.");
+                                break;
+                        }
+
+                        if(node.Name == "populace")
                         {
-                            Characteristics = Convert.ToByte(actorGraphics.ItemArray[7]),
-                            CharacteristicsColor = Convert.ToByte(actorGraphics.ItemArray[8]),
-                            Type = Convert.ToByte(actorGraphics.ItemArray[6]),
-                            Ears = Convert.ToByte(actorGraphics.ItemArray[15]),
-                            Mouth = Convert.ToByte(actorGraphics.ItemArray[14]),
-                            Features = Convert.ToByte(actorGraphics.ItemArray[13]),
-                            Nose = Convert.ToByte(actorGraphics.ItemArray[12]),
-                            EyeShape = Convert.ToByte(actorGraphics.ItemArray[11]),
-                            IrisSize = Convert.ToByte(actorGraphics.ItemArray[10]),
-                            EyeBrows = Convert.ToByte(actorGraphics.ItemArray[9])
-                        };
-
-                        Appearance appearance = new Appearance
-                        {
-                            BaseModel = Convert.ToUInt32(actorGraphics.ItemArray[1]),
-                            Size = Convert.ToUInt32(actorGraphics.ItemArray[2]),
-                            MainWeapon = Convert.ToUInt32(actorGraphics.ItemArray[20]),
-                            SecondaryWeapon = Convert.ToUInt32(actorGraphics.ItemArray[21]),
-                            SPMainWeapon = Convert.ToUInt32(actorGraphics.ItemArray[22]),
-                            SPSecondaryWeapon = Convert.ToUInt32(actorGraphics.ItemArray[23]),
-                            Throwing = Convert.ToUInt32(actorGraphics.ItemArray[24]),
-                            Pack = Convert.ToUInt32(actorGraphics.ItemArray[25]),
-                            Pouch = Convert.ToUInt32(actorGraphics.ItemArray[26]),
-                            Head = Convert.ToUInt32(actorGraphics.ItemArray[27]),
-                            Body = Convert.ToUInt32(actorGraphics.ItemArray[28]),
-                            Legs = Convert.ToUInt32(actorGraphics.ItemArray[29]),
-                            Hands = Convert.ToUInt32(actorGraphics.ItemArray[30]),
-                            Feet = Convert.ToUInt32(actorGraphics.ItemArray[31]),
-                            Waist = Convert.ToUInt32(actorGraphics.ItemArray[32]),
-                            Neck = Convert.ToUInt32(actorGraphics.ItemArray[33]),
-                            RightEar = Convert.ToUInt32(actorGraphics.ItemArray[34]),
-                            LeftEar = Convert.ToUInt32(actorGraphics.ItemArray[35]),
-                            RightIndex = Convert.ToUInt32(actorGraphics.ItemArray[36]),
-                            LeftIndex = Convert.ToUInt32(actorGraphics.ItemArray[37]),
-                            RightFinger = Convert.ToUInt32(actorGraphics.ItemArray[38]),
-                            LeftFinger = Convert.ToUInt32(actorGraphics.ItemArray[39])
-                        };
-
-                        SubState subState = new SubState
-                        {
-                            MotionPack = animation
-                        };
-
-                        //Npc obj
-                        PopulaceStandard npc = new PopulaceStandard
-                        {    
-                            ClassId = classId,
-                            NameId = Convert.ToInt32(actorNameId.ItemArray[1]),
-                            HairStyle = Convert.ToUInt16(actorGraphics.ItemArray[3]),
-                            HairHighlightColor = Convert.ToUInt16(actorGraphics.ItemArray[4]),
-                            HairColor = Convert.ToUInt16(actorGraphics.ItemArray[16]),
-                            SkinColor = Convert.ToUInt16(actorGraphics.ItemArray[17]),                            
-                            EyeColor = Convert.ToUInt16(actorGraphics.ItemArray[18]),
-                            Appearance = appearance,
-                            Face = face,
-                            Position = position,
-                            QuestIcon = questIcon,
-                            SubState = subState
-                        };
-
-                        zoneNpcs.Add(npc);
+                            
+                        }
+                       
                     }
                 }
                 catch (Exception e)
@@ -389,6 +348,128 @@ namespace Launcher
             return zoneNpcs;
         }
 
+        private List<EventCondition> SetEvents(XmlNode eventNode)
+        {
+            List<EventCondition> eventList = new List<EventCondition>();
+
+            foreach(XmlNode node in eventNode.ChildNodes)
+            {
+                switch (node.Name)
+                {
+                    case "pushDefault":
+                        eventList.Add(new EventCondition
+                        {
+                            Opcode = ServerOpcode.PushEventCircle,
+                            EventName = "pushDefault",
+                            Radius = float.Parse(node.Attributes["radius"].Value),
+                            Direction = Convert.ToByte(node.Attributes["outwards"].Value == "false" ? 1 : 0),
+                            IsSilent = Convert.ToByte(node.Attributes["silent"].Value == "false" ? 0 : 1)
+                        });
+                        break;
+                    case "talkDefault":
+                        eventList.Add(new EventCondition
+                        {
+                            Opcode = ServerOpcode.TalkEvent,
+                            EventName = "talkDefault",
+                            Priority = Convert.ToByte(node.Attributes["priority"].Value),
+                            IsDisabled = Convert.ToByte(node.Attributes["disabled"].Value)
+                        });
+                        break;
+
+                    case "noticeEvent":
+                        eventList.Add(new EventCondition
+                        {
+                            Opcode = ServerOpcode.NoticeEvent,
+                            EventName = "noticeEvent",
+                            Priority = Convert.ToByte(node.Attributes["priority"].Value),
+                            IsDisabled = Convert.ToByte(node.Attributes["disabled"].Value)
+                        });
+                        break;
+                    case "in":
+                        //pushWithBoxEventConditions
+                        break;
+                    case "exit":
+                        //pushWithCircleEventConditions
+                        break;
+                    case "caution":
+                        //pushWithCircleEventConditions
+                        break;
+                    case "pushCommand":
+
+                        break;
+                    case "pushCommandIn":
+
+                        break;
+                    case "pushCommandOut":
+
+                        break;
+                    default:
+                        Log.Instance.Info("Unhandled event '" + node.Name + "' sent.");
+                        break;
+                }
+            }
+
+            return eventList;
+        }
+
+        private Appearance SetAppearance(DataRow actorGraphics)
+        {
+            return new Appearance
+            {
+                BaseModel = Convert.ToUInt32(actorGraphics.ItemArray[1]),
+                Size = Convert.ToUInt32(actorGraphics.ItemArray[2]),
+                MainWeapon = Convert.ToUInt32(actorGraphics.ItemArray[20]),
+                SecondaryWeapon = Convert.ToUInt32(actorGraphics.ItemArray[21]),
+                SPMainWeapon = Convert.ToUInt32(actorGraphics.ItemArray[22]),
+                SPSecondaryWeapon = Convert.ToUInt32(actorGraphics.ItemArray[23]),
+                Throwing = Convert.ToUInt32(actorGraphics.ItemArray[24]),
+                Pack = Convert.ToUInt32(actorGraphics.ItemArray[25]),
+                Pouch = Convert.ToUInt32(actorGraphics.ItemArray[26]),
+                Head = Convert.ToUInt32(actorGraphics.ItemArray[27]),
+                Body = Convert.ToUInt32(actorGraphics.ItemArray[28]),
+                Legs = Convert.ToUInt32(actorGraphics.ItemArray[29]),
+                Hands = Convert.ToUInt32(actorGraphics.ItemArray[30]),
+                Feet = Convert.ToUInt32(actorGraphics.ItemArray[31]),
+                Waist = Convert.ToUInt32(actorGraphics.ItemArray[32]),
+                Neck = Convert.ToUInt32(actorGraphics.ItemArray[33]),
+                RightEar = Convert.ToUInt32(actorGraphics.ItemArray[34]),
+                LeftEar = Convert.ToUInt32(actorGraphics.ItemArray[35]),
+                RightIndex = Convert.ToUInt32(actorGraphics.ItemArray[36]),
+                LeftIndex = Convert.ToUInt32(actorGraphics.ItemArray[37]),
+                RightFinger = Convert.ToUInt32(actorGraphics.ItemArray[38]),
+                LeftFinger = Convert.ToUInt32(actorGraphics.ItemArray[39])
+            };
+        }
+
+        private Face SetFace(DataRow actorGraphics)
+        {
+            return new Face
+            {
+                Characteristics = Convert.ToByte(actorGraphics.ItemArray[7]),
+                CharacteristicsColor = Convert.ToByte(actorGraphics.ItemArray[8]),
+                Type = Convert.ToByte(actorGraphics.ItemArray[6]),
+                Ears = Convert.ToByte(actorGraphics.ItemArray[15]),
+                Mouth = Convert.ToByte(actorGraphics.ItemArray[14]),
+                Features = Convert.ToByte(actorGraphics.ItemArray[13]),
+                Nose = Convert.ToByte(actorGraphics.ItemArray[12]),
+                EyeShape = Convert.ToByte(actorGraphics.ItemArray[11]),
+                IrisSize = Convert.ToByte(actorGraphics.ItemArray[10]),
+                EyeBrows = Convert.ToByte(actorGraphics.ItemArray[9])
+            };
+        }
+
+        private Position SetPosition(uint zoneId, XmlNode positionNode)
+        {
+            return new Position
+            {
+                ZoneId = zoneId,
+                X = Convert.ToSingle(positionNode.Attributes["x"].Value),
+                Y = Convert.ToSingle(positionNode.Attributes["y"].Value),
+                Z = Convert.ToSingle(positionNode.Attributes["z"].Value),
+                R = Convert.ToSingle(positionNode.Attributes["r"].Value)
+            };
+        }
+
         /// <summary>
         /// Get the contents of a XML file configured as a resource.
         /// </summary>
@@ -398,7 +479,7 @@ namespace Launcher
         {
             //From https://social.msdn.microsoft.com/Forums/vstudio/en-US/6990068d-ddee-41e9-86fc-01527dcd99b5/how-to-embed-xml-file-in-project-resources?forum=csharpgeneral
             string result = string.Empty;
-            Stream stream = this.GetType().Assembly.GetManifestResourceStream("Launcher.Resources.xml.zones." + fileName);
+            Stream stream = this.GetType().Assembly.GetManifestResourceStream("Launcher.Resources.xml.zones.z" + fileName);
             if(stream != null)
                 using (stream)            
                     using (StreamReader sr = new StreamReader(stream))                

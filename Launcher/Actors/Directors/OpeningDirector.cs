@@ -10,9 +10,6 @@ namespace Launcher
 {
     public class OpeningDirector : Actor
     {
-
-
-
         public OpeningDirector(uint id)
         {
             Id = id;
@@ -27,16 +24,10 @@ namespace Launcher
         }
 
         public override void Prepare(ushort actorIndex = 0)
-        {
-            //TODO:remove this
-            string debugNameNumber = "01";
-
-            if (Id == 0x66080000)
-                debugNameNumber = "00";
-
+        {         
             LuaParameters = new LuaParameters
             {
-                ActorName = "openingDire_ocn0Btl02_"+ debugNameNumber + "@0" + LuaParameters.SwapEndian(User.Instance.Character.Position.ZoneId).ToString("X").Substring(0, 4),
+                ActorName = MinifyClassName() + "_ocn0Btl02_" + (Id & 0xff).ToString("X2") + "@0" + LuaParameters.SwapEndian(User.Instance.Character.Position.ZoneId).ToString("X").Substring(0, 4),
                 ClassName = ClassName,
                 ClassCode = ClassCode
             };
@@ -65,7 +56,7 @@ namespace Launcher
             SetName(sender);
             SetMainState(sender);
             SetIsZoning(sender);
-            LoadActorScript(sender);
+            LoadScript(sender);
             Getwork(sender);            
         }
 
@@ -86,26 +77,14 @@ namespace Launcher
             Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, data, 0x04, 4);
             Buffer.BlockCopy(BitConverter.GetBytes(0x75dc1705), 0, data, 0x08, 4); //the last byte is the event type (05). the other bytes are unknown.
             Buffer.BlockCopy(BitConverter.GetBytes(ClassCode), 0, data, 0x0c, 4);
-
             LuaParameters parameters = new LuaParameters();
             parameters.Add(Encoding.ASCII.GetBytes("noticeEvent"));            
             parameters.Add(true);
-
             LuaParameters.WriteParameters(ref data, parameters, 0x10);
             SendPacket(sender, ServerOpcode.StartEvent, data, sourceId: characterId);            
-        }      
+        }             
 
-        public void ProcessEventRequest(Socket sender, ClientEventRequest eventRequest)
-        {
-            switch (eventRequest.Code)
-            {
-                case 0x05:
-                    NoticeEvent(sender, eventRequest);
-                    break;
-            }
-        }
-
-        private void NoticeEvent(Socket sender, ClientEventRequest eventRequest)
+        public override void NoticeEvent(Socket sender, ClientEventRequest eventRequest)
         {
             byte[] data = new byte[0x298]; 
             Buffer.BlockCopy(BitConverter.GetBytes(User.Instance.Character.Id), 0, data, 0, 4);

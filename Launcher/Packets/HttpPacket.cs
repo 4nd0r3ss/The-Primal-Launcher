@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Text;
 
 namespace Launcher
@@ -86,12 +87,17 @@ namespace Launcher
         private string CheckHeader(string label, string value)
             => (value != null) ? Response += label + ": " + value + CRLF : Response;
 
-        private string GetFile(string file)
+        private string GetFile(string fileName)
         {
-            string page = "";
-            try { page = System.IO.File.ReadAllText(file); }
-            catch (Exception) { /*page = ErrorPage("Page not found. Please, reinstall FFXIV1.0 Primal Launcher.");*/ }
-            return page;
+            //From https://social.msdn.microsoft.com/Forums/vstudio/en-US/6990068d-ddee-41e9-86fc-01527dcd99b5/how-to-embed-xml-file-in-project-resources?forum=csharpgeneral
+            string result = string.Empty;
+            Stream stream = this.GetType().Assembly.GetManifestResourceStream("Launcher.Resources.html." + fileName);
+            if (stream != null)
+                using (stream)
+                using (StreamReader sr = new StreamReader(stream))
+                    result = sr.ReadToEnd();
+
+            return result;
         }
 
         private static string GetLastModified(string file)

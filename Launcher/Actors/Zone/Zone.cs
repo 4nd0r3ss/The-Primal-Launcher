@@ -5,14 +5,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 namespace Launcher
-{
-    public enum ZoneType
-    {
-        Default = 4,
-        Inn = 68,
-        Instance = 6,
-        CanStealth = 132
-    }
+{    
     [Serializable]
     public class Zone : Actor
     {
@@ -64,13 +57,13 @@ namespace Launcher
             SetName(handler);
             SetMainState(handler);            
             SetIsZoning(handler);
-            LoadActorScript(handler);
+            LoadScript(handler);
         }
 
         public override void Prepare(ushort actorIndex = 0)
         {           
             Actors.AddRange(ActorRepository.Instance.Aetherytes.FindAll(x => x.Position.ZoneId == Id));
-            Actors.AddRange(ActorRepository.Instance.LoadZoneNpc(Id));
+            Actors.AddRange(ActorRepository.Instance.GetZoneNpcs(Id));
         }
 
         public void SpawnActors(Socket sender)
@@ -97,8 +90,7 @@ namespace Launcher
 
     [Serializable]
     public class ZoneList
-    {
-        
+    {        
         public static string[] LocationName { get; } = new string[]
         {
             "Lower La Noscea",              //0

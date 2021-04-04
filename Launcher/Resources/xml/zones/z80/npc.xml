@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<chara>
+  <npc>
+    <populace className="PopulaceCampMaster">
+      <classId>1500007</classId>
+      <position x="23.98" y="46.05" z="-42.96" r="0.6" />
+      <animation>1041</animation>
+    </populace>
+    <populace className="PopulaceCampSubMaster">
+      <classId>1000613</classId>
+      <position x="22.57" y="45.5" z="-23.08" r="1.5" />
+      <animation>1041</animation>
+    </populace>
+    <populace className="PopulaceStandard">
+      <classId>1000359</classId>
+      <position x="58.78" y="46.1" z="-12.45" r="0.6" />
+      <animation>1056</animation>
+    </populace>
+    <populace className="PopulaceStandard">
+      <classId>1000360</classId>
+      <position x="8.37" y="45.62" z="-37.45" r="-1.64" />
+      <animation>1056</animation>
+    </populace>    
+    <populace className="PopulaceRequestWarden">
+      <classId>1500013</classId>
+      <position x="56.43" y="45.34" z="-40.84" r="-1.65" />
+      <animation>0</animation>
+    </populace>
+    <!--<populace className="PopulaceShopSalesman">
+      <classId>1600016</classId>
+      <position x="45.86" y="45.53" z="-11.5" r="-3.13" />
+      <animation>0</animation>
+    </populace>-->
+  </npc>
+</chara>

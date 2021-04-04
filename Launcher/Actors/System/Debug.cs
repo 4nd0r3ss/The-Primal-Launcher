@@ -21,7 +21,7 @@ namespace Launcher
             SetName(handler);
             SetMainState(handler);
             SetIsZoning(handler);
-            LoadActorScript(handler);            
+            LoadScript(handler);            
         }
 
         public override void Prepare(ushort actorIndex = 0)
@@ -39,7 +39,7 @@ namespace Launcher
             LuaParameters.Add(false);
             LuaParameters.Add(false);
             LuaParameters.Add(true);
-            LuaParameters.Add((uint)0xc51f); //???
+            LuaParameters.Add((int)0xc51f); //???
             LuaParameters.Add(true);
             LuaParameters.Add(true);            
         }

@@ -11,7 +11,7 @@ namespace Launcher
     {
         private static EventManager _instance = null;
         private static readonly object _padlock = new object();
-        public Event CurrentEvent { get; set; } = null;
+        public ClientEventRequest CurrentEvent { get; set; } = null;
 
         public static EventManager Instance
         {
@@ -36,39 +36,139 @@ namespace Launcher
             CurrentEvent = eventRequest;
         }
 
-        public void StartRequest(Socket sender, byte[] data)
+
+        public void ProcessIncoming(Socket sender, byte[] data)
         {
-            if(CurrentEvent == null)
+            CurrentEvent = new ClientEventRequest(data);
+
+            Log.Instance.Warning("Event: " + CurrentEvent.Name + ", Actor: 0x" + CurrentEvent.OwnerId.ToString("X"));
+
+            switch (CurrentEvent.Name)
             {
-                int rawCommand = (data[0x15] << 8 | data[0x14]);
-
-                if(Enum.IsDefined(typeof(Command), rawCommand))
-                {
-                    Command command = (Command)rawCommand;
-
-                    switch (command)
-                    {
-                        case Command.Teleport: //command teleport
-                            CurrentEvent = new EventMenuTeleport();
-                            break;
-                        default:
-                            CurrentEvent = new Event();
-                            
-                            break;
-                    }
-                }
-                else
-                {
-                    Log.Instance.Error("Unknown command 0x" + rawCommand.ToString("X2"));
-                }               
+                case "talkDefault":
+                    CurrentEvent.TalkDefault(sender);
+                    break;
+                case "noticeEvent":
+                    CurrentEvent.Process(sender);
+                    break;
+                case "pushDefault":
+                    CurrentEvent.Process(sender);
+                    break;
             }
 
-            CurrentEvent.StartRequest(sender, data);
+
+
+
+            //PlayerCharacter playerCharacter = User.Instance.Character;
+            //string eventType = Encoding.ASCII.GetString(data, 0x21, 14);
+            //ushort command = (ushort)(data[0x15] << 8 | data[0x14]);
+
+            ////File.WriteAllBytes(command + ".txt", data);
+
+            ////Log.Instance.Warning("Received event request: 0x12d");
+            //Log.Instance.Warning("event: " + eventType + ", command: " + command.ToString("X2"));
+            ////File.WriteAllBytes("eventrequest_" + DateTime.Now.Ticks.ToString() + ".txt", data);
+
+            //if (eventType.IndexOf("commandForced") >= 0)
+            //{
+            //    switch (command)
+            //    {
+            //        case (ushort)Command.BattleStance:
+            //            playerCharacter.State.Main = MainState.Active;
+            //            playerCharacter.SetMainState(sender);
+            //            playerCharacter.SendActionResult(sender, Command.BattleStance);
+            //            playerCharacter.EndClientOrderEvent(sender, eventType);
+            //            break;
+            //        case (ushort)Command.NormalStance:
+            //            playerCharacter.State.Main = MainState.Passive;
+            //            playerCharacter.SetMainState(sender);
+            //            playerCharacter.SendActionResult(sender, Command.NormalStance);
+            //            playerCharacter.EndClientOrderEvent(sender, eventType);
+            //            break;
+            //        case (ushort)Command.MountChocobo:
+            //            playerCharacter.ToggleMount(sender, Command.MountChocobo);
+            //            Log.Instance.Success("Player is now mounted.");
+            //            break;
+
+            //    }
+            //}
+            //else if (eventType.IndexOf("commandRequest") >= 0)
+            //{
+            //    switch (command)
+            //    {
+            //        case (ushort)Command.UmountChocobo:
+            //            playerCharacter.ToggleMount(sender, Command.UmountChocobo);
+            //            Log.Instance.Success("Player is now dismounted.");
+            //            break;
+
+            //        case (ushort)Command.DoEmote:
+            //            Log.Instance.Warning("emote id:" + data[0x45].ToString("X2"));
+            //            playerCharacter.DoEmote(sender);
+            //            break;
+
+            //        case (ushort)Command.ChangeEquipment:
+            //            playerCharacter.ChangeGear(sender, data);
+            //            break;
+            //        case (ushort)Command.EquipSoulStone:
+            //            playerCharacter.EquipSoulStone(sender, data);
+            //            break;
+            //    }
+            //}
+            //else if (eventType.IndexOf("commandContent") >= 0)
+            //{
+            //    switch (command)
+            //    {
+            //        case (ushort)Command.Teleport:
+            //            EventManager.Instance.StartRequest(sender, data);
+            //            break;
+
+            //    }
+            //}
+            //else if (eventType.IndexOf("noticeEvent") >= 0 || eventType.IndexOf("pushDefault") >= 0)
+            //{
+            //    EventManager.Instance.Process(sender, data);
+            //}
+            //else if (eventType.IndexOf("talkDefault") >= 0)
+            //{
+            //    File.WriteAllBytes("talkDefault_eventrequest_" + DateTime.Now.Ticks.ToString() + ".txt", data);
+            //}
+
+
+        }
+
+        public void StartRequest(Socket sender, byte[] data)
+        {
+            //if(CurrentEvent == null)
+            //{
+            //    int rawCommand = (data[0x15] << 8 | data[0x14]);
+
+            //    if(Enum.IsDefined(typeof(Command), rawCommand))
+            //    {
+            //        Command command = (Command)rawCommand;
+
+            //        switch (command)
+            //        {
+            //            case Command.Teleport: //command teleport
+            //                CurrentEvent = new EventMenuTeleport();
+            //                break;
+            //            default:
+            //                CurrentEvent = new Event();
+                            
+            //                break;
+            //        }
+            //    }
+            //    else
+            //    {
+            //        Log.Instance.Error("Unknown command 0x" + rawCommand.ToString("X2"));
+            //    }               
+            //}
+
+            //CurrentEvent.StartRequest(sender, data);
         }
 
         public void EventResult(Socket sender, byte[] data)
         {
-            CurrentEvent.EventResult(sender, data);
+            //CurrentEvent.EventResult(sender, data);
         }
     }
 
@@ -249,7 +349,7 @@ namespace Launcher
         }
     }
 
-    public class ClientEventRequest : Event
+    public class ClientEventRequest
     {
         public uint CallerId { get; set; }
         public uint OwnerId { get; set; }
@@ -295,7 +395,37 @@ namespace Launcher
                 eventOwner.ProcessEventRequest(sender, this);
         }
 
-        public override void EndClientOrderEvent(Socket sender, string eventType)
+        public void TalkDefault(Socket sender)
+        {
+            List<object> parameters = new List<object>();
+            parameters.Add(Encoding.ASCII.GetBytes("talkDefault"));
+            parameters.Add(Encoding.ASCII.GetBytes("delegateEvent"));
+            parameters.Add(CallerId);
+            parameters.Add((uint)0xA0F1ADB1); //talk event command id??
+            parameters.Add("processEvent000_14");
+            parameters.Add(null);
+            parameters.Add(null);
+            parameters.Add(null);      
+            RequestResponse(sender, 0x05, parameters);
+        }
+
+        public virtual void RequestResponse(Socket sender, byte eventType, List<object> additionalparameters)
+        {
+            byte[] data = new byte[0xb0];            
+            Buffer.BlockCopy(BitConverter.GetBytes(CallerId), 0, data, 0, 4);
+            Buffer.BlockCopy(BitConverter.GetBytes(OwnerId), 0, data, 0x04, 4);
+            data[0x08] = eventType;
+            LuaParameters parameters = new LuaParameters();
+                       
+
+            foreach (object i in additionalparameters)
+                parameters.Add(i);
+
+            LuaParameters.WriteParameters(ref data, parameters, 0x09);     
+            SendPacket(sender, ServerOpcode.StartEventRequest, data);
+        }
+
+        public void EndClientOrder(Socket sender, string eventType)
         {
             byte[] data = new byte[0x30];
             Buffer.BlockCopy(BitConverter.GetBytes(User.Instance.Character.Id), 0, data, 0, sizeof(uint));
@@ -303,6 +433,15 @@ namespace Launcher
             Buffer.BlockCopy(Encoding.ASCII.GetBytes(Name), 0, data, 0x09, Name.Length);
             SendPacket(sender, ServerOpcode.EndClientOrderEvent, data);
             EventManager.Instance.CurrentEvent = null;
+        }
+
+        public void SendPacket(Socket sender, ServerOpcode opcode, byte[] data, uint sourceId = 0, uint targetId = 0)
+        {
+            sender.Send(new Packet(new GamePacket
+            {
+                Opcode = (ushort)opcode,
+                Data = data
+            }).ToBytes());
         }
     }
 

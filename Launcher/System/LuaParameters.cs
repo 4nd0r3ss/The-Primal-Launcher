@@ -25,7 +25,7 @@ namespace Launcher
             if (param is int)
                 List.Add(new KeyValuePair<byte, object>(0, (int)param));
             else if (param is uint)
-                List.Add(new KeyValuePair<byte, object>(0x01, (uint)param));
+                List.Add(new KeyValuePair<byte, object>(0x06, (uint)param));
             else if (param is string)
                 List.Add(new KeyValuePair<byte, object>(0x02, (string)param));
             else if (param is bool)
@@ -36,16 +36,12 @@ namespace Launcher
                     List.Add(new KeyValuePair<byte, object>(0x04, null));
             }
             else if (param is null)
-                List.Add(new KeyValuePair<byte, object>(0x05, null));
-            else if (param is Command)
-                List.Add(new KeyValuePair<byte, object>(0x06, (Command)param)); 
-            else if (param is DirectorCode)
-                List.Add(new KeyValuePair<byte, object>(0x98, (DirectorCode)param));
+                List.Add(new KeyValuePair<byte, object>(0x05, null));  
             else if (param is byte)
                 List.Add(new KeyValuePair<byte, object>(0xc, (byte)param));
             else if (param is byte[])
                 List.Add(new KeyValuePair<byte, object>(0x99, (byte[])param));
-            
+           
         }
 
         /// <summary>
@@ -63,10 +59,8 @@ namespace Launcher
                     writer.Seek(startIndex, SeekOrigin.Begin); //points to the right position
 
                     foreach (var parameter in luaParameters.List)
-                    {
-                        if (parameter.Key == 0x01)
-                            writer.Write((byte)0);
-                        else if(parameter.Key != 0x98 && parameter.Key != 0x99)
+                    {                        
+                        if(parameter.Key != 0x98 && parameter.Key != 0x99)
                             writer.Write(parameter.Key);
 
                         switch (parameter.Key)
@@ -85,7 +79,7 @@ namespace Launcher
                             case 0x05: //null
                                 break;
                             case 0x06:                                
-                                writer.Write(SwapEndian((uint)(Command)parameter.Value));
+                                writer.Write(SwapEndian((uint)parameter.Value));
                                 break;
                             case 0x07:
                                 break;

@@ -7,19 +7,14 @@ using System.Threading.Tasks;
 
 namespace Launcher
 {
-    public class PopulaceStandard : Actor
+    public class Populace : Actor
     {
         public int QuestIcon { get; set; }
 
-        public PopulaceStandard()
+        public Populace()
         {
-            ClassPath = "/chara/npc/populace/";
-            ClassName = "PopulaceStandard";
+            ClassPath = "/chara/npc/populace/";           
             ClassCode = 0x30400000;
-
-            EventConditions.Add(new EventCondition { Opcode = ServerOpcode.TalkEvent, EventName = "talkDefault", Priority = 0x04 });
-            EventConditions.Add(new EventCondition { Opcode = ServerOpcode.NoticeEvent, EventName = "noticeEvent", IsDisabled = 0x01 });
-                    
         }
 
         public override void Spawn(Socket sender, ushort spawnType = 0, ushort isZoning = 0, int changingZone = 0, ushort actorIndex = 0)
@@ -35,7 +30,7 @@ namespace Launcher
             SetSubState(sender);
             SetAllStatus(sender);
             SetIsZoning(sender);
-            LoadActorScript(sender);
+            LoadScript(sender);
             Init(sender);
             SetEventStatus(sender);
             SetQuestIcon(sender);
@@ -48,7 +43,19 @@ namespace Launcher
             foreach(EventCondition ec in EventConditions)
             {
                 Buffer.BlockCopy(BitConverter.GetBytes((uint)0x01), 0, data, 0, sizeof(uint));
-                data[0x04] = 0x01;
+                byte eventType = 1;
+
+                switch (ec.EventName)
+                {
+                    case "pushDefault":
+                        eventType = 2;
+                        break;
+                    default:
+                        eventType = 1;
+                        break;
+                }
+
+                data[0x04] = eventType;
                 Buffer.BlockCopy(Encoding.ASCII.GetBytes(ec.EventName), 0, data, 0x05, ec.EventName.Length);
 
                 SendPacket(sender, ServerOpcode.SetEventStatus, data);

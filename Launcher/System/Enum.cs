@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Launcher
 {
+    /// <summary>
+    /// Opcodes for packets received from game client.
+    /// </summary>
     public enum ClientOpcode
     {
         Ping = 0x01,
@@ -26,6 +29,9 @@ namespace Launcher
         CutSceneFinished = 0x0ce
     }
 
+    /// <summary>
+    /// Opcodes for packets sent by the server.
+    /// </summary>
     public enum ServerOpcode
     {
         Unknown0x02 = 0x02,
@@ -144,6 +150,9 @@ namespace Launcher
         ActiveLinkshell = 0x18a
     }
 
+    /// <summary>
+    /// Commands triggered by different actions in the game.
+    /// </summary>
     public enum Command
     {
         ChangeEquipment = 0x2ee9,
@@ -157,17 +166,10 @@ namespace Launcher
         BattleStance = 0x5209,
         NormalStance = 0x520a,
     }
-
-    public enum BGMMode
-    {
-        Play = 0x01,
-        CrossFade = 0x02,
-        Layer = 0x03,
-        FadeIn = 0x04,
-        Channel1 = 0x05,
-        Channel2 = 0x06
-    }
-
+       
+    /// <summary>
+    /// Used to set the number of slots availble in different inventories.
+    /// </summary>
     [Serializable]
     public enum InventoryMaxSlots
     {
@@ -193,6 +195,9 @@ namespace Launcher
         Equipment = 0xfe
     }
 
+    /// <summary>
+    /// Animation ids used in throughout the game.
+    /// </summary>
     public enum AnimationEffect
     {
         ChangeClass = 0x02,
@@ -207,6 +212,9 @@ namespace Launcher
         Teleport = 0xffb,
     }
 
+    /// <summary>
+    /// Used to set in-game weather.
+    /// </summary>
     [Serializable]
     public enum Weather
     {
@@ -257,6 +265,9 @@ namespace Launcher
         //Thanalan = 
     }
 
+    /// <summary>
+    /// The different types of actor events.
+    /// </summary>
     public enum EventType
     {
         //0 (CommandContent), 1 (TalkEvent), 2 (PushDefault), 3 (EmoteDefault1), 5 (NoticeEvent).
@@ -267,6 +278,9 @@ namespace Launcher
         NoticeEvent = 5
     }
 
+    /// <summary>
+    /// Sets the type of message to be sent to the game chat window.
+    /// </summary>
     public enum MessageType
     {
         None = 0,
@@ -296,6 +310,9 @@ namespace Launcher
         SystemError = 33
     }
 
+    /// <summary>
+    /// Used when freezing/unfreezing the UI when in certain events.
+    /// </summary>
     public enum UIControl
     {
         Off = 0x14,
@@ -319,6 +336,9 @@ namespace Launcher
         Opening = 0x00000866
     }
 
+    /// <summary>
+    /// Used to set the actor type for a given main state.
+    /// </summary>
     [Serializable]
     public enum MainStateType
     {
@@ -326,7 +346,10 @@ namespace Launcher
         Player = 0xBF,
         Monster = 0x03
     }
-    
+
+    /// <summary>
+    /// Known main states for an actor.
+    /// </summary>
     [Serializable]
     public enum MainState
     {
@@ -349,6 +372,9 @@ namespace Launcher
         Debug3 = 0x5C,	//Debug? - Summons chocobo, but no chocobo
     }
 
+    /// <summary>
+    /// Values used to set and actor's movement speed. The higher the value, the faster it moves. Setting a value too high will crash the game.
+    /// </summary>
     [Serializable]
     public enum ActorSpeed
     {
@@ -356,5 +382,32 @@ namespace Launcher
         Walking = 0x40000000,
         Running = 0x40d00000,
         Active = 0x40a00000
+    }
+
+    /// <summary>
+    /// Set how BGM should be played.
+    /// </summary>
+    [Serializable]
+    public enum MusicMode
+    {
+        Play = 0x01, //change music immediately
+        Crossfade = 0x02,
+        Layer = 0x03,
+        FadeStart = 0x04,
+        ChannelOne = 0x05,
+        ChannelTwo = 0x06
+    }
+
+    public enum ZoneType
+    {
+        Default = 4,
+        Inn = 68,
+        Instance = 6,
+        CanStealth = 132
+    }
+
+    public enum LuaIdUint
+    {
+        //this is used to fake type and int for lua parameters. Will probably be removed later when I come up with something better.
     }
 }

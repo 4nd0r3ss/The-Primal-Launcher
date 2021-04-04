@@ -46,28 +46,21 @@ namespace Launcher
                         case 0x01: 
                             CreateGameSession(sp);                           
                             break;
-
                         case 0x02:
                             Log.Instance.Warning("[" + World.Instance.ServerName + "] Received: 0x02");                            
                             break;
-
                         case 0x03:
                             ProcessGamePacket(sp);
                             break;
-
                         case 0x07: //delete actor request?
-                             Log.Instance.Warning("[" + World.Instance.ServerName + "] Received: 0x07");
-                            
+                             Log.Instance.Warning("[" + World.Instance.ServerName + "] Received: 0x07");                            
                             break;
-
                         case 0x08:                           
                             Log.Instance.Warning("[" + World.Instance.ServerName + "] Received: 0x08");                            
                             break;
-
                         case 0x1000:
                             Log.Instance.Warning("[" + World.Instance.ServerName + "] Received: 0x1000");
                             break;
-
                         default:
                             Log.Instance.Error("[" + World.Instance.ServerName + "] Unknown packet type: " + sp.Type.ToString("X"));                           
                             break;
@@ -123,9 +116,8 @@ namespace Launcher
                     User.Instance.Character.SetGroupInitWork(_connection.socket, subpacket.Data);
                     break;
 
-                case (ushort)ClientOpcode.EventRequest: 
-                    //EventManager.Instance.
-                    ProcessEventRequest(subpacket.Data);
+                case (ushort)ClientOpcode.EventRequest:                     
+                    EventManager.Instance.ProcessIncoming(_connection.socket, subpacket.Data);
                     break;
 
                 case (ushort)ClientOpcode.DataRequest:                           
@@ -144,18 +136,11 @@ namespace Launcher
                     break;
 
                 case (ushort)ClientOpcode.LockOnTarget:
-                    Log.Instance.Warning("Target locked");
+                    //Log.Instance.Warning("Target locked.");
                     break;
 
                 case (ushort)ClientOpcode.EventResult:
-                    EventManager.Instance.CurrentEvent.EndClientOrderEvent(_connection.socket, "");
-                    //EventManager.Instance.EventResult(_connection.socket, subpacket.Data);
-
-                    //User.Instance.Character.EndClientOrderEvent(_connection.socket, "commandContent");
-
-                    //Log.Instance.Error("[" + World.Name + "] Event Result packet: 0x" + opcode.ToString("X"));
-                    File.WriteAllBytes("client_eventresult_" + DateTime.Now.Ticks.ToString() + ".txt", subpacket.Data);
-                    //World.Instance.TeleportMenuLevel2(_connection.socket, subpacket.Data);
+                    EventManager.Instance.CurrentEvent.EndClientOrder(_connection.socket, "");                   
                     break;
 
                 case (ushort)ClientOpcode.GMTicketActiveRequest:
@@ -171,78 +156,6 @@ namespace Launcher
                     break;
             }
         }    
-
-        public void ProcessEventRequest(byte[] data)
-        {
-            PlayerCharacter playerCharacter = User.Instance.Character;
-            string eventType = Encoding.ASCII.GetString(data, 0x21, 14);
-            ushort command = (ushort)(data[0x15] << 8 | data[0x14]);
-
-            //File.WriteAllBytes(command + ".txt", data);
-
-            //Log.Instance.Warning("Received event request: 0x12d");
-            //Log.Instance.Warning("event: " + eventType + ", command: " + command.ToString("X2"));
-            //File.WriteAllBytes("eventrequest_" + DateTime.Now.Ticks.ToString() + ".txt", data);
-
-            if (eventType.IndexOf("commandForced") >= 0)
-            {
-                switch (command)
-                {
-                    case (ushort)Command.BattleStance:
-                        playerCharacter.State.Main = MainState.Active;
-                        playerCharacter.SetMainState(_connection.socket);
-                        playerCharacter.SendActionResult(_connection.socket, Command.BattleStance);
-                        playerCharacter.EndClientOrderEvent(_connection.socket, eventType);
-                        break;
-                    case (ushort)Command.NormalStance:
-                        playerCharacter.State.Main = MainState.Passive;
-                        playerCharacter.SetMainState(_connection.socket);
-                        playerCharacter.SendActionResult(_connection.socket, Command.NormalStance);
-                        playerCharacter.EndClientOrderEvent(_connection.socket, eventType);
-                        break;
-                    case (ushort)Command.MountChocobo:
-                        playerCharacter.ToggleMount(_connection.socket, Command.MountChocobo);
-                        Log.Instance.Success("Player is now mounted.");
-                        break;
-                   
-                } 
-            }
-            else if (eventType.IndexOf("commandRequest") >= 0)
-            {
-                switch (command)
-                {
-                    case (ushort)Command.UmountChocobo:
-                        playerCharacter.ToggleMount(_connection.socket, Command.UmountChocobo);
-                        Log.Instance.Success("Player is now dismounted.");
-                        break;
-
-                    case (ushort)Command.DoEmote:
-                        Log.Instance.Warning("emote id:" + data[0x45].ToString("X2"));
-                        playerCharacter.DoEmote(_connection.socket);
-                        break;
-
-                    case (ushort)Command.ChangeEquipment:
-                        playerCharacter.ChangeGear(_connection.socket, data);
-                        break;
-                    case (ushort)Command.EquipSoulStone:
-                        playerCharacter.EquipSoulStone(_connection.socket, data);
-                        break;
-                }
-            }
-            else if (eventType.IndexOf("commandContent") >= 0)
-            {
-                switch (command)
-                {
-                    case (ushort)Command.Teleport:
-                        EventManager.Instance.StartRequest(_connection.socket, data);
-                        break;
-                   
-                }
-            }else if(eventType.IndexOf("noticeEvent") >= 0)
-            {
-                EventManager.Instance.Process(_connection.socket, data);     
-            }
-        }
                
         /// <summary>
         /// Answer to a ping request from the client.

@@ -19,7 +19,7 @@ namespace Launcher
         public int Population { get; set; }
         public string ServerName { get; set; } = "CHANGE NAME"; //change this
         public List<Zone> Zones { get; set;}
-        public List<OpeningDirector> Actors { get; set; }
+        public List<OpeningDirector> Actors { get; set; } = new List<OpeningDirector>();
         public static World Instance
         {
             get
@@ -30,18 +30,13 @@ namespace Launcher
                 return _instance;
             }
         }
-
         #endregion
-        public World()
+
+        private World()
         {
             Id = 0x5ff80001;
             Zones = ActorRepository.Instance.ZoneList();
-            Name = Encoding.ASCII.GetBytes("worldMaster");           
-
-            //Directors
-            Actors = new List<OpeningDirector>();
-            Actors.Add(new OpeningDirector(0x66080000));
-            Actors.Add(new OpeningDirector(0x66080001));
+            Name = Encoding.ASCII.GetBytes("worldMaster");     
         }
 
         public byte[] GetNameBytes(byte id) => Encoding.ASCII.GetBytes(GetServerName(id));
@@ -55,7 +50,7 @@ namespace Launcher
             SetName(handler);
             SetMainState(handler);
             SetIsZoning(handler);
-            LoadActorScript(handler);
+            LoadScript(handler);
         }
 
         public override void Prepare(ushort actorIndex = 0)
@@ -67,56 +62,49 @@ namespace Launcher
             LuaParameters.Add(false);
             LuaParameters.Add(false);
             LuaParameters.Add(false);
-            LuaParameters.Add(null);
-            
+            LuaParameters.Add(null);            
         }
 
         public void Initialize(Socket sender)
         {
             PlayerCharacter playerCharacter = User.Instance.Character;
-            Debug debug = new Debug();
-           
-
+            Debug debug = new Debug();           
             ServerName = GetServerName(playerCharacter.WorldId);
-
-            ChatProcessor.SendMessage(sender, MessageType.GeneralInfo, "Welcome to " + ServerName + "!");
-            ChatProcessor.SendMessage(sender, MessageType.GeneralInfo, "Welcome to Eorzea!");
-            ChatProcessor.SendMessage(sender, MessageType.GeneralInfo, @"To get a list of available commands, type \help in the chat window and hit enter.");
-            
             uint currentZone = playerCharacter.Position.ZoneId;
             Zone zone = Zones.Find(x => x.Id == currentZone);
+
+            //login welcome messages
+            ChatProcessor.SendMessage(sender, MessageType.GeneralInfo, "Welcome to " + ServerName + "!");
+            ChatProcessor.SendMessage(sender, MessageType.GeneralInfo, "Welcome to Eorzea!");
+            ChatProcessor.SendMessage(sender, MessageType.GeneralInfo, @"To get a list of available commands, type \help in the chat window and hit enter.");            
+            
             playerCharacter.SendGroupPackets(sender);
+            playerCharacter.IsNew = false;
+            playerCharacter.OpeningSequence(sender);
 
-            if (true) //if playercharacter didnt reach after-opening map
-            {
-                OpeningDirector opening0 = new OpeningDirector(0x66080000);
-                OpeningDirector opening1 = new OpeningDirector(0x66080001);
-                opening0.Spawn(sender);
-                opening0.StartClientOrderEvent(sender);
-            }
-
-            //zone environment init
-            SetIsZoning(sender);
-            SetDalamudPhase(sender);
-            SetMusic(sender, zone.GetCurrentBGM());
-            SetWeather(sender, Weather.Clear);
-            SetMap(sender, zone);
+            SetMapEnvironment(sender, zone);
 
             //spawn actors
             playerCharacter.Spawn(sender, spawnType: 0x01, isZoning: 0);//spawn player character
             zone.Spawn(sender);//spawn zone
             debug.Spawn(sender);
             Spawn(sender, 0x01);            
-            zone.SpawnActors(sender);
+            zone.SpawnActors(sender);           
+        }
 
-            //TestPackets.Populace(playerCharacter.Id, null, sender);
+        private void SetMapEnvironment(Socket sender, Zone zone)
+        {
+            SetIsZoning(sender);
+            SetDalamudPhase(sender);
+            SetMusic(sender, zone.GetCurrentBGM());
+            SetWeather(sender, Weather.Clear);
+            SetMap(sender, zone);
         }
 
         public void SetDalamudPhase(Socket sender)
         {
             byte[] data = new byte[0x08];
             data[0] = 0xff; //test other values and make enum later
-
             SendPacket(sender, ServerOpcode.SetDalamud, data, sourceId: User.Instance.Character.Id);
         }       
 
@@ -163,8 +151,8 @@ namespace Launcher
 
         private void ChangeZone(Socket sender, Position position)
         {
-            PlayerCharacter playerCharacter = User.Instance.Character;
-            playerCharacter.Position = position;
+            User.Instance.Character.Position = position;
+            PlayerCharacter playerCharacter = User.Instance.Character;            
 
             uint currentZone = playerCharacter.Position.ZoneId;
             Zone zone = Zones.Find(x => x.Id == currentZone);
@@ -173,11 +161,13 @@ namespace Launcher
             SendPacket(sender, ServerOpcode.MassDeleteEnd, new byte[0x08], playerCharacter.Id, playerCharacter.Id);
 
             playerCharacter.MapUIChange(sender, 0x02);
+
             SetIsZoning(sender);
             SetDalamudPhase(sender);
             SetMusic(sender, zone.GetCurrentBGM());
             SetWeather(sender, Weather.Clear);
             SetMap(sender, zone);
+
             playerCharacter.Spawn(sender, 2, 1, -1);//spawn player character
             zone.Spawn(sender);//spawn zone 
             debug.Spawn(sender);
