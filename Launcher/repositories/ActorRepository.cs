@@ -305,38 +305,25 @@ namespace Launcher
                         DataRow actorGraphics = actorsGraphics.Select("id = '" + classId + "'")[0];
                         DataRow actorNameId = actorsNameIds.Select("id = '" + classId + "'")[0];
 
-                        switch (node.Name)
-                        {
-                            case "populace":
-                                zoneNpcs.Add(new Populace
-                                {
-                                    ClassId = classId,
-                                    ClassName = node.Attributes["className"].Value,
-                                    NameId = Convert.ToInt32(actorNameId.ItemArray[1]),
-                                    HairStyle = Convert.ToUInt16(actorGraphics.ItemArray[3]),
-                                    HairHighlightColor = Convert.ToUInt16(actorGraphics.ItemArray[4]),
-                                    HairColor = Convert.ToUInt16(actorGraphics.ItemArray[16]),
-                                    SkinColor = Convert.ToUInt16(actorGraphics.ItemArray[17]),
-                                    EyeColor = Convert.ToUInt16(actorGraphics.ItemArray[18]),
-                                    Appearance = SetAppearance(actorGraphics),
-                                    Face = SetFace(actorGraphics),
-                                    Position = SetPosition(zoneId, node.SelectSingleNode("position")),
-                                    QuestIcon = questIcon,
-                                    SubState = new SubState { MotionPack = animation },
-                                    EventConditions = SetEvents(node.SelectSingleNode("events"))
-                                });
-                                break;
+                        Type type = Type.GetType("Launcher." + node.Name);
+                        Actor actor = (Actor)Activator.CreateInstance(type);
 
-                            default:
-                                Log.Instance.Info("Unhandled actor '" + node.Name + "' sent.");
-                                break;
-                        }
+                        actor.ClassId = classId;
+                        actor.ClassName = node.Attributes["className"].Value;
+                        actor.NameId = Convert.ToInt32(actorNameId.ItemArray[1]);
+                        actor.HairStyle = Convert.ToUInt16(actorGraphics.ItemArray[3]);
+                        actor.HairHighlightColor = Convert.ToUInt16(actorGraphics.ItemArray[4]);
+                        actor.HairColor = Convert.ToUInt16(actorGraphics.ItemArray[16]);
+                        actor.SkinColor = Convert.ToUInt16(actorGraphics.ItemArray[17]);
+                        actor.EyeColor = Convert.ToUInt16(actorGraphics.ItemArray[18]);
+                        actor.Appearance = SetAppearance(actorGraphics);
+                        actor.Face = SetFace(actorGraphics);
+                        actor.Position = SetPosition(zoneId, node.SelectSingleNode("position"));
+                        actor.QuestIcon = questIcon;
+                        actor.SubState = new SubState { MotionPack = animation };
+                        actor.EventConditions = SetEvents(node.SelectSingleNode("events"));
 
-                        if(node.Name == "populace")
-                        {
-                            
-                        }
-                       
+                        zoneNpcs.Add(actor);
                     }
                 }
                 catch (Exception e)
@@ -404,7 +391,7 @@ namespace Launcher
 
                         break;
                     default:
-                        Log.Instance.Info("Unhandled event '" + node.Name + "' sent.");
+                        Log.Instance.Warning("ActorRepository.SetEvents: Unhandled event '" + node.Name + "' received.");
                         break;
                 }
             }

@@ -67,42 +67,30 @@ namespace Launcher
             Buffer.BlockCopy(BitConverter.GetBytes(0x8807), 0, data, 0, sizeof(ushort));
             Buffer.BlockCopy(Encoding.ASCII.GetBytes(init), 0, data, 0x02, init.Length);
             SendPacket(sender, ServerOpcode.ActorInit, data);
-        }       
+        }
 
-        public void StartClientOrderEvent(Socket sender)
+        #region Event methods
+        public void StartEvent(Socket sender)
         {          
             byte[] data = new byte[0x70];
             uint characterId = User.Instance.Character.Id;
             Buffer.BlockCopy(BitConverter.GetBytes(characterId), 0, data, 0, 4);
             Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, data, 0x04, 4);
-            Buffer.BlockCopy(BitConverter.GetBytes(0x75dc1705), 0, data, 0x08, 4); //the last byte is the event type (05). the other bytes are unknown.
+
+            Buffer.BlockCopy(BitConverter.GetBytes(0x00000005), 0, data, 0x08, 4); //the last byte is the event type (05). the other bytes are unknown.
             Buffer.BlockCopy(BitConverter.GetBytes(ClassCode), 0, data, 0x0c, 4);
             LuaParameters parameters = new LuaParameters();
             parameters.Add(Encoding.ASCII.GetBytes("noticeEvent"));            
             parameters.Add(true);
+
             LuaParameters.WriteParameters(ref data, parameters, 0x10);
             SendPacket(sender, ServerOpcode.StartEvent, data, sourceId: characterId);            
-        }             
-
-        public override void NoticeEvent(Socket sender, ClientEventRequest eventRequest)
-        {
-            byte[] data = new byte[0x298]; 
-            Buffer.BlockCopy(BitConverter.GetBytes(User.Instance.Character.Id), 0, data, 0, 4);
-            Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, data, 0x04, 4);
-            data[0x08] = eventRequest.Code;
-
-            LuaParameters parameters = new LuaParameters();
-            parameters.Add(Encoding.ASCII.GetBytes("noticeEvent"));
-            parameters.Add(Encoding.ASCII.GetBytes("delegateEvent"));
-            parameters.Add((Command)eventRequest.CallerId);
-            parameters.Add(unchecked((Command)0xa0f1adb1));
-            parameters.Add("processTtrNomal001withHQ");
-            parameters.Add(null);
-            parameters.Add(null);
-            parameters.Add(null);           
-
-            LuaParameters.WriteParameters(ref data, parameters, 0x09);   
-            SendPacket(sender, ServerOpcode.StartEventRequest, data);
         }
+
+        public override void noticeEvent(Socket sender)
+        {           
+            EventManager.Instance.CurrentEvent.DelegateEvent(sender, 0xA0F1ADB1, "processTtrNomal001withHQ");           
+        }
+        #endregion
     }
 }

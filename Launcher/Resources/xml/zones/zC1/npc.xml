@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <chara>
   <npc>
-    <populace className="PopulaceStandard">
+    <Populace className="PopulaceStandard">
       <classId>1000438</classId>
       <position x="-0.71" y="10.35" z="-40.51" r="0.3"/>
       <animation>1035</animation>
@@ -9,8 +9,8 @@
         <talkDefault priority="4" disabled="0"/>
         <noticeEvent priority="0" disabled="1"/>
       </events>
-    </populace>
-    <populace className="PopulaceStandard">
+    </Populace>
+    <Populace className="PopulaceStandard">
       <classId>1000439</classId>
       <position x="-1.87" y="9.15" z="-30.67" r="2.44"/>
       <animation>1032</animation>
@@ -18,8 +18,8 @@
         <talkDefault priority="4" disabled="0"/>
         <noticeEvent priority="0" disabled="1"/>
       </events>
-    </populace>
-    <populace className="PopulaceStandard">
+    </Populace>
+    <Populace className="PopulaceStandard">
       <classId>1000440</classId>
       <position x="7.06" y="9.15" z="-28.62" r="-1.54"/>
       <animation>1041</animation>
@@ -27,8 +27,8 @@
         <talkDefault priority="4" disabled="0"/>
         <noticeEvent priority="0" disabled="1"/>
       </events>
-    </populace>
-    <populace className="PopulaceStandard">
+    </Populace>
+    <Populace className="PopulaceStandard">
       <classId>1000441</classId>
       <position x="2.63" y="9.15" z="-33.91" r="-0.16"/>
       <animation>1041</animation>
@@ -36,8 +36,8 @@
         <talkDefault priority="4" disabled="0"/>
         <noticeEvent priority="0" disabled="1"/>
       </events>
-    </populace>
-    <populace className="PopulaceStandard">
+    </Populace>
+    <Populace className="PopulaceStandard">
       <classId>1000442</classId>
       <position x="4.2" y="10.35" z="-21.98" r="3.11"/>
       <animation>1015</animation>
@@ -45,8 +45,9 @@
         <talkDefault priority="4" disabled="0"/>
         <noticeEvent priority="0" disabled="1"/>
       </events>
-    </populace>
-    <populace className="PopulaceStandard">
+      <questIcon>2</questIcon>
+    </Populace>
+    <Populace className="PopulaceStandard">
       <classId>1000443</classId>
       <position x="4.06" y="10.35" z="-35.24" r="2.52"/>
       <animation>1036</animation>
@@ -54,8 +55,8 @@
         <talkDefault priority="4" disabled="0"/>
         <noticeEvent priority="0" disabled="1"/>
       </events>
-    </populace>
-    <populace className="PopulaceStandard">
+    </Populace>
+    <Populace className="PopulaceStandard">
       <classId>1000444</classId>
       <position x="-4.72" y="10.35" z="-22.56" r="2.06"/>
       <animation>1041</animation>
@@ -63,8 +64,8 @@
         <talkDefault priority="4" disabled="0"/>
         <noticeEvent priority="0" disabled="1"/>
       </events>
-    </populace>
-    <populace className="PopulaceStandard">
+    </Populace>
+    <Populace className="PopulaceStandard">
       <classId>1000445</classId>
       <position x="-4.09" y="9.15" z="-24.55" r="2.09"/>
       <animation>1035</animation>
@@ -72,8 +73,8 @@
         <talkDefault priority="4" disabled="0"/>
         <noticeEvent priority="0" disabled="1"/>
       </events>
-    </populace>
-    <populace className="PopulaceStandard">
+    </Populace>
+    <Populace className="PopulaceStandard">
       <classId>1000446</classId>
       <position x="-0.72" y="9.15" z="-31.81" r="-1.18"/>
       <animation>1041</animation>
@@ -81,17 +82,18 @@
         <talkDefault priority="4" disabled="0"/>
         <noticeEvent priority="0" disabled="1"/>
       </events>
-    </populace>
-    <populace className="PopulaceStandard">
+    </Populace>
+    <Populace className="PopulaceStandard">
       <classId>1000447</classId>
       <position x="-2.16" y="9.15" z="-26.18" r="0.09"/>
       <animation>1016</animation>
       <events>
         <talkDefault priority="4" disabled="0"/>
-        <noticeEvent priority="0" disabled="1"/>
+        <noticeEvent priority="0" disabled="1"/>        
       </events>
-    </populace>
-    <populace className="PopulaceStandard">
+      <questIcon>2</questIcon>
+    </Populace>
+    <Populace className="PopulaceStandard">
       <classId>1000448</classId>
       <position x="5.93" y="10.35" z="-25.09" r="-2.01"/>
       <animation>1037</animation>
@@ -99,8 +101,8 @@
         <talkDefault priority="4" disabled="0"/>
         <noticeEvent priority="0" disabled="1"/>
       </events>
-    </populace>
-    <populace className="PopulaceStandard">
+    </Populace>
+    <Populace className="PopulaceStandard">
       <classId>1000449</classId>
       <position x="-1.92" y="9.15" z="-34.19" r="0.82"/>
       <animation>1013</animation>
@@ -108,8 +110,8 @@
         <talkDefault priority="4" disabled="0"/>
         <noticeEvent priority="0" disabled="1"/>
       </events>
-    </populace>
-    <populace className="PopulaceStandard">
+    </Populace>
+    <Populace className="PopulaceStandard">
       <classId>1000450</classId>
       <position x="4.88" y="9.15" z="-29.5" r="0.65"/>
       <animation>1271</animation>
@@ -117,8 +119,8 @@
         <talkDefault priority="4" disabled="0"/>
         <noticeEvent priority="0" disabled="1"/>
       </events>
-    </populace>
-    <populace className="PopulaceStandard">
+    </Populace>
+    <Populace className="PopulaceStandard">
       <classId>1000451</classId>
       <position x="-1.1" y="9.85" z="-33.62" r="-0.82"/>
       <animation>1026</animation>
@@ -126,25 +128,27 @@
         <talkDefault priority="4" disabled="0"/>
         <noticeEvent priority="0" disabled="1"/>
       </events>
-    </populace>
-    <populace className="PopulaceStandard">
+    </Populace>
+    <Populace className="PopulaceStandard">
       <classId>1001652</classId>
       <position x="-7.73" y="9.967" z="-27.44" r="1.6"/>
       <animation>1041</animation>
       <events>
         <talkDefault priority="1" disabled="0"/>
         <noticeEvent priority="1" disabled="0"/>
-        <pushDefault radius="3.0" silent="false" outwards="false"/>
+        <pushDefault radius="3.0" silent="false" outwards="false"/>        
       </events>
-    </populace>
-    <populace className="PopulaceStandard">
+      <questIcon>2</questIcon>
+    </Populace>
+    <Populace className="PopulaceStandard">
       <classId>1090025</classId>
       <position x="0" y="10" z="-18" r="0"/>
       <animation>0</animation>
       <events>
         <noticeEvent priority="0" disabled="1"/>
-        <pushDefault radius="2.0" silent="false" outwards="false"/>
+        <pushDefault radius="2.0" silent="false" outwards="false"/>        
       </events>
-    </populace>
+      <questIcon>0</questIcon>
+    </Populace>
   </npc>
 </chara>

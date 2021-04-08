@@ -24,8 +24,6 @@ namespace Launcher
         {
             if (param is int)
                 List.Add(new KeyValuePair<byte, object>(0, (int)param));
-            else if (param is uint)
-                List.Add(new KeyValuePair<byte, object>(0x06, (uint)param));
             else if (param is string)
                 List.Add(new KeyValuePair<byte, object>(0x02, (string)param));
             else if (param is bool)
@@ -36,9 +34,13 @@ namespace Launcher
                     List.Add(new KeyValuePair<byte, object>(0x04, null));
             }
             else if (param is null)
-                List.Add(new KeyValuePair<byte, object>(0x05, null));  
+                List.Add(new KeyValuePair<byte, object>(0x05, null));
+            else if (param is uint)
+                List.Add(new KeyValuePair<byte, object>(0x06, (uint)param));                 
             else if (param is byte)
                 List.Add(new KeyValuePair<byte, object>(0xc, (byte)param));
+            else if (param is sbyte)
+                List.Add(new KeyValuePair<byte, object>(0x98, (sbyte)param));
             else if (param is byte[])
                 List.Add(new KeyValuePair<byte, object>(0x99, (byte[])param));
            
@@ -91,8 +93,7 @@ namespace Launcher
                             case 0x1b:
                                 break;
                             case 0x98:
-                                writer.Write((byte)0x06);
-                                writer.Write((uint)(DirectorCode)parameter.Value);
+                                writer.Write((sbyte)parameter.Value);                               
                                 break;
                             case 0x99:
                                 byte[] strArr = new byte[0x20];

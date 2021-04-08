@@ -46,11 +46,13 @@ namespace Launcher
 
             for (int i = 7; i > -1; i--)
                 LuaParameters.Add(((byte)zoneType & (1 << i)) != 0);
+
+            Actors.AddRange(ActorRepository.Instance.Aetherytes.FindAll(x => x.Position.ZoneId == Id));
+            Actors.AddRange(ActorRepository.Instance.GetZoneNpcs(Id));
         }
 
         public override void Spawn(Socket handler, ushort spawnType = 0, ushort isZoning = 0, int changingZone = 0, ushort actorIndex = 0)
-        {
-            Prepare(actorIndex);
+        {            
             CreateActor(handler);
             SetSpeeds(handler);
             SetPosition(handler, 1, isZoning);
@@ -58,13 +60,7 @@ namespace Launcher
             SetMainState(handler);            
             SetIsZoning(handler);
             LoadScript(handler);
-        }
-
-        public override void Prepare(ushort actorIndex = 0)
-        {           
-            Actors.AddRange(ActorRepository.Instance.Aetherytes.FindAll(x => x.Position.ZoneId == Id));
-            Actors.AddRange(ActorRepository.Instance.GetZoneNpcs(Id));
-        }
+        }       
 
         public void SpawnActors(Socket sender)
         {

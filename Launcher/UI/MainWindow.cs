@@ -56,7 +56,7 @@ namespace Launcher
                 //show update tab
             }
 
-            //ActorRepository.Instance.GetZoneNpcs(0xc1);
+            ActorRepository.Instance.GetZoneNpcs(0xc1);
 
 
             Log.Instance.Info("Welcome to Primal Launcher!");

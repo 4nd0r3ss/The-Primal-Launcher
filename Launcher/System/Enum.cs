@@ -160,11 +160,13 @@ namespace Launcher
         UmountChocobo = 0x2eef,
         EquipSoulStone = 0x2ef1,
 
+        QuestData = 0x5e93,
         Logout = 0x5e9b,
         Teleport = 0x5e9c,
         DoEmote = 0x5e26,
         BattleStance = 0x5209,
         NormalStance = 0x520a,
+        
     }
        
     /// <summary>
@@ -271,11 +273,11 @@ namespace Launcher
     public enum EventType
     {
         //0 (CommandContent), 1 (TalkEvent), 2 (PushDefault), 3 (EmoteDefault1), 5 (NoticeEvent).
-        CommandContent = 0,
-        TalkEvent = 1,
-        PushDefault = 2,
-        EmoteDefault1 = 3,
-        NoticeEvent = 5
+        commandContent = 0,
+        talkDefault = 1,
+        pushDefault = 2,
+        emoteDefault1 = 3,
+        noticeEvent = 5
     }
 
     /// <summary>

@@ -136,34 +136,6 @@ namespace Launcher
             RetainerGroup = new RetainerGroup();
         }
 
-        public void OpeningSequence(Socket sender)
-        {
-            if (IsNew)
-            {
-                Position = Position.GetInitialPosition(InitialTown);
-
-                switch (InitialTown)
-                {
-                    case 1: //Limsa
-
-                        break;
-                    case 2: //Gridania
-
-                        break;
-                    case 3: //Uldah
-
-                        break;
-                }
-
-                OpeningDirector opening0 = new OpeningDirector(0x66080000);
-                OpeningDirector opening1 = new OpeningDirector(0x66080001);
-                World.Instance.Actors.Add(opening0);
-                World.Instance.Actors.Add(opening1);
-                opening0.Spawn(sender);
-                opening0.StartClientOrderEvent(sender);
-            }
-        }
-
         public override void Prepare(ushort actorIndex = 0){}
 
         private void LoadInitialEquipment()
@@ -256,6 +228,37 @@ namespace Launcher
             GetWork(sender);           
         }
 
+        public void OpeningSequence(Socket sender)
+        {
+            if (IsNew)
+            {
+                Position = Position.GetInitialPosition(InitialTown);
+                uint directorId1 = 0;
+                uint directorId2 = 0;
+
+                switch (InitialTown)
+                {
+                    case 1: //Limsa
+                        directorId1 = 0x66080000;
+                        directorId2 = 0x66080001;
+                        break;
+                    case 2: //Gridania
+
+                        break;
+                    case 3: //Uldah
+
+                        break;
+                }
+
+                OpeningDirector openingDirector1 = new OpeningDirector(directorId1);
+                OpeningDirector openingDirector2 = new OpeningDirector(directorId2);
+                World.Instance.Actors.Add(openingDirector1);
+                World.Instance.Actors.Add(openingDirector2);
+                openingDirector1.Spawn(sender);
+                openingDirector1.StartEvent(sender);
+            }
+        }
+
         public override void LoadScript(Socket sender)
         {
             LuaParameters = new LuaParameters
@@ -271,7 +274,7 @@ namespace Launcher
                 LuaParameters.Add(false);
                 LuaParameters.Add(false);
                 LuaParameters.Add(true);
-                LuaParameters.Add(DirectorCode.Opening);
+                LuaParameters.Add((uint)0x66080000);
             }
             else //no opening
             {                
@@ -435,8 +438,8 @@ namespace Launcher
                 property.Add(string.Format("charaWork.commandCategory[{0}]", i), (byte)1);
 
 
-            for (int i = 0; i < 4096; i++)
-                property.Add(string.Format("charaWork.commandAcquired[{0}]", 1150), true);
+            //for (int i = 0; i < 4096; i++)
+                //property.Add(string.Format("charaWork.commandAcquired[{0}]", 1150), true);
 
             //job abilities
             for (int i = 0; i < 36; i++)
@@ -456,8 +459,17 @@ namespace Launcher
             property.Add("charaWork.depictionJudge", 0xa0f50911);
 
             //for (int i = 0; i < 40; i++)
-            //property.Add(string.Format("playerWork.questScenario[{0}]", 0), true);
+            property.Add(string.Format("playerWork.questScenario[{0}]", 1), 0xA0F00000 | 110001);
 
+            AddToWorkGuildleve(ref property);
+            AddToWorkNpcLinkshell(ref property);
+            property.Add("playerWork.restBonusExpRate", 0f);
+            AddToWorkBackground(ref property);
+            property.FinishWriting();
+        }
+
+        private void AddToWorkGuildleve(ref WorkProperties property)
+        {
             //GuildLeve - local
             //for (int i = 0; i < 40; i++)
             //property.Add(string.Format("playerWork.questGuildleve[{0}]", (uint)49), true);
@@ -466,7 +478,7 @@ namespace Launcher
             //for(int i = 0; i < 16; i++)
             //{
             //    if (guildLeveId[i] != 0)
-            property.Add(string.Format("work.guildleveId[{0}]", 0), 1103);
+            //property.Add(string.Format("work.guildleveId[{0}]", 0), 1103);
 
             //if(guildLeveDone[i]!=0)
             //    property.Add(string.Format("work.guildleveDone[{0}]", i), guildLeveDone[i]);
@@ -474,7 +486,10 @@ namespace Launcher
             //if(guildLeveChecked[i]!=0)
             //    property.Add(string.Format("work.guildleveChecked[{0}]", i), guildLeveChecked[i]);
             //}
+        }
 
+        private void AddToWorkNpcLinkshell(ref WorkProperties property)
+        {
             //NPC linkshell
             //for(int i = 0; i < 64; i++)
             //{
@@ -484,19 +499,16 @@ namespace Launcher
             //    //if (npcLinkshellExtra[i])
             //    //    property.Add(string.Format("playerWork.npcLinkshellChatExtra[{0}]", i), true);
             //}
+        }
 
-
-            //ok
-            property.Add("playerWork.restBonusExpRate", 0f);
-
+        private void AddToWorkBackground(ref WorkProperties property)
+        {
             //From PlayerCharacter obj
             property.Add("playerWork.tribe", Tribe);
             property.Add("playerWork.guardian", Guardian);
             property.Add("playerWork.birthdayMonth", BirthMonth);
             property.Add("playerWork.birthdayDay", BirthDay);
             property.Add("playerWork.initialTown", (byte)InitialTown);
-
-            property.FinishWriting();
         }
 
         public void UpdateExp(Socket sender)
@@ -913,26 +925,13 @@ namespace Launcher
             pc.Position.Z = BitConverter.ToSingle(new byte[] { data[0x20], data[0x21], data[0x22], data[0x23] }, 0);
             pc.Position.R = BitConverter.ToSingle(new byte[] { data[0x24], data[0x25], data[0x26], data[0x27] }, 0);
 
-            byte[] unknown = new byte[] { data[0x2a], data[0x2b], data[0x2c], data[0x2d], data[0x2e], data[0x2e] };
+            //byte[] moveState = new byte[] { data[0x28], data[0x29] }; //unused so far. maybe part of mouse positioning?
+            //byte[] mousePosition = byte[] { data[0x2a], data[0x2b] }; //2d mouse cursor hud position?
+            //byte[] cameraRotation = new byte[] { data[0x2c], data[0x2d], data[0x2e], data[0x2f] }; //indicates the camera rotation (maybe it's 2 shorts?).
 
             //save player position 
             User.Instance.AccountList[0].CharacterList[pc.Slot] = pc;
-            User.Instance.Save();
-
-            //print player position on PL ui.
-            //ucLogWindow.Instance.PrintPlayerPosition(playerCharacter.Position, unknown);
-
-            //check eorzea time and change BGM if necessary
-            //ActorRepository.Instance.Zones.Find(x => x.Id == playerCharacter.Position.ZoneId).GetCurrentBGM();
-
-            //uint unknown0 = (uint)(data[0x17] << 24 | data[0x16] << 16 | data[0x15] << 8 | data[0x14]);
-            //ushort moveState = (ushort)(data[0x29] << 8 | data[0x28]);
-            //ushort unknown1 = (ushort)(data[0x2b] << 8 | data[0x2a]);
-            //uint unknown2 = (uint)(data[0x2f] << 24 | data[0x2e] << 16 | data[0x2d] << 8 | data[0x2c]);
-
-            //_log.Warning("Player position: X=" + _user.Character.Position.X + ", Y=" + _user.Character.Position.Y + ", Z=" + _user.Character.Position.Z + ", R=" + _user.Character.Position.R);
-            //if(unknown1 != 0x19 && unknown1 != 0xed)
-            //_log.Warning("U0=0x" + unknown0.ToString("X") + ", U1=0x" + unknown1.ToString("X") + ", U2=0x" + unknown2.ToString("X") + ", MS=0x"+ moveState.ToString("X"));
+            User.Instance.Save();           
         }
 
         public uint NewId()

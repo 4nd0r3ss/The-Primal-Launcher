@@ -22,6 +22,7 @@ namespace Launcher
         public string ClassName { get; set; }
         public string ClassPath { get; set; }
         public uint ClassCode { get; set; }
+        public int QuestIcon { get; set; }
 
         #region States
         public State State { get; set; } = new State();
@@ -323,20 +324,13 @@ namespace Launcher
             SendPacket(sender, ServerOpcode.DoEmote, data);
         }
 
-        public void ProcessEventRequest(Socket sender, ClientEventRequest eventRequest)
-        {
-            switch (eventRequest.Code)
-            {
-                case 0x05:
-                    NoticeEvent(sender, eventRequest);
-                    break;
-            }
-        }
+        #region Event virtual methods     
+        public virtual void noticeEvent(Socket sender) { }      
 
-        public virtual void NoticeEvent(Socket sender, ClientEventRequest eventRequest) { }      
+        public virtual void pushDefault(Socket sender) { }
 
-        public virtual void PushDefault(Socket sender, ClientEventRequest eventRequest) { }
-
+        public virtual void talkDefault(Socket sender) { }
+        #endregion
 
         /// <summary>
         /// Converts a number to a base 63 string. This function was taken from Ioncannon's code, all credit goes to him. 
@@ -409,6 +403,16 @@ namespace Launcher
             DataRow[] selected = itemNames.Select("id = '" + id + "'");
             int model = (int)selected[0][1]; //had to do this as it was throwing cast error
             Appearance.BaseModel = (uint)model;
+        }
+
+        public void InvokeMethod(string methodName, object[] methodParams)
+        {
+            var method = GetType().GetMethod(methodName);
+
+            if (method != null)
+                method.Invoke(this, methodParams);
+            else
+                Log.Instance.Error("Actor.InvokeMethod: Type " + GetType().Name + " has no method " + methodName + ".");
         }
     }
 }
