@@ -18,7 +18,7 @@ namespace Launcher
 
         public List<Actor> Actors = new List<Actor>(); //list to keep all actors which are currentl in this zone.
 
-        public Zone(uint regionId, uint zoneId, byte locationNameId, byte musicSetId, int classNameId = -1, bool isMountAllowed = false, ZoneType zoneType = ZoneType.Default, string mapName = null)
+        public Zone(uint regionId, uint zoneId, byte locationNameId, byte musicSetId, int classNameId = -1, bool isMountAllowed = true, ZoneType zoneType = ZoneType.Default, string mapName = null)
         {
             Id = zoneId; 
             Name = Encoding.ASCII.GetBytes("_areaMaster");

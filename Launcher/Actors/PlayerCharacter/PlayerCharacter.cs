@@ -213,12 +213,12 @@ namespace Launcher
             //current job
             //SendCurrentJob(sender);
 
-            SetSpecialEventWork(sender);            
+            SetSpecialEventWork(sender);
 
             /* Chocobo mounts packet here */
-            //SendPacket(sender, ServerOpcode.SetChocoboName, new byte[] { 0x42, 0x6f, 0x6b, 0x6f, 0x00, 0x00, 0x00, 0x00 });
-            //SendPacket(sender, ServerOpcode.SetHasChocobo, new byte[] { 0x1f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
-            //SendPacket(sender, ServerOpcode.SetHasGobbue, new byte[] { 0x1, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
+            SendPacket(sender, ServerOpcode.SetChocoboName, new byte[] { 0x42, 0x6f, 0x6b, 0x6f, 0x00, 0x00, 0x00, 0x00 });
+            SendPacket(sender, ServerOpcode.SetHasChocobo, new byte[] { 0x1f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
+            SendPacket(sender, ServerOpcode.SetHasGobbue, new byte[] { 0x1, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
 
             GetAchievementPoints(sender);
             GetAchievementsLatest(sender);
@@ -636,60 +636,36 @@ namespace Launcher
 
             //set player state
             byte[] data = new byte[0x08];
+            byte[] mountTextSheet = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0xF8, 0x5F, 0x91, 0x65, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
             if (command == Command.MountChocobo)
-            {
-                data[0x05] = 0x2; //0x1f = twin adder chocobo, 0x1 = maelstrom chocobo     
-                SendPacket(sender, ServerOpcode.SetChocoboMounted, data);
+            {                
+                data[0x05] = (byte)ChocoboAppearance.Maelstrom4;     
+                SendPacket(sender, ServerOpcode.SetChocoboMounted, data);               
+                Speeds.SetMounted();
             }
             else
             {
+                mountTextSheet[0x08] = 0x93;
                 State.Main = MainState.Passive;
                 SetMainState(sender);
+                Speeds.SetUnmounted();
             }               
 
-            //send command answer
+            //TODO: send command answer - this should probably be in event manager.
             data = new byte[0x28];
             Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, data, 0, 4);
             Buffer.BlockCopy(BitConverter.GetBytes(0x7c000062), 0, data, 0x4, 4);
             data[0x27] = 0x08; //8 animation slots to be played in sequence?
-            SendPacket(sender, ServerOpcode.CommandResult, data);
+            SendPacket(sender, ServerOpcode.CommandResult, data);      
 
-            //set chocobo speeds (this packet is originally sent 3 times for unknown reasons)
-            if (command == Command.MountChocobo)
-            {
-                data = new byte[] {
-                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x66, 0x66, 0x66, 0x40, 0x01, 0x00, 0x00, 0x00,
-                    0x00, 0x00, 0x10, 0x41, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x41, 0x03, 0x00, 0x00, 0x00,
-                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                    0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-                };
+            SetSpeeds(sender);
+            SetSpeeds(sender);
+            SetSpeeds(sender);
 
-                SendPacket(sender, ServerOpcode.SetSpeed, data);
-                SendPacket(sender, ServerOpcode.SetSpeed, data);
-                SendPacket(sender, ServerOpcode.SetSpeed, data);
-            }
-            else
-            {
-                SetSpeeds(sender);
-                SetSpeeds(sender);
-                SetSpeeds(sender);
-            }
+            World.Instance.SendTextSheetMessage(sender, ServerOpcode.TextSheetMessage30b, mountTextSheet);
 
-            //text sheet message
-            if (command == Command.MountChocobo)
-                data = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0xF8, 0x5F, 0x91, 0x65, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00 };
-            else
-                data = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0xF8, 0x5F, 0x93, 0x65, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00 };
-
-            World.Instance.SendTextSheetMessage(sender, ServerOpcode.TextSheetMessage30b, data);
-
-            //command result 
+            //TODO: command result - this should probably be in event manager.
             data = new byte[0x38];
             Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, data, 0, 4);
             Buffer.BlockCopy(BitConverter.GetBytes(0x7c000062), 0, data, 0x4, 4);
@@ -702,13 +678,7 @@ namespace Launcher
             SendPacket(sender, ServerOpcode.CommandResultX1, data);
 
             //end event order
-            if (command == Command.MountChocobo)
-            {
-                data = new byte[0x30];
-                Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, data, 0, 4);
-                Buffer.BlockCopy(Encoding.ASCII.GetBytes("commandForced"), 0, data, 0x9, 4);
-                SendPacket(sender, ServerOpcode.EndClientOrderEvent, data);
-            }
+            EventManager.Instance.CurrentEvent.EndClientOrder(sender);
         }
 
         public void EquipSoulStone(Socket sender, byte[] data)

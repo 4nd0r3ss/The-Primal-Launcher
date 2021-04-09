@@ -231,7 +231,6 @@
     <Compile Include="Packets\GamePacket.cs" />
     <Compile Include="Packets\HttpPacket.cs" />
     <Compile Include="Packets\MessagePacket.cs" />
-    <Compile Include="Packets\PacketFactory.cs" />
     <Compile Include="Packets\SubPacket.cs" />
     <Compile Include="Repositories\ActorRepository.cs" />
     <Compile Include="Servers\GameServer.cs" />

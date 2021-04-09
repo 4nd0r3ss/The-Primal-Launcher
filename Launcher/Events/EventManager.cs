@@ -33,8 +33,7 @@ namespace Launcher
         {
             Type type = Type.GetType(GetEventType(data));
             CurrentEvent = (Event)Activator.CreateInstance(type, data);
-            CurrentEvent.Execute(sender);
-            Log.Instance.Warning("Event: " + CurrentEvent.GetType().Name + ", Actor: 0x" + CurrentEvent.OwnerId.ToString("X"));        
+            CurrentEvent.Execute(sender);                 
         }    
         
         private string GetEventType(byte[] data)
@@ -72,9 +71,10 @@ namespace Launcher
             OwnerId = (uint)(data[0x17] << 24 | data[0x16] << 16 | data[0x15] << 8 | data[0x14]);
             Unknown1 = (uint)(data[0x1b] << 24 | data[0x1a] << 16 | data[0x19] << 8 | data[0x18]);
             Unknown2 = (uint)(data[0x1f] << 24 | data[0x1e] << 16 | data[0x1d] << 8 | data[0x1c]);
+            Data = data;
         }       
 
-        public void EndClientOrder(Socket sender, string eventType)
+        public void EndClientOrder(Socket sender)
         {
             byte[] data = new byte[0x30];
             Buffer.BlockCopy(BitConverter.GetBytes(User.Instance.Character.Id), 0, data, 0, sizeof(uint));
@@ -101,6 +101,8 @@ namespace Launcher
 
         public virtual void Execute(Socket sender)
         {
+            Log.Instance.Warning("Event: " + GetType().Name + ", Actor: 0x" + OwnerId.ToString("X"));
+
             Actor eventOwner = GetActor();
 
             if (eventOwner != null)
@@ -155,24 +157,105 @@ namespace Launcher
         public Command CommandId { get; set; }
         public commandRequest(byte[] data) : base(data)
         {
-            CommandId = (Command)(data[0x17] << 24 | data[0x16] << 16 | data[0x15] << 8 | data[0x14]);
+            CommandId = (Command)(data[0x15] << 8 | data[0x14]);
+            OwnerId = 0;
         }
 
         public override void Execute(Socket sender)
         {
-            
+            Log.Instance.Warning("Event: " + GetType().Name + ", Command: 0x" + CommandId.ToString("X"));
+
+            switch (CommandId)
+            {
+                case Command.QuestData:
+                    GetQuestData(sender);
+                    break;
+                case Command.GuildleveData:
+                    GetGuildleveData(sender);
+                    break;
+                case Command.UmountChocobo:
+                    User.Instance.Character.ToggleMount(sender, Command.UmountChocobo);
+                    Log.Instance.Success("Player is now dismounted.");
+                    break;
+                case Command.DoEmote:
+                    Log.Instance.Warning("emote id:" + Data[0x45].ToString("X2"));
+                    User.Instance.Character.DoEmote(sender);
+                    break;
+                case Command.ChangeEquipment:
+                    User.Instance.Character.ChangeGear(sender, Data);
+                    break;
+                case Command.EquipSoulStone:
+                    User.Instance.Character.EquipSoulStone(sender, Data);
+                    break;
+            }
         }
 
-        //private 
+        private void GetQuestData(Socket sender)
+        {
+            byte[] data = new byte[0xc0];
+            int questId = data[0x32] << 24 | data[0x33] << 16 | data[0x34] << 8 | data[0x35];
+            RequestParameters.Add("requestedData");            
+            RequestParameters.Add("qtdata");
+            RequestParameters.Add(questId);
+            RequestParameters.Add(0);
+            LuaParameters.WriteParameters(ref data, RequestParameters, 0);
+            SendPacket(sender, ServerOpcode.GeneralData, data);
+        }
+
+        private void GetGuildleveData(Socket sender)
+        {
+            byte[] data = new byte[0xc0];            
+            RequestParameters.Add("requestedData");
+            RequestParameters.Add("activegl");
+            RequestParameters.Add(0x07); //???
+            RequestParameters.Add(null);
+            RequestParameters.Add(null);
+            RequestParameters.Add(null);
+            RequestParameters.Add(null);
+            RequestParameters.Add(null);
+            RequestParameters.Add(null);
+            RequestParameters.Add(null);
+            LuaParameters.WriteParameters(ref data, RequestParameters, 0);
+            SendPacket(sender, ServerOpcode.GeneralData, data);
+        }
 
     }
 
     public class commandForced : Event
     {
+        public Command CommandId { get; set; }
+
         public commandForced(byte[] data) : base(data)
         {
-
+            CommandId = (Command)(data[0x15] << 8 | data[0x14]);
+            OwnerId = 0;
         }
+
+        public override void Execute(Socket sender)
+        {
+            Log.Instance.Warning("Event: " + GetType().Name + ", Command: 0x" + CommandId.ToString("X"));
+
+            switch (CommandId)
+            {
+                case Command.BattleStance:
+                    //playerCharacter.State.Main = MainState.Active;
+                    //playerCharacter.SetMainState(sender);
+                    //playerCharacter.SendActionResult(sender, Command.BattleStance);
+                    //playerCharacter.EndClientOrderEvent(sender, eventType);
+                    break;
+                case Command.NormalStance:
+                    //playerCharacter.State.Main = MainState.Passive;
+                    //playerCharacter.SetMainState(sender);
+                    //playerCharacter.SendActionResult(sender, Command.NormalStance);
+                    //playerCharacter.EndClientOrderEvent(sender, eventType);
+                    break;
+                case Command.MountChocobo:
+                    User.Instance.Character.ToggleMount(sender, Command.MountChocobo);                    
+                    break;
+
+            }
+        }
+
     }
 
     public class commandContent : Event

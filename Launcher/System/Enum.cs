@@ -64,6 +64,7 @@ namespace Launcher
         SendFriendList = 0x1ce,        
         StartEvent = 0x12f,
         ChatMessage = 0x03,
+        GeneralData = 0x133,
 
         //Delete actors
         MassDeleteStart = 0x06,
@@ -161,6 +162,7 @@ namespace Launcher
         EquipSoulStone = 0x2ef1,
 
         QuestData = 0x5e93,
+        GuildleveData = 0x5e94,
         Logout = 0x5e9b,
         Teleport = 0x5e9c,
         DoEmote = 0x5e26,
@@ -383,7 +385,10 @@ namespace Launcher
         Stopped = 0,
         Walking = 0x40000000,
         Running = 0x40d00000,
-        Active = 0x40a00000
+        Active = 0x40a00000,
+
+        WalkingMount = 0x40000000,
+        RunningMount = 0x40d00000
     }
 
     /// <summary>
@@ -412,4 +417,25 @@ namespace Launcher
     {
         //this is used to fake type and int for lua parameters. Will probably be removed later when I come up with something better.
     }
+
+    public enum ChocoboAppearance
+    {
+        Rental = 0,
+
+        //company chocobo type bound by rank?
+        Maelstrom1 = 0x01,
+        Maelstrom2 = 0x02,
+        Maelstrom3 = 0x03,
+        Maelstrom4 = 0x04,
+        
+        TwinAdder1 = 0x1F,
+        TwinAdder2 = 0x20,
+        TwinAdder3 = 0x21,
+        TwinAdder4 = 0x22,
+        
+        ImmortalFlames1 = 0x3D,
+        ImmortalFlames2 = 0x3E,
+        ImmortalFlames3 = 0x3F,
+        ImmortalFlames4 = 0x40,
+}
 }

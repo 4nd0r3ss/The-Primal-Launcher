@@ -38,5 +38,17 @@ namespace Launcher
 
             return data;
         }
+
+        public void SetMounted()
+        {
+            Walking = ActorSpeed.WalkingMount;
+            Running = ActorSpeed.RunningMount;
+        }
+
+        public void SetUnmounted()
+        {
+            Walking = ActorSpeed.Walking;
+            Running = ActorSpeed.Running;
+        }
     }
 }
