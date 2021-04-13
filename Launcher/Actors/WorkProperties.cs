@@ -42,12 +42,18 @@ namespace Launcher
             _index = 0;           
         }
 
-        public void Add(string id, object value, bool isLastItem = false)
-        {   
-            
-            uint hashedId = MurmurHash2(id, 0);     
+        public void Add(object key, object value, bool isLastItem = false)
+        {
+            uint hashedId = 0;
 
-            if(value is bool)
+            //This is for writing unknown work values from packet traces while I don't get a working reverse murmur function. 
+            //if key is a int we just bypass the murmur hashing.
+            if (key is string)
+                hashedId = MurmurHash2((string)key, 0);
+            else
+                hashedId = (uint)key;
+
+            if (value is bool)
             {
                 if (_index + 6 + 1 + Command.Length <= _maxBytes) //if there is space to write... | +1 = wrapper byte
                 {
@@ -63,7 +69,7 @@ namespace Launcher
             }
                 else
                 {
-                    SendPacket(id, value);
+                    SendPacket((string)key, value);
                 }
             }
             else if(value is byte || value is sbyte)
@@ -81,7 +87,7 @@ namespace Launcher
                 }
                 else
                 {
-                    SendPacket(id, value);
+                    SendPacket((string)key, value);
                 }
             }
             else if(value is ushort || value is short)
@@ -102,7 +108,7 @@ namespace Launcher
                 }
                 else
                 {
-                    SendPacket(id, value);
+                    SendPacket((string)key, value);
                 }
             }           
             else if(value is uint || value is int)
@@ -123,7 +129,7 @@ namespace Launcher
                 }
                 else
                 {
-                    SendPacket(id, value);
+                    SendPacket((string)key, value);
                 }
             }
             else if(value is float)
@@ -143,7 +149,7 @@ namespace Launcher
                 }
                 else
                 {
-                    SendPacket(id, value);
+                    SendPacket((string)key, value);
                 }
             }  
             else if (value is Queue<short> buffer)
@@ -200,7 +206,7 @@ namespace Launcher
             SendPacket();
         }
 
-        private void SendPacket(string id = null, object value = null)
+        private void SendPacket(string key = null, object value = null)
         {
             _bw.Write((byte)(_writeMore ? (0x60 + Command.Length) : (0x82 + Command.Length))); //write wrap byte
             _index += 1;            
@@ -211,7 +217,7 @@ namespace Launcher
             _bw.Seek(0, SeekOrigin.Begin);
             _bw.Write((byte)_index);
 
-            _sender.Send(new Packet(new GamePacket { Opcode = 0x137, Data = _buffer }).ToBytes());
+            _sender.Send(new Packet(new GamePacket { Opcode = (ushort)ServerOpcode.ActorInit, Data = _buffer }).ToBytes());
 
             _bw.Dispose();
             _ms.Dispose();
@@ -219,12 +225,12 @@ namespace Launcher
             if (_writeMore)
             {
                 InitWrite(1);
-                Add(id, value);
+                Add(key, value);
             }           
         }
 
         /// <summary>
-        /// This is a generic murmurhash2 function. I copied this version from IonCannon's project, so the credit goes to him.
+        /// This is a generic murmurhash2 function. I've copied this version from Meteor project, the credit goes to them.
         /// </summary>
         /// <param name="key"></param>
         /// <param name="seed"></param>

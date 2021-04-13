@@ -39,10 +39,10 @@ namespace Launcher
             LuaParameters.Add(false);
             LuaParameters.Add(false);
 
-            EventConditions = new List<EventCondition>();
-            EventConditions.Add(new EventCondition { Opcode = ServerOpcode.NoticeEvent, EventName = "noticeEvent", Priority = 0x0e });
-            EventConditions.Add(new EventCondition { Opcode = ServerOpcode.NoticeEvent, EventName = "noticeRequest", IsDisabled = 0x01 });
-            EventConditions.Add(new EventCondition { Opcode = ServerOpcode.NoticeEvent, EventName = "reqForChild", IsDisabled = 0x01 });
+            Events = new List<Event>();
+            Events.Add(new Event { Opcode = ServerOpcode.NoticeEvent, EventName = "noticeEvent", Priority = 0x0e });
+            Events.Add(new Event { Opcode = ServerOpcode.NoticeEvent, EventName = "noticeRequest", Enabled = 0x01 });
+            Events.Add(new Event { Opcode = ServerOpcode.NoticeEvent, EventName = "reqForChild", Enabled = 0x01 });
         }
 
 
@@ -77,7 +77,7 @@ namespace Launcher
             Buffer.BlockCopy(BitConverter.GetBytes(characterId), 0, data, 0, 4);
             Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, data, 0x04, 4);
 
-            Buffer.BlockCopy(BitConverter.GetBytes(0x00000005), 0, data, 0x08, 4); //the last byte is the event type (05). the other bytes are unknown.
+            Buffer.BlockCopy(BitConverter.GetBytes(0x75dc1705), 0, data, 0x08, 4); //the last byte is the event type (05). the other bytes are unknown.
             Buffer.BlockCopy(BitConverter.GetBytes(ClassCode), 0, data, 0x0c, 4);
             LuaParameters parameters = new LuaParameters();
             parameters.Add(Encoding.ASCII.GetBytes("noticeEvent"));            

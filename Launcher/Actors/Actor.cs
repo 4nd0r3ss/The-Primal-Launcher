@@ -23,6 +23,7 @@ namespace Launcher
         public string ClassPath { get; set; }
         public uint ClassCode { get; set; }
         public int QuestIcon { get; set; }
+        public bool Spawned { get; set; }
 
         #region States
         public State State { get; set; } = new State();
@@ -42,7 +43,7 @@ namespace Launcher
         public Appearance Appearance { get; set; } = new Appearance();      
         public Position Position { get; set; } = new Position();
         public LuaParameters LuaParameters { get; set; }
-        public List<EventCondition> EventConditions { get; set; } = new List<EventCondition>();
+        public List<Event> Events { get; set; } = new List<Event>();
         public Speeds Speeds { get; set; } = new Speeds();
 
         public virtual void Spawn(Socket sender, ushort spawnType = 0, ushort isZoning = 0, int changingZone = 0, ushort actorIndex = 0)
@@ -61,6 +62,7 @@ namespace Launcher
             SetIsZoning(sender, false);
             LoadScript(sender);
             Init(sender);
+            Spawned = true;
         }
 
         public virtual void Prepare(ushort actorIndex = 0)
@@ -91,9 +93,9 @@ namespace Launcher
 
         public void SetEventConditions(Socket sender)
         {
-            if (EventConditions.Count > 0) //not all actors have event conditions
+            if (Events.Count > 0) //not all actors have event conditions
             {
-                foreach (var e in EventConditions)
+                foreach (var e in Events)
                 {
                     byte[] data = new byte[0x28];
                     byte[] conditionName = Encoding.ASCII.GetBytes(e.EventName);
@@ -103,7 +105,7 @@ namespace Launcher
                     {
                         case ServerOpcode.EmoteEvent:
                             Buffer.BlockCopy(BitConverter.GetBytes(e.Priority), 0, data, 0, sizeof(byte));
-                            Buffer.BlockCopy(BitConverter.GetBytes(e.IsDisabled), 0, data, 0x1, sizeof(byte));
+                            Buffer.BlockCopy(BitConverter.GetBytes(e.Enabled), 0, data, 0x1, sizeof(byte));
                             Buffer.BlockCopy(BitConverter.GetBytes(e.EmoteId), 0, data, 0x2, sizeof(ushort));
                             Buffer.BlockCopy(conditionName, 0, data, 0x4, conditionNameLength);
                             break;
@@ -141,7 +143,7 @@ namespace Launcher
                         case ServerOpcode.TalkEvent:
                         default:
                             Buffer.BlockCopy(BitConverter.GetBytes(e.Priority), 0, data, 0, sizeof(byte));
-                            Buffer.BlockCopy(BitConverter.GetBytes(e.IsDisabled), 0, data, 0x1, sizeof(byte));
+                            Buffer.BlockCopy(BitConverter.GetBytes(e.IsSilent), 0, data, 0x1, sizeof(byte));
                             Buffer.BlockCopy(conditionName, 0, data, 0x2, conditionNameLength);
                             break;
                     }
@@ -324,13 +326,44 @@ namespace Launcher
             SendPacket(sender, ServerOpcode.DoEmote, data);
         }
 
-        #region Event virtual methods     
+        #region Event virtual methods   
+        public virtual void SetEventStatus(Socket sender)
+        {
+            byte[] data = new byte[0x48];
+
+            foreach (Event ec in Events)
+            {
+                Buffer.BlockCopy(BitConverter.GetBytes((uint)ec.Enabled), 0, data, 0, sizeof(uint));
+                byte eventType = 1;
+
+                switch (ec.EventName)
+                {
+                    case "pushDefault":
+                        eventType = 2;
+                        break;
+                    default:
+                        eventType = 1;
+                        break;
+                }
+
+                data[0x04] = eventType;
+                Buffer.BlockCopy(Encoding.ASCII.GetBytes(ec.EventName), 0, data, 0x05, ec.EventName.Length);
+
+                SendPacket(sender, ServerOpcode.SetEventStatus, data);
+            }
+        }
+
         public virtual void noticeEvent(Socket sender) { }      
 
         public virtual void pushDefault(Socket sender) { }
 
         public virtual void talkDefault(Socket sender) { }
         #endregion
+
+        public void SetQuestIcon(Socket sender)
+        {
+            SendPacket(sender, ServerOpcode.SetQuestIcon, BitConverter.GetBytes((ulong)QuestIcon));
+        }
 
         /// <summary>
         /// Converts a number to a base 63 string. This function was taken from Ioncannon's code, all credit goes to him. 

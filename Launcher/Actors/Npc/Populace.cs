@@ -10,13 +10,14 @@ namespace Launcher
     public class Populace : Actor
     {
        
-        public string DefaultTalkFunction { get; set; }
+        public string TalkFunction { get; set; }
+        public string QuestFunction { get; set; }
 
         public Populace()
         {
             ClassPath = "/chara/npc/populace/";           
             ClassCode = 0x30400000;
-            DefaultTalkFunction = "processTtrNomal003";
+            TalkFunction = "processEvent000_9";// "processTtrNomal003";
         }
 
         public override void Spawn(Socket sender, ushort spawnType = 0, ushort isZoning = 0, int changingZone = 0, ushort actorIndex = 0)
@@ -36,13 +37,8 @@ namespace Launcher
             Init(sender);
             SetEventStatus(sender);
             SetQuestIcon(sender);
-        }       
-
-        private void SetQuestIcon(Socket sender)
-        {
-            if (QuestIcon >= 0)            
-                SendPacket(sender, ServerOpcode.SetQuestIcon, BitConverter.GetBytes((ulong)QuestIcon));            
-        }
+            Spawned = true;
+        }               
 
         public override void Init(Socket sender)
         {
@@ -62,36 +58,13 @@ namespace Launcher
             SendPacket(sender, ServerOpcode.ActorInit, data);
         }
 
-        #region Event methods
-        private void SetEventStatus(Socket sender)
-        {
-            byte[] data = new byte[0x48];
-
-            foreach (EventCondition ec in EventConditions)
-            {
-                Buffer.BlockCopy(BitConverter.GetBytes((uint)0x01), 0, data, 0, sizeof(uint));
-                byte eventType = 1;
-
-                switch (ec.EventName)
-                {
-                    case "pushDefault":
-                        eventType = 2;
-                        break;
-                    default:
-                        eventType = 1;
-                        break;
-                }
-
-                data[0x04] = eventType;
-                Buffer.BlockCopy(Encoding.ASCII.GetBytes(ec.EventName), 0, data, 0x05, ec.EventName.Length);
-
-                SendPacket(sender, ServerOpcode.SetEventStatus, data);
-            }
-        }
-
+        #region Event methods       
         public override void talkDefault(Socket sender)
-        {          
-            EventManager.Instance.CurrentEvent.DelegateEvent(sender, 0xA0F1ADB1, DefaultTalkFunction);           
+        {
+           
+                //EventManager.Instance.CurrentEvent.DelegateEvent(sender, 0xA0F1ADB1, TalkFunction);
+            
+            EventManager.Instance.CurrentEvent.DelegateEvent(sender, 0xA0F1ADB1, TalkFunction);           
         }
 
         public override void pushDefault(Socket sender)

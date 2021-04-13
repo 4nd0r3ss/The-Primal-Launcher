@@ -99,7 +99,7 @@ namespace Launcher
         SetHasGobbue = 0x1a1,
 
         BattleActionResult01 = 0x139,
-        EndClientOrderEvent = 0x131,
+        
 
         //event conditions
         TalkEvent = 0x012e,
@@ -109,7 +109,10 @@ namespace Launcher
         PushEvenFan = 0x0170,
         PushEventTriggerBox = 0x0175,
 
-        StartEventRequest = 0x130,
+        EventRequestResponse = 0x130,
+        EventRequestFinish = 0x131,
+
+        
         //EventResult = 0x12e,
 
         //Inventory

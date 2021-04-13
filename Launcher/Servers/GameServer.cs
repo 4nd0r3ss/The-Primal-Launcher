@@ -120,7 +120,7 @@ namespace Launcher
                     EventManager.Instance.ProcessIncoming(_connection.socket, subpacket.Data);
                     break;
 
-                case (ushort)ClientOpcode.DataRequest:                           
+                case (ushort)ClientOpcode.DataRequest:     //TODO: should be in event manager?                      
                     string request = Encoding.ASCII.GetString(subpacket.Data).Substring(0x14, 0x20).Trim(new[] { '\0' }); 
 
                     switch (request)
@@ -140,7 +140,7 @@ namespace Launcher
                     break;
 
                 case (ushort)ClientOpcode.EventResult:
-                    EventManager.Instance.CurrentEvent.EndClientOrder(_connection.socket);                   
+                    EventManager.Instance.CurrentEvent.Finish(_connection.socket);                   
                     break;
 
                 case (ushort)ClientOpcode.GMTicketActiveRequest:

@@ -79,7 +79,7 @@ namespace Launcher
             ChatProcessor.SendMessage(sender, MessageType.GeneralInfo, @"To get a list of available commands, type \help in the chat window and hit enter.");            
             
             playerCharacter.SendGroupPackets(sender);
-            playerCharacter.IsNew = false;
+            playerCharacter.IsNew = true;
             playerCharacter.OpeningSequence(sender);
 
             SetMapEnvironment(sender, zone);

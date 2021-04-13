@@ -321,7 +321,7 @@ namespace Launcher
                         actor.Position = SetPosition(zoneId, node.SelectSingleNode("position"));
                         actor.QuestIcon = questIcon;
                         actor.SubState = new SubState { MotionPack = animation };
-                        actor.EventConditions = SetEvents(node.SelectSingleNode("events"));
+                        actor.Events = SetEvents(node.SelectSingleNode("events"));
 
                         zoneNpcs.Add(actor);
                     }
@@ -335,16 +335,16 @@ namespace Launcher
             return zoneNpcs;
         }
 
-        private List<EventCondition> SetEvents(XmlNode eventNode)
+        private List<Event> SetEvents(XmlNode eventNode)
         {
-            List<EventCondition> eventList = new List<EventCondition>();
+            List<Event> eventList = new List<Event>();
 
             foreach(XmlNode node in eventNode.ChildNodes)
             {
                 switch (node.Name)
                 {
                     case "pushDefault":
-                        eventList.Add(new EventCondition
+                        eventList.Add(new Event
                         {
                             Opcode = ServerOpcode.PushEventCircle,
                             EventName = "pushDefault",
@@ -354,22 +354,22 @@ namespace Launcher
                         });
                         break;
                     case "talkDefault":
-                        eventList.Add(new EventCondition
+                        eventList.Add(new Event
                         {
                             Opcode = ServerOpcode.TalkEvent,
                             EventName = "talkDefault",
                             Priority = Convert.ToByte(node.Attributes["priority"].Value),
-                            IsDisabled = Convert.ToByte(node.Attributes["disabled"].Value)
+                            Enabled = Convert.ToByte(node.Attributes["enabled"].Value)
                         });
                         break;
 
                     case "noticeEvent":
-                        eventList.Add(new EventCondition
+                        eventList.Add(new Event
                         {
                             Opcode = ServerOpcode.NoticeEvent,
                             EventName = "noticeEvent",
                             Priority = Convert.ToByte(node.Attributes["priority"].Value),
-                            IsDisabled = Convert.ToByte(node.Attributes["disabled"].Value)
+                            Enabled = Convert.ToByte(node.Attributes["enabled"].Value)
                         });
                         break;
                     case "in":

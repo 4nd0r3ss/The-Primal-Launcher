@@ -11,7 +11,7 @@ namespace Launcher
     {
         private static EventManager _instance = null;
         private static readonly object _padlock = new object();
-        public Event CurrentEvent { get; set; } = null;
+        public EventRequest CurrentEvent { get; set; } = null;
 
         public static EventManager Instance
         {
@@ -32,7 +32,7 @@ namespace Launcher
         public void ProcessIncoming(Socket sender, byte[] data)
         {
             Type type = Type.GetType(GetEventType(data));
-            CurrentEvent = (Event)Activator.CreateInstance(type, data);
+            CurrentEvent = (EventRequest)Activator.CreateInstance(type, data);
             CurrentEvent.Execute(sender);                 
         }    
         
@@ -48,7 +48,7 @@ namespace Launcher
            return "Launcher." + Encoding.ASCII.GetString(nameBytes);
         }
     }
-    public class Event
+    public class EventRequest
     {
         public LuaParameters RequestParameters { get; set; }
 
@@ -63,7 +63,7 @@ namespace Launcher
 
         public byte[] Data { get; set; }
 
-        public Event(byte[] data)
+        public EventRequest(byte[] data)
         {
             RequestParameters = new LuaParameters();
 
@@ -72,31 +72,6 @@ namespace Launcher
             Unknown1 = (uint)(data[0x1b] << 24 | data[0x1a] << 16 | data[0x19] << 8 | data[0x18]);
             Unknown2 = (uint)(data[0x1f] << 24 | data[0x1e] << 16 | data[0x1d] << 8 | data[0x1c]);
             Data = data;
-        }       
-
-        public void EndClientOrder(Socket sender)
-        {
-            byte[] data = new byte[0x30];
-            Buffer.BlockCopy(BitConverter.GetBytes(User.Instance.Character.Id), 0, data, 0, sizeof(uint));
-            data[0x08] = 1;
-            string name = GetType().Name;
-            Buffer.BlockCopy(Encoding.ASCII.GetBytes(name), 0, data, 0x09, name.Length);
-            SendPacket(sender, ServerOpcode.EndClientOrderEvent, data);
-            EventManager.Instance.CurrentEvent = null;
-        }
-
-        private void RequestResponse(Socket sender)
-        {
-            byte[] data = new byte[0xb0];
-            Buffer.BlockCopy(BitConverter.GetBytes(CallerId), 0, data, 0, 4);
-            Buffer.BlockCopy(BitConverter.GetBytes(OwnerId), 0, data, 0x04, 4);            
-            LuaParameters.WriteParameters(ref data, RequestParameters, 0x08);
-            SendPacket(sender, ServerOpcode.StartEventRequest, data);
-        }
-
-        public void SendPacket(Socket sender, ServerOpcode opcode, byte[] data, uint sourceId = 0, uint targetId = 0)
-        {
-            sender.Send(new Packet(new GamePacket{ Opcode = (ushort)opcode, Data = data }).ToBytes());
         }
 
         public virtual void Execute(Socket sender)
@@ -110,6 +85,32 @@ namespace Launcher
             else
                 Log.Instance.Error("Actor 0x" + OwnerId.ToString("X") + " not found.");
         }
+
+        private void Response(Socket sender)
+        {
+            byte[] data = new byte[0xb0];
+            Buffer.BlockCopy(BitConverter.GetBytes(CallerId), 0, data, 0, 4);
+            Buffer.BlockCopy(BitConverter.GetBytes(OwnerId), 0, data, 0x04, 4);
+            LuaParameters.WriteParameters(ref data, RequestParameters, 0x08);
+            SendPacket(sender, ServerOpcode.EventRequestResponse, data);
+        }
+
+        public void Finish(Socket sender)
+        {
+            byte[] data = new byte[0x30];
+            Buffer.BlockCopy(BitConverter.GetBytes(User.Instance.Character.Id), 0, data, 0, sizeof(uint));
+            data[0x08] = 1;
+            string name = GetType().Name;
+            Buffer.BlockCopy(Encoding.ASCII.GetBytes(name), 0, data, 0x09, name.Length);
+            SendPacket(sender, ServerOpcode.EventRequestFinish, data);
+            EventManager.Instance.CurrentEvent = null;
+        }
+
+        #region helper methods
+        public void SendPacket(Socket sender, ServerOpcode opcode, byte[] data, uint sourceId = 0, uint targetId = 0)
+        {
+            sender.Send(new Packet(new GamePacket{ Opcode = (ushort)opcode, Data = data }).ToBytes());
+        }        
 
         public Actor GetActor()
         {
@@ -132,27 +133,22 @@ namespace Launcher
             else
                 Log.Instance.Error("EventManager.InvokeMethod: Type " + GetType().Name + " has no method " + methodName + ".");
         }
+        #endregion
 
-        public static void Trigger()
-        {
-
-        }
-
-        public virtual void DelegateEvent(Socket sender, uint quest, string functionName)
+        public virtual void DelegateEvent(Socket sender, uint questId, string functionName)
         {
             RequestParameters.Add(Encoding.ASCII.GetBytes("delegateEvent"));
             RequestParameters.Add(CallerId);
-            RequestParameters.Add(quest);
+            RequestParameters.Add(questId);
             RequestParameters.Add(functionName);
             RequestParameters.Add(null);
             RequestParameters.Add(null);
             RequestParameters.Add(null);
-
-            RequestResponse(sender);
+            Response(sender);
         }
     }
       
-    public class commandRequest : Event
+    public class commandRequest : EventRequest
     {
         public Command CommandId { get; set; }
         public commandRequest(byte[] data) : base(data)
@@ -174,8 +170,7 @@ namespace Launcher
                     GetGuildleveData(sender);
                     break;
                 case Command.UmountChocobo:
-                    User.Instance.Character.ToggleMount(sender, Command.UmountChocobo);
-                    Log.Instance.Success("Player is now dismounted.");
+                    User.Instance.Character.ToggleMount(sender, Command.UmountChocobo);                   
                     break;
                 case Command.DoEmote:
                     Log.Instance.Warning("emote id:" + Data[0x45].ToString("X2"));
@@ -221,7 +216,7 @@ namespace Launcher
 
     }
 
-    public class commandForced : Event
+    public class commandForced : EventRequest
     {
         public Command CommandId { get; set; }
 
@@ -237,28 +232,22 @@ namespace Launcher
 
             switch (CommandId)
             {
-                case Command.BattleStance:
-                    //playerCharacter.State.Main = MainState.Active;
-                    //playerCharacter.SetMainState(sender);
-                    //playerCharacter.SendActionResult(sender, Command.BattleStance);
-                    //playerCharacter.EndClientOrderEvent(sender, eventType);
-                    break;
+                case Command.BattleStance:   
                 case Command.NormalStance:
-                    //playerCharacter.State.Main = MainState.Passive;
-                    //playerCharacter.SetMainState(sender);
-                    //playerCharacter.SendActionResult(sender, Command.NormalStance);
-                    //playerCharacter.EndClientOrderEvent(sender, eventType);
+                    User.Instance.Character.ToggleStance(sender, CommandId);
                     break;
                 case Command.MountChocobo:
                     User.Instance.Character.ToggleMount(sender, Command.MountChocobo);                    
                     break;
 
             }
+            
+            Finish(sender);
         }
 
     }
 
-    public class commandContent : Event
+    public class commandContent : EventRequest
     {
         public commandContent(byte[] data) : base(data)
         {
@@ -266,14 +255,37 @@ namespace Launcher
         }
     }
 
-    public class talkDefault : Event
+    public class talkDefault : EventRequest
     {
         public talkDefault(byte[] data) : base(data)
         {
             EventType eventType = (EventType)Enum.Parse(typeof(EventType), GetType().Name);
             RequestParameters.Add((sbyte)eventType);
             RequestParameters.Add(Encoding.ASCII.GetBytes(GetType().Name));
-        }      
+        }
+
+        public override void Execute(Socket sender)
+        {
+            Actor eventOwner = GetActor();
+
+            if (eventOwner != null)
+            {
+                foreach (Quest quest in User.Instance.Character.Quests)
+                {
+                    string stepResult = quest.ActorStepComplete(sender, eventOwner.ClassId, GetType().Name);
+
+                    if (stepResult != null)
+                    {
+                        DelegateEvent(sender, 0xA0F00000 | quest.Id, stepResult);                       
+                        return;
+                    }
+                }
+
+                eventOwner.InvokeMethod(GetType().Name, new object[] { sender });
+            }
+            else
+                Log.Instance.Error("Actor 0x" + OwnerId.ToString("X") + " not found.");
+        }
 
         private void EventTalkCard() { }
         private void EventTalkDetail() { }
@@ -295,17 +307,48 @@ namespace Launcher
         private void AskLogout() { }
     }
 
-    public class pushDefault : Event
+    public class pushDefault : EventRequest
     {
         public pushDefault(byte[] data) : base(data)
         {
             EventType eventType = (EventType)Enum.Parse(typeof(EventType), GetType().Name);
-            RequestParameters.Add((sbyte)eventType);
+            RequestParameters.Add((sbyte)0x05);
             RequestParameters.Add(Encoding.ASCII.GetBytes(GetType().Name));
+        }
+
+        private void AddEventInfo(byte code, string eventName)
+        {
+            RequestParameters.Add((sbyte)code);
+            RequestParameters.Add(Encoding.ASCII.GetBytes(eventName));
+        }
+
+        public override void Execute(Socket sender)
+        {
+            Log.Instance.Warning("Event: " + GetType().Name + ", Actor: 0x" + OwnerId.ToString("X"));
+
+            Actor eventOwner = GetActor();            
+
+            if (eventOwner != null)
+            {
+                foreach (Quest quest in User.Instance.Character.Quests)
+                {
+                    string stepResult = quest.ActorStepComplete(sender, eventOwner.ClassId, GetType().Name);
+
+                    if (stepResult != null)
+                    {
+                        DelegateEvent(sender, 0xA0F00000 | quest.Id, stepResult);
+                        return;
+                    }
+                }
+
+                eventOwner.InvokeMethod(GetType().Name, new object[] { sender });               
+            }               
+            else
+                Log.Instance.Error("Actor 0x" + OwnerId.ToString("X") + " not found.");
         }
     }
 
-    public class noticeEvent : Event
+    public class noticeEvent : EventRequest
     {
         public noticeEvent(byte[] data) : base(data)
         {

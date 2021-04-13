@@ -200,6 +200,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Actors\Appearance.cs" />
+    <Compile Include="Actors\PlayerCharacter\Quest.cs" />
     <Compile Include="Actors\Speeds.cs" />
     <Compile Include="Actors\State.cs" />
     <Compile Include="Actors\SubState.cs" />
@@ -208,7 +209,7 @@
     <Compile Include="Actors\PlayerCharacter\ItemGraphics.cs" />
     <Compile Include="Actors\Npc\Populace.cs" />
     <Compile Include="Events\CommandResult.cs" />
-    <Compile Include="Events\EventCondition.cs" />
+    <Compile Include="Events\Event.cs" />
     <Compile Include="System\LuaParameters.cs" />
     <Compile Include="System\BitField.cs" />
     <Compile Include="System\Blowfish.cs" />

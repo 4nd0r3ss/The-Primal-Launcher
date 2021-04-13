@@ -39,6 +39,7 @@ namespace Launcher
         public OrderedDictionary GeneralParameters { get; set; }
         public PartyGroup PartyGroup { get; set; }
         public RetainerGroup RetainerGroup { get; set; }
+        public List<Quest> Quests { get; set; } = new List<Quest>();
 
         public Queue<byte[]> PacketQueue { get; set; }
 
@@ -56,6 +57,8 @@ namespace Launcher
             Speeds.Walking = ActorSpeed.Walking;  //Walking speed
             Speeds.Running = ActorSpeed.Running; // 0x40a00000;  //Running speed
             Speeds.Active = ActorSpeed.Active;  //Acive
+
+            Quests.Add(new Quest());
 
             //prepare packet info for decoding
             byte[] info = new byte[0x90];
@@ -250,10 +253,13 @@ namespace Launcher
                         break;
                 }
 
+                Quests = new List<Quest>();
+                Quests.Add(new Quest());
+                Quests[0].StartPhase(sender);
                 OpeningDirector openingDirector1 = new OpeningDirector(directorId1);
-                OpeningDirector openingDirector2 = new OpeningDirector(directorId2);
+                //OpeningDirector openingDirector2 = new OpeningDirector(directorId2);
                 World.Instance.Actors.Add(openingDirector1);
-                World.Instance.Actors.Add(openingDirector2);
+                //World.Instance.Actors.Add(openingDirector2);
                 openingDirector1.Spawn(sender);
                 openingDirector1.StartEvent(sender);
             }
@@ -458,8 +464,10 @@ namespace Launcher
             property.Add("charaWork.parameterTemp.giftCount[1]", (byte)5);
             property.Add("charaWork.depictionJudge", 0xa0f50911);
 
-            //for (int i = 0; i < 40; i++)
-            property.Add(string.Format("playerWork.questScenario[{0}]", 1), 0xA0F00000 | 110001);
+            for (int i = 0; i < Quests.Count; i++)
+                property.Add(string.Format("playerWork.questScenario[{0}]", i+1), 0xA0F00000 | Quests[i].Id);
+            
+           
 
             AddToWorkGuildleve(ref property);
             AddToWorkNpcLinkshell(ref property);
@@ -676,9 +684,17 @@ namespace Launcher
             data[0x30] = 1;
             data[0x36] = 1;
             SendPacket(sender, ServerOpcode.CommandResultX1, data);
+        }
 
-            //end event order
-            EventManager.Instance.CurrentEvent.EndClientOrder(sender);
+        public void ToggleStance(Socket sender, Command command)
+        {
+            if(command == Command.BattleStance)           
+                State.Main = MainState.Active;            
+            else           
+                State.Main = MainState.Passive;
+
+            SetMainState(sender);
+            SendActionResult(sender, command);           
         }
 
         public void EquipSoulStone(Socket sender, byte[] data)
@@ -917,22 +933,7 @@ namespace Launcher
             byte[] data = new byte[0x10];
             Buffer.BlockCopy(BitConverter.GetBytes(User.Instance.Character.Id), 0, data, 0x08, 0x04);
             SendPacket(sender, ServerOpcode.Unknown0x02, data);           
-        }
-
-        #region Events      
-        public void EndClientOrderEvent(Socket sender, string eventType)
-        {
-            byte[] data = new byte[0x30];
-
-            Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, data, 0, sizeof(uint));
-            Buffer.BlockCopy(Encoding.ASCII.GetBytes(eventType), 0, data, 0x08, eventType.Length);
-
-            Buffer.BlockCopy(BitConverter.GetBytes(0x09d4f200), 0, data, 0x28, sizeof(uint));
-            Buffer.BlockCopy(BitConverter.GetBytes(0x0a09a930), 0, data, 0x2c, sizeof(uint));
-
-            SendPacket(sender, ServerOpcode.EndClientOrderEvent, data);
-        }
-        #endregion
+        }       
     }
 
     [Serializable]
