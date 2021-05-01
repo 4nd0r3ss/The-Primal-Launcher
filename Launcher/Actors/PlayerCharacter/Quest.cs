@@ -30,7 +30,8 @@ namespace Launcher
                 {
                     new QuestPhaseStep{ActorClassId = 1001652, Type = "questIcon", Value = "2"},
                     new QuestPhaseStep{ActorClassId = 1000442, Type = "questIcon", Value = "2"},
-                    new QuestPhaseStep{ActorClassId = 1000447, Type = "questIcon", Value = "2"},                   
+                    new QuestPhaseStep{ActorClassId = 1000447, Type = "questIcon", Value = "2"},       
+                    new QuestPhaseStep{ActorId = 0x66080001, Type = "noticeEvent", Value = "processTtrNomal001withHQ"}, 
                     new QuestPhaseStep{ActorClassId = 1001652, Type = "pushDefault", Value = "processTtrNomal002", OnExecute = "Enabled:0"},
                     new QuestPhaseStep{ActorClassId = 1001652, Type = "talkDefault", Value = "processTtrNomal003"}
                 }
@@ -53,7 +54,18 @@ namespace Launcher
                 Steps = new List<QuestPhaseStep>
                 {
                      new QuestPhaseStep{ActorClassId = 1090025, Type = "questIcon", Value = "3"},
-                     new QuestPhaseStep{ActorClassId = 1090025, Type = "pushDefault", Value = "processEventNewRectAsk", Repeatable = true}
+                     new QuestPhaseStep{ActorClassId = 1090025, Type = "pushDefault", Value = "processEventNewRectAsk", Repeatable = true, Parameters = new object[] { null } }
+                }
+            });
+
+            Phases.Add(3, new QuestPhase
+            {
+                FinishCondition = "allStepsDone",
+                Steps = new List<QuestPhaseStep>
+                {
+                     new QuestPhaseStep{ActorId = 0x66080001, Type = "noticeEvent", Value = "processTtrBtl001", OnExecute = "SendData:9"},
+                     new QuestPhaseStep{ActorId = 0x66080001, Type = "noticeEvent", Value = "processTtrBtl002"},
+                     new QuestPhaseStep{ActorId = 0x66080001, Type = "noticeEvent", Value = "processTtrBtl003"},
                 }
             });
 
@@ -62,17 +74,26 @@ namespace Launcher
         public void StartPhase(Socket sender) => CurrentPhase.Start(sender);
        
 
-        public QuestPhaseStep SearchActorStep(uint actorClassId, string type)
+        public QuestPhaseStep SearchActorStep(string type, uint actorClassId, uint actorId)
         {
             QuestPhaseStep stepForActor = null;           
 
             foreach (QuestPhaseStep step in CurrentPhase.Steps)
             {
-                if (step.ActorClassId == actorClassId && step.Type == type && step.Done == false)
+                if (step.Type == type && step.Done == false)
                 {
-                    stepForActor = step;
-                    break;
-                }               
+                    if(step.ActorClassId == actorClassId)
+                    {
+                        stepForActor = step;
+                        break;
+                    }                        
+
+                    if(step.ActorClassId == 0 && step.ActorId == actorId)
+                    {
+                        stepForActor = step;
+                        break;
+                    }
+                }
             }
 
             return stepForActor;
@@ -87,19 +108,24 @@ namespace Launcher
             }
         }
 
-        public string ActorStepComplete(Socket sender, uint classId, string eventName)
+        public KeyValuePair<string, object[]> ActorStepComplete(Socket sender, string eventName, uint classId, uint actorid = 0, bool finishRepeatable = false)
         {            
-             QuestPhaseStep step = SearchActorStep(classId, eventName);
+             QuestPhaseStep step = SearchActorStep(eventName, classId, actorid);           
 
              if (step != null)
              {
                 step.Execute(sender);
+
+                if (finishRepeatable)
+                    step.Done = true;
+
                 CheckPhase(sender);
-                return step.Value;
+                KeyValuePair<string, object[]> result = new KeyValuePair<string, object[]>(step.Value, step.Parameters);
+                return result;
             }
             else
             {
-                return null;
+                return new KeyValuePair<string, object[]>();
             }     
         }
     }
@@ -125,7 +151,7 @@ namespace Launcher
                         break;
                     case "pushDefault":
                     case "talkDefault":
-                        actorRef.Events.Find(x => x.EventName == step.Type).Enabled = 1;
+                        actorRef.Events.Find(x => x.Name == step.Type).Enabled = 1;
                         if (actorRef.Spawned) actorRef.SetEventStatus(sender);
                         break;
                     
@@ -139,11 +165,13 @@ namespace Launcher
     public class QuestPhaseStep
     {
         public uint ActorClassId { get; set; }
+        public uint ActorId { get; set; } //we need this for when the actor has no classid but has a fixed id# (i.e. directors)
         public string Type { get; set; }
         public string Value { get; set; }
         public string OnExecute { get; set; }
         public bool Done { get; set; }
         public bool Repeatable { get; set; }
+        public object[] Parameters { get; set; }
 
         public void Execute(Socket sender)
         {
@@ -158,7 +186,7 @@ namespace Launcher
                     switch (command[0])
                     {
                         case "Enabled":
-                            typeof(Event).GetProperty(command[0]).SetValue(actorRef.Events.Find(x => x.EventName == Type), Convert.ToByte(command[1]));
+                            typeof(Event).GetProperty(command[0]).SetValue(actorRef.Events.Find(x => x.Name == Type), Convert.ToByte(command[1]));
                             actorRef.SetEventStatus(sender);
                             break;
                         case "QuestIcon":

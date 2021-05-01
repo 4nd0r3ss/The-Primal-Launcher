@@ -7,18 +7,18 @@ using System.Threading.Tasks;
 namespace Launcher
 {
     /// <summary>
-    /// This struct is used to keep data about event conditions for actors. Actors have a list of event conditions populated by specialized class' constructor. 
+    /// This class is used to keep data about event conditions for actors. Actors have a list of event conditions populated by specialized class' constructor. 
     /// </summary>
     [Serializable]
     public class Event
     {
         public ServerOpcode Opcode { get; set; }
-        public string EventName { get; set; }
+        public string Name { get; set; }
         public ushort EmoteId { get; set; }
         public float Radius { get; set; }       //circle size
         public byte Priority { get; set; }      //unknown
         public byte Enabled { get; set; }    //0 won't fire event.
-        public byte IsSilent { get; set; }      //0x1 do NOT lock UI and player.
+        public byte Silent { get; set; }      //0x1 do NOT lock UI and player.
         public byte Direction { get; set; }     //possible values: 0x11 leave circle, 0x1 enter circle.
         public uint ServerCodes { get; set; }
 

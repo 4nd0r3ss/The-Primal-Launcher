@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 
 namespace Launcher
 {
@@ -201,6 +202,24 @@ namespace Launcher
         {
             byte[] result = ZlibStream.UncompressBuffer(Data);
             Data = result;
+        }
+
+        public static void Send(Socket sender, ServerOpcode opcode, byte[] data, uint sourceId = 0, uint targetId = 0)
+        {
+            GamePacket gamePacket = new GamePacket
+            {
+                Opcode = (ushort)opcode,
+                Data = data
+            };
+
+            if (sourceId == 0) 
+                sourceId = User.Instance.Character.Id;
+
+            if (targetId == 0)
+                targetId = User.Instance.Character.Id;
+
+            Packet packet = new Packet(new SubPacket(gamePacket) { SourceId = sourceId, TargetId = targetId });
+            sender.Send(packet.ToBytes());
         }
     }
 }

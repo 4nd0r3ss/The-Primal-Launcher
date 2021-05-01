@@ -81,6 +81,7 @@ namespace Launcher
         TextSheetMessage50b = 0x15a,
         TextSheetMessage70b = 0x15b,
         TextSheetMessageNoSource28b = 0x166,
+        TextSheetMessageNoSource38b = 0x167,
 
         //World specific
         SetDalamud = 0x10,
@@ -96,9 +97,10 @@ namespace Launcher
         SetChocoboName = 0x198,
         SetChocoboMounted = 0x197,
         SetHasChocobo = 0x199,
-        SetHasGobbue = 0x1a1,
+        SetGobbueMounted = 0x01A0,
+        SetHasGobbue = 0x1A1,
 
-        BattleActionResult01 = 0x139,
+        CommandResult01 = 0x139,
         
 
         //event conditions
@@ -150,6 +152,7 @@ namespace Launcher
         GroupOccupancy = 0x0187,
         GroupSync = 0x1020, //check this        
         GroupInitWork = 0x17a,
+        GroupDutyMembers = 0x183,
 
         ActiveLinkshell = 0x18a
     }
@@ -160,8 +163,8 @@ namespace Launcher
     public enum Command
     {
         ChangeEquipment = 0x2ee9,
-        MountChocobo = 0x2eee,
-        UmountChocobo = 0x2eef,
+        Mount = 0x2eee,
+        Umount = 0x2eef,
         EquipSoulStone = 0x2ef1,
 
         QuestData = 0x5e93,
@@ -336,11 +339,7 @@ namespace Launcher
         Retainer = 0x013881,
         Party = 0x002711,
         Linkshell = 0x004e22,
-    }
-
-    public enum DirectorCode
-    {
-        Opening = 0x00000866
+        Duty = 0x007536
     }
 
     /// <summary>
@@ -391,7 +390,7 @@ namespace Launcher
         Active = 0x40a00000,
 
         WalkingMount = 0x40000000,
-        RunningMount = 0x40d00000
+        RunningMount = 0x40E00000
     }
 
     /// <summary>
@@ -410,6 +409,7 @@ namespace Launcher
 
     public enum ZoneType
     {
+        Nothing = 0,
         Default = 4,
         Inn = 68,
         Instance = 6,

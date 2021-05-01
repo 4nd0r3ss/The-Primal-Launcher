@@ -19,7 +19,7 @@ namespace Launcher
         public int Population { get; set; }
         public string ServerName { get; set; } = "CHANGE NAME"; //change this
         public List<Zone> Zones { get; set;}
-        public List<OpeningDirector> Actors { get; set; } = new List<OpeningDirector>();
+        public List<Actor> Actors { get; set; } = new List<Actor>();
         public static World Instance
         {
             get
@@ -149,31 +149,58 @@ namespace Launcher
             ChangeZone(sender, position);
         }        
 
-        private void ChangeZone(Socket sender, Position position)
+        public void ChangeZone(Socket sender, Position position, string allowedActorTypes = "all")
         {
             User.Instance.Character.Position = position;
-            PlayerCharacter playerCharacter = User.Instance.Character;            
-
-            uint currentZone = playerCharacter.Position.ZoneId;
-            Zone zone = Zones.Find(x => x.Id == currentZone);
+            PlayerCharacter playerCharacter = User.Instance.Character;    
+            Zone zone = Zones.Find(x => x.Id == playerCharacter.Position.ZoneId);
             Debug debug = new Debug();
 
-            SendPacket(sender, ServerOpcode.MassDeleteEnd, new byte[0x08], playerCharacter.Id, playerCharacter.Id);
+            MassDeleteActors(sender);
+            playerCharacter.MapUIChange(sender, (uint)(playerCharacter.IsNew ? 0x10 : 0x02));
+            SetMapEnvironment(sender, zone);
+            playerCharacter.Spawn(sender, (ushort)(playerCharacter.IsNew ? 0x10 : 0x02), 1);
 
-            playerCharacter.MapUIChange(sender, 0x02);
-
-            SetIsZoning(sender);
-            SetDalamudPhase(sender);
-            SetMusic(sender, zone.GetCurrentBGM());
-            SetWeather(sender, Weather.Clear);
-            SetMap(sender, zone);
-
-            playerCharacter.Spawn(sender, 2, 1, -1);//spawn player character
+            if (playerCharacter.IsNew) //TODO: move this to zone prepare
+            {
+                zone.ContentFunction = "SimpleContent30002";
+                zone.PrivLevel = 1;
+                zone.Type = ZoneType.Nothing;
+            }
+            
             zone.Spawn(sender);//spawn zone 
             debug.Spawn(sender);
             Spawn(sender, 0x01);
-            playerCharacter.SetPosition(sender, 2, 1, -1);
-            zone.SpawnActors(sender);
+
+            if (playerCharacter.IsNew)
+            {
+                OpeningDirector openingDirector = new OpeningDirector(0x66080000);
+                QuestDirector questDirector = new QuestDirector(0x66080001);
+
+                foreach(var ev in openingDirector.Events)
+                {
+                    if (ev.Name.IndexOf("notice") >= 0)
+                        ev.Silent = 1;
+                }
+
+                openingDirector.Spawn(sender);
+                questDirector.QuestFunction = "Man0l001";
+                questDirector.Spawn(sender);
+                playerCharacter.Groups.Find(x => x.Id == 0x30_00_00_00_00_00_00_01).SendPackets(sender);
+            }
+            
+            zone.SpawnActors(sender, allowedActorTypes);
+        }
+
+        public void MassDeleteActors(Socket sender)
+        {
+            PlayerCharacter playerCharacter = User.Instance.Character;
+            Zone zone = Zones.Find(x => x.Id == playerCharacter.Position.ZoneId);
+
+            if(zone.Actors.Count > 0) //anti-crash for debug
+                zone.Actors.ForEach(x => x.Spawned = false); // 'despawn' zone actors.
+
+            SendPacket(sender, ServerOpcode.MassDeleteEnd, new byte[0x08], playerCharacter.Id, playerCharacter.Id);
         }
 
         public XmlNodeList GetWorldListXml()
@@ -265,6 +292,28 @@ namespace Launcher
         }
 
         public void SendTextSheetMessage(Socket sender, ServerOpcode opcode, byte[] data) => SendPacket(sender, opcode, data);
+
+        public void SendTextQuestUpdated(Socket sender, uint questId)
+        {
+            byte[] data = new byte[0x18];
+
+            Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, data, 0, sizeof(uint));
+            Buffer.BlockCopy(BitConverter.GetBytes(0x20621C), 0, data, 0x04, sizeof(uint)); //sheet#
+            Buffer.BlockCopy(BitConverter.GetBytes(LuaParameters.SwapEndian(questId)), 0, data, 0x09, sizeof(uint));
+            Buffer.BlockCopy(BitConverter.GetBytes(0x0800000F), 0, data, 0x0D, sizeof(uint)); //unknown
+
+            Instance.SendTextSheetMessage(sender, ServerOpcode.TextSheetMessageNoSource38b, data);
+        }
+
+        public void SendTextEnteredDuty(Socket sender)
+        {
+            byte[] data = new byte[0x08];
+
+            Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, data, 0, sizeof(uint));
+            Buffer.BlockCopy(BitConverter.GetBytes(0x20853C), 0, data, 0x04, sizeof(uint)); //sheet#
+
+            Instance.SendTextSheetMessage(sender, ServerOpcode.TextSheetMessageNoSource28b, data);
+        }
 
         public void GMActiveRequest(Socket sender)
         {

@@ -140,7 +140,7 @@ namespace Launcher
                     break;
 
                 case (ushort)ClientOpcode.EventResult:
-                    EventManager.Instance.CurrentEvent.Finish(_connection.socket);                   
+                    EventManager.Instance.CurrentEvent.ProcessEventResult(_connection.socket, subpacket.Data);                   
                     break;
 
                 case (ushort)ClientOpcode.GMTicketActiveRequest:

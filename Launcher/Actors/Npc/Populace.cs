@@ -64,12 +64,12 @@ namespace Launcher
            
                 //EventManager.Instance.CurrentEvent.DelegateEvent(sender, 0xA0F1ADB1, TalkFunction);
             
-            EventManager.Instance.CurrentEvent.DelegateEvent(sender, 0xA0F1ADB1, TalkFunction);           
+            EventManager.Instance.CurrentEvent.DelegateEvent(sender, 0x1ADB1, TalkFunction);           
         }
 
         public override void pushDefault(Socket sender)
         {     
-            EventManager.Instance.CurrentEvent.DelegateEvent(sender, 0xA0F1ADB1, "processTtrNomal002");            
+            EventManager.Instance.CurrentEvent.DelegateEvent(sender, 0x1ADB1, "processTtrNomal002");            
         }
         #endregion
     }

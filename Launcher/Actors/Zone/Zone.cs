@@ -14,7 +14,10 @@ namespace Launcher
         public string MapName { get; set; }
         public string PlaceName { get; set; }      
         public bool MountAllowed { get; set; }       
+        public string ContentFunction { get; set; }
         public MusicSet MusicSet { get; set; }
+        public ZoneType Type { get; set; }
+        public byte PrivLevel { get; set; }
 
         public List<Actor> Actors = new List<Actor>(); //list to keep all actors which are currentl in this zone.
 
@@ -27,11 +30,18 @@ namespace Launcher
             PlaceName = ZoneList.LocationName[locationNameId];
             ClassName = classNameId < 0 ? null : "ZoneMaster" + ZoneList.ClassName[classNameId];
             MusicSet = MusicSet.Get(musicSetId);           
-            MountAllowed = isMountAllowed;                    
+            MountAllowed = isMountAllowed;
+            Type = zoneType;
 
+            Actors.AddRange(ActorRepository.Instance.Aetherytes.FindAll(x => x.Position.ZoneId == Id));
+            Actors.AddRange(ActorRepository.Instance.GetZoneNpcs(Id));
+        }
+
+        public override void Prepare(ushort actorIndex = 0)
+        {
             LuaParameters = new LuaParameters
             {
-                ActorName = "_areaMaster" + "@0" + LuaParameters.SwapEndian(zoneId).ToString("X").Substring(0, 4),
+                ActorName = "_areaMaster" + "@0" + LuaParameters.SwapEndian(Id).ToString("X").Substring(0, 4),
                 ClassName = ClassName,
                 ClassCode = 0x30400000
             };
@@ -40,19 +50,17 @@ namespace Launcher
             LuaParameters.Add(false);
             LuaParameters.Add(true);
             LuaParameters.Add(MapName);
-            LuaParameters.Add("");
-            LuaParameters.Add(-1);
-            LuaParameters.Add(Convert.ToByte(isMountAllowed));
+            LuaParameters.Add((!string.IsNullOrEmpty(ContentFunction) ? ContentFunction : ""));
+            LuaParameters.Add((!string.IsNullOrEmpty(ContentFunction) ? 1 : -1));
+            LuaParameters.Add(Convert.ToByte(MountAllowed));
 
             for (int i = 7; i > -1; i--)
-                LuaParameters.Add(((byte)zoneType & (1 << i)) != 0);
-
-            Actors.AddRange(ActorRepository.Instance.Aetherytes.FindAll(x => x.Position.ZoneId == Id));
-            Actors.AddRange(ActorRepository.Instance.GetZoneNpcs(Id));
+                LuaParameters.Add(((byte)Type & (1 << i)) != 0);
         }
 
         public override void Spawn(Socket handler, ushort spawnType = 0, ushort isZoning = 0, int changingZone = 0, ushort actorIndex = 0)
-        {            
+        {
+            Prepare();
             CreateActor(handler);
             SetSpeeds(handler);
             SetPosition(handler, 1, isZoning);
@@ -62,16 +70,28 @@ namespace Launcher
             LoadScript(handler);
         }       
 
-        public void SpawnActors(Socket sender)
-        {
+        public void SpawnActors(Socket sender, string allowedTypes = "all")
+        {            
+            List<Actor> actorsToSpawn = Actors; //all actors in zone
+
             try
             {
-                for (int i = 0; i < Actors.Count; i++)
-                    Actors[i].Spawn(sender, actorIndex: (ushort)(i+1));
+                switch (allowedTypes)
+                {
+                    case "monster":
+                        actorsToSpawn = Actors.FindAll(x => x.GetType().Name == "Monster").ToList();
+                        break;
+                    case "populace":
+                        actorsToSpawn = Actors.FindAll(x => x.GetType().Name == "Populace").ToList();
+                        break;
+                }
+
+                for (int i = 0; i < actorsToSpawn.Count; i++)
+                    actorsToSpawn[i].Spawn(sender, actorIndex: (ushort)(i + 1));
             }
             catch (Exception e) { _log.Error(e.Message); }
 
-            _log.Success("Loaded " + Actors.Count + " actors in zone " + PlaceName);
+            _log.Success("Loaded " + actorsToSpawn.Count + " actors in zone " + PlaceName);
         }
 
         public uint GetCurrentBGM()

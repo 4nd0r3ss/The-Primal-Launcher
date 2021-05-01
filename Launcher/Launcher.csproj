@@ -200,6 +200,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Actors\Appearance.cs" />
+    <Compile Include="Actors\Directors\QuestDirector.cs" />
+    <Compile Include="Actors\Npc\Monster.cs" />
     <Compile Include="Actors\PlayerCharacter\Quest.cs" />
     <Compile Include="Actors\Speeds.cs" />
     <Compile Include="Actors\State.cs" />

@@ -308,6 +308,8 @@ namespace Launcher
                         Type type = Type.GetType("Launcher." + node.Name);
                         Actor actor = (Actor)Activator.CreateInstance(type);
 
+
+                        actor.Family = node.Attributes["family"] != null ? node.Attributes["family"].Value : "";
                         actor.ClassId = classId;
                         actor.ClassName = node.Attributes["className"].Value;
                         actor.NameId = Convert.ToInt32(actorNameId.ItemArray[1]);
@@ -347,17 +349,17 @@ namespace Launcher
                         eventList.Add(new Event
                         {
                             Opcode = ServerOpcode.PushEventCircle,
-                            EventName = "pushDefault",
+                            Name = "pushDefault",
                             Radius = float.Parse(node.Attributes["radius"].Value),
                             Direction = Convert.ToByte(node.Attributes["outwards"].Value == "false" ? 1 : 0),
-                            IsSilent = Convert.ToByte(node.Attributes["silent"].Value == "false" ? 0 : 1)
+                            Silent = Convert.ToByte(node.Attributes["silent"].Value == "false" ? 0 : 1)
                         });
                         break;
                     case "talkDefault":
                         eventList.Add(new Event
                         {
                             Opcode = ServerOpcode.TalkEvent,
-                            EventName = "talkDefault",
+                            Name = "talkDefault",
                             Priority = Convert.ToByte(node.Attributes["priority"].Value),
                             Enabled = Convert.ToByte(node.Attributes["enabled"].Value)
                         });
@@ -367,9 +369,10 @@ namespace Launcher
                         eventList.Add(new Event
                         {
                             Opcode = ServerOpcode.NoticeEvent,
-                            EventName = "noticeEvent",
+                            Name = "noticeEvent",
                             Priority = Convert.ToByte(node.Attributes["priority"].Value),
-                            Enabled = Convert.ToByte(node.Attributes["enabled"].Value)
+                            Enabled = Convert.ToByte(node.Attributes["enabled"].Value),
+                            Silent = node.Attributes["silent"] != null ? Convert.ToByte(node.Attributes["silent"].Value) : (byte)0
                         });
                         break;
                     case "in":

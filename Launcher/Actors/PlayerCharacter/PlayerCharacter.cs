@@ -37,8 +37,12 @@ namespace Launcher
         public Inventory Inventory { get; set; }
         public Dictionary<byte, Job> Jobs { get; set; } = Job.LoadAll();
         public OrderedDictionary GeneralParameters { get; set; }
-        public PartyGroup PartyGroup { get; set; }
-        public RetainerGroup RetainerGroup { get; set; }
+
+        public List<Group> Groups { get; set; } = new List<Group>();
+
+        //public PartyGroup PartyGroup { get; set; }
+        //public RetainerGroup RetainerGroup { get; set; }
+        //public DutyGroup DutyGroup { get; set; }
         public List<Quest> Quests { get; set; } = new List<Quest>();
 
         public Queue<byte[]> PacketQueue { get; set; }
@@ -134,9 +138,6 @@ namespace Launcher
                 LuaParameters.Add(0);           
 
             LuaParameters.Add(true);
-
-            PartyGroup = new PartyGroup();
-            RetainerGroup = new RetainerGroup();
         }
 
         public override void Prepare(ushort actorIndex = 0){}
@@ -188,16 +189,17 @@ namespace Launcher
             SendPacket(handler, ServerOpcode.SetTarget, data);
         }
 
-        public override void Spawn(Socket sender, ushort spawnType = 0x01, ushort isZoning = 0, int changingZone = 0, ushort actorIndex = 0)
+        public void Spawn(Socket sender, ushort spawnType = 0x01, ushort isZoning = 0, ushort actorIndex = 0)
         {
-            PacketQueue = null;                     
+            PacketQueue = null;
+            State.Main = MainState.Passive;
             TargetId = Id; //For packet creation  
 
             //SendGroupPackets(sender);
             CreateActor(sender, 0x08);
             CommandSequence(sender);
             SetSpeeds(sender);
-            SetPosition(sender, spawnType, isZoning, changingZone);
+            SetPosition(sender, spawnType, isZoning);
             SetAppearance(sender);
             SetName(sender, -1, Name); //-1 = it's a custom name.
             SendUnknown(sender);
@@ -224,7 +226,7 @@ namespace Launcher
             SendPacket(sender, ServerOpcode.SetHasGobbue, new byte[] { 0x1, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
 
             GetAchievementPoints(sender);
-            GetAchievementsLatest(sender);
+            //GetAchievementsLatest(sender);
             GetAchievementsCompleted(sender);    
             LoadScript(sender);           
             Inventory.SendInventories(sender);
@@ -242,8 +244,8 @@ namespace Launcher
                 switch (InitialTown)
                 {
                     case 1: //Limsa
-                        directorId1 = 0x66080000;
-                        directorId2 = 0x66080001;
+                        directorId1 = 0x66080001;
+                        directorId2 = 0x66080000;
                         break;
                     case 2: //Gridania
 
@@ -257,10 +259,11 @@ namespace Launcher
                 Quests.Add(new Quest());
                 Quests[0].StartPhase(sender);
                 OpeningDirector openingDirector1 = new OpeningDirector(directorId1);
-                //OpeningDirector openingDirector2 = new OpeningDirector(directorId2);
+                OpeningDirector openingDirector2 = new OpeningDirector(directorId2);
                 World.Instance.Actors.Add(openingDirector1);
-                //World.Instance.Actors.Add(openingDirector2);
+                World.Instance.Actors.Add(openingDirector2);
                 openingDirector1.Spawn(sender);
+                //openingDirector2.Spawn(sender);
                 openingDirector1.StartEvent(sender);
             }
         }
@@ -280,7 +283,7 @@ namespace Launcher
                 LuaParameters.Add(false);
                 LuaParameters.Add(false);
                 LuaParameters.Add(true);
-                LuaParameters.Add((uint)0x66080000);
+                LuaParameters.Add((uint)0x66080001);
             }
             else //no opening
             {                
@@ -295,33 +298,49 @@ namespace Launcher
 
             //add timer placeholders
             for (int i = 0; i < 20; i++)           
-                LuaParameters.Add(0);           
+                LuaParameters.Add(0);
 
             LuaParameters.Add(true);
 
             base.LoadScript(sender);
         }
 
-        public override void SetPosition(Socket handler, ushort spawnType = 0, ushort isZonning = 0, int changingZone = 0, bool isPlayer = false)
+        public void SetPosition(Socket handler, ushort spawnType = 0, ushort isZonning = 0)
         {
-            base.SetPosition(handler, spawnType, 0, changingZone, true);
-        }       
+            base.SetPosition(handler, spawnType, isZonning, true);
+        }
 
         public void SendGroupPackets(Socket sender)
         {
-            PartyGroup.SendPackets(sender);
-            RetainerGroup.SendPackets(sender);
+
+            if (Groups.Count == 0) //dirty...
+            {
+                Groups.Add(new PartyGroup());
+                Groups.Add(new RetainerGroup());
+            }
+
+            foreach (var group in Groups)
+            {
+                if(!(group is DutyGroup))
+                    group.SendPackets(sender);
+            }                            
+          
             SendActiveLinkshell(sender);
         }
 
         public void SetGroupInitWork(Socket sender, byte[] data)
-        {            
-            byte groupSequence = data[0x10];
+        {
+            ulong groupId = 0;
 
-            if (groupSequence == 0x01)
-                PartyGroup.InitWork(sender);
-            else
-                RetainerGroup.InitWork(sender);
+            using (MemoryStream stream = new MemoryStream(data))
+            using(BinaryReader br = new BinaryReader(stream))
+            {
+                br.ReadUInt64();
+                br.ReadUInt64();
+                groupId = br.ReadUInt64();
+            }
+
+            Groups.Find(x => x.Id == groupId).InitWork(sender);            
         }
 
         public void SendActiveLinkshell(Socket sender)
@@ -360,52 +379,7 @@ namespace Launcher
 
         public void GetWork(Socket sender)
         {
-            WorkProperties property = new WorkProperties(sender, Id, @"/_init");           
-
-            property.Add("charaWork.eventSave.bazaarTax", (byte)5);
-            property.Add("charaWork.battleSave.potencial", 6.6f);
-
-            for (int i = 0; i < 32; i++)
-                if (i < 5 && i != 3) property.Add(string.Format("charaWork.property[{0}]", i), (byte)1);
-
-            //Current class info
-            Job currentClass = Jobs[CurrentClassId];
-            property.Add("charaWork.parameterSave.hp[0]", currentClass.Hp); //always start with HP filled up
-            property.Add("charaWork.parameterSave.hpMax[0]", currentClass.MaxHp);
-            property.Add("charaWork.parameterSave.mp", currentClass.Mp); //always start with MP filled up
-            property.Add("charaWork.parameterSave.mpMax", currentClass.MaxMp);
-            property.Add("charaWork.parameterTemp.tp", currentClass.Tp);
-
-            property.Add("charaWork.parameterSave.state_mainSkill[0]", currentClass.Id);
-            property.Add("charaWork.parameterSave.state_mainSkillLevel", (short)currentClass.Level);
-
-            //status buff/ailment timer? database.cs ln 892
-            //property.Add(string.Format("charaWork.statusShownTime[{0}]", i), ); 
-
-            //Write character's parameters
-            for (int i = 0; i < GeneralParameters.Count; i++)
-                property.Add(string.Format("charaWork.battleTemp.generalParameter[{0}]", i), GeneralParameters[i]);
-
-            //unknown
-            property.Add("charaWork.battleTemp.castGauge_speed[0]", 1.0f);
-            property.Add("charaWork.battleTemp.castGauge_speed[1]", 0.25f);
-            property.Add("charaWork.commandBorder", (byte)0x20);
-            property.Add("charaWork.battleSave.negotiationFlag[0]", true);
-
-            //Add character commands
-            //DataTable commandTable = GameData.Instance.GetGameData("command");
-            //DataRow[] commandRows = commandTable.Select("(id > 0 AND id < 23000) OR (id > 24000 AND id < 26000)"); //(id > 0 AND id < 23000) OR (id > 24000 AND id < 26000)
-
-            //for (int i = 0; i < commandRows.Length; i++)
-            //{
-            //    uint commandId = (uint)commandRows[i].ItemArray[0];
-            //    property.Add(string.Format("charaWork.command[{0}]", i), (0xA0F00000 | (ushort)commandId));
-            //}
-
-
-            //for (int i = 0; i < commandRows.Length; i++)
-            //    property.Add(string.Format("charaWork.commandCategory[{0}]", i), (byte)1);
-
+            WorkProperties property = new WorkProperties(sender, Id, @"/_init");
 
             uint[] command = new uint[64];
 
@@ -425,27 +399,50 @@ namespace Launcher
             command[13] = 22013; //Repair
             command[14] = 29497; //Engage in competitive discourse to win what you seek.
             command[15] = 22015; //[no description]
-            //command[16] = 22001; //synthesize
+            command[16] = 22001; //synthesize
             //command[17] = 24101; //talk
             //command[18] = 24212; //talk
 
             //hotbar
             command[32] = 27039; //index 32 ~ 61 - hotbar
 
-
             //????
             //command[62] = 0xA0F00000 | 27150;
-            //command[63] = 0xA0F00000 | 27150;        
+            //command[63] = 0xA0F00000 | 27150; 
 
+            property.Add("charaWork.eventSave.bazaarTax", (byte)5);
+            property.Add("charaWork.battleSave.potencial", 6.6f);
+
+            for (int i = 0; i < 32; i++)
+                if (i < 5 && i != 3) property.Add(string.Format("charaWork.property[{0}]", i), (byte)1);
+                       
+            AddToWorkClassParameters(ref property);
+
+            //status buff/ailment timer? database.cs ln 892
+            //property.Add(string.Format("charaWork.statusShownTime[{0}]", i), ); 
+
+            //Write character's parameters
+            for (int i = 0; i < GeneralParameters.Count; i++)
+            {
+                if ((ushort)GeneralParameters[i] > 0)
+                    property.Add(string.Format("charaWork.battleTemp.generalParameter[{0}]", i), GeneralParameters[i]);
+            }
+                
+
+            //unknown
+            property.Add("charaWork.battleTemp.castGauge_speed[0]", 1.0f);
+            property.Add("charaWork.battleTemp.castGauge_speed[1]", 0.25f);
+            property.Add("charaWork.commandBorder", (byte)0x20);
+            property.Add("charaWork.battleSave.negotiationFlag[0]", true);
+                                        
             for (int i = 0; i < command.Length; i++)
                 if (command[i] != 0) property.Add(string.Format("charaWork.command[{0}]", i), 0xA0F00000 | command[i]);
 
             for (int i = 0; i < 64; i++)
                 property.Add(string.Format("charaWork.commandCategory[{0}]", i), (byte)1);
 
-
             //for (int i = 0; i < 4096; i++)
-                //property.Add(string.Format("charaWork.commandAcquired[{0}]", 1150), true);
+                property.Add(string.Format("charaWork.commandAcquired[{0}]", 1150), true);
 
             //job abilities
             for (int i = 0; i < 36; i++)
@@ -453,8 +450,33 @@ namespace Launcher
 
             for (int i = 0; i < 40; i++)
                 property.Add(string.Format("charaWork.parameterSave.commandSlot_compatibility[{0}]", i), true);
+                        
+            AddToWorkSystem(ref property);
 
-            //unknown
+            for (int i = 0; i < Quests.Count; i++)
+                property.Add(string.Format("playerWork.questScenario[{0}]", i+1), 0xA0F00000 | Quests[i].Id);     
+
+            AddToWorkGuildleve(ref property);
+            AddToWorkNpcLinkshell(ref property);
+            property.Add("playerWork.restBonusExpRate", 0f);
+            AddToWorkCharacterBackground(ref property);
+            property.FinishWriting();
+        }
+
+        private void AddToWorkClassParameters(ref WorkProperties property)
+        {
+            Job currentClass = Jobs[CurrentClassId];
+            property.Add("charaWork.parameterSave.hp[0]", currentClass.Hp); //always start with HP filled up
+            property.Add("charaWork.parameterSave.hpMax[0]", currentClass.MaxHp);
+            property.Add("charaWork.parameterSave.mp", currentClass.Mp); //always start with MP filled up
+            property.Add("charaWork.parameterSave.mpMax", currentClass.MaxMp);
+            property.Add("charaWork.parameterTemp.tp", (ushort)3000);// currentClass.Tp);
+            property.Add("charaWork.parameterSave.state_mainSkill[0]", currentClass.Id);
+            property.Add("charaWork.parameterSave.state_mainSkillLevel", (short)currentClass.Level);
+        }
+
+        private void AddToWorkSystem(ref WorkProperties property)
+        {
             property.Add("charaWork.parameterTemp.forceControl_float_forClientSelf[0]", 1.0f);
             property.Add("charaWork.parameterTemp.forceControl_float_forClientSelf[1]", 1.0f);
             property.Add("charaWork.parameterTemp.forceControl_int16_forClientSelf[0]", (short)-1);
@@ -462,18 +484,7 @@ namespace Launcher
             property.Add("charaWork.parameterTemp.otherClassAbilityCount[0]", (byte)4);
             property.Add("charaWork.parameterTemp.otherClassAbilityCount[1]", (byte)5);
             property.Add("charaWork.parameterTemp.giftCount[1]", (byte)5);
-            property.Add("charaWork.depictionJudge", 0xa0f50911);
-
-            for (int i = 0; i < Quests.Count; i++)
-                property.Add(string.Format("playerWork.questScenario[{0}]", i+1), 0xA0F00000 | Quests[i].Id);
-            
-           
-
-            AddToWorkGuildleve(ref property);
-            AddToWorkNpcLinkshell(ref property);
-            property.Add("playerWork.restBonusExpRate", 0f);
-            AddToWorkBackground(ref property);
-            property.FinishWriting();
+            property.Add("charaWork.depictionJudge", 0xA0F50911);
         }
 
         private void AddToWorkGuildleve(ref WorkProperties property)
@@ -509,7 +520,7 @@ namespace Launcher
             //}
         }
 
-        private void AddToWorkBackground(ref WorkProperties property)
+        private void AddToWorkCharacterBackground(ref WorkProperties property)
         {
             //From PlayerCharacter obj
             property.Add("playerWork.tribe", Tribe);
@@ -619,13 +630,13 @@ namespace Launcher
 
             Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, data, 0, sizeof(uint));
             Buffer.BlockCopy(BitConverter.GetBytes(animationId), 0, data, 0x04, sizeof(uint));
-            Buffer.BlockCopy(BitConverter.GetBytes(unknown), 0, data, 0x1c, sizeof(uint));
+            //Buffer.BlockCopy(BitConverter.GetBytes(unknown), 0, data, 0x1c, sizeof(uint));
 
             if (resultList != null)
             {
                 Buffer.BlockCopy(BitConverter.GetBytes(numResults), 0, data, 0x20, sizeof(int)); //#results
                 Buffer.BlockCopy(BitConverter.GetBytes((short)command), 0, data, 0x24, sizeof(short));
-                Buffer.BlockCopy(BitConverter.GetBytes(0x0810), 0, data, 0x26, sizeof(ushort)); //unknown
+                Buffer.BlockCopy(BitConverter.GetBytes((unknown > 0 ? unknown : 0x0810)), 0, data, 0x26, sizeof(ushort)); //unknown
 
                 foreach (var result in resultList)
                 {
@@ -634,22 +645,31 @@ namespace Launcher
                 }
             }
 
-            SendPacket(sender, ServerOpcode.BattleActionResult01, data);
+            SendPacket(sender, ServerOpcode.CommandResult01, data);
         }       
 
-        public void ToggleMount(Socket sender, Command command)
-        {
-            //change to chocobo bgm
-            World.Instance.SetMusic(sender, (ushort)(command == Command.MountChocobo ? 0x53 : World.Instance.Zones.Find(x => x.Id == Position.ZoneId).GetCurrentBGM()), MusicMode.FadeStart);           
-
+        public void ToggleMount(Socket sender, Command command, bool isChocobo)
+        {         
             //set player state
             byte[] data = new byte[0x08];
             byte[] mountTextSheet = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0xF8, 0x5F, 0x91, 0x65, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00 };
+            byte bgm = 0x53;
 
-            if (command == Command.MountChocobo)
-            {                
-                data[0x05] = (byte)ChocoboAppearance.Maelstrom4;     
-                SendPacket(sender, ServerOpcode.SetChocoboMounted, data);               
+            if (command == Command.Mount)
+            {
+                if (isChocobo)
+                {
+                    data[0x05] = (byte)ChocoboAppearance.Maelstrom4;     
+                    SendPacket(sender, ServerOpcode.SetChocoboMounted, data);
+                }
+                else
+                {
+                    data = new byte[0x28];
+                    data[0] = 0x01;
+                    SendPacket(sender, ServerOpcode.SetGobbueMounted, data);
+                    bgm = 0x98;
+                }
+
                 Speeds.SetMounted();
             }
             else
@@ -658,7 +678,10 @@ namespace Launcher
                 State.Main = MainState.Passive;
                 SetMainState(sender);
                 Speeds.SetUnmounted();
-            }               
+            }
+
+            //change to chocobo bgm
+            World.Instance.SetMusic(sender, (ushort)(command == Command.Mount ? bgm : World.Instance.Zones.Find(x => x.Id == Position.ZoneId).GetCurrentBGM()), MusicMode.FadeStart);
 
             //TODO: send command answer - this should probably be in event manager.
             data = new byte[0x28];
@@ -693,8 +716,15 @@ namespace Launcher
             else           
                 State.Main = MainState.Passive;
 
+            CommandResult cr = new CommandResult
+            {
+                TargetId = User.Instance.Character.Id,
+                EffectId = 1,
+                Sequence = 1
+            };
+
             SetMainState(sender);
-            SendActionResult(sender, command);           
+            SendActionResult(sender, command, new List<CommandResult> { cr }, 0x72000062, 0x032A);           
         }
 
         public void EquipSoulStone(Socket sender, byte[] data)
@@ -922,10 +952,8 @@ namespace Launcher
 
         public uint NewId()
         {
-            Random rnd = new Random();
-            byte[] id = new byte[0x4];
-            rnd.NextBytes(id);
-            return BitConverter.ToUInt32(id, 0);
+            Random rnd = new Random();   
+            return (uint)rnd.Next(0xff, 0xffff);
         }
 
         public void Unknown0x02(Socket sender)

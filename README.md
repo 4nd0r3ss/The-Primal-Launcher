@@ -25,14 +25,19 @@ Lobby
 - Character create/delete
 - Character Legacy tag
 - Rename character
-- Game start (no intro cutscene or battle for now)
+- Game start
+
+Opening
+- Limsa opening working all the way to battle toturial.
+- Gridania and UlDah not working yet.
 
 In-game general
 - Change class/job
 - Currency add/remove
 - Items add/remove
-- Mounting (limited)
+- Mounts - both chocobo and gobbue (unlocked from start)
 - Map static objects (aetheryte crystals, gates and shards, no interaction)
+- Map NPCs in some zones
 - Add/remove exp
 - Level up/down
 
@@ -49,5 +54,5 @@ Map
 - PL Custom teleport command (can visit any map in the game, including jail and cottage)
 
 Dungeons
-- It's possible to find the dungeon by walking around the map but no instancing so far.
+- It's possible to find dungeons by walking around the map but no instancing so far.
 

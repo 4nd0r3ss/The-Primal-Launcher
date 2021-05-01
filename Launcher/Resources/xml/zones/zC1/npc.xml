@@ -44,7 +44,7 @@
       <events>
         <talkDefault priority="4" enabled="1"/>
         <noticeEvent priority="0" enabled="0"/>
-      </events>     
+      </events>
     </Populace>
     <Populace className="PopulaceStandard">
       <classId>1000443</classId>
@@ -88,8 +88,8 @@
       <animation>1016</animation>
       <events>
         <talkDefault priority="4" enabled="1"/>
-        <noticeEvent priority="0" enabled="0"/>        
-      </events>     
+        <noticeEvent priority="0" enabled="0"/>
+      </events>
     </Populace>
     <Populace className="PopulaceStandard">
       <classId>1000448</classId>
@@ -134,8 +134,8 @@
       <events>
         <talkDefault priority="1" enabled="1"/>
         <noticeEvent priority="1" enabled="1"/>
-        <pushDefault radius="3.0" silent="false" outwards="false"/>        
-      </events>     
+        <pushDefault radius="3.0" silent="false" outwards="false"/>
+      </events>
     </Populace>
     <Populace className="PopulaceStandard">
       <classId>1090025</classId>
@@ -143,8 +143,48 @@
       <animation>0</animation>
       <events>
         <noticeEvent priority="0" enabled="0"/>
-        <pushDefault radius="2.0" silent="false" outwards="false"/>        
-      </events>     
+        <pushDefault radius="2.0" silent="false" outwards="false"/>
+      </events>
     </Populace>
+    <Monster family="fighter" className="FighterAllyOpeningHealer">
+      <classId>2290001</classId>
+      <position x="-8" y="16.35" z="6" r="0.5" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="1" silent="1" />
+      </events>
+    </Monster>
+    <Monster family="fighter" className="FighterAllyOpeningAttacker">
+      <classId>2290002</classId>
+      <position x="0" y="16.35" z="22" r="3" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="1" silent="1" />
+      </events>
+    </Monster>
+    <Monster family="jellyfish" className="JellyfishScenarioLimsaLv00">
+      <classId>2205403</classId>
+      <position x="-3.02" y="17.35" z="14.24" r="-2.81" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="1" silent="1" />
+      </events>
+    </Monster>
+    <Monster family="jellyfish" className="JellyfishScenarioLimsaLv00">
+      <classId>2205403</classId>
+      <position x="-5.52" y="17.35" z="14.24" r="-2.81" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="1" silent="1" />
+      </events>
+    </Monster>
+    <Monster family="jellyfish" className="JellyfishScenarioLimsaLv00">
+      <classId>2205403</classId>
+      <position x="-0.52" y="17.35" z="14.24" r="-2.81" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="1" silent="1" />
+      </events>
+    </Monster>
   </npc>
 </chara>

@@ -24,6 +24,7 @@ namespace Launcher
         public uint ClassCode { get; set; }
         public int QuestIcon { get; set; }
         public bool Spawned { get; set; }
+        public string Family { get; set; }
 
         #region States
         public State State { get; set; } = new State();
@@ -98,8 +99,8 @@ namespace Launcher
                 foreach (var e in Events)
                 {
                     byte[] data = new byte[0x28];
-                    byte[] conditionName = Encoding.ASCII.GetBytes(e.EventName);
-                    int conditionNameLength = e.EventName.Length;
+                    byte[] conditionName = Encoding.ASCII.GetBytes(e.Name);
+                    int conditionNameLength = e.Name.Length;
 
                     switch (e.Opcode)
                     {
@@ -117,7 +118,7 @@ namespace Launcher
                             Buffer.BlockCopy(BitConverter.GetBytes(0), 0, data, 0x0c, sizeof(uint));
                             Buffer.BlockCopy(BitConverter.GetBytes(e.Direction), 0, data, 0x10, sizeof(byte));
                             Buffer.BlockCopy(BitConverter.GetBytes(0), 0, data, 0x11, sizeof(byte));
-                            Buffer.BlockCopy(BitConverter.GetBytes(e.IsSilent), 0, data, 0x12, sizeof(byte));
+                            Buffer.BlockCopy(BitConverter.GetBytes(e.Silent), 0, data, 0x12, sizeof(byte));
                             Buffer.BlockCopy(conditionName, 0, data, 0x13, conditionNameLength);
                             break;
                         case ServerOpcode.PushEvenFan:
@@ -127,7 +128,7 @@ namespace Launcher
                             Buffer.BlockCopy(BitConverter.GetBytes(e.Radius), 0, data, 0x08, sizeof(uint));
                             Buffer.BlockCopy(BitConverter.GetBytes(e.Direction), 0, data, 0x10, sizeof(byte));
                             Buffer.BlockCopy(BitConverter.GetBytes(e.Priority), 0, data, 0x11, sizeof(byte));
-                            Buffer.BlockCopy(BitConverter.GetBytes(e.IsSilent), 0, data, 0x12, sizeof(byte));
+                            Buffer.BlockCopy(BitConverter.GetBytes(e.Silent), 0, data, 0x12, sizeof(byte));
                             Buffer.BlockCopy(conditionName, 0, data, 0x13, conditionNameLength);
                             break;
                         case ServerOpcode.PushEventTriggerBox:
@@ -143,7 +144,7 @@ namespace Launcher
                         case ServerOpcode.TalkEvent:
                         default:
                             Buffer.BlockCopy(BitConverter.GetBytes(e.Priority), 0, data, 0, sizeof(byte));
-                            Buffer.BlockCopy(BitConverter.GetBytes(e.IsSilent), 0, data, 0x1, sizeof(byte));
+                            Buffer.BlockCopy(BitConverter.GetBytes(e.Silent), 0, data, 0x1, sizeof(byte));
                             Buffer.BlockCopy(conditionName, 0, data, 0x2, conditionNameLength);
                             break;
                     }
@@ -153,11 +154,7 @@ namespace Launcher
             }
         }
 
-        public virtual void Init(Socket sender)
-        {
-            //byte[] data = new byte[0x88];
-            //SendPacket(sender, Opcode.ActorInit, data);
-        }
+        public virtual void Init(Socket sender) { }
 
         public virtual void LoadScript(Socket sender)
         {
@@ -209,31 +206,21 @@ namespace Launcher
         public void SetName(Socket sender, int isCustom = 0, byte[] customName = null)
         {
             byte[] data = new byte[0x28];
-
-            if (customName != null)
-            {
-                Buffer.BlockCopy(BitConverter.GetBytes(isCustom), 0, data, 0, sizeof(int));
-                Buffer.BlockCopy(customName, 0, data, 0x04, customName.Length);                
-            }
-            else
-            {
-                Buffer.BlockCopy(BitConverter.GetBytes(NameId), 0, data, 0x00, sizeof(uint));
-                Buffer.BlockCopy(Name, 0, data, 0x04, Name.Length);
-            }
-
+            byte[] nameToPrint = customName ?? Name;
+            int nameIdToPrint = isCustom != 0 ? isCustom : NameId;
+            
+            Buffer.BlockCopy(BitConverter.GetBytes(nameIdToPrint), 0, data, 0x00, sizeof(uint));
+            Buffer.BlockCopy(nameToPrint, 0, data, 0x04, nameToPrint.Length);
             SendPacket(sender, ServerOpcode.SetName, data);
         }
 
-        public virtual void SetPosition(Socket sender, ushort spawnType = 0, ushort isZonning = 0, int changingZone = 0, bool isPlayer = false)
+        public virtual void SetPosition(Socket sender, ushort spawnType = 0, ushort isZonning = 0, bool isPlayer = false)
         {
             byte[] data = new byte[0x28];
+            int idToPrint = (int)Id;
 
-            if (changingZone == 0)
-                changingZone = (int)Id;
-
-            uint idToPrint = Id;
             if (isPlayer)
-                idToPrint = 0;
+                idToPrint = -1;
 
             Buffer.BlockCopy(BitConverter.GetBytes(idToPrint), 0, data, 0x04, sizeof(uint));
             Buffer.BlockCopy(BitConverter.GetBytes(Position.X), 0, data, 0x08, sizeof(int));
@@ -329,14 +316,14 @@ namespace Launcher
         #region Event virtual methods   
         public virtual void SetEventStatus(Socket sender)
         {
-            byte[] data = new byte[0x48];
+            byte[] data = new byte[0x28];
 
             foreach (Event ec in Events)
             {
                 Buffer.BlockCopy(BitConverter.GetBytes((uint)ec.Enabled), 0, data, 0, sizeof(uint));
                 byte eventType = 1;
 
-                switch (ec.EventName)
+                switch (ec.Name)
                 {
                     case "pushDefault":
                         eventType = 2;
@@ -347,7 +334,7 @@ namespace Launcher
                 }
 
                 data[0x04] = eventType;
-                Buffer.BlockCopy(Encoding.ASCII.GetBytes(ec.EventName), 0, data, 0x05, ec.EventName.Length);
+                Buffer.BlockCopy(Encoding.ASCII.GetBytes(ec.Name), 0, data, 0x05, ec.Name.Length);
 
                 SendPacket(sender, ServerOpcode.SetEventStatus, data);
             }
@@ -385,8 +372,8 @@ namespace Launcher
         {
             Zone zone = World.Instance.Zones.Find(x => x.Id == Position.ZoneId);            
             uint zoneId = zone.Id;
-            uint privLevel = 0;           
-            string zoneName = MinifyMapName(zone.MapName);
+            uint privLevel = zone.PrivLevel;           
+            string zoneName = MinifyMapName(zone.MapName, zone.PrivLevel);
             string className = MinifyClassName();
 
             //if (zone.ZoneType == ZoneType.Inn)
@@ -395,8 +382,8 @@ namespace Launcher
             //    //privLevel = ((PrivateArea)zone).GetPrivateAreaType();
             //}
 
-            zoneName = Char.ToLowerInvariant(zoneName[0]) + zoneName.Substring(1);      
-            className = Char.ToLowerInvariant(className[0]) + className.Substring(1);
+            zoneName = char.ToLowerInvariant(zoneName[0]) + zoneName.Substring(1);      
+            className = char.ToLowerInvariant(className[0]) + className.Substring(1);
 
             if(className.Length > 6 && (className.Length + (zoneName.Length + 4)) > 25)
                 try{ className = className.Substring(0, 21 - zoneName.Length); }
@@ -405,9 +392,9 @@ namespace Launcher
             return string.Format("{0}_{1}_{2}@{3:X3}{4:X2}", className, zoneName, ToStringBase63(actorNumber), zoneId, privLevel);
         }
 
-        protected string MinifyMapName(string mapName)
+        protected string MinifyMapName(string mapName, byte privLevel = 0)
         {
-            return mapName.Replace("Field", "Fld")
+            string minifiedStr = mapName.Replace("Field", "Fld")
                 .Replace("Dungeon", "Dgn")
                 .Replace("Town", "Twn")
                 .Replace("Battle", "Btl")
@@ -415,6 +402,11 @@ namespace Launcher
                 .Replace("Event", "Evt")
                 .Replace("Ship", "Shp")
                 .Replace("Office", "Ofc");
+
+            if (privLevel > 0)
+                minifiedStr = minifiedStr.Substring(0, minifiedStr.Length - 1) + "P";
+
+            return minifiedStr;
         }
 
         protected string MinifyClassName()

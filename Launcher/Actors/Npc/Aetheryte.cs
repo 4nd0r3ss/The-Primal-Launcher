@@ -62,14 +62,14 @@ namespace Launcher
 
             if (AetheryteType != AetheryteType.Shard)
             {
-                Events.Add(new Event { Opcode = ServerOpcode.TalkEvent, EventName = "talkDefault", Priority = 0x04 });
-                Events.Add(new Event { Opcode = ServerOpcode.NoticeEvent, EventName = "pushCommand", Priority = 0x04 });
+                Events.Add(new Event { Opcode = ServerOpcode.TalkEvent, Name = "talkDefault", Priority = 0x04 });
+                Events.Add(new Event { Opcode = ServerOpcode.NoticeEvent, Name = "pushCommand", Priority = 0x04 });
                 //push event
-                Events.Add(new Event { Opcode = ServerOpcode.PushEventCircle, EventName = "pushCommandIn", ServerCodes = 0x44c00014, Radius = pushEventRadius, Direction = 0x01, IsSilent = 0x00 });
-                Events.Add(new Event { Opcode = ServerOpcode.PushEventCircle, EventName = "pushCommandOut", ServerCodes = 0x44c00014, Radius = pushEventRadius, Direction = 0x11, IsSilent = 0x00 });
+                Events.Add(new Event { Opcode = ServerOpcode.PushEventCircle, Name = "pushCommandIn", ServerCodes = 0x44c00014, Radius = pushEventRadius, Direction = 0x01, Silent = 0x00 });
+                Events.Add(new Event { Opcode = ServerOpcode.PushEventCircle, Name = "pushCommandOut", ServerCodes = 0x44c00014, Radius = pushEventRadius, Direction = 0x11, Silent = 0x00 });
             }
 
-            Events.Add(new Event{ Opcode = ServerOpcode.NoticeEvent, EventName = "noticeEvent", Enabled = 0x01 });
+            Events.Add(new Event{ Opcode = ServerOpcode.NoticeEvent, Name = "noticeEvent", Enabled = 0x01 });
             
             base.Prepare(actorIndex);     
         }

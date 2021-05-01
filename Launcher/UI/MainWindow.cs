@@ -1,6 +1,7 @@
 ﻿using MaterialSkin;
 using MaterialSkin.Controls;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -56,7 +57,7 @@ namespace Launcher
                 //show update tab
             }
 
-            ActorRepository.Instance.GetZoneNpcs(0xc1);
+            List<Actor> myList = ActorRepository.Instance.GetZoneNpcs(0xc1);
 
 
             Log.Instance.Info("Welcome to Primal Launcher!");
