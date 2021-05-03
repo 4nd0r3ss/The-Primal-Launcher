@@ -67,7 +67,7 @@ namespace Launcher
             SetName(handler);
             SetMainState(handler);            
             SetIsZoning(handler);
-            LoadScript(handler);
+            SetLuaScript(handler);
         }       
 
         public void SpawnActors(Socket sender, string allowedTypes = "all")

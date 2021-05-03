@@ -61,7 +61,7 @@ namespace Launcher
             SetAllStatus(sender);
             SetIcon(sender);
             SetIsZoning(sender, false);
-            LoadScript(sender);
+            SetLuaScript(sender);
             Init(sender);
             Spawned = true;
         }
@@ -149,14 +149,14 @@ namespace Launcher
                             break;
                     }
 
-                    SendPacket(sender, e.Opcode, data);
+                    Packet.Send(sender, e.Opcode, data, Id);
                 }
             }
         }
 
         public virtual void Init(Socket sender) { }
 
-        public virtual void LoadScript(Socket sender)
+        public virtual void SetLuaScript(Socket sender)
         {
             byte[] data = new byte[0x108];
 
@@ -166,42 +166,42 @@ namespace Launcher
 
             LuaParameters.WriteParameters(ref data, LuaParameters);
 
-            SendPacket(sender, ServerOpcode.LoadClassScript, data);
+            Packet.Send(sender, ServerOpcode.LoadClassScript, data, Id);
         }
 
         public void SetIsZoning(Socket sender, bool isZoning = false)
         {
             byte[] data = new byte[0x08];
             data[0] = (byte)(isZoning ? 1 : 0);
-            SendPacket(sender, ServerOpcode.SetIsZoning, data);
+            Packet.Send(sender, ServerOpcode.SetIsZoning, data, Id);
         }
 
         public void SetIcon(Socket sender)
         {
             byte[] data = new byte[0x08];
             /* will be properly implemented later */
-            SendPacket(sender, ServerOpcode.SetIcon, data);
+            Packet.Send(sender, ServerOpcode.SetIcon, data, Id);
         }
 
         public void SetAllStatus(Socket sender)
         {
             byte[] data = new byte[0x28];
             /* will be properly implemented later */
-            SendPacket(sender, ServerOpcode.SetAllStatus, data);
+            Packet.Send(sender, ServerOpcode.SetAllStatus, data, Id);
         }
 
-        public void SetSubState(Socket sender) => SendPacket(sender, ServerOpcode.SetSubState, SubState.ToBytes());       
+        public void SetSubState(Socket sender) => Packet.Send(sender, ServerOpcode.SetSubState, SubState.ToBytes(), Id);       
 
-        public void SetMainState(Socket sender) => SendPacket(sender, ServerOpcode.SetMainState, State.ToBytes());        
+        public void SetMainState(Socket sender) => Packet.Send(sender, ServerOpcode.SetMainState, State.ToBytes(), Id);        
 
         public void CreateActor(Socket sender, byte code = 0)
         {
             byte[] data = new byte[0x08];
             data[0] = code;
-            SendPacket(sender, ServerOpcode.CreateActor, data);
+            Packet.Send(sender, ServerOpcode.CreateActor, data, Id);
         }
 
-        public void SendUnknown(Socket sender) => SendPacket(sender, ServerOpcode.Unknown, new byte[0x18]);
+        public void SendUnknown(Socket sender) => Packet.Send(sender, ServerOpcode.Unknown, new byte[0x18], Id);
 
         public void SetName(Socket sender, int isCustom = 0, byte[] customName = null)
         {
@@ -211,7 +211,7 @@ namespace Launcher
             
             Buffer.BlockCopy(BitConverter.GetBytes(nameIdToPrint), 0, data, 0x00, sizeof(uint));
             Buffer.BlockCopy(nameToPrint, 0, data, 0x04, nameToPrint.Length);
-            SendPacket(sender, ServerOpcode.SetName, data);
+            Packet.Send(sender, ServerOpcode.SetName, data, Id);
         }
 
         public virtual void SetPosition(Socket sender, ushort spawnType = 0, ushort isZonning = 0, bool isPlayer = false)
@@ -231,10 +231,10 @@ namespace Launcher
             Buffer.BlockCopy(BitConverter.GetBytes(spawnType), 0, data, 0x24, sizeof(ushort));
             Buffer.BlockCopy(BitConverter.GetBytes(isZonning), 0, data, 0x26, sizeof(ushort));
 
-            SendPacket(sender, ServerOpcode.SetPosition, data);
+            Packet.Send(sender, ServerOpcode.SetPosition, data, Id);
         }
 
-        public void SetSpeeds(Socket sender, uint[] value = null) => SendPacket(sender, ServerOpcode.SetSpeed, Speeds.ToBytes());       
+        public void SetSpeeds(Socket sender, uint[] value = null) => Packet.Send(sender, ServerOpcode.SetSpeed, Speeds.ToBytes(), Id);       
 
         public void SetAppearance(Socket sender)
         {
@@ -287,30 +287,14 @@ namespace Launcher
 
             data[0x100] = (byte)AppearanceSlots.Count;
 
-            SendPacket(sender, ServerOpcode.SetAppearance, data);
-        }
-
-        public void SendPacket(Socket sender, ServerOpcode opcode, byte[] data, uint sourceId = 0, uint targetId = 0)
-        {
-            GamePacket gamePacket = new GamePacket
-            {
-                Opcode = (ushort)opcode,
-                Data = data
-            };
-
-            if (sourceId == 0)
-                sourceId = Id;
-
-            //Packet packet = new Packet(new SubPacket(gamePacket) { SourceId = sourceId > 0 ? sourceId : Id, TargetId = targetId > 0 ? targetId : TargetId });
-            Packet packet = new Packet(new SubPacket(gamePacket) { SourceId = Id, TargetId = TargetId });
-            sender.Send(packet.ToBytes());
+            Packet.Send(sender, ServerOpcode.SetAppearance, data, Id);
         }
                
         public void DoEmote(Socket sender)
         {
             byte[] data = new byte[] { 0x00, 0xB0, 0x00, 0x05, 0x41, 0x29, 0x9B, 0x02, 0x6E, 0x52, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
             Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, data, 0x04, 4);
-            SendPacket(sender, ServerOpcode.DoEmote, data);
+            Packet.Send(sender, ServerOpcode.DoEmote, data, Id);
         }
 
         #region Event virtual methods   
@@ -336,7 +320,7 @@ namespace Launcher
                 data[0x04] = eventType;
                 Buffer.BlockCopy(Encoding.ASCII.GetBytes(ec.Name), 0, data, 0x05, ec.Name.Length);
 
-                SendPacket(sender, ServerOpcode.SetEventStatus, data);
+                Packet.Send(sender, ServerOpcode.SetEventStatus, data, Id);
             }
         }
 
@@ -349,7 +333,7 @@ namespace Launcher
 
         public void SetQuestIcon(Socket sender)
         {
-            SendPacket(sender, ServerOpcode.SetQuestIcon, BitConverter.GetBytes((ulong)QuestIcon));
+            Packet.Send(sender, ServerOpcode.SetQuestIcon, BitConverter.GetBytes((ulong)QuestIcon), Id);
         }
 
         /// <summary>

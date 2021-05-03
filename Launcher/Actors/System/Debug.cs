@@ -8,8 +8,7 @@ namespace Launcher
         public Debug()
         {
             Name = Encoding.ASCII.GetBytes("debug");
-            Id = 0x5ff80002; //id from hardcoded packet (just bc it works)     
-            TargetId = User.Instance.Character.Id;          
+            Id = 0x5ff80002; //id from hardcoded packet (just bc it works)                  
         }
 
         public override void Spawn(Socket handler, ushort spawnType = 0, ushort isZoning = 0, int changingZone = 0, ushort actorIndex = 0)
@@ -21,7 +20,7 @@ namespace Launcher
             SetName(handler);
             SetMainState(handler);
             SetIsZoning(handler);
-            LoadScript(handler);            
+            SetLuaScript(handler);            
         }
 
         public override void Prepare(ushort actorIndex = 0)

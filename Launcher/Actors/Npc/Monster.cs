@@ -67,7 +67,7 @@ namespace Launcher
             SetAllStatus(sender);
             SetIcon(sender);
             SetIsZoning(sender, false);
-            LoadScript(sender);
+            SetLuaScript(sender);
             Init(sender);
             SetEventStatus(sender);
             Spawned = true;
@@ -100,7 +100,7 @@ namespace Launcher
                 0x00, 0x00
             };
 
-            SendPacket(sender, ServerOpcode.ActorInit, data);
+            Packet.Send(sender, ServerOpcode.ActorInit, data, Id);
         }
     }
 }

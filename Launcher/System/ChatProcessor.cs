@@ -113,7 +113,7 @@ namespace Launcher
                             pos.Z = Convert.ToSingle(parameters[2]);
 
                             pc.Position = pos;
-                            pc.SetPosition(sender);
+                            pc.GetPosition(sender);
                         }
                         break;
 

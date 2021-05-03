@@ -37,30 +37,12 @@ namespace Launcher
             Buffer.BlockCopy(BitConverter.GetBytes(User.Instance.Character.Id), 0, data, 0, sizeof(uint));
             Buffer.BlockCopy(BitConverter.GetBytes((ushort)maxSize), 0, data, 0x04, sizeof(ushort));
             Buffer.BlockCopy(BitConverter.GetBytes((ushort)type), 0, data, 0x06, sizeof(ushort));
-            SendPacket(sender, ServerOpcode.ChunkStart, data);
+            Packet.Send(sender, ServerOpcode.ChunkStart, data);
         }
-        public void ChunkEnd(Socket sender) => SendPacket(sender, ServerOpcode.ChunkEnd, new byte[0x08]);
-        public void InventoryStart(Socket sender) => SendPacket(sender, ServerOpcode.InventoryStart, new byte[0x08]);
-        public void InventoryEnd(Socket sender) => SendPacket(sender, ServerOpcode.InventoryEnd, new byte[0x08]);
-        private void SendChunk(Socket sender, ServerOpcode opcode, byte[] data) => SendPacket(sender, opcode, data);
-
-        /// <summary>
-        /// Send an inventory packet.
-        /// </summary>
-        /// <param name="handler"></param>
-        /// <param name="opcode"></param>
-        /// <param name="data"></param>
-        private void SendPacket(Socket handler, ServerOpcode opcode, byte[] data)
-        {
-            GamePacket gamePacket = new GamePacket
-            {
-                Opcode = (ushort)opcode,
-                Data = data
-            };
-
-            Packet packet = new Packet(new SubPacket(gamePacket) { SourceId = User.Instance.Character.Id, TargetId = User.Instance.Character.Id });
-            handler.Send(packet.ToBytes());
-        }
+        public void ChunkEnd(Socket sender) => Packet.Send(sender, ServerOpcode.ChunkEnd, new byte[0x08]);
+        public void InventoryStart(Socket sender) => Packet.Send(sender, ServerOpcode.InventoryStart, new byte[0x08]);
+        public void InventoryEnd(Socket sender) => Packet.Send(sender, ServerOpcode.InventoryEnd, new byte[0x08]);
+        private void SendChunk(Socket sender, ServerOpcode opcode, byte[] data) => Packet.Send(sender, opcode, data);
         #endregion
 
         /// <summary>
@@ -214,7 +196,7 @@ namespace Launcher
         /// Sends all inventories packets. Used when spawning player.
         /// </summary>
         /// <param name="sender"></param>
-        public void SendInventories(Socket sender)
+        public void Send(Socket sender)
         {           
             InventoryStart(sender);                    
             SendInventory(sender, Bag, InventoryMaxSlots.Bag, InventoryType.Bag);
@@ -616,7 +598,7 @@ namespace Launcher
             Buffer.BlockCopy(BitConverter.GetBytes(gearSlot), 0, data, 0, 1);
             Buffer.BlockCopy(BitConverter.GetBytes(invSlot), 0, data, 2, 1);
 
-            SendPacket(sender, opcode, data);
+            Packet.Send(sender, opcode, data);
             ChunkEnd(sender);
             InventoryEnd(sender);
 
@@ -637,7 +619,7 @@ namespace Launcher
             byte[] data = new byte[0x08];
             Buffer.BlockCopy(BitConverter.GetBytes(gearslot), 0, data, 0, 1);
 
-            SendPacket(sender, ServerOpcode.x01RemoveEquipment, data);
+            Packet.Send(sender, ServerOpcode.x01RemoveEquipment, data);
             ChunkEnd(sender);
             InventoryEnd(sender);
 
@@ -659,7 +641,7 @@ namespace Launcher
             Buffer.BlockCopy(BitConverter.GetBytes(gearslot), 0, data, 0, 1);
             Buffer.BlockCopy(BitConverter.GetBytes(invSlot), 0, data, 2, 1);
 
-            SendPacket(sender, ServerOpcode.x01SetEquipment, data);
+            Packet.Send(sender, ServerOpcode.x01SetEquipment, data);
             ChunkEnd(sender);
             InventoryEnd(sender);
 

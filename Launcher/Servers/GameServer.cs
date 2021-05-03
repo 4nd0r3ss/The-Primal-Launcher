@@ -113,7 +113,7 @@ namespace Launcher
                     break;
 
                 case (ushort)ClientOpcode.InitGroupWork:
-                    User.Instance.Character.SetGroupInitWork(_connection.socket, subpacket.Data);
+                    User.Instance.Character.GetGroupInitWork(_connection.socket, subpacket.Data);
                     break;
 
                 case (ushort)ClientOpcode.EventRequest:                     
@@ -126,7 +126,7 @@ namespace Launcher
                     switch (request)
                     {
                         case "charaWork/exp":                           
-                            _connection.Send(User.Instance.Character.CharaWorkExp(_connection.socket));   
+                            _connection.Send(User.Instance.Character.ClassExp(_connection.socket));   
                          break;
                     }
                     break;

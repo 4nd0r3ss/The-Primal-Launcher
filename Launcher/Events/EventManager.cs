@@ -112,7 +112,7 @@ namespace Launcher
             Buffer.BlockCopy(BitConverter.GetBytes(CallerId), 0, data, 0, 4);
             Buffer.BlockCopy(BitConverter.GetBytes(OwnerId), 0, data, 0x04, 4);
             LuaParameters.WriteParameters(ref data, RequestParameters, 0x08);
-            SendPacket(sender, ServerOpcode.EventRequestResponse, data);
+            Packet.Send(sender, ServerOpcode.EventRequestResponse, data);
         }
 
         public virtual void Finish(Socket sender)
@@ -122,7 +122,7 @@ namespace Launcher
             data[0x08] = 1;
             string name = GetType().Name;
             Buffer.BlockCopy(Encoding.ASCII.GetBytes(name), 0, data, 0x09, name.Length);
-            SendPacket(sender, ServerOpcode.EventRequestFinish, data);
+            Packet.Send(sender, ServerOpcode.EventRequestFinish, data);
             //EventManager.Instance.CurrentEvent = null;
         }
 
@@ -131,15 +131,10 @@ namespace Launcher
             Finish(sender);
         }
 
-        #region helper methods
-        public void SendPacket(Socket sender, ServerOpcode opcode, byte[] data, uint sourceId = 0, uint targetId = 0)
-        {
-            sender.Send(new Packet(new GamePacket { Opcode = (ushort)opcode, Data = data }) {  }.ToBytes());
-        }        
-
+        #region helper methods   
         public Actor GetActor()
         {
-            Actor eventOwner = World.Instance.Actors.FirstOrDefault(x => x.Id == OwnerId);
+            Actor eventOwner = World.Instance.Directors.FirstOrDefault(x => x.Id == OwnerId);
 
             if (eventOwner == null)
                 eventOwner = World.Instance.Zones
@@ -188,7 +183,7 @@ namespace Launcher
                 parameters.Add(obj);
 
             LuaParameters.WriteParameters(ref data, parameters, 0);
-            SendPacket(sender, ServerOpcode.GeneralData, data);
+            Packet.Send(sender, ServerOpcode.GeneralData, data);
         }
     }
       
@@ -236,9 +231,9 @@ namespace Launcher
             RequestParameters.Add("requestedData");            
             RequestParameters.Add("qtdata");
             RequestParameters.Add(questId);
-            RequestParameters.Add(2);
+            RequestParameters.Add(0);
             LuaParameters.WriteParameters(ref data, RequestParameters, 0);
-            SendPacket(sender, ServerOpcode.GeneralData, data);
+            Packet.Send(sender, ServerOpcode.GeneralData, data);
         }
 
         private void GetGuildleveData(Socket sender)
@@ -255,7 +250,7 @@ namespace Launcher
             RequestParameters.Add(null);
             RequestParameters.Add(null);
             LuaParameters.WriteParameters(ref data, RequestParameters, 0);
-            SendPacket(sender, ServerOpcode.GeneralData, data);
+            Packet.Send(sender, ServerOpcode.GeneralData, data);
         }
 
     }
@@ -287,7 +282,7 @@ namespace Launcher
             }
             
             Finish(sender);
-            ((OpeningDirector)World.Instance.Actors.Find(x => x.Id == 0x66080001)).StartEvent(sender, "noticeEvent");
+            ((OpeningDirector)World.Instance.Directors.Find(x => x.Id == 0x66080001)).StartEvent(sender, "noticeEvent");
         }
 
     }
@@ -372,7 +367,7 @@ namespace Launcher
                 dutyGroup.SendPackets(sender);
                 User.Instance.Character.Groups.Add(dutyGroup);
                 World.Instance.SendTextEnteredDuty(sender);               
-                ((OpeningDirector)World.Instance.Actors.Find(x => x.Id == 0x66080001)).StartEvent(sender);                
+                ((OpeningDirector)World.Instance.Directors.Find(x => x.Id == 0x66080001)).StartEvent(sender);                
                 World.Instance.ChangeZone(sender, new Position(193, -5f, 16.35f, 6f, 0.5f, 16), "monster");
             }
             else
@@ -406,7 +401,7 @@ namespace Launcher
 
             if (FunctionName == "processTtrBtl002")
             {
-                int timeInterval = 2000;
+                //int timeInterval = 2000;
 
                 //the weaponskill packet is class-specific. investigate that.
 

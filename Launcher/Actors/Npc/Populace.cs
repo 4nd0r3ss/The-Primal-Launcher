@@ -33,7 +33,7 @@ namespace Launcher
             SetSubState(sender);
             SetAllStatus(sender);
             SetIsZoning(sender);
-            LoadScript(sender);
+            SetLuaScript(sender);
             Init(sender);
             SetEventStatus(sender);
             SetQuestIcon(sender);
@@ -55,15 +55,12 @@ namespace Launcher
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
             };
 
-            SendPacket(sender, ServerOpcode.ActorInit, data);
+            Packet.Send(sender, ServerOpcode.ActorInit, data, Id);
         }
 
         #region Event methods       
         public override void talkDefault(Socket sender)
-        {
-           
-                //EventManager.Instance.CurrentEvent.DelegateEvent(sender, 0xA0F1ADB1, TalkFunction);
-            
+        {            
             EventManager.Instance.CurrentEvent.DelegateEvent(sender, 0x1ADB1, TalkFunction);           
         }
 

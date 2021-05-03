@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
-using System.Linq;
 using System.Text;
 using System.Xml;
 using System.IO;
@@ -12,14 +11,10 @@ namespace Launcher
     public class World : Actor
     {
         #region Properties 
-        private static World _instance = null;
-        public static ushort Port { get; set; } = 54992;
-        public static string Address { get; set; } = "127.0.0.1";
-        public int ServerId { get; set; }
-        public int Population { get; set; }
-        public string ServerName { get; set; } = "CHANGE NAME"; //change this
+        private static World _instance = null;       
         public List<Zone> Zones { get; set;}
-        public List<Actor> Actors { get; set; } = new List<Actor>();
+        public List<Director> Directors { get; set; } = new List<Director>();
+        public Debug Debug { get; set; } = new Debug();
         public static World Instance
         {
             get
@@ -31,6 +26,11 @@ namespace Launcher
             }
         }
         #endregion
+        
+        //move these to GameServer.
+        public static ushort Port { get; set; } = 54992;
+        public static string Address { get; set; } = "127.0.0.1";
+        public string ServerName { get; set; } = "CHANGE NAME"; //change this        
 
         private World()
         {
@@ -50,7 +50,7 @@ namespace Launcher
             SetName(handler);
             SetMainState(handler);
             SetIsZoning(handler);
-            LoadScript(handler);
+            SetLuaScript(handler);
         }
 
         public override void Prepare(ushort actorIndex = 0)
@@ -64,34 +64,31 @@ namespace Launcher
             LuaParameters.Add(false);
             LuaParameters.Add(null);            
         }
-
+        
         public void Initialize(Socket sender)
         {
-            PlayerCharacter playerCharacter = User.Instance.Character;
-            Debug debug = new Debug();           
+            PlayerCharacter playerCharacter = User.Instance.Character;               
             ServerName = GetServerName(playerCharacter.WorldId);
-            uint currentZone = playerCharacter.Position.ZoneId;
-            Zone zone = Zones.Find(x => x.Id == currentZone);
 
             //login welcome messages
             ChatProcessor.SendMessage(sender, MessageType.GeneralInfo, "Welcome to " + ServerName + "!");
             ChatProcessor.SendMessage(sender, MessageType.GeneralInfo, "Welcome to Eorzea!");
-            ChatProcessor.SendMessage(sender, MessageType.GeneralInfo, @"To get a list of available commands, type \help in the chat window and hit enter.");            
+            ChatProcessor.SendMessage(sender, MessageType.GeneralInfo, @"To get a list of custom commands, type \help in the chat window and hit enter.");            
             
-            playerCharacter.SendGroupPackets(sender);
+            playerCharacter.GetGroups(sender);
             playerCharacter.IsNew = true;
             playerCharacter.OpeningSequence(sender);
 
-            SetMapEnvironment(sender, zone);
-
-            //spawn actors
-            playerCharacter.Spawn(sender, spawnType: 0x01, isZoning: 0);//spawn player character
-            zone.Spawn(sender);//spawn zone
-            debug.Spawn(sender);
+            Zone zone = Zones.Find(x => x.Id == playerCharacter.Position.ZoneId);
+            SetMapEnvironment(sender, zone);            
+            playerCharacter.Spawn(sender, spawnType: 0x01, isZoning: 0);
+            zone.Spawn(sender);
+            Debug.Spawn(sender);
             Spawn(sender, 0x01);            
-            zone.SpawnActors(sender);           
+            zone.SpawnActors(sender);
         }
 
+        #region World Environment Methods
         private void SetMapEnvironment(Socket sender, Zone zone)
         {
             SetIsZoning(sender);
@@ -105,7 +102,7 @@ namespace Launcher
         {
             byte[] data = new byte[0x08];
             data[0] = 0xff; //test other values and make enum later
-            SendPacket(sender, ServerOpcode.SetDalamud, data, sourceId: User.Instance.Character.Id);
+            Packet.Send(sender, ServerOpcode.SetDalamud, data, sourceId: User.Instance.Character.Id);
         }       
 
         public void SetMusic(Socket sender, uint musicId, MusicMode mode = MusicMode.Play)
@@ -113,7 +110,7 @@ namespace Launcher
             byte[] data = new byte[0x08];            
             data[0] = (byte)musicId; //these numbers will not vary, so no need for blockcopy
             data[0x02] = (byte)mode;
-            SendPacket(sender, ServerOpcode.SetMusic, data);
+            Packet.Send(sender, ServerOpcode.SetMusic, data);
         }
 
         public void SetWeather(Socket sender, Weather weather)
@@ -121,7 +118,7 @@ namespace Launcher
             byte[] data = new byte[0x08];
             Buffer.BlockCopy(BitConverter.GetBytes((ushort)weather), 0, data, 0, sizeof(ushort));
             data[0x02] = 0x02;
-            SendPacket(sender, ServerOpcode.SetWeather, data);           
+            Packet.Send(sender, ServerOpcode.SetWeather, data);           
         }    
 
         public void SetMap(Socket sender, Zone zone)
@@ -130,8 +127,9 @@ namespace Launcher
             Buffer.BlockCopy(BitConverter.GetBytes(zone.RegionId), 0, data, 0, sizeof(uint));
             Buffer.BlockCopy(BitConverter.GetBytes(zone.Id), 0, data, 0x04, sizeof(uint));            
             data[0x08] = 0x28;
-            SendPacket(sender, ServerOpcode.SetMap, data, sourceId: User.Instance.Character.Id);           
-        }       
+            Packet.Send(sender, ServerOpcode.SetMap, data, sourceId: User.Instance.Character.Id);           
+        }
+        #endregion
 
         public void TeleportPlayer(Socket sender, uint zoneId)
         {
@@ -141,20 +139,13 @@ namespace Launcher
                 entryPoint = new Position() { ZoneId = zoneId };
 
             ChangeZone(sender, entryPoint);
-        }
-
-        public void TeleportPlayer(Socket sender, Position position)
-        {
-            position.X = position.X + 3;
-            ChangeZone(sender, position);
-        }        
+        }      
 
         public void ChangeZone(Socket sender, Position position, string allowedActorTypes = "all")
         {
             User.Instance.Character.Position = position;
             PlayerCharacter playerCharacter = User.Instance.Character;    
-            Zone zone = Zones.Find(x => x.Id == playerCharacter.Position.ZoneId);
-            Debug debug = new Debug();
+            Zone zone = Zones.Find(x => x.Id == playerCharacter.Position.ZoneId);           
 
             MassDeleteActors(sender);
             playerCharacter.MapUIChange(sender, (uint)(playerCharacter.IsNew ? 0x10 : 0x02));
@@ -168,41 +159,38 @@ namespace Launcher
                 zone.Type = ZoneType.Nothing;
             }
             
-            zone.Spawn(sender);//spawn zone 
-            debug.Spawn(sender);
+            zone.Spawn(sender);
+            Debug.Spawn(sender);
             Spawn(sender, 0x01);
 
             if (playerCharacter.IsNew)
             {
-                OpeningDirector openingDirector = new OpeningDirector(0x66080000);
-                QuestDirector questDirector = new QuestDirector(0x66080001);
-
-                foreach(var ev in openingDirector.Events)
-                {
+                foreach(var ev in GetDirector("Opening").Events)                
                     if (ev.Name.IndexOf("notice") >= 0)
-                        ev.Silent = 1;
-                }
+                        ev.Silent = 1;                
 
-                openingDirector.Spawn(sender);
-                questDirector.QuestFunction = "Man0l001";
-                questDirector.Spawn(sender);
+                GetDirector("Opening").Spawn(sender);               
+                ((QuestDirector)GetDirector("Quest")).Spawn(sender, "Man0l001");
                 playerCharacter.Groups.Find(x => x.Id == 0x30_00_00_00_00_00_00_01).SendPackets(sender);
             }
             
             zone.SpawnActors(sender, allowedActorTypes);
         }
 
+        public Director GetDirector(string directorName) => Directors.Find(x => x.GetType().Name == directorName + "Director");        
+
         public void MassDeleteActors(Socket sender)
         {
             PlayerCharacter playerCharacter = User.Instance.Character;
             Zone zone = Zones.Find(x => x.Id == playerCharacter.Position.ZoneId);
 
-            if(zone.Actors.Count > 0) //anti-crash for debug
+            if(zone.Actors.Count > 0) //anti-crash for debugging
                 zone.Actors.ForEach(x => x.Spawned = false); // 'despawn' zone actors.
 
-            SendPacket(sender, ServerOpcode.MassDeleteEnd, new byte[0x08], playerCharacter.Id, playerCharacter.Id);
+            Packet.Send(sender, ServerOpcode.MassDeleteEnd, new byte[0x08], playerCharacter.Id, playerCharacter.Id);
         }
 
+        #region World List Methods
         public XmlNodeList GetWorldListXml()
         {
             List<Actor> zoneNpcs = new List<Actor>();
@@ -290,8 +278,10 @@ namespace Launcher
                 Log.Instance.Error("An error ocurred when loading the world list.");
             }
         }
+        #endregion
 
-        public void SendTextSheetMessage(Socket sender, ServerOpcode opcode, byte[] data) => SendPacket(sender, opcode, data);
+        #region World Text Sheet Methods
+        public void SendTextSheetMessage(Socket sender, ServerOpcode opcode, byte[] data) => Packet.Send(sender, opcode, data);
 
         public void SendTextQuestUpdated(Socket sender, uint questId)
         {
@@ -314,11 +304,12 @@ namespace Launcher
 
             Instance.SendTextSheetMessage(sender, ServerOpcode.TextSheetMessageNoSource28b, data);
         }
+        #endregion
 
         public void GMActiveRequest(Socket sender)
         {
             byte[] data = new byte[0x08];
-            SendPacket(sender, ServerOpcode.GMTicketActiveRequest, data);
+            Packet.Send(sender, ServerOpcode.GMTicketActiveRequest, data);
         }
        
     }    

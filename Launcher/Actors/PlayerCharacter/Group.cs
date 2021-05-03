@@ -95,7 +95,7 @@ namespace Launcher
                 bw.Write(NumMembers);
             }
             
-            SendPacket(sender, ServerOpcode.GroupHeader, data);
+            Packet.Send(sender, ServerOpcode.GroupHeader, data);
         }
 
         private void Begin(Socket sender)
@@ -103,7 +103,7 @@ namespace Launcher
             byte[] data = GetPrepByteArray(0x20);
             Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, data, 0x10, sizeof(ulong));
             data[0x18] = NumMembers;
-            SendPacket(sender, ServerOpcode.GroupBegin, data);
+            Packet.Send(sender, ServerOpcode.GroupBegin, data);
         }
 
         protected virtual void Members(Socket sender)
@@ -116,14 +116,14 @@ namespace Launcher
             Buffer.BlockCopy(User.Instance.Character.Name, 0, data, 0x1e, User.Instance.Character.Name.Length);
             data[0x190] = NumMembers; //only one member, the player.
 
-            SendPacket(sender, ServerOpcode.GroupMembers, data);
+            Packet.Send(sender, ServerOpcode.GroupMembers, data);
         }
 
         private void End(Socket sender)
         {
             byte[] data = GetPrepByteArray(0x18);
             Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, data, 0x10, sizeof(ulong));
-            SendPacket(sender, ServerOpcode.GroupEnd, data);
+            Packet.Send(sender, ServerOpcode.GroupEnd, data);
         }
 
         public virtual void InitWork(Socket sender)
@@ -140,7 +140,7 @@ namespace Launcher
                 }
             }
 
-            SendPacket(sender, ServerOpcode.GroupInitWork, data);
+            Packet.Send(sender, ServerOpcode.GroupInitWork, data);
         }
 
         public void SendPackets(Socket sender, GroupType type = GroupType.None)
@@ -149,20 +149,8 @@ namespace Launcher
             Begin(sender);
             Members(sender);
             End(sender);
-        }               
+        }              
 
-        protected void SendPacket(Socket handler, ServerOpcode opcode, byte[] data)
-        {
-            uint characterId = User.Instance.Character.Id;
-            GamePacket gamePacket = new GamePacket
-            {
-                Opcode = (ushort)opcode,
-                Data = data
-            };
-
-            Packet packet = new Packet(new SubPacket(gamePacket));
-            handler.Send(packet.ToBytes());
-        }
     }   
 
     [Serializable]
@@ -188,7 +176,7 @@ namespace Launcher
                 }
             }
            
-            SendPacket(sender, ServerOpcode.GroupInitWork, data);
+            Packet.Send(sender, ServerOpcode.GroupInitWork, data);
         }
 
     }
@@ -247,7 +235,7 @@ namespace Launcher
                 bw.Write(memberIds.Length);                
             }
 
-            SendPacket(sender, ServerOpcode.GroupDutyMembers, data);
+            Packet.Send(sender, ServerOpcode.GroupDutyMembers, data);
         }
 
         /// <summary>
@@ -268,7 +256,7 @@ namespace Launcher
                     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
                 };
-            SendPacket(sender, ServerOpcode.ActorInit, work);
+            Packet.Send(sender, ServerOpcode.ActorInit, work);
         }
 
         public override void InitWork(Socket sender)
@@ -276,7 +264,7 @@ namespace Launcher
             byte[] init = new byte[0x28];
             Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, init, 0, sizeof(long));
             Buffer.BlockCopy(Encoding.ASCII.GetBytes("/_init"), 0, init, 0x08, 6);
-            SendPacket(sender, ServerOpcode.GeneralData, init);
+            Packet.Send(sender, ServerOpcode.GeneralData, init);
 
             byte[] data = new byte[0x90];
 
@@ -301,7 +289,7 @@ namespace Launcher
                 }
             }
 
-            SendPacket(sender, ServerOpcode.GroupInitWork, data);
+            Packet.Send(sender, ServerOpcode.GroupInitWork, data);
         }
     }
 }
