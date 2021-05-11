@@ -148,7 +148,7 @@ namespace Launcher
                     break;
 
                 case (ushort)ClientOpcode.CutSceneFinished:
-                    Log.Instance.Success("Cutscene finished.");
+                    CutsceneLog(subpacket.Data);
                     break;
 
                 default:
@@ -156,6 +156,20 @@ namespace Launcher
                     break;
             }
         }    
+
+        /// <summary>
+        /// Indicate is a cutscene is starting or finishing. Might be used in the future to fire events after cutscenes.
+        /// </summary>
+        /// <param name="data"></param>
+        private void CutsceneLog(byte[] data)
+        {
+            string status = "started";
+
+            if (data[0x34] == 2)
+                status = "finished";
+
+            Log.Instance.Success("Cutscene "+ status +".");
+        }
                
         /// <summary>
         /// Answer to a ping request from the client.

@@ -47,9 +47,9 @@ namespace Launcher
         public List<Event> Events { get; set; } = new List<Event>();
         public Speeds Speeds { get; set; } = new Speeds();
 
-        public virtual void Spawn(Socket sender, ushort spawnType = 0, ushort isZoning = 0, int changingZone = 0, ushort actorIndex = 0)
+        public virtual void Spawn(Socket sender, ushort spawnType = 0, ushort isZoning = 0, int changingZone = 0)
         {
-            Prepare(actorIndex);
+            Prepare();
             CreateActor(sender, 0x08);
             SetEventConditions(sender);
             SetSpeeds(sender);
@@ -66,14 +66,11 @@ namespace Launcher
             Spawned = true;
         }
 
-        public virtual void Prepare(ushort actorIndex = 0)
-        {
-            Zone zone = World.Instance.Zones.Find(x => x.Id == Position.ZoneId);
-            Id = 4 << 28 | zone.Id << 19 | (uint)actorIndex; // 0x46700087;           
-
+        public virtual void Prepare()
+        {          
             LuaParameters = new LuaParameters
             {
-                ActorName = GenerateActorName(actorIndex),
+                ActorName = GenerateActorName(),
                 ClassName = ClassName,
                 ClassCode = ClassCode
             };
@@ -165,6 +162,7 @@ namespace Launcher
             Buffer.BlockCopy(Encoding.ASCII.GetBytes(LuaParameters.ClassName), 0, data, 0x24, LuaParameters.ClassName.Length);
 
             LuaParameters.WriteParameters(ref data, LuaParameters);
+            LuaParameters = null;
 
             Packet.Send(sender, ServerOpcode.LoadClassScript, data, Id);
         }
@@ -333,7 +331,8 @@ namespace Launcher
 
         public void SetQuestIcon(Socket sender)
         {
-            Packet.Send(sender, ServerOpcode.SetQuestIcon, BitConverter.GetBytes((ulong)QuestIcon), Id);
+            if(QuestIcon >= 0)
+                Packet.Send(sender, ServerOpcode.SetQuestIcon, BitConverter.GetBytes((ulong)QuestIcon), Id);
         }
 
         /// <summary>
@@ -352,7 +351,7 @@ namespace Launcher
             return secondDigit + firstDigit;
         }
 
-        public string GenerateActorName(int actorNumber)
+        public string GenerateActorName()
         {
             Zone zone = World.Instance.Zones.Find(x => x.Id == Position.ZoneId);            
             uint zoneId = zone.Id;
@@ -373,7 +372,7 @@ namespace Launcher
                 try{ className = className.Substring(0, 21 - zoneName.Length); }
                 catch (ArgumentOutOfRangeException e) { Log.Instance.Error(e.Message); }
                         
-            return string.Format("{0}_{1}_{2}@{3:X3}{4:X2}", className, zoneName, ToStringBase63(actorNumber), zoneId, privLevel);
+            return string.Format("{0}_{1}_{2}@{3:X3}{4:X2}", className, zoneName, ToStringBase63((int)(Id & 0xff)), zoneId, privLevel);
         }
 
         protected string MinifyMapName(string mapName, byte privLevel = 0)

@@ -10,12 +10,10 @@ namespace Launcher
 {
     public class OpeningDirector : Director
     {
-        public OpeningDirector(){}
-
-        public override void Prepare(ushort actorIndex = 0)
+        public override void Prepare()
         {
             Zone zone = World.Instance.Zones.Find(x => x.Id == User.Instance.Character.Position.ZoneId);
-            string zoneName = MinifyMapName(zone.MapName, zone.PrivLevel);
+            string zoneName = MinifyMapName(zone.MapName);
 
             LuaParameters = new LuaParameters
             {
@@ -35,8 +33,6 @@ namespace Launcher
             Events.Add(new Event { Opcode = ServerOpcode.NoticeEvent, Name = "noticeEvent", Priority = 0x0e });
             Events.Add(new Event { Opcode = ServerOpcode.NoticeEvent, Name = "noticeRequest", Enabled = 0x01, Silent = 1 });
             Events.Add(new Event { Opcode = ServerOpcode.NoticeEvent, Name = "reqForChild", Enabled = 0x01, Silent = 1 });
-        }             
-
-        
+        } 
     }
 }

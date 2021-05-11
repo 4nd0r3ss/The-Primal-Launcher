@@ -11,9 +11,9 @@ namespace Launcher
             Id = 0x5ff80002; //id from hardcoded packet (just bc it works)                  
         }
 
-        public override void Spawn(Socket handler, ushort spawnType = 0, ushort isZoning = 0, int changingZone = 0, ushort actorIndex = 0)
+        public override void Spawn(Socket handler, ushort spawnType = 0, ushort isZoning = 0, int changingZone = 0)
         {
-            Prepare(actorIndex);
+            Prepare();
             CreateActor(handler);
             SetSpeeds(handler);
             SetPosition(handler, 1, isZoning);
@@ -23,7 +23,7 @@ namespace Launcher
             SetLuaScript(handler);            
         }
 
-        public override void Prepare(ushort actorIndex = 0)
+        public override void Prepare()
         {
             LuaParameters = new LuaParameters
             {

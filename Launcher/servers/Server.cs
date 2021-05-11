@@ -99,5 +99,8 @@ namespace Launcher
         public static int GetTimeStamp() => (int)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds;
 
         public static byte[] GetTimeStampHex() => BitConverter.GetBytes(GetTimeStamp());
+
+        public static ulong GetTimeStampHexMiliseconds() => (ulong)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds;
+
     }
 }

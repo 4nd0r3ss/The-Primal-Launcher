@@ -108,7 +108,7 @@ namespace Launcher
 
         private void Response(Socket sender)
         {
-            byte[] data = new byte[0xb0];
+            byte[] data = new byte[0x298];
             Buffer.BlockCopy(BitConverter.GetBytes(CallerId), 0, data, 0, 4);
             Buffer.BlockCopy(BitConverter.GetBytes(OwnerId), 0, data, 0x04, 4);
             LuaParameters.WriteParameters(ref data, RequestParameters, 0x08);
@@ -122,8 +122,7 @@ namespace Launcher
             data[0x08] = 1;
             string name = GetType().Name;
             Buffer.BlockCopy(Encoding.ASCII.GetBytes(name), 0, data, 0x09, name.Length);
-            Packet.Send(sender, ServerOpcode.EventRequestFinish, data);
-            //EventManager.Instance.CurrentEvent = null;
+            Packet.Send(sender, ServerOpcode.EventRequestFinish, data);            
         }
 
         public virtual void ProcessEventResult(Socket sender, byte[] data)
@@ -174,7 +173,7 @@ namespace Launcher
             Response(sender);
         }
 
-        public void SendData(Socket sender, object[] toSend)
+        public void SendData(Socket sender, object[] toSend, int sleepSeconds = 0)
         {
             byte[] data = new byte[0xC0];
             LuaParameters parameters = new LuaParameters();
@@ -184,6 +183,9 @@ namespace Launcher
 
             LuaParameters.WriteParameters(ref data, parameters, 0);
             Packet.Send(sender, ServerOpcode.GeneralData, data);
+
+            if(sleepSeconds > 0)
+                Thread.Sleep(sleepSeconds * 1000);
         }
     }
       
@@ -227,11 +229,11 @@ namespace Launcher
         private void GetQuestData(Socket sender)
         {
             byte[] data = new byte[0xc0];
-            int questId = data[0x32] << 24 | data[0x33] << 16 | data[0x34] << 8 | data[0x35];
+            int questId = Data[0x42] << 24 | Data[0x43] << 16 | Data[0x44] << 8 | Data[0x45];
             RequestParameters.Add("requestedData");            
             RequestParameters.Add("qtdata");
             RequestParameters.Add(questId);
-            RequestParameters.Add(0);
+            RequestParameters.Add(5);
             LuaParameters.WriteParameters(ref data, RequestParameters, 0);
             Packet.Send(sender, ServerOpcode.GeneralData, data);
         }
@@ -265,7 +267,7 @@ namespace Launcher
             OwnerId = 0;
         }
 
-        public override void Execute(Socket sender)
+        public override void Execute(Socket sender) 
         {
             Log.Instance.Warning("Event: " + GetType().Name + ", Command: 0x" + CommandId.ToString("X"));
 
@@ -282,7 +284,8 @@ namespace Launcher
             }
             
             Finish(sender);
-            ((OpeningDirector)World.Instance.Directors.Find(x => x.Id == 0x66080001)).StartEvent(sender, "noticeEvent");
+            Thread.Sleep(1000);
+            ((QuestDirector)World.Instance.GetDirector("Quest")).StartEvent(sender, "noticeEvent");
         }
 
     }
@@ -362,13 +365,20 @@ namespace Launcher
                 Actor eventOwner = GetActor();
                 User.Instance.Character.Quests.Find(x => x.Id == QuestId).ActorStepComplete(sender, GetType().Name, eventOwner.ClassId, eventOwner.Id, finishRepeatable: true);
                 World.Instance.SendTextQuestUpdated(sender, QuestId);
+                Zone zone = World.Instance.Zones.Find(x => x.Id == User.Instance.Character.Position.ZoneId);                
                 DutyGroup dutyGroup = new DutyGroup();
+                QuestDirector questDirector = ((QuestDirector)World.Instance.GetDirector("Quest"));
+
+                zone.LoadActors("Monster");
+                dutyGroup.MemberList.Add(questDirector.Id);
+                dutyGroup.AddMembers(zone.Actors);
                 dutyGroup.InitializeGroup(sender);
                 dutyGroup.SendPackets(sender);
+                User.Instance.Character.Groups.RemoveAll(x => x.GetType().Name == "DutyGroup"); //remove later
                 User.Instance.Character.Groups.Add(dutyGroup);
-                World.Instance.SendTextEnteredDuty(sender);               
-                ((OpeningDirector)World.Instance.Directors.Find(x => x.Id == 0x66080001)).StartEvent(sender);                
-                World.Instance.ChangeZone(sender, new Position(193, -5f, 16.35f, 6f, 0.5f, 16), "monster");
+                World.Instance.SendTextEnteredDuty(sender);
+                questDirector.StartEvent(sender);
+                World.Instance.ChangeZone(sender, new Position(193, -5f, 16.35f, 6f, 0.5f, 16));
             }
             else
             {
@@ -401,31 +411,19 @@ namespace Launcher
 
             if (FunctionName == "processTtrBtl002")
             {
-                //int timeInterval = 2000;
-
-                //the weaponskill packet is class-specific. investigate that.
-
-                SendData(sender, new object[] { 0x05 }); //finish draw weapon tutorial
-                //Thread.Sleep(timeInterval);
-                //SendData(sender, new object[] { 0x02, null, null, 0x235f });
-                //Thread.Sleep(timeInterval);
-                //SendData(sender, new object[] { 0x04, null, null, 0x01, 0x0C });
-                //Thread.Sleep(timeInterval);
-                //SendData(sender, new object[] { 0x05 });
-                //Thread.Sleep(timeInterval);
-                //SendData(sender, new object[] { 0x04, null, null, 0x01, 0x0D });
-                //Thread.Sleep(timeInterval);
-                //SendData(sender, new object[] { 0x05 });
-                //Thread.Sleep(timeInterval);
-                //SendData(sender, new object[] { 0x02, null, null, 0x2369 });
-                //Thread.Sleep(timeInterval);
-                //SendData(sender, new object[] { "attention", (uint)0x5FF80001, "", 0xC781, 0x01 }); //second parameter is world id
-                //Thread.Sleep(timeInterval);
-                //User.Instance.Character.ToggleStance(sender, Command.NormalStance);
-                //Actor eventOwner = GetActor();
-                //User.Instance.Character.Quests.Find(x => x.Id == QuestId).ActorStepComplete(sender, GetType().Name, eventOwner.ClassId, eventOwner.Id);
+                int sleepSeconds = 3;
+                SendData(sender, new object[] { 0x05 }, sleepSeconds);                
+                SendData(sender, new object[] { 0x02, null, null, 0x235f }, sleepSeconds);               
+                SendData(sender, new object[] { 0x04, null, null, 0x01, 0x0C }, sleepSeconds);               
+                SendData(sender, new object[] { 0x05 }, sleepSeconds);                
+                SendData(sender, new object[] { 0x04, null, null, 0x01, 0x0D }, sleepSeconds);                
+                SendData(sender, new object[] { 0x05 }, sleepSeconds);                
+                SendData(sender, new object[] { 0x02, null, null, 0x2369 }, sleepSeconds);                
+                SendData(sender, new object[] { "attention", (uint)0x5FF80001, "", 0xC781, 0x01 }); //second parameter is world id
+               
+                User.Instance.Character.ToggleStance(sender, Command.NormalStance);
+                ((QuestDirector)World.Instance.GetDirector("Quest")).StartEvent(sender, "noticeEvent");
             }
-
         }
     }
 

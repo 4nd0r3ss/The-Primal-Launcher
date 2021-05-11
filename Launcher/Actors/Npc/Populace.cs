@@ -20,9 +20,9 @@ namespace Launcher
             TalkFunction = "processEvent000_9";// "processTtrNomal003";
         }
 
-        public override void Spawn(Socket sender, ushort spawnType = 0, ushort isZoning = 0, int changingZone = 0, ushort actorIndex = 0)
+        public override void Spawn(Socket sender, ushort spawnType = 0, ushort isZoning = 0, int changingZone = 0)
         {
-            Prepare(actorIndex);
+            Prepare();
             CreateActor(sender, 0x08);
             SetEventConditions(sender);
             SetSpeeds(sender);

@@ -214,6 +214,7 @@
     <Compile Include="Events\CommandResult.cs" />
     <Compile Include="Events\Event.cs" />
     <Compile Include="Repositories\QuestRepository.cs" />
+    <Compile Include="Repositories\ZoneRepository.cs" />
     <Compile Include="System\LuaParameters.cs" />
     <Compile Include="System\BitField.cs" />
     <Compile Include="System\Blowfish.cs" />

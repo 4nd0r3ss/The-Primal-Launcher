@@ -35,15 +35,15 @@ namespace Launcher
         private World()
         {
             Id = 0x5ff80001;
-            Zones = ActorRepository.Instance.ZoneList();
+            Zones = ZoneRepository.GetZones();
             Name = Encoding.ASCII.GetBytes("worldMaster");     
         }
 
         public byte[] GetNameBytes(byte id) => Encoding.ASCII.GetBytes(GetServerName(id));
 
-        public override void Spawn(Socket handler, ushort spawnType = 0, ushort isZoning = 0, int changingZone = 0, ushort actorIndex = 0)
+        public override void Spawn(Socket handler, ushort spawnType = 0, ushort isZoning = 0, int changingZone = 0)
         {
-            Prepare(actorIndex);
+            Prepare();
             CreateActor(handler);
             SetSpeeds(handler);
             SetPosition(handler, 1, isZoning);
@@ -53,7 +53,7 @@ namespace Launcher
             SetLuaScript(handler);
         }
 
-        public override void Prepare(ushort actorIndex = 0)
+        public override void Prepare()
         {
             LuaParameters = new LuaParameters { ActorName = "worldMaster", ClassName = "WorldMaster", ClassCode = 0x30400000 };
             LuaParameters.Add("/World/WorldMaster_event");
@@ -69,22 +69,24 @@ namespace Launcher
         {
             PlayerCharacter playerCharacter = User.Instance.Character;               
             ServerName = GetServerName(playerCharacter.WorldId);
+            Zone zone = Zones.Find(x => x.Id == playerCharacter.Position.ZoneId);
 
             //login welcome messages
             ChatProcessor.SendMessage(sender, MessageType.GeneralInfo, "Welcome to " + ServerName + "!");
             ChatProcessor.SendMessage(sender, MessageType.GeneralInfo, "Welcome to Eorzea!");
-            ChatProcessor.SendMessage(sender, MessageType.GeneralInfo, @"To get a list of custom commands, type \help in the chat window and hit enter.");            
-            
+            ChatProcessor.SendMessage(sender, MessageType.GeneralInfo, @"To get a list of custom commands, type \help in the chat window and hit enter.");
+
+            zone.LoadActors();
             playerCharacter.GetGroups(sender);
             playerCharacter.IsNew = true;
             playerCharacter.OpeningSequence(sender);
-
-            Zone zone = Zones.Find(x => x.Id == playerCharacter.Position.ZoneId);
+            
             SetMapEnvironment(sender, zone);            
             playerCharacter.Spawn(sender, spawnType: 0x01, isZoning: 0);
             zone.Spawn(sender);
             Debug.Spawn(sender);
-            Spawn(sender, 0x01);            
+            Spawn(sender, 0x01);
+            
             zone.SpawnActors(sender);
         }
 
@@ -141,7 +143,7 @@ namespace Launcher
             ChangeZone(sender, entryPoint);
         }      
 
-        public void ChangeZone(Socket sender, Position position, string allowedActorTypes = "all")
+        public void ChangeZone(Socket sender, Position position)
         {
             User.Instance.Character.Position = position;
             PlayerCharacter playerCharacter = User.Instance.Character;    
@@ -150,6 +152,10 @@ namespace Launcher
             MassDeleteActors(sender);
             playerCharacter.MapUIChange(sender, (uint)(playerCharacter.IsNew ? 0x10 : 0x02));
             SetMapEnvironment(sender, zone);
+
+            if (playerCharacter.IsNew)
+                playerCharacter.LoadLuaParameters(GetDirector("Quest").Id);
+
             playerCharacter.Spawn(sender, (ushort)(playerCharacter.IsNew ? 0x10 : 0x02), 1);
 
             if (playerCharacter.IsNew) //TODO: move this to zone prepare
@@ -157,6 +163,10 @@ namespace Launcher
                 zone.ContentFunction = "SimpleContent30002";
                 zone.PrivLevel = 1;
                 zone.Type = ZoneType.Nothing;
+            }
+            else
+            {
+                zone.LoadActors();
             }
             
             zone.Spawn(sender);
@@ -171,10 +181,10 @@ namespace Launcher
 
                 GetDirector("Opening").Spawn(sender);               
                 ((QuestDirector)GetDirector("Quest")).Spawn(sender, "Man0l001");
-                playerCharacter.Groups.Find(x => x.Id == 0x30_00_00_00_00_00_00_01).SendPackets(sender);
+                playerCharacter.Groups.Find(x => x.GetType().Name == "DutyGroup").SendPackets(sender);
             }
             
-            zone.SpawnActors(sender, allowedActorTypes);
+            zone.SpawnActors(sender);
         }
 
         public Director GetDirector(string directorName) => Directors.Find(x => x.GetType().Name == directorName + "Director");        
@@ -281,7 +291,7 @@ namespace Launcher
         #endregion
 
         #region World Text Sheet Methods
-        public void SendTextSheetMessage(Socket sender, ServerOpcode opcode, byte[] data) => Packet.Send(sender, opcode, data);
+        public void SendTextSheetMessage(Socket sender, ServerOpcode opcode, byte[] data) => Packet.Send(sender, opcode, data, Id);
 
         public void SendTextQuestUpdated(Socket sender, uint questId)
         {

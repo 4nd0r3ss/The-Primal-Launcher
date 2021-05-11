@@ -15,12 +15,9 @@ namespace Launcher
             ClassCode = 0x30400000;            
         }
 
-        public override void Prepare(ushort actorIndex = 0)
+        public override void Prepare()
         {           
-            Zone zone = World.Instance.Zones.Find(x => x.Id == Position.ZoneId);
-            Id = 4 << 28 | zone.Id << 19 | (uint)actorIndex; // 0x46700087;  
-
-            string actorName = GenerateActorName(actorIndex);
+            string actorName = GenerateActorName();
             actorName = actorName.Substring(0, actorName.IndexOf("_") - 1) + actorName.Substring(actorName.IndexOf("_")); //dirty way of removing extra character...
 
             LuaParameters = new LuaParameters
@@ -53,9 +50,9 @@ namespace Launcher
             LuaParameters.Add((int)0);
         }
 
-        public override void Spawn(Socket sender, ushort spawnType = 0, ushort isZoning = 0, int changingZone = 0, ushort actorIndex = 0)
+        public override void Spawn(Socket sender, ushort spawnType = 0, ushort isZoning = 0, int changingZone = 0)
         {     
-            Prepare(actorIndex);
+            Prepare();
             CreateActor(sender, 0x08);
             SetEventConditions(sender);
             SetSpeeds(sender);

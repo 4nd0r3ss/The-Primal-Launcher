@@ -17,37 +17,24 @@ namespace Launcher
         protected byte IsOnline { get; set; } = 1;
         protected byte Flag { get; set; } //try changing values to see what happens. 
         protected GroupType Type { get; set; }
-        protected byte NumMembers
-        {
-            get { return (byte)(TempMemberCount + 1); }
-        }
+        public List<uint> MemberList { get; set; }        
         public ulong Id
         {
             get { return _idMask + Sequence; }
         }
+        protected ulong TimeStamp { get; set; }
+        protected byte Sequence { get; set; }
+        //private uint[] PacketInitialBytes { get; set; } // need a better name for this...
+        
 
-        protected uint Code { get; set; }
-
-        protected byte Sequence { get; set; }                       
-        public List<Actor> MemeberList { get; set; }
-        public int TempMemberCount { get; set; } = 0; //temporary while I dont implement members properly.
-
-        private uint[] PacketInitialBytes { get; set; } // need a better name for this...
-
-        public Group(uint code, byte id, GroupType type)
+        public Group(byte id, GroupType type)
         {
             Sequence = id;
-            Type = type;
-            Code = code;
-            MemeberList = new List<Actor>();
-
-            PacketInitialBytes = new uint[]
+            Type = type;            
+            MemberList = new List<uint>
             {
-                User.Instance.Character.Position.ZoneId,
-                0,
-                Code,
-                0x0178
-            };
+                User.Instance.Character.Id
+            };            
         }
         
         protected byte[] GetPrepByteArray(int size)
@@ -58,10 +45,8 @@ namespace Launcher
             using(BinaryWriter bw = new BinaryWriter(stream))
             {
                 bw.Seek(0, SeekOrigin.Begin);
-                bw.Write(User.Instance.Character.Position.ZoneId);
-                bw.Write((uint)0);
-                bw.Write((uint)Code);
-                bw.Write((uint)0x0178);
+                bw.Write((ulong)User.Instance.Character.Position.ZoneId);                
+                bw.Write(TimeStamp);                
             }
 
             return data;
@@ -74,11 +59,7 @@ namespace Launcher
             using (MemoryStream stream = new MemoryStream(data))
             using (BinaryWriter bw = new BinaryWriter(stream))
             {
-                bw.Seek(0, SeekOrigin.Begin);
-
-                foreach (uint i in PacketInitialBytes)
-                    bw.Write(i);
-
+                bw.Seek(0x10, SeekOrigin.Begin);
                 bw.Write((ulong)0x03);
                 bw.Write(Id);
                 bw.Write((ulong)0);
@@ -92,7 +73,7 @@ namespace Launcher
                 for (int i = 0; i < 4; i++)
                     bw.Write((uint)0x6d);
 
-                bw.Write(NumMembers);
+                bw.Write((byte)(MemberList.Count));
             }
             
             Packet.Send(sender, ServerOpcode.GroupHeader, data);
@@ -102,7 +83,7 @@ namespace Launcher
         {
             byte[] data = GetPrepByteArray(0x20);
             Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, data, 0x10, sizeof(ulong));
-            data[0x18] = NumMembers;
+            data[0x18] = (byte)(MemberList.Count);
             Packet.Send(sender, ServerOpcode.GroupBegin, data);
         }
 
@@ -114,7 +95,7 @@ namespace Launcher
             data[0x1c] = Flag;
             data[0x1d] = IsOnline;
             Buffer.BlockCopy(User.Instance.Character.Name, 0, data, 0x1e, User.Instance.Character.Name.Length);
-            data[0x190] = NumMembers; //only one member, the player.
+            data[0x190] = (byte)(MemberList.Count); //only one member, the player.
 
             Packet.Send(sender, ServerOpcode.GroupMembers, data);
         }
@@ -145,18 +126,24 @@ namespace Launcher
 
         public void SendPackets(Socket sender, GroupType type = GroupType.None)
         {
+            TimeStamp = Server.GetTimeStampHexMiliseconds();
             Header(sender);
             Begin(sender);
             Members(sender);
             End(sender);
         }              
 
+        public void AddMembers(List<Actor> membersToAdd)
+        {
+            foreach (Actor a in membersToAdd)
+                MemberList.Add(a.Id);
+        }
     }   
 
     [Serializable]
     public class PartyGroup : Group
     {
-        public PartyGroup() : base(0x0d_9b_ee_40, 0x01, GroupType.Party) { }
+        public PartyGroup() : base(0x01, GroupType.Party) { }       
 
         public override void InitWork(Socket sender)
         {
@@ -184,43 +171,27 @@ namespace Launcher
     [Serializable]
     public class RetainerGroup : Group
     {
-        public RetainerGroup() : base(0x0d9bee73, 0x02, GroupType.Retainer) { }       
-
+        public RetainerGroup() : base(0x02, GroupType.Retainer) { }
     }
 
     [Serializable]
     public class DutyGroup : Group
     {
-        public DutyGroup() : base(0x6FBECA9B, 0x01, GroupType.Duty)
+        public DutyGroup() : base(0x01, GroupType.Duty)
         {
-            _idMask = 0x3000000000000000;
-            Sequence = 1;
-            TempMemberCount = 6;
+            _idMask = 0x3000000000000000;          
         }
         
         protected override void Members(Socket sender)
         {
             byte[] data = GetPrepByteArray(0x198); //only groups of 8 allowed here. Many more are allowed in linkshell  groups for example, but I chose to limit to 8.
-
-            uint[] memberIds =
-            {
-                User.Instance.Character.Id,
-                0x66080001,
-                0x46080001,
-                0x46080002,
-                0x46080003,
-                0x46080004,
-                0x46080005
-            };
-
-            
-
+                       
             using (MemoryStream ms = new MemoryStream(data))           
             using (BinaryWriter bw = new BinaryWriter(ms))
             {
                 bw.Seek(0x10, SeekOrigin.Begin);
 
-                foreach(uint member in memberIds)
+                foreach(uint member in MemberList)
                 {
                     bw.Write(member);
                     bw.Write(0x03E9);  //unknown
@@ -232,7 +203,7 @@ namespace Launcher
                 bw.Write(0);
                 bw.Write(0);
 
-                bw.Write(memberIds.Length);                
+                bw.Write((byte)(MemberList.Count));                
             }
 
             Packet.Send(sender, ServerOpcode.GroupDutyMembers, data);
@@ -279,7 +250,7 @@ namespace Launcher
                     bw.Write((byte)0x08); //data type (0x08 == array of ints? or long?)
                     bw.Write(0x33D2BD7B); //hashed string - property name
                     bw.Write(0);          //first value
-                    bw.Write(0x66080001); //director id
+                    bw.Write(World.Instance.GetDirector("Quest").Id); //director id
                     bw.Write((byte)0x01); //data type - bool
                     bw.Write(0x9627ABD8); //hashed string - property name
                     bw.Write((byte)0x01); // true

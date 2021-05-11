@@ -110,32 +110,10 @@ namespace Launcher
             Jobs[CurrentClassId].IsCurrent = true; //current class the player will start with.                        
             LoadInitialEquipment();
 
-            //Position = Position.GetInitialPosition(InitialTown);
-
-            //Lua
-            //LuaParameters = new LuaParameters
-            //{
-            //    ActorName = string.Format("_pc{0:00000000}", Id),
-            //    ClassName = "Player"
-            //};
-
-            //Actor Lua parameters
-            //LuaParameters.Add(ClassPath);
-            //LuaParameters.Add(true);
-            //LuaParameters.Add(false);
-            //LuaParameters.Add(false);
-            //LuaParameters.Add(true);
-            //LuaParameters.Add(0);
-            //LuaParameters.Add(false);
-
-            //add timer placeholders
-            //for (int i = 0; i < 20; i++)
-            //    LuaParameters.Add(0);
-
-            //LuaParameters.Add(true);
+            Position = Position.GetInitialPosition(InitialTown);
         }
 
-        public override void Prepare(ushort actorIndex = 0){}
+        public override void Prepare(){}
 
         private void LoadInitialEquipment()
         {
@@ -187,10 +165,8 @@ namespace Launcher
         public void Spawn(Socket sender, ushort spawnType = 0x01, ushort isZoning = 0, ushort actorIndex = 0)
         {
             PacketQueue = null;
-            State.Main = MainState.Passive;
-            TargetId = Id; //For packet creation  
-
-            //SendGroupPackets(sender);
+            State.Main = MainState.Passive;     
+            
             CreateActor(sender, 0x08);
             CommandSequence(sender);
             SetSpeeds(sender);
@@ -214,19 +190,21 @@ namespace Launcher
             //SendCurrentJob(sender);
 
             SpecialEventWork(sender);
-
-            /* Chocobo mounts packet here */
-            Packet.Send(sender, ServerOpcode.SetChocoboName, new byte[] { 0x42, 0x6f, 0x6b, 0x6f, 0x00, 0x00, 0x00, 0x00 });
-            Packet.Send(sender, ServerOpcode.SetHasChocobo, new byte[] { 0x1f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
-            Packet.Send(sender, ServerOpcode.SetHasGobbue, new byte[] { 0x1, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
-
+            SetMounts(sender);
             AchievementPoints(sender);
             AchievementsLatest(sender);
             AchievementsCompleted(sender);
-            LoadLuaParameters(sender);
+            LoadLuaParameters();
             SetLuaScript(sender);           
             Inventory.Send(sender);
             Work(sender);           
+        }
+
+        public void SetMounts(Socket sender)
+        {
+            Packet.Send(sender, ServerOpcode.SetChocoboName, new byte[] { 0x42, 0x6f, 0x6b, 0x6f, 0x00, 0x00, 0x00, 0x00 });
+            Packet.Send(sender, ServerOpcode.SetHasChocobo, new byte[] { 0x1f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
+            Packet.Send(sender, ServerOpcode.SetHasGobbue, new byte[] { 0x1, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
         }
 
         public void OpeningSequence(Socket sender)
@@ -237,17 +215,17 @@ namespace Launcher
                 World.Instance.Directors.Add(new QuestDirector());
                 Quests = new List<Quest>(); //this is to reset quests on every spawn for debugging. remove later.
 
-                Position = Position.GetInitialPosition(InitialTown);                
+                Position = Position.GetInitialPosition(InitialTown);    //remove later       
                 Quests.Add(QuestRepository.GetInitialQuest(InitialTown));
                 Quests[0].StartPhase(sender);
                 OpeningDirector director = (OpeningDirector)World.Instance.GetDirector("Opening");
                 director.Spawn(sender);
                 director.StartEvent(sender);
-                LoadLuaParameters(sender, director.Id);
+                LoadLuaParameters(director.Id);
             }
         }
 
-        public void LoadLuaParameters(Socket sender, uint director = 0)
+        public void LoadLuaParameters(uint director = 0)
         {
             if(LuaParameters == null)
             {
@@ -360,6 +338,7 @@ namespace Launcher
         public void Work(Socket sender)
         {
             WorkProperties property = new WorkProperties(sender, Id, @"/_init");
+            byte commandBorder = 0x20;
 
             uint[] command = new uint[64];
 
@@ -378,10 +357,7 @@ namespace Launcher
             command[12] = 22012; //Bazaar
             command[13] = 22013; //Repair
             command[14] = 29497; //Engage in competitive discourse to win what you seek.
-            command[15] = 22015; //[no description]
-            //command[16] = 22001; //synthesize
-            //command[17] = 24101; //talk
-            //command[18] = 24212; //talk
+            command[15] = 22015; //[no description]          
 
             //hotbar
             command[32] = 27039; //index 32 ~ 61 - hotbar
@@ -411,11 +387,21 @@ namespace Launcher
             //unknown
             property.Add("charaWork.battleTemp.castGauge_speed[0]", 1.0f);
             property.Add("charaWork.battleTemp.castGauge_speed[1]", 0.25f);
-            property.Add("charaWork.commandBorder", (byte)0x20);
+            property.Add("charaWork.commandBorder", commandBorder);
             property.Add("charaWork.battleSave.negotiationFlag[0]", true);
                                         
             for (int i = 0; i < command.Length; i++)
-                if (command[i] != 0) property.Add(string.Format("charaWork.command[{0}]", i), 0xA0F00000 | command[i]);
+            {
+                if (command[i] != 0)
+                {
+                    property.Add(string.Format("charaWork.command[{0}]", i), 0xA0F00000 | command[i]);
+                    //if (i >= commandBorder)
+                    //{
+                    //    property.Add(string.Format("charaWork.parameterTemp.maxCommandRecastTime[{0}]", i - commandBorder), (ushort)5);
+                    //    property.Add(string.Format("charaWork.parameterSave.commandSlot_recastTime[{0}]", i - commandBorder), (uint)(Server.GetTimeStamp() + 5));
+                    //}
+                }
+            }                
 
             for (int i = 0; i < 64; i++)
                 property.Add(string.Format("charaWork.commandCategory[{0}]", i), (byte)1);
@@ -433,7 +419,7 @@ namespace Launcher
             AddWorkSystem(ref property);
 
             for (int i = 0; i < Quests.Count; i++)
-                property.Add(string.Format("playerWork.questScenario[{0}]", i+1), 0xA0F00000 | Quests[i].Id);     
+                property.Add(string.Format("playerWork.questScenario[{0}]", i), 0xA0F00000 | Quests[i].Id);     
 
             AddWorkGuildleve(ref property);
             AddWorkNpcLinkshell(ref property);

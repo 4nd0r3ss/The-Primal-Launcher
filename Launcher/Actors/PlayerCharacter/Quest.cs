@@ -42,9 +42,9 @@ namespace Launcher
                 FinishCondition = "allStepsDone",
                 Steps = new List<QuestPhaseStep>
                 {
-                    new QuestPhaseStep{ActorClassId = 1001652, Type = "talkDefault", Value = "processTtrMini001", OnExecute = "QuestIcon:0"},
-                    new QuestPhaseStep{ActorClassId = 1000442, Type = "talkDefault", Value = "processTtrMini002", OnExecute = "QuestIcon:0"},
-                    new QuestPhaseStep{ActorClassId = 1000447, Type = "talkDefault", Value = "processTtrMini003", OnExecute = "QuestIcon:0"}
+                    new QuestPhaseStep{ActorClassId = 1001652, Type = "talkDefault", Value = "processTtrMini001", OnExecute = "QuestIcon:0"},                    
+                    new QuestPhaseStep{ActorClassId = 1000447, Type = "talkDefault", Value = "processTtrMini002", OnExecute = "QuestIcon:0"},
+                    new QuestPhaseStep{ActorClassId = 1000442, Type = "talkDefault", Value = "processTtrMini003", OnExecute = "QuestIcon:0"}
                 }
             });
 
@@ -65,7 +65,7 @@ namespace Launcher
                 {
                      new QuestPhaseStep{ActorId = 0x66080001, Type = "noticeEvent", Value = "processTtrBtl001", OnExecute = "SendData:9"},
                      new QuestPhaseStep{ActorId = 0x66080001, Type = "noticeEvent", Value = "processTtrBtl002"},
-                     new QuestPhaseStep{ActorId = 0x66080001, Type = "noticeEvent", Value = "processTtrBtl003"},
+                     new QuestPhaseStep{ActorId = 0x66080001, Type = "noticeEvent", Value = "processEvent000_3"},
                 }
             });
 

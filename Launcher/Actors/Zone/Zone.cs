@@ -9,7 +9,6 @@ namespace Launcher
     [Serializable]
     public class Zone : Actor
     {
-        private Log _log = Log.Instance;
         public uint RegionId { get; set; }
         public string MapName { get; set; }
         public string PlaceName { get; set; }      
@@ -18,26 +17,22 @@ namespace Launcher
         public MusicSet MusicSet { get; set; }
         public ZoneType Type { get; set; }
         public byte PrivLevel { get; set; }
+        public List<Actor> Actors { get; set; }
 
-        public List<Actor> Actors = new List<Actor>(); //list to keep all actors which are currentl in this zone.
-
-        public Zone(uint regionId, uint zoneId, byte locationNameId, byte musicSetId, int classNameId = -1, bool isMountAllowed = true, ZoneType zoneType = ZoneType.Default, string mapName = null)
+        public Zone(uint regionId, uint zoneId, byte locationNameId, byte musicSetId, int classNameId = -1, bool isMountAllowed = false, ZoneType zoneType = ZoneType.Default, string mapName = null)
         {
             Id = zoneId; 
             Name = Encoding.ASCII.GetBytes("_areaMaster");
             RegionId = regionId;
             MapName = mapName;
-            PlaceName = ZoneList.LocationName[locationNameId];
-            ClassName = classNameId < 0 ? null : "ZoneMaster" + ZoneList.ClassName[classNameId];
+            PlaceName = LocationName[locationNameId];
+            ClassName = classNameId < 0 ? null : "ZoneMaster" + ClassNames[classNameId];
             MusicSet = MusicSet.Get(musicSetId);           
             MountAllowed = isMountAllowed;
-            Type = zoneType;
-
-            Actors.AddRange(ActorRepository.Instance.Aetherytes.FindAll(x => x.Position.ZoneId == Id));
-            Actors.AddRange(ActorRepository.Instance.GetZoneNpcs(Id));
+            Type = zoneType;                   
         }
 
-        public override void Prepare(ushort actorIndex = 0)
+        public override void Prepare()
         {
             LuaParameters = new LuaParameters
             {
@@ -58,7 +53,7 @@ namespace Launcher
                 LuaParameters.Add(((byte)Type & (1 << i)) != 0);
         }
 
-        public override void Spawn(Socket handler, ushort spawnType = 0, ushort isZoning = 0, int changingZone = 0, ushort actorIndex = 0)
+        public override void Spawn(Socket handler, ushort spawnType = 0, ushort isZoning = 0, int changingZone = 0)
         {
             Prepare();
             CreateActor(handler);
@@ -70,28 +65,35 @@ namespace Launcher
             SetLuaScript(handler);
         }       
 
-        public void SpawnActors(Socket sender, string allowedTypes = "all")
-        {            
-            List<Actor> actorsToSpawn = Actors; //all actors in zone
-
+        public void SpawnActors(Socket sender)
+        {       
             try
             {
-                switch (allowedTypes)
-                {
-                    case "monster":
-                        actorsToSpawn = Actors.FindAll(x => x.GetType().Name == "Monster").ToList();
-                        break;
-                    case "populace":
-                        actorsToSpawn = Actors.FindAll(x => x.GetType().Name == "Populace").ToList();
-                        break;
-                }
-
-                for (int i = 0; i < actorsToSpawn.Count; i++)
-                    actorsToSpawn[i].Spawn(sender, actorIndex: (ushort)(i + 1));
+                for (int i = 0; i < Actors.Count; i++)
+                    Actors[i].Spawn(sender);
             }
-            catch (Exception e) { _log.Error(e.Message); }
+            catch (Exception e) { Log.Instance.Error(e.Message); }
+        }
 
-            _log.Success("Loaded " + actorsToSpawn.Count + " actors in zone " + PlaceName);
+        public void LoadActors(string allowedTypes = "")
+        {
+            Actors = new List<Actor>();
+            List<Actor> actors = ActorRepository.Instance.GetZoneNpcs(Id);
+            int index = 1;
+
+            //TODO: find a better way to do this...
+            if(!string.IsNullOrEmpty(allowedTypes))
+                actors = actors.Where(x => x.GetType().Name == allowedTypes).ToList();
+
+            foreach (Actor actor in actors)
+            {                   
+                actor.Id = 4 << 28 | Id << 19 | (uint)index;
+                Actors.Add(actor);
+                index++;
+            }
+
+            Actors.AddRange(ActorRepository.Instance.Aetherytes.FindAll(x => x.Position.ZoneId == Id));
+            Log.Instance.Success("Loaded " + Actors.Count + " actors in zone " + PlaceName);
         }
 
         public uint GetCurrentBGM()
@@ -102,11 +104,7 @@ namespace Launcher
             else
                 return MusicSet.NightMusic;
         }
-    }
 
-    [Serializable]
-    public class ZoneList
-    {        
         public static string[] LocationName { get; } = new string[]
         {
             "Lower La Noscea",              //0
@@ -169,7 +167,8 @@ namespace Launcher
             "Jail",                         //57
             "Cottage"                       //58
         };
-        public static string[] ClassName { get; } = new string[]
+
+        public static string[] ClassNames { get; } = new string[]
         {
             "SeaS0",       //0
             "MarketSeaS0", //1
@@ -193,11 +192,7 @@ namespace Launcher
             "PrvI0",       //19
             "RocR1"        //20
         };
-       
-        
     }
-
-    
 }
 
 

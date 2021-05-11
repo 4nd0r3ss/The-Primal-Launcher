@@ -164,6 +164,14 @@
     </Monster>
     <Monster family="jellyfish" className="JellyfishScenarioLimsaLv00">
       <classId>2205403</classId>
+      <position x="-6.02" y="17.35" z="14.24" r="-2.81" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="1" silent="1" />
+      </events>
+    </Monster>
+    <Monster family="jellyfish" className="JellyfishScenarioLimsaLv00">
+      <classId>2205403</classId>
       <position x="-3.02" y="17.35" z="14.24" r="-2.81" />
       <animation>0</animation>
       <events>
@@ -172,15 +180,7 @@
     </Monster>
     <Monster family="jellyfish" className="JellyfishScenarioLimsaLv00">
       <classId>2205403</classId>
-      <position x="-5.52" y="17.35" z="14.24" r="-2.81" />
-      <animation>0</animation>
-      <events>
-        <noticeEvent priority="0" enabled="1" silent="1" />
-      </events>
-    </Monster>
-    <Monster family="jellyfish" className="JellyfishScenarioLimsaLv00">
-      <classId>2205403</classId>
-      <position x="-0.52" y="17.35" z="14.24" r="-2.81" />
+      <position x="-0.02" y="17.35" z="14.24" r="-2.81" />
       <animation>0</animation>
       <events>
         <noticeEvent priority="0" enabled="1" silent="1" />

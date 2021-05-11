@@ -9,12 +9,10 @@ namespace Launcher
 {
     class QuestDirector : Director
     {
-        public QuestDirector(){}
-
         public void Prepare(string questFunction)
         {
             Zone zone = World.Instance.Zones.Find(x => x.Id == User.Instance.Character.Position.ZoneId);
-            string zoneName = MinifyMapName(zone.MapName, zone.PrivLevel);   
+            string zoneName = MinifyMapName(zone.MapName);   
 
             LuaParameters = new LuaParameters
             {

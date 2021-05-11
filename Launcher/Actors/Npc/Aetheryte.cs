@@ -52,7 +52,7 @@ namespace Launcher
             }            
         }
 
-        public override void Prepare(ushort actorIndex)
+        public override void Prepare()
         {
             float pushEventRadius = 3.0f;
             Zone zone = World.Instance.Zones.Find(x => x.Id == Position.ZoneId);
@@ -71,7 +71,7 @@ namespace Launcher
 
             Events.Add(new Event{ Opcode = ServerOpcode.NoticeEvent, Name = "noticeEvent", Enabled = 0x01 });
             
-            base.Prepare(actorIndex);     
+            base.Prepare();     
         }
 
         public override void Init(Socket sender)
