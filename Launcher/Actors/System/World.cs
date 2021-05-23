@@ -27,19 +27,12 @@ namespace Launcher
         }
         #endregion
         
-        //move these to GameServer.
-        public static ushort Port { get; set; } = 54992;
-        public static string Address { get; set; } = "127.0.0.1";
-        public string ServerName { get; set; } = "CHANGE NAME"; //change this        
-
         private World()
         {
             Id = 0x5ff80001;
-            Zones = ZoneRepository.GetZones();
+            Zones = ZoneRepository.GetZones();           
             Name = Encoding.ASCII.GetBytes("worldMaster");     
-        }
-
-        public byte[] GetNameBytes(byte id) => Encoding.ASCII.GetBytes(GetServerName(id));
+        }       
 
         public override void Spawn(Socket handler, ushort spawnType = 0, ushort isZoning = 0, int changingZone = 0)
         {
@@ -67,21 +60,15 @@ namespace Launcher
         
         public void Initialize(Socket sender)
         {
-            PlayerCharacter playerCharacter = User.Instance.Character;               
-            ServerName = GetServerName(playerCharacter.WorldId);
-            Zone zone = Zones.Find(x => x.Id == playerCharacter.Position.ZoneId);
-
-            //login welcome messages
-            ChatProcessor.SendMessage(sender, MessageType.GeneralInfo, "Welcome to " + ServerName + "!");
-            ChatProcessor.SendMessage(sender, MessageType.GeneralInfo, "Welcome to Eorzea!");
-            ChatProcessor.SendMessage(sender, MessageType.GeneralInfo, @"To get a list of custom commands, type \help in the chat window and hit enter.");
+            PlayerCharacter playerCharacter = User.Instance.Character;
+            Zone zone = playerCharacter.GetCurrentZone();           
 
             zone.LoadActors();
             playerCharacter.GetGroups(sender);
-            playerCharacter.IsNew = true;
-            playerCharacter.OpeningSequence(sender);
-            
-            SetMapEnvironment(sender, zone);            
+            playerCharacter.IsNew = false;
+            SetMapEnvironment(sender, zone);
+            playerCharacter.InitializeCurrentQuests(sender);           
+                       
             playerCharacter.Spawn(sender, spawnType: 0x01, isZoning: 0);
             zone.Spawn(sender);
             Debug.Spawn(sender);
@@ -140,51 +127,26 @@ namespace Launcher
             if (entryPoint == null)
                 entryPoint = new Position() { ZoneId = zoneId };
 
-            ChangeZone(sender, entryPoint);
-        }      
+            ChangeZone(sender, position: entryPoint);
+        }
 
-        public void ChangeZone(Socket sender, Position position)
-        {
-            User.Instance.Character.Position = position;
-            PlayerCharacter playerCharacter = User.Instance.Character;    
-            Zone zone = Zones.Find(x => x.Id == playerCharacter.Position.ZoneId);           
+        public Zone GetZone(uint id) => Zones.Find(x => x.Id == id);
 
+        public void ChangeZone(Socket sender, Position position = null, ushort spawnType = 0x10, ushort mapUiChange = 0x02)
+        {                 
             MassDeleteActors(sender);
-            playerCharacter.MapUIChange(sender, (uint)(playerCharacter.IsNew ? 0x10 : 0x02));
-            SetMapEnvironment(sender, zone);
+            MapUIChange(sender, mapUiChange);
 
-            if (playerCharacter.IsNew)
-                playerCharacter.LoadLuaParameters(GetDirector("Quest").Id);
-
-            playerCharacter.Spawn(sender, (ushort)(playerCharacter.IsNew ? 0x10 : 0x02), 1);
-
-            if (playerCharacter.IsNew) //TODO: move this to zone prepare
-            {
-                zone.ContentFunction = "SimpleContent30002";
-                zone.PrivLevel = 1;
-                zone.Type = ZoneType.Nothing;
-            }
-            else
-            {
-                zone.LoadActors();
-            }
-            
-            zone.Spawn(sender);
+            User.Instance.Character.Position = position;           
+            Zone toZone = Zones.Find(x => x.Id == position.ZoneId);   
+               
+            SetMapEnvironment(sender, toZone);
+            User.Instance.Character.Spawn(sender, spawnType, 1);
+            toZone.Spawn(sender);
             Debug.Spawn(sender);
             Spawn(sender, 0x01);
-
-            if (playerCharacter.IsNew)
-            {
-                foreach(var ev in GetDirector("Opening").Events)                
-                    if (ev.Name.IndexOf("notice") >= 0)
-                        ev.Silent = 1;                
-
-                GetDirector("Opening").Spawn(sender);               
-                ((QuestDirector)GetDirector("Quest")).Spawn(sender, "Man0l001");
-                playerCharacter.Groups.Find(x => x.GetType().Name == "DutyGroup").SendPackets(sender);
-            }
-            
-            zone.SpawnActors(sender);
+            toZone.LoadActors();
+            toZone.SpawnActors(sender);
         }
 
         public Director GetDirector(string directorName) => Directors.Find(x => x.GetType().Name == directorName + "Director");        
@@ -200,95 +162,13 @@ namespace Launcher
             Packet.Send(sender, ServerOpcode.MassDeleteEnd, new byte[0x08], playerCharacter.Id, playerCharacter.Id);
         }
 
-        #region World List Methods
-        public XmlNodeList GetWorldListXml()
+        public void MapUIChange(Socket sender, uint code)
         {
-            List<Actor> zoneNpcs = new List<Actor>();
-            XmlNodeList rootNode = null;
-            XmlDocument worldListFile = new XmlDocument();
-
-            //From https://social.msdn.microsoft.com/Forums/vstudio/en-US/6990068d-ddee-41e9-86fc-01527dcd99b5/how-to-embed-xml-file-in-project-resources?forum=csharpgeneral
-            string file = string.Empty;          
-           
-            using (Stream stream = GetType().Assembly.GetManifestResourceStream("Launcher.Resources.xml.WorldList.xml"))
-            using (StreamReader sr = new StreamReader(stream))
-                file = sr.ReadToEnd();
-
-            try
-            {
-                //prepare xml nodes
-                worldListFile.LoadXml(file);
-                rootNode = worldListFile.SelectNodes("servers/region[@id = '" + "NA" + "']/world");
-            }
-            catch (Exception e) { Log.Instance.Error(e.Message); }
-
-            return rootNode;
+            byte[] data = new byte[0x08];
+            Buffer.BlockCopy(BitConverter.GetBytes(code), 0, data, 0, sizeof(uint)); // (0x02 & 0xff);           
+            //Buffer.BlockCopy(BitConverter.GetBytes(unknown), 0, data, 0x04, sizeof(uint)); // (0x02 & 0xff);           
+            Packet.Send(sender, ServerOpcode.MapUiChange, data);
         }
-
-        public string GetServerName(byte id)
-        {
-            XmlNodeList worldListXml = GetWorldListXml();
-            string worldName = "Primal Launcher";
-
-            foreach (XmlNode node in worldListXml)
-                if (node.Attributes["id"].InnerText == id.ToString())
-                {
-                    worldName = node.Attributes["name"].InnerText;
-                    break;
-                }                    
-
-            ServerName = worldName;
-
-            return worldName;
-        }
-
-        public void SendWorldList(Socket handler, Blowfish blowfish)
-        {
-            XmlNodeList rootNode = GetWorldListXml();
-
-            if (rootNode != null)
-            {
-                try
-                {
-                    byte[] serverListData = new byte[(0x50 * rootNode.Count) + 0x10];
-                    int index = 0;
-
-                    //read nodes
-                    foreach (XmlNode node in rootNode)
-                    {
-                        byte[] name = Encoding.ASCII.GetBytes(node.Attributes["name"].Value);
-                        byte[] server = new byte[0x50];
-
-                        server[0x00] = Convert.ToByte(node.Attributes["id"].Value);
-                        server[0x02] = (byte)index;
-                        server[0x04] = Convert.ToByte(node.Attributes["population"].Value);
-                        Buffer.BlockCopy(name, 0, server, 0x10, name.Length);
-
-                        Buffer.BlockCopy(server, 0, serverListData, ((index * 0x50) + 0x10), server.Length);
-
-                        index++;
-                    }
-
-                    serverListData[0x09] = (byte)index;
-
-                    GamePacket worldList = new GamePacket
-                    {
-                        Opcode = 0x15,
-                        Data = serverListData
-                    };
-
-                    Packet worldListPacket = new Packet(worldList);
-                    handler.Send(worldListPacket.ToBytes(blowfish));
-                    Log.Instance.Info("World list sent.");
-                }
-                catch (Exception e) { Log.Instance.Error(e.Message); }
-            }
-            else
-            {
-                Log.Instance.Error("An error ocurred when loading the world list.");
-            }
-        }
-        #endregion
 
         #region World Text Sheet Methods
         public void SendTextSheetMessage(Socket sender, ServerOpcode opcode, byte[] data) => Packet.Send(sender, opcode, data, Id);

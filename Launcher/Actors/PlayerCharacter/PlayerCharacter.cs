@@ -16,7 +16,7 @@ namespace Launcher
         
         public byte WorldId { get; set; }
         public byte Slot { get; set; }
-        public DateTime? LastLogin { get; set; }
+        public long TotalPlaytime { get; set; }
         public bool IsNew { get; set; }
         #endregion       
 
@@ -42,6 +42,10 @@ namespace Launcher
         public List<Quest> Quests { get; set; } = new List<Quest>();
         public Queue<byte[]> PacketQueue { get; set; }
 
+        public string ChocoboName { get; set; }
+        public ChocoboAppearance ChocoboAppearance { get; set; }
+        public bool HasGobbue { get; set; }
+
         public void Setup(byte[] data)
         {
             //Character ID
@@ -56,8 +60,6 @@ namespace Launcher
             Speeds.Walking = ActorSpeed.Walking;  //Walking speed
             Speeds.Running = ActorSpeed.Running; // 0x40a00000;  //Running speed
             Speeds.Active = ActorSpeed.Active;  //Acive
-
-            Quests.Add(new Quest());
 
             //prepare packet info for decoding
             byte[] info = new byte[0x90];
@@ -113,6 +115,18 @@ namespace Launcher
             Position = Position.GetInitialPosition(InitialTown);
         }
 
+        public void UpdatePlayTime()
+        {            
+            if (TotalPlaytime > 0)
+                TotalPlaytime = DateTimeOffset.Now.ToUnixTimeMilliseconds() - TotalPlaytime;
+        }
+
+        private void StartPlayTime()
+        {
+            if (TotalPlaytime == 0)
+                TotalPlaytime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+        }
+
         public override void Prepare(){}
 
         private void LoadInitialEquipment()
@@ -162,10 +176,10 @@ namespace Launcher
             Packet.Send(handler, ServerOpcode.SetTarget, data);
         }
 
-        public void Spawn(Socket sender, ushort spawnType = 0x01, ushort isZoning = 0, ushort actorIndex = 0)
+        public void Spawn(Socket sender, ushort spawnType = 0x01, ushort isZoning = 0)
         {
             PacketQueue = null;
-            State.Main = MainState.Passive;     
+            State.Main = MainState.Passive;
             
             CreateActor(sender, 0x08);
             CommandSequence(sender);
@@ -178,17 +192,10 @@ namespace Launcher
             SetSubState(sender);
             SetAllStatus(sender);
             SetIcon(sender);
-            SetIsZoning(sender, false);// (isZoning == 0 ? false : true));
-
-            /* Grand Company packets here */
-            //Packet.Send(sender, ServerOpcode.SetGrandCompany, new byte[] { 0x02, 0x7F, 0x0B, 0x7F, 0x00, 0x00, 0x00, 0x00 });
-
-            //Set Player title
-           // Packet.Send(sender, ServerOpcode.SetTitle, new byte[] { 0x8f, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
-
-            //current job
-            //SendCurrentJob(sender);
-
+            SetIsZoning(sender, false);
+            SetGrandCompany(sender);
+            SetTitle(sender);
+            SendCurrentJob(sender);
             SpecialEventWork(sender);
             SetMounts(sender);
             AchievementPoints(sender);
@@ -197,33 +204,70 @@ namespace Launcher
             LoadLuaParameters();
             SetLuaScript(sender);           
             Inventory.Send(sender);
-            Work(sender);           
+            Work(sender);
+            StartPlayTime();
+        }
+
+        public Zone GetCurrentZone() => World.Instance.Zones.Find(x => x.Id == Position.ZoneId);
+
+        public void SetGrandCompany(Socket sender)
+        {           
+            Packet.Send(sender, ServerOpcode.SetGrandCompany, new byte[] { 0x02, 0x7F, 0x0B, 0x7F, 0x00, 0x00, 0x00, 0x00 });
+        }
+
+        public void SetTitle(Socket sender)
+        {
+            Packet.Send(sender, ServerOpcode.SetTitle, new byte[] { 0x8f, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
         }
 
         public void SetMounts(Socket sender)
         {
-            Packet.Send(sender, ServerOpcode.SetChocoboName, new byte[] { 0x42, 0x6f, 0x6b, 0x6f, 0x00, 0x00, 0x00, 0x00 });
-            Packet.Send(sender, ServerOpcode.SetHasChocobo, new byte[] { 0x1f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
-            Packet.Send(sender, ServerOpcode.SetHasGobbue, new byte[] { 0x1, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
+            if (!string.IsNullOrEmpty(ChocoboName))
+            {
+                Packet.Send(sender, ServerOpcode.SetChocoboName, Encoding.ASCII.GetBytes(ChocoboName));
+                Packet.Send(sender, ServerOpcode.SetHasChocobo, new byte[] { 0x1f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
+            }
+            
+            if(HasGobbue)
+                Packet.Send(sender, ServerOpcode.SetHasGobbue, new byte[] { 0x1, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
         }
 
-        public void OpeningSequence(Socket sender)
+        public void InitializeCurrentQuests(Socket sender)
         {
-            if (IsNew)
+            if (TotalPlaytime == 0)
             {
                 World.Instance.Directors.Add(new OpeningDirector());
                 World.Instance.Directors.Add(new QuestDirector());
-                Quests = new List<Quest>(); //this is to reset quests on every spawn for debugging. remove later.
-
-                Position = Position.GetInitialPosition(InitialTown);    //remove later       
-                Quests.Add(QuestRepository.GetInitialQuest(InitialTown));
+                
+                AddQuest(QuestRepository.GetInitialQuest(InitialTown));
                 Quests[0].StartPhase(sender);
+
                 OpeningDirector director = (OpeningDirector)World.Instance.GetDirector("Opening");
                 director.Spawn(sender);
-                director.StartEvent(sender);
-                LoadLuaParameters(director.Id);
+                director.StartEvent(sender);                
+            }
+            else
+            {
+                QuestDirector questDirector = ((QuestDirector)World.Instance.GetDirector("Quest"));
+
+                if(questDirector == null)
+                {
+                    questDirector = new QuestDirector();
+                    World.Instance.Directors.Add(questDirector);
+                }
+                //questDirector.StartEvent(sender);
+                //questDirector.Spawn(sender, "Man0l001");
+                LuaParameters = null;
+                //LoadLuaParameters(questDirector.Id);
+                Position.SpawnType = 0x0F;
             }
         }
+
+        private void AddQuest(Quest quest)
+        {
+            if(Quests.Where(x => x.Id == quest.Id).FirstOrDefault() == null)
+                Quests.Add(quest);
+        }        
 
         public void LoadLuaParameters(uint director = 0)
         {
@@ -263,6 +307,18 @@ namespace Launcher
             }
         }
 
+        public void BindQuestDirector(Socket sender, string questName, bool startEvent = false)
+        {
+            QuestDirector questDirector = ((QuestDirector)World.Instance.GetDirector("Quest"));
+
+            if(startEvent)
+                questDirector.StartEvent(sender);
+
+            questDirector.Spawn(sender, questName);
+            User.Instance.Character.LuaParameters = null;
+            User.Instance.Character.LoadLuaParameters(questDirector.Id);
+        }
+
         #region Group Methods
         public void GetGroups(Socket sender)
         {
@@ -295,6 +351,20 @@ namespace Launcher
             }
 
             Groups.Find(x => x.Id == groupId).InitWork(sender);            
+        }
+
+        public void AddDutyGroup(Socket sender, List<uint> membersClassId, bool addQuestDirector = false)
+        {
+            DutyGroup dutyGroup = new DutyGroup();
+
+            if(addQuestDirector)
+                dutyGroup.MemberList.Add(((QuestDirector)World.Instance.GetDirector("Quest")).Id);
+
+            dutyGroup.AddMembers(GetCurrentZone().GetActorsByClassId(membersClassId));
+            dutyGroup.InitializeGroup(sender);
+            dutyGroup.SendPackets(sender);
+            Groups.RemoveAll(x => x.GetType().Name == "DutyGroup"); //remove later
+            Groups.Add(dutyGroup);
         }
         #endregion
 
@@ -589,6 +659,7 @@ namespace Launcher
             });
 
             UpdateLevel(sender);
+            World.Instance.SetMusic(sender, 0x52, MusicMode.Play);
         }
 
         public void LevelDown(Socket sender, short toLevel)
@@ -866,14 +937,7 @@ namespace Launcher
             data[0x03] = 0x04;
             Packet.Send(sender, ServerOpcode.PlayAnimationEffect, data);
         }
-
-        public void MapUIChange(Socket sender, uint code)
-        {
-            byte[] data = new byte[0x08];
-            Buffer.BlockCopy(BitConverter.GetBytes(code), 0, data, 0, sizeof(uint)); // (0x02 & 0xff);           
-            //Buffer.BlockCopy(BitConverter.GetBytes(unknown), 0, data, 0x04, sizeof(uint)); // (0x02 & 0xff);           
-            Packet.Send(sender, ServerOpcode.MapUiChange, data);
-        }
+        
         public void ToggleUIControl(Socket sender, UIControl control, uint unknown = 0x02)
         {
             byte[] data = new byte[0x08];

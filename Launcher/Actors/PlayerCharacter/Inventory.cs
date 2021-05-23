@@ -87,6 +87,11 @@ namespace Launcher
             }
         }
 
+        public void AddKeyItem(string itemName, uint quantity = 1, Socket sender = null)
+        {
+            AddItem(ref KeyItems, itemName, quantity, sender);
+        }
+
         /// <summary>
         /// Add a new item to specified inventory by item id.
         /// </summary>

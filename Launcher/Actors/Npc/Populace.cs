@@ -17,7 +17,7 @@ namespace Launcher
         {
             ClassPath = "/chara/npc/populace/";           
             ClassCode = 0x30400000;
-            TalkFunction = "processEvent000_9";// "processTtrNomal003";
+            TalkFunction = "processEvent000_9"; // random speech for all npcs, need to change this.
         }
 
         public override void Spawn(Socket sender, ushort spawnType = 0, ushort isZoning = 0, int changingZone = 0)
@@ -66,7 +66,7 @@ namespace Launcher
 
         public override void pushDefault(Socket sender)
         {     
-            EventManager.Instance.CurrentEvent.DelegateEvent(sender, 0x1ADB1, "processTtrNomal002");            
+            //EventManager.Instance.CurrentEvent.DelegateEvent(sender, 0x1ADB1, "processTtrNomal002");            
         }
         #endregion
     }

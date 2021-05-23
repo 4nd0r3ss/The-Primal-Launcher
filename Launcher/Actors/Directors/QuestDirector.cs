@@ -11,7 +11,7 @@ namespace Launcher
     {
         public void Prepare(string questFunction)
         {
-            Zone zone = World.Instance.Zones.Find(x => x.Id == User.Instance.Character.Position.ZoneId);
+            Zone zone = User.Instance.Character.GetCurrentZone();
             string zoneName = MinifyMapName(zone.MapName);   
 
             LuaParameters = new LuaParameters

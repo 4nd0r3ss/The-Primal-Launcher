@@ -84,11 +84,13 @@ namespace Launcher
 
                     if(character != null)
                     {
-                        Buffer.BlockCopy(BitConverter.GetBytes(character.Position.ZoneId), 0, characterSlot, 0xc, sizeof(uint));
+                        Zone currentZone = character.GetCurrentZone();
+
+                        Buffer.BlockCopy(BitConverter.GetBytes(currentZone is PrivateArea ? ((PrivateArea)currentZone).ParentZoneId : currentZone.Id), 0, characterSlot, 0xc, sizeof(uint));
 
                         byte[] name = Encoding.ASCII.GetBytes(Encoding.ASCII.GetString(character.Name).Trim(new[] { '\0' }));
                         byte[] gearSet = character.Appearance.ToBytes();
-                        byte[] worldName = World.Instance.GetNameBytes(character.WorldId); // WorldFactory.GetWorld(character.WorldId).Name);
+                        byte[] worldName = GameServer.GetNameBytes(character.WorldId); // WorldFactory.GetWorld(character.WorldId).Name);
                         Job currentClass = character.Jobs[character.CurrentClassId];
 
                         Buffer.BlockCopy(BitConverter.GetBytes(character.Id), 0, characterSlot, 0x04, 0x04); //sequence?                    

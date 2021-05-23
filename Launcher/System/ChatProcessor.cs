@@ -253,7 +253,7 @@ namespace Launcher
                 Opcode = (ushort)ServerOpcode.ChatMessage
             };
 
-            Log.Instance.Chat("[" + World.Instance.ServerName + "] " + message); //show sent message on launcher output window (TODO: make it optional?)
+            //Log.Instance.Chat("[" + World.Instance.ServerName + "] " + message); //show sent message on launcher output window (TODO: make it optional?)
 
             Packet packet = new Packet(new SubPacket(messagePacket) { SourceId = User.Instance.SessionId, TargetId = User.Instance.SessionId });
             sender.Send(packet.ToBytes());

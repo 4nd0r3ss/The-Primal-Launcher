@@ -28,15 +28,11 @@ namespace Launcher
         #region Class fields
         private static Preferences _instance = null;
         private readonly string _configFile = @"app_data.dat";
-        private Options _options;
         public static string AppFolder = @"\Primal Launcher User Files\";
         #endregion
+       
+        private Preferences() { }       
 
-        #region Constructor
-        private Preferences() => LoadConfigFile();
-        #endregion
-
-        #region Class properties
         public static Preferences Instance
         {
             get
@@ -48,8 +44,7 @@ namespace Launcher
                 return _instance;
             }
         }
-        public Options Options => _options;
-        #endregion
+        public Options Options { get; set; }       
 
         #region Search game installation path in registry
         public string SearchGameInstallPath()
@@ -65,12 +60,12 @@ namespace Launcher
         #region Load configuration file       
         public void LoadConfigFile()
         {               
-            if (File.Exists(_options.UserFilesPath + AppFolder + _configFile))
+            if (File.Exists(Options.UserFilesPath + AppFolder + _configFile))
             {               
-                using (var fileStream = new FileStream(_options.UserFilesPath + AppFolder + _configFile, FileMode.Open))
+                using (var fileStream = new FileStream(Options.UserFilesPath + AppFolder + _configFile, FileMode.Open))
                 {
                     var bFormatter = new BinaryFormatter();
-                    _options = (Options)bFormatter.Deserialize(fileStream);
+                    Options = (Options)bFormatter.Deserialize(fileStream);
                 }
             }
             else //there is no config file
@@ -84,33 +79,36 @@ namespace Launcher
         #region Save options object to configuration file
         private void SaveConfigFile()
         {
-            if (Directory.Exists(_options.UserFilesPath + AppFolder))
+            if (Directory.Exists(Options.UserFilesPath + AppFolder))
             {
-                using (var fileStream = new FileStream(_options.UserFilesPath + AppFolder + _configFile, FileMode.Create))
+                using (var fileStream = new FileStream(Options.UserFilesPath + AppFolder + _configFile, FileMode.Create))
                 {
                     var bFormatter = new BinaryFormatter();
-                    bFormatter.Serialize(fileStream, _options);
+                    bFormatter.Serialize(fileStream, Options);
                 }
             }
             else
             {
-                Directory.CreateDirectory(_options.UserFilesPath + AppFolder);
+                Directory.CreateDirectory(Options.UserFilesPath + AppFolder);
                 SaveConfigFile();
             }
 
         }
         #endregion
 
-        #region Fill up options object with default values
+        #region Fill out options object with default values
         private void Configure()
         {
-            _options.GameInstallPath = SearchGameInstallPath();
-            _options.PatchDownloadPath = @"patches\";
-            _options.ServerAddress = "127.0.0.1";
-            _options.UseExternalHttpServer = false;
-            _options.ShowLoginPage = true;
-            _options.ChooseGameAccount = true;
-            _options.UserFilesPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            Options = new Options
+            {
+                GameInstallPath = SearchGameInstallPath(),
+                PatchDownloadPath = @"patches\",
+                ServerAddress = "127.0.0.1",
+                UseExternalHttpServer = false,
+                ShowLoginPage = true,
+                ChooseGameAccount = true,
+                UserFilesPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
+            };            
         }
         #endregion
 

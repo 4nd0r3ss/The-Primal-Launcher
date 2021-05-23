@@ -19,7 +19,7 @@ namespace Launcher
 
             var materialSkinManager = MaterialSkinManager.Instance;
             materialSkinManager.AddFormToManage(this);
-            materialSkinManager.Theme = MaterialSkinManager.Themes.LIGHT;
+            materialSkinManager.Theme = MaterialSkinManager.Themes.LIGHT;            
             materialSkinManager.ColorScheme = new ColorScheme((Primary)0x800101, (Primary)0x630101, (Primary)0x800101, (Accent)0xf5d800, TextShade.WHITE);         
         }
 
@@ -47,6 +47,8 @@ namespace Launcher
 
         private void MainWindow_Load(object sender, EventArgs e)
         {
+            Preferences.Instance.LoadConfigFile();
+
             //first thing is to check game installation.
             if (true)
             {
@@ -57,8 +59,9 @@ namespace Launcher
                 //show update tab
             }
 
-            List<Actor> myList = ActorRepository.Instance.GetZoneNpcs(0xc1);
-
+            //List<Zone> myList = ZoneRepository.GetZones();
+            //List<Actor> acto = ActorRepository.Instance.GetZoneNpcs(166);
+            //Quest quest = QuestRepository.GetInitialQuest(1);
 
             Log.Instance.Info("Welcome to Primal Launcher!");
             Task.Run(() => { new GameServer(); });
@@ -95,6 +98,9 @@ namespace Launcher
                 lbly.Text = string.Format("{0:0.0}", pos.Y);
                 lblz.Text = string.Format("{0:0.0}", pos.Z);
                 lblr.Text = string.Format("{0:0.0}", pos.R);
+
+                //User.Instance.Character.UpdatePlayTime();
+                //lblPlaytime.Text = User.Instance.Character.TotalPlaytime.ToString();
             }            
         }       
     }

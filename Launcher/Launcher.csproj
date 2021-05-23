@@ -203,6 +203,7 @@
     <Compile Include="Actors\Directors\Director.cs" />
     <Compile Include="Actors\Directors\QuestDirector.cs" />
     <Compile Include="Actors\Npc\Monster.cs" />
+    <Compile Include="Actors\Npc\Object.cs" />
     <Compile Include="Actors\PlayerCharacter\Quest.cs" />
     <Compile Include="Actors\Speeds.cs" />
     <Compile Include="Actors\State.cs" />
@@ -211,6 +212,7 @@
     <Compile Include="Actors\Directors\OpeningDirector.cs" />
     <Compile Include="Actors\PlayerCharacter\ItemGraphics.cs" />
     <Compile Include="Actors\Npc\Populace.cs" />
+    <Compile Include="Actors\Zone\PrivateArea.cs" />
     <Compile Include="Events\CommandResult.cs" />
     <Compile Include="Events\Event.cs" />
     <Compile Include="Repositories\QuestRepository.cs" />
@@ -336,11 +338,19 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="icon.ico" />
-    <EmbeddedResource Include="Resources\xml\zones\z9B\npc.xml">
+    <EmbeddedResource Include="Resources\xml\zones\xA6\npc.xml" />
+    <EmbeddedResource Include="Resources\xml\MainScenarioQuests.xml" />
+    <EmbeddedResource Include="Resources\xml\zones\x4\npc.xml" />
+    <EmbeddedResource Include="Resources\xml\zones\x2\npc.xml" />
+    <EmbeddedResource Include="Resources\xml\zones\xE6\npc.xml" />
+    <EmbeddedResource Include="Resources\xml\ZoneList.xml">
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Resources\xml\zones\zB8\npc.xml" />
-    <EmbeddedResource Include="Resources\xml\zones\z80\npc.xml">
+    <EmbeddedResource Include="Resources\xml\zones\x9B\npc.xml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\xml\zones\xB8\npc.xml" />
+    <EmbeddedResource Include="Resources\xml\zones\x80\npc.xml">
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Resources\html\Auth.html" />
@@ -348,7 +358,7 @@
     <EmbeddedResource Include="Resources\xml\WorldList.xml">
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Resources\xml\zones\zC1\npc.xml">
+    <EmbeddedResource Include="Resources\xml\zones\xC1\npc.xml">
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>

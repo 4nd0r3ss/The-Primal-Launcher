@@ -1,0 +1,56 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<quests>
+  <quest id="110001" name="Man0l001" startRegion="193">
+    <phase>
+      <step actorClassId="1001652" type="questIcon" value="2" />
+      <step actorClassId="1000442" type="questIcon" value="2" />
+      <step actorClassId="1000447" type="questIcon" value="2" />
+      <step actorId="1711800321" type="noticeEvent" value="processTtrNomal001withHQ" />
+      <step actorClassId="1001652" type="pushDefault" value="processTtrNomal002" onExecute="Enabled:0" />
+      <step actorClassId="1001652" type="talkDefault" value="processTtrNomal003" />
+    </phase>
+    <phase>
+      <step actorClassId="1001652" type="talkDefault" value="processTtrMini001" onExecute="QuestIcon:0" />
+      <step actorClassId="1000447" type="talkDefault" value="processTtrMini002" onExecute="QuestIcon:0" />
+      <step actorClassId="1000442" type="talkDefault" value="processTtrMini003" onExecute="QuestIcon:0" />
+    </phase>
+    <phase>
+      <step actorClassId="1090025" type="questIcon" value="3" />
+      <step actorClassId="1090025" type="pushDefault" value="processEventNewRectAsk" repeatable="true" parameters="null" />
+    </phase>
+    <phase>
+      <step actorId="1711800321" type="noticeEvent" value="processTtrBtl001" onExecute="SendData:9" />
+      <step type="commandForced" value="noticeEvent" />
+      <step actorId="1711800321" type="noticeEvent" value="processTtrBtl002" />
+      <step actorId="1711800321" type="noticeEvent" value="processEvent000_3" onExecute="AddKeyItem:balloonfish" />
+    </phase>
+    <phase>
+      <step actorClassId="1000151" type="talkDefault" value="processEvent020_9" repeatable="true" parameters="null" />
+    </phase>
+  </quest>
+  <quest id="110002" name="Man0l001">
+    <phase>
+      <step actorClassId="1000137" type="questIcon" value="2" />
+      <step actorClassId="1000137" type="talkDefault" value="processEvent020" />
+    </phase>
+  </quest>
+  <quest id="110005" name="Man0g001" startRegion="166">
+    <phase>
+      <step actorClassId="1000009" type="questIcon" value="2" />      
+      <step actorId="1697644545" type="noticeEvent" value="processTtrNomal001withHQ" />
+      <step actorClassId="1000009" type="pushDefault" value="processTtrNomal002" onExecute="Enabled:0" />
+      <step actorClassId="1000009" type="talkDefault" value="processTtrNomal003" onExecute="QuestIcon:0" />
+    </phase>
+    <phase>
+      <step actorClassId="1000010" type="questIcon" value="2" />
+      <step actorClassId="1000010" type="talkDefault" value="processEvent000_3" onExecute="QuestIcon:0" />
+    </phase>
+    <phase>
+      <step actorClassId="1000009" type="questIcon" value="2" />
+      <step actorClassId="1000009" type="talkDefault" value="processTtrNomal003" onExecute="QuestIcon:0" />
+    </phase>
+  </quest>
+  <quest id="110009" name="Man0l001">
+
+  </quest>
+</quests>

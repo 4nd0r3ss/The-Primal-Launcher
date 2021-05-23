@@ -297,17 +297,18 @@ namespace Launcher
 
         #region Event virtual methods   
         public virtual void SetEventStatus(Socket sender)
-        {
-            byte[] data = new byte[0x28];
-
+        {      
             foreach (Event ec in Events)
             {
+                byte[] data = new byte[0x28];
                 Buffer.BlockCopy(BitConverter.GetBytes((uint)ec.Enabled), 0, data, 0, sizeof(uint));
                 byte eventType = 1;
 
                 switch (ec.Name)
                 {
                     case "pushDefault":
+                    case "exit":
+                    case "caution":
                         eventType = 2;
                         break;
                     default:
@@ -353,7 +354,11 @@ namespace Launcher
 
         public string GenerateActorName()
         {
-            Zone zone = World.Instance.Zones.Find(x => x.Id == Position.ZoneId);            
+            Zone zone = World.Instance.Zones.Find(x => x.Id == Position.ZoneId);
+
+            //if (zone == null)
+            //    zone = ZoneRepository.GetPrivateArea((int)Position.ZoneId);
+
             uint zoneId = zone.Id;
             uint privLevel = zone.PrivLevel;           
             string zoneName = MinifyMapName(zone.MapName, zone.PrivLevel);

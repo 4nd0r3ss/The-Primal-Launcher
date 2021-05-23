@@ -206,20 +206,26 @@ namespace Launcher
 
         public static void Send(Socket sender, ServerOpcode opcode, byte[] data, uint sourceId = 0, uint targetId = 0)
         {
-            GamePacket gamePacket = new GamePacket
+            try
             {
-                Opcode = (ushort)opcode,
-                Data = data
-            };
+                GamePacket gamePacket = new GamePacket
+                {
+                    Opcode = (ushort)opcode,
+                    Data = data
+                };
 
-            if (sourceId == 0) 
-                sourceId = User.Instance.Character.Id;
+                if (sourceId == 0)
+                    sourceId = User.Instance.Character.Id;
 
-            if (targetId == 0)
-                targetId = User.Instance.Character.Id;
+                if (targetId == 0)
+                    targetId = User.Instance.Character.Id;
 
-            Packet packet = new Packet(new SubPacket(gamePacket) { SourceId = sourceId, TargetId = targetId });
-            sender.Send(packet.ToBytes());
+                Packet packet = new Packet(new SubPacket(gamePacket) { SourceId = sourceId, TargetId = targetId });
+                sender.Send(packet.ToBytes());
+            }catch(Exception e)
+            {
+                Log.Instance.Error("Packet missed. Opcode: " + opcode.ToString() + ". Exception: " + e.Message);
+            }          
         }
     }
 }

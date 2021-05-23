@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Globalization;
+using System.Net.Sockets;
+
 namespace Launcher
 {
     class Clock
@@ -9,6 +11,8 @@ namespace Launcher
         private DateTime _dateTime;
         private readonly double _eorzeaMultiplier = 3600D / 175D;
         private readonly DateTime _epoch = new DateTime(1970, 1, 1);
+        private readonly TimeSpan _dayTime = new TimeSpan(7, 0, 0); //7AM
+        private readonly TimeSpan _nightTime = new TimeSpan(19, 0, 0); //7PM
 
         public static Clock Instance
         {
@@ -55,6 +59,19 @@ namespace Launcher
             long eorzeaDateTime = (long)(timeInSeconds * (_eorzeaMultiplier));
             _dateTime = _epoch + TimeSpan.FromMilliseconds(eorzeaDateTime);
         }
+
+        public void UpdateBMG(Socket sender)
+        {
+            if(User.Instance.Character != null) //is spawned
+            {
+                if (Time.Equals(_dayTime))
+                    World.Instance.SetMusic(sender, User.Instance.Character.GetCurrentZone().MusicSet.DayMusic, MusicMode.FadeStart);
+
+                if (Time.Equals(_nightTime))
+                    World.Instance.SetMusic(sender, User.Instance.Character.GetCurrentZone().MusicSet.NightMusic, MusicMode.FadeStart);
+            }
+           
+        } 
     }
 }
 

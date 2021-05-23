@@ -165,38 +165,40 @@ namespace Launcher
                     
                     //each npc node in xml 
                     foreach (XmlNode node in chara.ChildNodes)
-                    {
-                        //XmlNode node = objNode.SelectSingleNode("PopulaceStandard");
-                        uint classId = Convert.ToUInt32(node.SelectSingleNode("classId").InnerText);
-                        uint state = node.SelectSingleNode("state") != null ? Convert.ToUInt32(node.SelectSingleNode("state").InnerText) : 0; //TODO: fix this as it is 2 bytes. so far it's alaways 0 so it's ok.
-                        ushort animation = node.SelectSingleNode("animation") != null ? Convert.ToUInt16(node.SelectSingleNode("animation").InnerText) : (ushort)0;
-                        int questIcon = node.SelectSingleNode("questIcon") != null ? Convert.ToInt32(node.SelectSingleNode("questIcon").InnerText) : -1;
-
-                        //get table lines with npc info
-                        DataRow actorGraphics = actorsGraphics.Select("id = '" + classId + "'")[0];
-                        DataRow actorNameId = actorsNameIds.Select("id = '" + classId + "'")[0];
-
+                    {                       
                         Type type = Type.GetType("Launcher." + node.Name);
-                        Actor actor = (Actor)Activator.CreateInstance(type);
 
+                        if(type != null && (node.Attributes["className"].Value == "PopulaceStandard" || type.Name == "Monster" || type.Name == "Object"))
+                        {
+                            //XmlNode node = objNode.SelectSingleNode("PopulaceStandard");
+                            uint classId = Convert.ToUInt32(node.SelectSingleNode("classId").InnerText);
+                            uint state = node.SelectSingleNode("state") != null ? Convert.ToUInt32(node.SelectSingleNode("state").InnerText) : 0; //TODO: fix this as it is 2 bytes. so far it's alaways 0 so it's ok.
+                            ushort animation = node.SelectSingleNode("animation") != null ? Convert.ToUInt16(node.SelectSingleNode("animation").InnerText) : (ushort)0;
+                            int questIcon = node.SelectSingleNode("questIcon") != null ? Convert.ToInt32(node.SelectSingleNode("questIcon").InnerText) : -1;
 
-                        actor.Family = node.Attributes["family"] != null ? node.Attributes["family"].Value : "";
-                        actor.ClassId = classId;
-                        actor.ClassName = node.Attributes["className"].Value;
-                        actor.NameId = Convert.ToInt32(actorNameId.ItemArray[1]);
-                        actor.HairStyle = Convert.ToUInt16(actorGraphics.ItemArray[3]);
-                        actor.HairHighlightColor = Convert.ToUInt16(actorGraphics.ItemArray[4]);
-                        actor.HairColor = Convert.ToUInt16(actorGraphics.ItemArray[16]);
-                        actor.SkinColor = Convert.ToUInt16(actorGraphics.ItemArray[17]);
-                        actor.EyeColor = Convert.ToUInt16(actorGraphics.ItemArray[18]);
-                        actor.Appearance = SetAppearance(actorGraphics);
-                        actor.Face = SetFace(actorGraphics);
-                        actor.Position = SetPosition(zoneId, node.SelectSingleNode("position"));
-                        actor.QuestIcon = questIcon;
-                        actor.SubState = new SubState { MotionPack = animation };
-                        actor.Events = SetEvents(node.SelectSingleNode("events"));
+                            //get table lines with npc info
+                            DataRow actorGraphics = actorsGraphics.Select("id = '" + classId + "'")[0];
+                            DataRow actorNameId = actorsNameIds.Select("id = '" + classId + "'")[0];
+                            Actor actor = (Actor)Activator.CreateInstance(type);
 
-                        zoneNpcs.Add(actor);
+                            actor.Family = node.Attributes["family"] != null ? node.Attributes["family"].Value : "";
+                            actor.ClassId = classId;
+                            actor.ClassName = node.Attributes["className"].Value;
+                            actor.NameId = Convert.ToInt32(actorNameId.ItemArray[1]);
+                            actor.HairStyle = Convert.ToUInt16(actorGraphics.ItemArray[3]);
+                            actor.HairHighlightColor = Convert.ToUInt16(actorGraphics.ItemArray[4]);
+                            actor.HairColor = Convert.ToUInt16(actorGraphics.ItemArray[16]);
+                            actor.SkinColor = Convert.ToUInt16(actorGraphics.ItemArray[17]);
+                            actor.EyeColor = Convert.ToUInt16(actorGraphics.ItemArray[18]);
+                            actor.Appearance = SetAppearance(actorGraphics);
+                            actor.Face = SetFace(actorGraphics);
+                            actor.Position = SetPosition(zoneId, node.SelectSingleNode("position"));
+                            actor.QuestIcon = questIcon;
+                            actor.SubState = new SubState { MotionPack = animation };
+                            actor.Events = SetEvents(node.SelectSingleNode("events"));
+
+                            zoneNpcs.Add(actor);
+                        }                        
                     }
                 }
                 catch (Exception e)
@@ -249,11 +251,27 @@ namespace Launcher
                     case "in":
                         //pushWithBoxEventConditions
                         break;
-                    case "exit":
-                        //pushWithCircleEventConditions
+                    case "exit":                      
+                        eventList.Add(new Event
+                        {
+                            Opcode = ServerOpcode.PushEventCircle,
+                            Name = "exit",
+                            Radius = node.Attributes["radius"] != null ? float.Parse(node.Attributes["radius"].Value) : 0,
+                            Silent = Convert.ToByte(node.Attributes["silent"].Value == "false" ? 0 : 1),
+                            Enabled = Convert.ToByte(node.Attributes["enabled"].Value),
+                            Direction = Convert.ToByte(node.Attributes["outwards"].Value == "false" ? 1 : 0x11)
+                        });
                         break;
                     case "caution":
-                        //pushWithCircleEventConditions
+                        eventList.Add(new Event
+                        {
+                            Opcode = ServerOpcode.PushEventCircle,
+                            Name = "caution",
+                            Radius = node.Attributes["radius"] != null ? float.Parse(node.Attributes["radius"].Value) : 0,
+                            Silent = Convert.ToByte(node.Attributes["silent"].Value == "false" ? 0 : 1),
+                            Enabled = Convert.ToByte(node.Attributes["enabled"].Value),
+                            Direction = Convert.ToByte(node.Attributes["outwards"].Value == "false" ? 1 : 0x11)
+                        });
                         break;
                     case "pushCommand":
 
@@ -341,7 +359,7 @@ namespace Launcher
         {
             //From https://social.msdn.microsoft.com/Forums/vstudio/en-US/6990068d-ddee-41e9-86fc-01527dcd99b5/how-to-embed-xml-file-in-project-resources?forum=csharpgeneral
             string result = string.Empty;
-            Stream stream = typeof(ActorRepository).Assembly.GetManifestResourceStream("Launcher.Resources.xml.zones.z" + fileName);
+            Stream stream = typeof(ActorRepository).Assembly.GetManifestResourceStream("Launcher.Resources.xml.zones.x" + fileName);
             if(stream != null)
                 using (stream)            
                     using (StreamReader sr = new StreamReader(stream))                
