@@ -4,12 +4,10 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Launcher
+namespace PrimalLauncher
 {
     class UpdateServer : Server
-    {       
-        public const int PORT = 54996;       
-
+    {              
         public UpdateServer()
         {
             Task.Run(() =>
@@ -19,7 +17,7 @@ namespace Launcher
             });
 
             LaunchGame();
-            Start("Update", PORT);            
+            Start("Update", 54996);            
         }
 
         private static void LaunchGame()
@@ -45,7 +43,7 @@ namespace Launcher
                     _connection.Send(Updater.CheckGameVer());
                     //ServerShutDown(); //sending shutdown after server's final task.
                 }
-            }                            
+            }
         }
 
         public override void ServerTransition()

@@ -5,7 +5,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Launcher
+namespace PrimalLauncher
 {
     public class Aetheryte : Actor
     {       
@@ -76,11 +76,17 @@ namespace Launcher
 
         public override void Init(Socket sender)
         {
+            //charaWork.property[0]
+
+
             WorkProperties property = new WorkProperties(sender, Id, @"/_init");
             property.Add((uint)0xE14B0CA8, true);
 
             if (AetheryteType != AetheryteType.Shard)
             {
+                //charaWork.property[1]
+                //??
+                //npcWork.pushCommandPriority
                 property.Add((uint)0x2138FD71, true);
                 property.Add((uint)0x03CF5B58, (short)0x2712);
                 property.Add((uint)0x40E25304, (byte)0x08);

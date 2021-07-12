@@ -4,7 +4,7 @@ using System.Collections.Specialized;
 using System.IO;
 using System.Xml;
 
-namespace Launcher
+namespace PrimalLauncher
 {
     public static class QuestRepository
     {
@@ -53,7 +53,7 @@ namespace Launcher
                             Phases = GetQuestPhases(node)
                         };
                     }
-                }                
+                }
             }
 
             return null; //if reached here, no quest was found.
@@ -85,12 +85,14 @@ namespace Launcher
 
                 step.ActorClassId = childNode.Attributes["actorClassId"] != null ? Convert.ToUInt32(childNode.Attributes["actorClassId"].Value) : 0;
                 step.ActorId = childNode.Attributes["actorId"] != null ? Convert.ToUInt32(childNode.Attributes["actorId"].Value) : 0;
-                step.Type = childNode.Attributes["type"] != null ? childNode.Attributes["type"].Value : "";
+                step.Event = childNode.Attributes["event"] != null ? childNode.Attributes["event"].Value : "";
                 step.Value = childNode.Attributes["value"] != null ? childNode.Attributes["value"].Value : "";
                 step.OnExecute = childNode.Attributes["onExecute"] != null ? childNode.Attributes["onExecute"].Value : "";
                 step.Repeatable = childNode.Attributes["repeatable"] != null ? Convert.ToBoolean(childNode.Attributes["repeatable"].Value) : false;
                 step.Parameters = childNode.Attributes["parameters"] != null ? ParseStringParameters(childNode.Attributes["parameters"].Value) : null;               
-
+                step.OnFinish = childNode.Attributes["onFinish"] != null ? childNode.Attributes["onFinish"].Value : "";
+                step.OnDelegate = childNode.Attributes["onDelegate"] != null ? childNode.Attributes["onDelegate"].Value : "";
+                step.EndPhase = childNode.Attributes["endPhase"] != null ? Convert.ToBoolean(childNode.Attributes["endPhase"].Value) : false;
                 stepList.Add(step);
             }
 
@@ -99,13 +101,21 @@ namespace Launcher
 
         public static object[] ParseStringParameters(string stringParameters)
         {
-            List<object> result = new List<object>();
-            string[] parameters = stringParameters.Split(new char[] { ',' });
+            if(stringParameters == "none")
+            {
+                return new object[] { };
+            }
+            else
+            {
+                List<object> result = new List<object>();
+                string[] parameters = stringParameters.Split(new char[] { ',' });
 
-            foreach(string parameter in parameters)           
-                result.Add(ParseStringParameter(parameter));            
+                foreach (string parameter in parameters)
+                    result.Add(ParseStringParameter(parameter));
 
-            return result.ToArray();
+                return result.ToArray();
+            }
+            
         }
 
         public static object ParseStringParameter(string parameter)

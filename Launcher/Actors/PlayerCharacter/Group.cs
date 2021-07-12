@@ -4,7 +4,7 @@ using System.IO;
 using System.Net.Sockets;
 using System.Text;
 
-namespace Launcher
+namespace PrimalLauncher
 {
     /// <summary>
     /// Sends a sequence of subpackets to the game client containing information on the different types of groups a player might have.

@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 
-namespace Launcher
+namespace PrimalLauncher
 {
     public class ActorRepository
     {
@@ -142,7 +142,7 @@ namespace Launcher
 
         public List<Aetheryte> GetZoneAetherytes(uint zoneId) => Aetherytes.FindAll(x => x.Position.ZoneId == zoneId);
 
-        public List<Actor> GetZoneNpcs(uint zoneId)
+        public List<Actor> GetZoneNpcs(uint zoneId, string excludeOfType = "")
         {
             string npcListPath = @"" + zoneId.ToString("X") ;
             string fileNamePath = npcListPath + @".npc.xml";
@@ -157,46 +157,67 @@ namespace Launcher
                     //get game data tables with actors data
                     DataTable actorsGraphics = GameData.Instance.GetGameData("actorclass_graphic");
                     DataTable actorsNameIds = GameData.Instance.GetGameData("actorclass");
+                    DataTable actorsNames = GameData.Instance.GetGameData("xtx/displayName");
 
                     //prepare xml nodes
                     npcFile.LoadXml(file);
                     XmlElement root = npcFile.DocumentElement;
-                    XmlNode chara = root.FirstChild;
-                    
+                    XmlNode chara = root.FirstChild;                    
+
                     //each npc node in xml 
                     foreach (XmlNode node in chara.ChildNodes)
-                    {                       
-                        Type type = Type.GetType("Launcher." + node.Name);
+                    {
+                        if (node.Name == excludeOfType) continue;
 
-                        if(type != null && (node.Attributes["className"].Value == "PopulaceStandard" || type.Name == "Monster" || type.Name == "Object"))
+                        Type type = Type.GetType("PrimalLauncher." + node.Name);
+
+                        if (type != null 
+                            && (node.Attributes["className"].Value == "PopulaceStandard" || type.Name == "Monster" || type.Name == "Object")
+                        )
                         {
                             //XmlNode node = objNode.SelectSingleNode("PopulaceStandard");
                             uint classId = Convert.ToUInt32(node.SelectSingleNode("classId").InnerText);
                             uint state = node.SelectSingleNode("state") != null ? Convert.ToUInt32(node.SelectSingleNode("state").InnerText) : 0; //TODO: fix this as it is 2 bytes. so far it's alaways 0 so it's ok.
                             ushort animation = node.SelectSingleNode("animation") != null ? Convert.ToUInt16(node.SelectSingleNode("animation").InnerText) : (ushort)0;
                             int questIcon = node.SelectSingleNode("questIcon") != null ? Convert.ToInt32(node.SelectSingleNode("questIcon").InnerText) : -1;
+                            string talkFunction = node.SelectSingleNode("talkFunction") != null ? node.SelectSingleNode("talkFunction").InnerText : "";
 
-                            //get table lines with npc info
-                            DataRow actorGraphics = actorsGraphics.Select("id = '" + classId + "'")[0];
-                            DataRow actorNameId = actorsNameIds.Select("id = '" + classId + "'")[0];
+                            //get table lines with npc data
+                            //had to separate the selects as it throws an exception when the actor have no appearance and/or nameid data.
+                            DataRow[] actorsGraphicsSelect = actorsGraphics.Select("id = '" + classId + "'");
+                            DataRow[] actorsNameIdsSelect = actorsNameIds.Select("id = '" + classId + "'");
+                            DataRow actorGraphics = actorsGraphicsSelect != null && actorsGraphicsSelect.Length > 0 ? actorsGraphicsSelect[0] : null;
+                            DataRow actorNameId = actorsNameIdsSelect != null && actorsNameIdsSelect.Length > 0 ? actorsNameIdsSelect[0] : null;
+
                             Actor actor = (Actor)Activator.CreateInstance(type);
+
+                            //if there is a talk function node, it will just add the function and skip the block below. Useful for cases when the function name
+                            //does not match the NPC name, like 'Noncomenanco has a typo in the function name, Noncomananco
+                            if (string.IsNullOrEmpty(talkFunction) && classId < 3000000 && actorNameId != null && (int)actorNameId.ItemArray[1] > 0) //< 3000000 is NPC. > is monster.
+                            {
+                                DataRow displayNameRow = actorsNames.Select("id = '" + actorNameId.ItemArray[1] + "'")[0];
+                                string displayName = (displayNameRow.ItemArray[1] + ""); //just to parse to string.
+                                displayName = displayName
+                                    .Replace(" ", "")
+                                    .Replace("`", "")
+                                    .Replace("\0", "")
+                                    .Replace("'", "");
+                                displayName = char.ToUpper(displayName[0]) + displayName.Substring(1, displayName.Length - 1).ToLower();
+
+                                talkFunction = "DelegateEvent:defaultTalkWith" + displayName + "_001";
+                            }
 
                             actor.Family = node.Attributes["family"] != null ? node.Attributes["family"].Value : "";
                             actor.ClassId = classId;
                             actor.ClassName = node.Attributes["className"].Value;
-                            actor.NameId = Convert.ToInt32(actorNameId.ItemArray[1]);
-                            actor.HairStyle = Convert.ToUInt16(actorGraphics.ItemArray[3]);
-                            actor.HairHighlightColor = Convert.ToUInt16(actorGraphics.ItemArray[4]);
-                            actor.HairColor = Convert.ToUInt16(actorGraphics.ItemArray[16]);
-                            actor.SkinColor = Convert.ToUInt16(actorGraphics.ItemArray[17]);
-                            actor.EyeColor = Convert.ToUInt16(actorGraphics.ItemArray[18]);
-                            actor.Appearance = SetAppearance(actorGraphics);
-                            actor.Face = SetFace(actorGraphics);
+                            actor.NameId = actorNameId != null ? Convert.ToInt32(actorNameId.ItemArray[1]) : 0;                            
+                            actor.Appearance = SetAppearance(actorGraphics);                            
                             actor.Position = SetPosition(zoneId, node.SelectSingleNode("position"));
                             actor.QuestIcon = questIcon;
                             actor.SubState = new SubState { MotionPack = animation };
                             actor.Events = SetEvents(node.SelectSingleNode("events"));
-
+                            actor.TalkFunction = talkFunction;                            
+                           
                             zoneNpcs.Add(actor);
                         }                        
                     }
@@ -214,111 +235,133 @@ namespace Launcher
         {
             List<Event> eventList = new List<Event>();
 
-            foreach(XmlNode node in eventNode.ChildNodes)
-            {
-                switch (node.Name)
+            if (eventNode != null && eventNode.ChildNodes != null && eventNode.ChildNodes.Count > 0)
+            {              
+                foreach (XmlNode node in eventNode.ChildNodes)
                 {
-                    case "pushDefault":
-                        eventList.Add(new Event
-                        {
-                            Opcode = ServerOpcode.PushEventCircle,
-                            Name = "pushDefault",
-                            Radius = float.Parse(node.Attributes["radius"].Value),
-                            Direction = Convert.ToByte(node.Attributes["outwards"].Value == "false" ? 1 : 0),
-                            Silent = Convert.ToByte(node.Attributes["silent"].Value == "false" ? 0 : 1)
-                        });
-                        break;
-                    case "talkDefault":
-                        eventList.Add(new Event
-                        {
-                            Opcode = ServerOpcode.TalkEvent,
-                            Name = "talkDefault",
-                            Priority = Convert.ToByte(node.Attributes["priority"].Value),
-                            Enabled = Convert.ToByte(node.Attributes["enabled"].Value)
-                        });
-                        break;
+                    switch (node.Name)
+                    {
+                        case "pushDefault":
+                            eventList.Add(new Event
+                            {
+                                Opcode = ServerOpcode.PushEventCircle,
+                                Name = "pushDefault",
+                                Radius = float.Parse(node.Attributes["radius"].Value),
+                                Direction = Convert.ToByte(node.Attributes["outwards"].Value == "false" ? 1 : 0),
+                                Silent = Convert.ToByte(node.Attributes["silent"].Value == "false" ? 0 : 1)
+                            });
+                            break;
+                        case "talkDefault":
+                            eventList.Add(new Event
+                            {
+                                Opcode = ServerOpcode.TalkEvent,
+                                Name = "talkDefault",
+                                Priority = Convert.ToByte(node.Attributes["priority"].Value),
+                                Enabled = Convert.ToByte(node.Attributes["enabled"].Value)
+                            });
+                            break;
 
-                    case "noticeEvent":
-                        eventList.Add(new Event
-                        {
-                            Opcode = ServerOpcode.NoticeEvent,
-                            Name = "noticeEvent",
-                            Priority = Convert.ToByte(node.Attributes["priority"].Value),
-                            Enabled = Convert.ToByte(node.Attributes["enabled"].Value),
-                            Silent = node.Attributes["silent"] != null ? Convert.ToByte(node.Attributes["silent"].Value) : (byte)0
-                        });
-                        break;
-                    case "in":
-                        //pushWithBoxEventConditions
-                        break;
-                    case "exit":                      
-                        eventList.Add(new Event
-                        {
-                            Opcode = ServerOpcode.PushEventCircle,
-                            Name = "exit",
-                            Radius = node.Attributes["radius"] != null ? float.Parse(node.Attributes["radius"].Value) : 0,
-                            Silent = Convert.ToByte(node.Attributes["silent"].Value == "false" ? 0 : 1),
-                            Enabled = Convert.ToByte(node.Attributes["enabled"].Value),
-                            Direction = Convert.ToByte(node.Attributes["outwards"].Value == "false" ? 1 : 0x11)
-                        });
-                        break;
-                    case "caution":
-                        eventList.Add(new Event
-                        {
-                            Opcode = ServerOpcode.PushEventCircle,
-                            Name = "caution",
-                            Radius = node.Attributes["radius"] != null ? float.Parse(node.Attributes["radius"].Value) : 0,
-                            Silent = Convert.ToByte(node.Attributes["silent"].Value == "false" ? 0 : 1),
-                            Enabled = Convert.ToByte(node.Attributes["enabled"].Value),
-                            Direction = Convert.ToByte(node.Attributes["outwards"].Value == "false" ? 1 : 0x11)
-                        });
-                        break;
-                    case "pushCommand":
+                        case "noticeEvent":
+                            eventList.Add(new Event
+                            {
+                                Opcode = ServerOpcode.NoticeEvent,
+                                Name = "noticeEvent",
+                                Priority = Convert.ToByte(node.Attributes["priority"].Value),
+                                Enabled = Convert.ToByte(node.Attributes["enabled"].Value),
+                                Silent = node.Attributes["silent"] != null ? Convert.ToByte(node.Attributes["silent"].Value) : (byte)0
+                            });
+                            break;
+                        case "in":
+                            //pushWithBoxEventConditions
+                            break;
+                        case "exit":
+                            eventList.Add(new Event
+                            {
+                                Opcode = ServerOpcode.PushEventCircle,
+                                Name = "exit",
+                                Radius = node.Attributes["radius"] != null ? float.Parse(node.Attributes["radius"].Value) : 0,
+                                Silent = Convert.ToByte(node.Attributes["silent"].Value == "false" ? 0 : 1),
+                                Enabled = Convert.ToByte(node.Attributes["enabled"].Value),
+                                Direction = Convert.ToByte(node.Attributes["outwards"].Value == "false" ? 1 : 0x11),
+                                Action = node.Attributes["action"] != null ? node.Attributes["action"].Value : ""
+                            });
+                            break;
+                        case "caution":
+                            eventList.Add(new Event
+                            {
+                                Opcode = ServerOpcode.PushEventCircle,
+                                Name = "caution",
+                                Radius = node.Attributes["radius"] != null ? float.Parse(node.Attributes["radius"].Value) : 0,
+                                Silent = Convert.ToByte(node.Attributes["silent"].Value == "false" ? 0 : 1),
+                                Enabled = Convert.ToByte(node.Attributes["enabled"].Value),
+                                Direction = Convert.ToByte(node.Attributes["outwards"].Value == "false" ? 1 : 0x11),
+                                Action = node.Attributes["action"] != null ? node.Attributes["action"].Value : ""
+                            });
+                            break;
+                        case "pushCommand":
 
-                        break;
-                    case "pushCommandIn":
+                            break;
+                        case "pushCommandIn":
 
-                        break;
-                    case "pushCommandOut":
+                            break;
+                        case "pushCommandOut":
 
-                        break;
-                    default:
-                        Log.Instance.Warning("ActorRepository.SetEvents: Unhandled event '" + node.Name + "' received.");
-                        break;
+                            break;
+                        default:
+                            Log.Instance.Warning("ActorRepository.SetEvents: Unhandled event '" + node.Name + "' received.");
+                            break;
+                    }
                 }
-            }
+            }            
 
             return eventList;
         }
 
         private Appearance SetAppearance(DataRow actorGraphics)
         {
-            return new Appearance
+            if(actorGraphics != null)
             {
-                BaseModel = Convert.ToUInt32(actorGraphics.ItemArray[1]),
-                Size = Convert.ToUInt32(actorGraphics.ItemArray[2]),
-                MainWeapon = Convert.ToUInt32(actorGraphics.ItemArray[20]),
-                SecondaryWeapon = Convert.ToUInt32(actorGraphics.ItemArray[21]),
-                SPMainWeapon = Convert.ToUInt32(actorGraphics.ItemArray[22]),
-                SPSecondaryWeapon = Convert.ToUInt32(actorGraphics.ItemArray[23]),
-                Throwing = Convert.ToUInt32(actorGraphics.ItemArray[24]),
-                Pack = Convert.ToUInt32(actorGraphics.ItemArray[25]),
-                Pouch = Convert.ToUInt32(actorGraphics.ItemArray[26]),
-                Head = Convert.ToUInt32(actorGraphics.ItemArray[27]),
-                Body = Convert.ToUInt32(actorGraphics.ItemArray[28]),
-                Legs = Convert.ToUInt32(actorGraphics.ItemArray[29]),
-                Hands = Convert.ToUInt32(actorGraphics.ItemArray[30]),
-                Feet = Convert.ToUInt32(actorGraphics.ItemArray[31]),
-                Waist = Convert.ToUInt32(actorGraphics.ItemArray[32]),
-                Neck = Convert.ToUInt32(actorGraphics.ItemArray[33]),
-                RightEar = Convert.ToUInt32(actorGraphics.ItemArray[34]),
-                LeftEar = Convert.ToUInt32(actorGraphics.ItemArray[35]),
-                RightIndex = Convert.ToUInt32(actorGraphics.ItemArray[36]),
-                LeftIndex = Convert.ToUInt32(actorGraphics.ItemArray[37]),
-                RightFinger = Convert.ToUInt32(actorGraphics.ItemArray[38]),
-                LeftFinger = Convert.ToUInt32(actorGraphics.ItemArray[39]),
-                Voice = Convert.ToUInt32(actorGraphics.ItemArray[18])
-            };
+                return new Appearance
+                {
+                    BaseModel = Convert.ToUInt32(actorGraphics.ItemArray[1]),
+                    Size = Convert.ToUInt32(actorGraphics.ItemArray[2]),
+                    MainWeapon = Convert.ToUInt32(actorGraphics.ItemArray[20]),
+                    SecondaryWeapon = Convert.ToUInt32(actorGraphics.ItemArray[21]),
+                    SPMainWeapon = Convert.ToUInt32(actorGraphics.ItemArray[22]),
+                    SPSecondaryWeapon = Convert.ToUInt32(actorGraphics.ItemArray[23]),
+                    Throwing = Convert.ToUInt32(actorGraphics.ItemArray[24]),
+                    Pack = Convert.ToUInt32(actorGraphics.ItemArray[25]),
+                    Pouch = Convert.ToUInt32(actorGraphics.ItemArray[26]),
+                    Head = Convert.ToUInt32(actorGraphics.ItemArray[27]),
+                    Body = Convert.ToUInt32(actorGraphics.ItemArray[28]),
+                    Legs = Convert.ToUInt32(actorGraphics.ItemArray[29]),
+                    Hands = Convert.ToUInt32(actorGraphics.ItemArray[30]),
+                    Feet = Convert.ToUInt32(actorGraphics.ItemArray[31]),
+                    Waist = Convert.ToUInt32(actorGraphics.ItemArray[32]),
+                    Neck = Convert.ToUInt32(actorGraphics.ItemArray[33]),
+                    RightEar = Convert.ToUInt32(actorGraphics.ItemArray[34]),
+                    LeftEar = Convert.ToUInt32(actorGraphics.ItemArray[35]),
+                    RightIndex = Convert.ToUInt32(actorGraphics.ItemArray[36]),
+                    LeftIndex = Convert.ToUInt32(actorGraphics.ItemArray[37]),
+                    RightFinger = Convert.ToUInt32(actorGraphics.ItemArray[38]),
+                    LeftFinger = Convert.ToUInt32(actorGraphics.ItemArray[39]),
+                    Voice = Convert.ToUInt32(actorGraphics.ItemArray[18]),
+                    HairStyle = Convert.ToUInt16(actorGraphics.ItemArray[3]),
+                    HairHighlightColor = Convert.ToUInt16(actorGraphics.ItemArray[4]),
+                    HairColor = Convert.ToUInt16(actorGraphics.ItemArray[16]),
+                    SkinColor = Convert.ToUInt16(actorGraphics.ItemArray[17]),
+                    EyeColor = Convert.ToUInt16(actorGraphics.ItemArray[18]),
+                    Face = SetFace(actorGraphics)
+                };
+            }
+            else
+            {
+                //this is necessary for actors who have no appearance data.
+                return new Appearance
+                {
+                    Face = new Face()
+                };
+            }            
         }
 
         private Face SetFace(DataRow actorGraphics)

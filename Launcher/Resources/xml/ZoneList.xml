@@ -83,7 +83,7 @@
   <Zone id="238" regionId="103" locationName="Thornmarch" className="" musicSetId="0" mapName="fst0Field04" />
   <Zone id="239" regionId="102" locationName="The Howling Eye" className="RocR0" musicSetId="0" mapName="roc0Field02a" />
   <Zone id="240" regionId="104" locationName="The Bowl of Embers" className="" musicSetId="0" mapName="wil0Field05a" />
-  <Zone id="244" regionId="209" locationName="Inn Room" className="PrvI0" musicSetId="0" mapName="prv0Inn01" />
+  <Zone id="244" regionId="209" locationName="Inn Room" className="PrvI0" musicSetId="0" mapName="prv0Inn01" type="Inn" />
   <Zone id="245" regionId="102" locationName="The Aurum Vale" className="RocR0" musicSetId="0" mapName="roc0Dungeon04" />
   <Zone id="246" regionId="104" locationName="Cutter's Cry" className="" musicSetId="0" mapName="" />
   <Zone id="247" regionId="103" locationName="North Shroud" className="" musicSetId="0" mapName="" />

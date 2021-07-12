@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Launcher
+namespace PrimalLauncher
 {
     /// <summary>
     /// Opcodes for packets received from game client.
@@ -40,6 +40,7 @@ namespace Launcher
         SetPosition = 0xce,
         SetSpeed = 0xd0,
         SetAppearance = 0xd6,
+        BindToMapObj = 0xd8,
         MapUiChange = 0xe2,
         SetQuestIcon = 0xe3,
         SetName = 0x13d,
@@ -80,6 +81,7 @@ namespace Launcher
         TextSheetMessage30b = 0x157,
         TextSheetMessage50b = 0x15a,
         TextSheetMessage70b = 0x15b,
+        TextSheetMessage38b = 0x168,
         TextSheetMessageNoSource28b = 0x166,
         TextSheetMessageNoSource38b = 0x167,
 
@@ -154,7 +156,12 @@ namespace Launcher
         GroupInitWork = 0x17a,
         GroupDutyMembers = 0x183,
 
-        ActiveLinkshell = 0x18a
+        ActiveLinkshell = 0x18a,
+        UnendingJourney = 0x1a3,
+        EntrustedItems = 0x1a5,
+
+        Logout = 0x00E,
+        ExitGame = 0x011
     }
 
     /// <summary>
@@ -219,7 +226,8 @@ namespace Launcher
         ChangeTo_DRG = 0x32,
         ChangeTo_BRD = 0x33,
 
-        Teleport = 0xffb,
+        TeleportWait = 0xFFA,
+        Teleport = 0xFFB,
     }
 
     /// <summary>
@@ -389,8 +397,8 @@ namespace Launcher
         Running = 0x40d00000,
         Active = 0x40a00000,
 
-        WalkingMount = 0x40000000,
-        RunningMount = 0x40E00000
+        WalkingMount = 0x40F00000,
+        RunningMount = 0x41F00000
     }
 
     /// <summary>

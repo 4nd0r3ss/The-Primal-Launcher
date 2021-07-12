@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 
-namespace Launcher
+namespace PrimalLauncher
 {
     [Serializable]
     public class Inventory

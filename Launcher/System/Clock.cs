@@ -2,7 +2,7 @@
 using System.Globalization;
 using System.Net.Sockets;
 
-namespace Launcher
+namespace PrimalLauncher
 {
     class Clock
     {

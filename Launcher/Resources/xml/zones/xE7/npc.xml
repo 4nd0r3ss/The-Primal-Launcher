@@ -1,0 +1,69 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<chara>
+  <npc>
+    <Populace className="DoorServer">
+      <classId>5900015</classId>
+      <position x="63.99" y="181.25" z="192.013" r="0" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+      </events>
+    </Populace>
+    <Populace className="DoorServer">
+      <classId>5900015</classId>
+      <position x="128.173" y="181.25" z="192.19" r="0" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+      </events>
+    </Populace>
+    <Populace className="DoorServer">
+      <classId>5900015</classId>
+      <position x="79.976" y="181.25" z="144.041" r="0" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+      </events>
+    </Populace>
+    <Populace className="DoorServer">
+      <classId>5900016</classId>
+      <position x="65.725" y="180.859" z="81.098" r="0" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+      </events>
+    </Populace>
+    <Populace className="DoorServer">
+      <classId>5900016</classId>
+      <position x="-95.198" y="164.884" z="-13.873" r="0" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+      </events>
+    </Populace>
+    <Populace className="DoorServer">
+      <classId>5900016</classId>
+      <position x="-0.544" y="172.854" z="-109.665" r="0" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+      </events>
+    </Populace>
+    <Populace className="DoorServer">
+      <classId>5900016</classId>
+      <position x="-32.564" y="172.795" z="-77.364" r="0" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+      </events>
+    </Populace>
+    <Populace className="DoorServer">
+      <classId>5900016</classId>
+      <position x="-74.02" y="172.187" z="-48.423" r="0" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+      </events>
+    </Populace>
+  </npc>
+</chara>

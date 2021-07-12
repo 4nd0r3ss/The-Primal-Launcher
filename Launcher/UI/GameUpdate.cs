@@ -11,17 +11,17 @@ using System.IO;
 using System.Net;
 using Ionic.Zlib;
 
-namespace Launcher
+namespace PrimalLauncher
 {
-    public partial class ucGameUpdate : UserControl
+    public partial class GameUpdate
     {
-        private static ucGameUpdate _instance;
-        public static ucGameUpdate Instance
+        private static GameUpdate _instance;
+        public static GameUpdate Instance
         {
             get
             {
                 if (_instance == null)
-                    _instance = new ucGameUpdate();
+                    _instance = new GameUpdate();
                 return _instance;
             }
         }
@@ -89,15 +89,14 @@ namespace Launcher
 
         private string _downloadMessage = "Click the download button to resume downloading the update files.";
 
-        public ucGameUpdate()
-        {
-            InitializeComponent();
+        public GameUpdate()
+        {           
             CheckUpdateFiles();
         }
 
-        private void CheckUpdateFiles()
+        public bool CheckUpdateFiles()
         {
-            lblDownloadStat.Text = "Checking downloaded files...";
+            MainWindow.Get().DownloadStatus = "Checking downloaded files...";
             long totalBytesToDownload = 0;
 
             foreach (var file in _filesToDownload)
@@ -126,7 +125,10 @@ namespace Launcher
             }
 
             if (_files.Count == 0)
-                UpdateReady();
+            {
+                ReadyToUpdate();
+                return true;
+            }                
             else
             {
                 double downloadSize = (((totalBytesToDownload / 1024) / 1024));
@@ -136,19 +138,17 @@ namespace Launcher
                 {
                     downloadSize = Math.Round((downloadSize / 1024), 2);
                     downloadSizeUnit = "GB";
-                }                
-                
-                lblDownloadStat.Text = "You need to download " + _files.Count + " files totalizing " + downloadSize.ToString() + downloadSizeUnit;
+                }
+
+                MainWindow.Get().DownloadStatus = "You need to download " + _files.Count + " files totalizing " + downloadSize.ToString() + downloadSizeUnit;
+                return false;
             }
         }
 
-        private void ucGameUpdate_Load(object sender, EventArgs e){}
-
-        private void DownloadFile()
+        public void DownloadFile()
         {
             _downloadIndex++;
-            progressBar.Value = 0;
-
+            MainWindow.Get().DownloadProgressValue = 0;
 
             if (!_keepDownloading) return; //cancel button was clicked
 
@@ -159,7 +159,7 @@ namespace Launcher
 
             if (!File.Exists(Preferences.AppFolder + _files[_downloadIndex].Key.Replace(@"/", @"\")))
             {
-                lblDownloadStat.Text = "Downloading file " + (_downloadIndex + 1) + @"/" + _files.Count + "  - " + _files[_downloadIndex].Key;
+                MainWindow.Get().DownloadStatus = "Downloading file " + (_downloadIndex + 1) + @"/" + _files.Count + "  - " + _files[_downloadIndex].Key;
 
                 using (_webClient = new WebClient())
                 {
@@ -170,51 +170,51 @@ namespace Launcher
             }
         }
 
-        private void ChangeProgressBarValue(object sender, DownloadProgressChangedEventArgs e) => progressBar.Value = e.ProgressPercentage;
+        private void ChangeProgressBarValue(object sender, DownloadProgressChangedEventArgs e) => MainWindow.Get().DownloadProgressValue = e.ProgressPercentage;
 
         private void DownloadComplete(object sender, AsyncCompletedEventArgs e)
         {
             if (_downloadIndex == _files.Count - 1)
             {
-                UpdateReady();
+                ReadyToUpdate();
                 return;
             }
             else
             {
                 DownloadFile();
             }      
-        }            
-       
-        private void btnDownload_Click(object sender, EventArgs e) => DownloadFile();
+        }   
 
-        private void btnDownloadCancel_Click(object sender, EventArgs e)
+        public void DownloadCancel()
         {
             _webClient.CancelAsync();
             _keepDownloading = false;
-            lblDownloadStat.Text = _downloadMessage;
+            MainWindow.Get().DownloadStatus = _downloadMessage;
         }
 
-        private void UpdateReady()
+        private void ReadyToUpdate()
         {
-            lblDownloadStat.Text = "All update files successfully downloaded.";
-            btnDownload.Enabled = false;
-            btnDownloadCancel.Enabled = false;
-            btnGameUpdate.Enabled = true;
+            MainWindow window = MainWindow.Get();
+            window.DownloadStatus = "All update files successfully downloaded.";
+            window.DownloadStartBtnEnabled = false;
+            window.DownloadCancelBtnEnabled = false;
+            window.UpdateBtnEnabled = true;
         }
 
-        private void GameUpdate()
+        public void StartGameUpdate()
         {
             CheckUpdateFiles(); //just to be sure...
+            MainWindow window = MainWindow.Get();
+            window.UpdateProgressValue = 0;
 
-            lblUpdate.Text = "Initiating game update...";
+            window.UpdateStatus = "Initiating game update...";
 
             string filesPath = Preferences.Instance.Options.UserFilesPath + Preferences.AppFolder + @"update\";
 
             foreach (var file in _filesToDownload)
             {
-
                 string currentFilePath = filesPath + file.Key.Replace('/', '\\');
-                lblUpdate.Text = "Applying file " + file.Key.Replace('/', '\\');
+                window.UpdateStatus = "Applying file " + file.Key.Replace('/', '\\');
                 //byte[] fileData = File.ReadAllBytes(currentFilePath);
 
                 //try
@@ -268,6 +268,8 @@ namespace Launcher
                                     break;
                             }
                         }
+
+                        window.UpdateProgressBar.Increment(2);
                     }
                 }
                 //break;
@@ -278,11 +280,10 @@ namespace Launcher
             File.WriteAllText(Preferences.Instance.Options.GameInstallPath + "/game.ver", "2012.09.19.0001 [Patched by Primal Launcher]");
             File.WriteAllText(Preferences.Instance.Options.GameInstallPath + "/boot.ver", "2010.09.18.0000 [Patched by Primal Launcher]");
 
-            lblUpdate.Text = "Game is updated to the latest version.";
+            window.UpdateStatus = "Game is updated to version 1.23b.";
+            window.UpdateBtnEnabled = false;
 
-            btnGameUpdate.Enabled = false;
-
-            if (!chkKeepFiles.Checked)
+            if (!MainWindow.Get().ChkKeepUpdatefiles)
             {
                 DirectoryInfo dir = new DirectoryInfo(Preferences.Instance.Options.PatchDownloadPath);
 
@@ -349,8 +350,12 @@ namespace Launcher
                     if (!Directory.Exists(destinationPath))
                         Directory.CreateDirectory(destinationPath);
 
+                    //delete file if exists
+                    if (File.Exists(fileDestinationPath))
+                        File.Delete(fileDestinationPath);
+
                     //Save file.
-                    File.WriteAllBytes(fileDestinationPath, fileData);
+                    File.WriteAllBytes(fileDestinationPath, fileData);                    
                 }
                 catch(Exception e) { throw e; }  
             }            
@@ -398,8 +403,6 @@ namespace Launcher
                 ClearFolder(fileDestinationPath);            
         }
 
-        private void btnGameUpdate_Click(object sender, EventArgs e) => GameUpdate();
-
         private void ClearFolder(string folderName)
         {
             DirectoryInfo dir = new DirectoryInfo(folderName);
@@ -414,7 +417,7 @@ namespace Launcher
             }
         }
 
-        private void btnPatch_Click(object sender, EventArgs e)
+        public void Patch()
         {
             //if Primal Launcher can write to the game installation folder
             if (Patcher.HasWritePermission())            

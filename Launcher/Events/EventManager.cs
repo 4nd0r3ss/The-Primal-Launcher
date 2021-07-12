@@ -6,7 +6,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 
-namespace Launcher
+namespace PrimalLauncher
 {
     public class EventManager
     {
@@ -41,6 +41,8 @@ namespace Launcher
             }catch(Exception e)
             {
                 Log.Instance.Error(e.Message);
+                File.WriteAllBytes("test.txt", data);
+                throw e;
             }                             
         }    
         
@@ -53,12 +55,19 @@ namespace Launcher
 
             byte[] nameBytes = new byte[nameSize - 1];
             Array.Copy(data, 0x21, nameBytes, 0, nameSize - 1);
-           return "Launcher." + Encoding.ASCII.GetString(nameBytes);
+           return "PrimalLauncher." + Encoding.ASCII.GetString(nameBytes);
         }
     }
     public class EventRequest
     {
-        public LuaParameters RequestParameters { get; set; }
+        protected LuaParameters _requestParameters;
+
+        public LuaParameters RequestParameters
+        {
+            get { return _requestParameters; }
+            set { _requestParameters = value; }        
+        }
+
         public uint CallerId { get; set; }
         public uint OwnerId { get; set; }
         public uint Unknown1 { get; set; }
@@ -68,6 +77,8 @@ namespace Launcher
         public byte[] Data { get; set; }
         public string FunctionName { get; set; }
         public string Name { get; set; }
+        public bool IsQuestion { get; set; }
+        public uint Selection { get; set; }
         public QuestPhaseStep QuestStep { get; set; }
 
         public EventRequest(byte[] data)
@@ -89,15 +100,20 @@ namespace Launcher
 
             if (eventOwner != null)
             {
-                foreach (Quest quest in User.Instance.Character.Quests)
+                foreach (Quest quest in User.Instance.Character.Journal.Quests)
                 {
                     QuestStep = quest.ActorStepComplete(sender, GetType().Name, eventOwner.ClassId, eventOwner.Id);
 
                     if (QuestStep != null)
                     {
-                        FunctionName = QuestStep.Value;
-                        QuestId = quest.Id;
-                        DelegateEvent(sender, quest.Id, QuestStep.Value, QuestStep.Parameters);
+                        FunctionName = QuestStep.Value ?? "";
+                        QuestId = QuestStep.QuestId > 0 ? QuestStep.QuestId : quest.Id;
+
+                        if (!string.IsNullOrEmpty(QuestStep.Value))
+                            DelegateEvent(sender, QuestId, QuestStep.Value, QuestStep.Parameters);
+                        else
+                            Finish(sender);
+
                         return;
                     }
                 }
@@ -108,6 +124,9 @@ namespace Launcher
                 Log.Instance.Error("Actor 0x" + OwnerId.ToString("X") + " not found.");
         }
 
+        /// <summary>
+        /// Prepare the lua parameters packet for the current event.
+        /// </summary>
         protected void InitLuaParameters()
         {
             RequestParameters = new LuaParameters();
@@ -116,7 +135,11 @@ namespace Launcher
             RequestParameters.Add(Encoding.ASCII.GetBytes(GetType().Name));
         }
 
-        private void Response(Socket sender)
+        /// <summary>
+        /// Send a packet to the client acknowledging the start of an event processing.
+        /// </summary>
+        /// <param name="sender"></param>
+        protected void Response(Socket sender)
         {
             byte[] data = new byte[0x298];
             Buffer.BlockCopy(BitConverter.GetBytes(CallerId), 0, data, 0, 4);
@@ -125,22 +148,116 @@ namespace Launcher
             Packet.Send(sender, ServerOpcode.EventRequestResponse, data);
         }
 
-        public virtual void Finish(Socket sender)
-        {           
+        protected virtual void Finish(Socket sender)
+        {        
             byte[] data = new byte[0x30];
             Buffer.BlockCopy(BitConverter.GetBytes(User.Instance.Character.Id), 0, data, 0, sizeof(uint));
             data[0x08] = 1;
             string name = GetType().Name;
             Buffer.BlockCopy(Encoding.ASCII.GetBytes(name), 0, data, 0x09, name.Length);
-            Packet.Send(sender, ServerOpcode.EventRequestFinish, data);            
-        }
+            Packet.Send(sender, ServerOpcode.EventRequestFinish, data);
 
+            if (QuestStep != null && !string.IsNullOrEmpty(QuestStep.OnFinish))
+            {
+                try
+                {
+                    string tasks = QuestStep.OnFinish;
+                    List<string> taskList = new List<string>();
+
+                    if (tasks.IndexOf(";") > 0)
+                        taskList.AddRange(tasks.Split(new char[] { ';' })); //if there is more than one task, we split them.
+                    else
+                        taskList.Add(tasks); //if just one task, just add it.
+
+                    foreach (string task in taskList)
+                    {
+                        if (task.IndexOf(":") > 0)
+                        {
+                            string[] split = task.Split(new char[] { ':' });
+                            InvokeMethod(split[0], new object[] { sender, split[1] });
+                        }
+                        else
+                        {
+                            InvokeMethod(task, new object[] { sender });
+                        }
+                    }
+                }catch(Exception e)
+                {
+                    throw e;
+                }
+                              
+            }                            
+        } 
+
+        /// <summary>
+        /// Send a packet to the client acknowledging the end of an event processing.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="data"></param>
         public virtual void ProcessEventResult(Socket sender, byte[] data)
-        {
+        {           
             Finish(sender);
         }
 
-        #region helper methods   
+        #region helper methods  
+        /// <summary>
+        /// This function is used by reflection.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="questName"></param>
+        /// <param name="privateAreaId"></param>
+        public void GoToQuestPrivateZone(Socket sender, string questName, ushort privateAreaId)
+        {
+            User.Instance.Character.BindQuestDirector(sender, questName);
+            World.Instance.ChangeZone(sender, EntryPoints.Get(privateAreaId), 0x0F);
+        }
+
+        /// <summary>
+        /// This function is used by reflection only, so no reference will be shown.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="privateAreaId"></param>
+        public void GoToPrivateZone(Socket sender, string privateAreaId)
+        {
+            World.Instance.ChangeZone(sender, EntryPoints.Get(Convert.ToUInt32(privateAreaId)), 0x0F);
+        }
+
+        /// <summary>
+        /// This function is used by reflection only, so no reference will be shown.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="zoneId"></param>
+        public void GoToZone(Socket sender, string zoneId)
+        {
+            World.Instance.ChangeZone(sender, EntryPoints.Get(Convert.ToUInt32(zoneId)), 0x0F);
+        }
+
+        /// <summary>
+        /// This function is used by reflection, so only 1 reference will be shown.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="questId"></param>
+        public void FinishQuest(Socket sender, string questId)
+        {
+            uint id = Convert.ToUInt32(questId);
+            User.Instance.Character.Journal.FinishQuest(sender, id);
+        }
+
+        /// <summary>
+        /// This function is used by reflection, so only 1 reference will be shown.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="questId"></param>
+        public void AddQuest(Socket sender, string questId)
+        {
+            uint id = Convert.ToUInt32(questId);
+            User.Instance.Character.Journal.AddQuest(sender, id);
+        }
+
+        /// <summary>
+        /// Get the Actor obj by its id#.
+        /// </summary>
+        /// <returns></returns>
         public Actor GetActor()
         {
             Actor eventOwner = World.Instance.Directors.FirstOrDefault(x => x.Id == OwnerId);
@@ -153,9 +270,15 @@ namespace Launcher
             return eventOwner;
         } 
         
+        /// <summary>
+        /// Use reflection to call methods by string name.
+        /// </summary>
+        /// <param name="methodName"></param>
+        /// <param name="methodParams"></param>
         public void InvokeMethod(string methodName, object[] methodParams = null)
         {
-            var method = GetType().GetMethod(methodName);
+            Type type = GetType();
+            var method = type.GetMethod(methodName);
 
             if (method != null)
                 method.Invoke(this, methodParams);
@@ -164,6 +287,13 @@ namespace Launcher
         }
         #endregion
 
+        /// <summary>
+        /// Delegates a specified function to the caller event. 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="questId"></param>
+        /// <param name="functionName"></param>
+        /// <param name="parameters"></param>
         public virtual void DelegateEvent(Socket sender, uint questId, string functionName, object[] parameters = null)
         {
             RequestParameters.Add(Encoding.ASCII.GetBytes("delegateEvent"));
@@ -175,17 +305,20 @@ namespace Launcher
                 parameters = new object[] { null, null, null };
 
             foreach(object obj in parameters)
-                RequestParameters.Add(obj);
+                RequestParameters.Add(obj);                
 
-            if (functionName == "processTtrBtl001")
-                SendData(sender, new object[] { 0x09 });
-
-            if (functionName == "processEvent000_3")
+            if (QuestStep != null && !string.IsNullOrEmpty(QuestStep.OnDelegate))
                 Thread.Sleep(5000);
 
             Response(sender);
         }
 
+        /// <summary>
+        /// This is used to send data to the client during an event, i.e.: battle tutorial dialogs.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="toSend"></param>
+        /// <param name="sleepSeconds"></param>
         public void SendData(Socket sender, object[] toSend, int sleepSeconds = 0)
         {
             byte[] data = new byte[0xC0];
@@ -201,32 +334,104 @@ namespace Launcher
                 Thread.Sleep(sleepSeconds * 1000);
         }
 
-        public void BattleTutorialStart(Socket sender, string questName)
+        /// <summary>
+        /// This function will start the battle tutorial in the beginning of the game.
+        /// </summary>
+        /// <param name="sender"></param>
+        public void BattleTutorialStart(Socket sender)
         {
             string simpleContentNumber = "";
+            string questName = "";
+            uint openingStoperClassId = 0;
+            Actor openingStoper = null;
             List<uint> dutyActorsClassId = null;
 
             switch (User.Instance.Character.InitialTown)
             {
                 case 1:
                     simpleContentNumber = "30002";
+                    questName = "Man0l001";
                     dutyActorsClassId = new List<uint> { 2290001, 2290002, 2205403 };
                     break;
                 case 2:
                     simpleContentNumber = "30010";
-                    dutyActorsClassId = new List<uint> { 1000009, 1000010, 2201407 };
+                    questName = "Man0g001";
+                    openingStoperClassId = 1090384;
+                    dutyActorsClassId = new List<uint> { 2290005, 2290006, 2201407 };
                     break;
                 case 3:
                     simpleContentNumber = "30010"; //change for uldah
+                    questName = "Man0u001";
                     dutyActorsClassId = new List<uint> {  };
                     break;
             }
 
-            User.Instance.Character.GetCurrentZone().SpawnAsPrivate("SimpleContent" + simpleContentNumber);
+            //if there is an opening stoper, we want to disable its events before antering battle.
+            //this is to fix the player being positioned in the wrong place in the battle tutorial.
+            if (openingStoperClassId > 0)
+            {
+                openingStoper = User.Instance.Character.GetCurrentZone().GetActorByClassId(openingStoperClassId);
+                openingStoper.ToggleEvents(sender, false);                
+                Thread.Sleep(1500);
+            }
+
+            User.Instance.Character.GetCurrentZone().SpawnAsPrivate("SimpleContent" + simpleContentNumber, "Populace");
             User.Instance.Character.BindQuestDirector(sender, questName, true);
             User.Instance.Character.AddDutyGroup(sender, dutyActorsClassId, true);
+            SendData(sender, new object[] { 0x09 });
+
+            List<Actor> fighters = User.Instance.Character.GetCurrentZone().GetActorsByFamily("fighter");
+
+            foreach (Actor fighter in fighters)
+                fighter.State.Main = MainState.Active;
+
+
             World.Instance.SendTextEnteredDuty(sender);
-            World.Instance.ChangeZone(sender, EntryPoints.Get(User.Instance.Character.GetCurrentZone().Id, 16));
+            World.Instance.ChangeZone(sender, EntryPoints.Get(User.Instance.Character.GetCurrentZone().Id, 0x10));
+
+            //if (openingStoper != null) //this is causing a bug
+            //    openingStoper.ToggleEvents(sender, true);
+        }
+
+        /// <summary>
+        /// Logout function
+        /// </summary>
+        public void AskLogout(Socket sender) 
+        {
+            if (IsQuestion)
+            {
+                switch (Selection)
+                {                    
+                    case 2:
+                        PlayerCharacter.ExitGame(sender);
+                        break;
+                    case 3:
+                        PlayerCharacter.Logout(sender);
+                        break;
+                    case 4:
+                        Log.Instance.Success("Selected 4");
+                        break;
+                }
+            }
+            else
+            {
+                IsQuestion = true;
+                FunctionName = "AskLogout";
+                RequestParameters.Add(Encoding.ASCII.GetBytes("askLogout"));
+                RequestParameters.Add(User.Instance.Character.Id);
+                Response(sender);
+            }
+        }
+
+        /// <summary>
+        /// Get player selection from a question dialog.
+        /// </summary>
+        public void GetQuestionSelection(byte[] data)
+        {
+            if (data[0x21] == 0x05)
+                Selection = 0xFF;
+            else
+                Selection = (uint)(data[0x22] << 24 | data[0x23] << 16 | data[0x24] << 8 | data[0x25]); //get player selection from event result packet
         }
     }
       
@@ -246,10 +451,10 @@ namespace Launcher
             switch (CommandId)
             {
                 case Command.QuestData:
-                    GetQuestData(sender);
+                    User.Instance.Character.Journal.GetQuestData(sender, (Data[0x42] << 24 | Data[0x43] << 16 | Data[0x44] << 8 | Data[0x45]), ref _requestParameters);
                     break;
                 case Command.GuildleveData:
-                    GetGuildleveData(sender);
+                    User.Instance.Character.Journal.GetGuildleveData(sender, ref _requestParameters);
                     break;
                 case Command.Umount:
                     User.Instance.Character.ToggleMount(sender, Command.Umount, false);                   
@@ -265,37 +470,7 @@ namespace Launcher
                     User.Instance.Character.EquipSoulStone(sender, Data);
                     break;
             }
-        }
-
-        private void GetQuestData(Socket sender)
-        {
-            byte[] data = new byte[0xc0];
-            int questId = Data[0x42] << 24 | Data[0x43] << 16 | Data[0x44] << 8 | Data[0x45];
-            RequestParameters.Add("requestedData");            
-            RequestParameters.Add("qtdata");
-            RequestParameters.Add(questId);
-            RequestParameters.Add(5);
-            LuaParameters.WriteParameters(ref data, RequestParameters, 0);
-            Packet.Send(sender, ServerOpcode.GeneralData, data);
-        }
-
-        private void GetGuildleveData(Socket sender)
-        {
-            byte[] data = new byte[0xc0];            
-            RequestParameters.Add("requestedData");
-            RequestParameters.Add("activegl");
-            RequestParameters.Add(0x07); //???
-            RequestParameters.Add(null);
-            RequestParameters.Add(null);
-            RequestParameters.Add(null);
-            RequestParameters.Add(null);
-            RequestParameters.Add(null);
-            RequestParameters.Add(null);
-            RequestParameters.Add(null);
-            LuaParameters.WriteParameters(ref data, RequestParameters, 0);
-            Packet.Send(sender, ServerOpcode.GeneralData, data);
-        }
-
+        }     
     }
 
     public class commandForced : EventRequest
@@ -312,7 +487,7 @@ namespace Launcher
         {
             Log.Instance.Warning("Event: " + GetType().Name + ", Command: 0x" + CommandId.ToString("X"));
 
-            foreach (Quest quest in User.Instance.Character.Quests)            
+            foreach (Quest quest in User.Instance.Character.Journal.Quests)            
                 QuestStep = quest.ActorStepComplete(sender, GetType().Name);
 
             switch (CommandId)
@@ -330,7 +505,7 @@ namespace Launcher
             Finish(sender);            
         }
 
-        public override void Finish(Socket sender)
+        protected override void Finish(Socket sender)
         {
             base.Finish(sender);
 
@@ -344,9 +519,127 @@ namespace Launcher
 
     public class commandContent : EventRequest
     {
+        public Command CommandId { get; set; }
+        private int MenuPage { get; set; }
+        private uint PageId { get; set; } 
+        private uint PageItem { get; set; } 
+
         public commandContent(byte[] data) : base(data)
         {
+            CommandId = (Command)(data[0x15] << 8 | data[0x14]);
+            OwnerId = (0xA0F00000 | (ushort)CommandId);
+            InitLuaParameters();
+        }
 
+        public override void Execute(Socket sender)
+        {
+            Log.Instance.Warning("Event: " + GetType().Name + ", Command: 0x" + CommandId.ToString("X"));
+
+            switch (CommandId)
+            {
+                case Command.Teleport:
+                    Teleport(sender);
+                    break;
+            }
+        }
+
+        public override void ProcessEventResult(Socket sender, byte[] data)
+        {            
+             if (IsQuestion)
+             {
+                 GetQuestionSelection(data);
+                 InvokeMethod(FunctionName, new object[] { sender });
+            }
+            else
+            {
+                Finish(sender);
+            }
+
+                 
+        }
+
+        public void Teleport(Socket sender)
+        {
+            
+            if (Selection == 0xFF)
+            {
+                if (MenuPage == 2) //from aetheryte selection back to region selection
+                    MenuPage = 0;               
+                
+            }
+
+            InitLuaParameters();
+
+            switch (MenuPage)
+            {
+                case 0:
+                
+                    IsQuestion = true;
+                    FunctionName = "Teleport";
+                    DelegateCommand(sender, new object[] { "eventRegion", (int)User.Instance.Character.Anima });
+                    break;
+                case 1:
+                    PageId = Selection;
+                    List<object> parameters = new List<object>();
+                    parameters.Add("eventAetheryte");
+                    parameters.Add((int)Selection);
+
+                    var regionAetherytes = from a in ActorRepository.Instance.Aetherytes
+                                           where a.TeleportMenuPageId == Selection
+                                           orderby a.TeleportMenuId ascending
+                                           select a;
+
+                    foreach (Aetheryte a in regionAetherytes)
+                        parameters.Add((int)a.AnimaCost);
+
+                    DelegateCommand(sender, parameters.ToArray());
+                    break;
+                case 2:
+                    PageItem = Selection;
+                    User.Instance.Character.PlayAnimationEffect(sender, AnimationEffect.TeleportWait);
+                    DelegateCommand(sender, new object[] { "eventConfirm", false, false, 0x02, 0x13883f, false });                    
+                    break;
+                case 3:
+                    if(Selection == 1)
+                    {
+                        User.Instance.Character.PlayAnimationEffect(sender, AnimationEffect.Teleport);                        
+                        Packet.Send(sender, ServerOpcode.SetUIControl, new byte[] { 0x14, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00 });
+                        World.Instance.SendTextSheetMessage(sender, ServerOpcode.TextSheetMessageNoSource28b, new byte[] { 0x01, 0x00, 0xF8, 0x5F, 0x39, 0x85, 0x20, 0x00 });
+                        Finish(sender);
+
+                        var destinationAetheryte = from a in ActorRepository.Instance.Aetherytes
+                                               where a.TeleportMenuPageId == PageId && a.TeleportMenuId == PageItem
+                                               orderby a.TeleportMenuId ascending
+                                               select a;
+
+                        if (destinationAetheryte != null)
+                            World.Instance.TeleportPlayer(sender, ((Aetheryte)destinationAetheryte.ToList()[0]).Position);
+                        else
+                            Log.Instance.Error("Something went wrong, aetheryte not found.");
+                    }
+                    else
+                    {
+                        Finish(sender);
+                    }
+                    break;
+
+            }
+
+            MenuPage++;
+        }
+
+        private void DelegateCommand(Socket sender, object[] parameters = null)
+        {
+            RequestParameters.Add(Encoding.ASCII.GetBytes("delegateCommand"));            
+            RequestParameters.Add(0xA0F00000 | (uint)CommandId);
+
+            if (parameters == null)
+                parameters = new object[] { null, null, null };
+
+            foreach (object obj in parameters)
+                RequestParameters.Add(obj);
+
+            Response(sender);
         }
     }
 
@@ -355,16 +648,26 @@ namespace Launcher
         public talkDefault(byte[] data) : base(data)
         {
             EventType eventType = (EventType)Enum.Parse(typeof(EventType), GetType().Name);
-            RequestParameters.Add((sbyte)eventType);
+            RequestParameters.Add((sbyte)0x05);
             RequestParameters.Add(Encoding.ASCII.GetBytes(GetType().Name));
         }
 
         public override void ProcessEventResult(Socket sender, byte[] data)
         {
-            if (!string.IsNullOrEmpty(FunctionName) && GetType().GetMethod(FunctionName) != null)           
-                InvokeMethod(FunctionName, new object[] { sender, data });            
-            else           
-                Finish(sender);           
+            if (!string.IsNullOrEmpty(FunctionName) && GetType().GetMethod(FunctionName) != null && !IsQuestion)
+            {
+               InvokeMethod(FunctionName, new object[] { sender, data });
+            }
+            else
+            {
+                if (IsQuestion)
+                {
+                    GetQuestionSelection(data);                    
+                    InvokeMethod(FunctionName, new object[] { sender });
+                }
+
+                Finish(sender);
+            }                          
         }
 
         public void processEvent020_9(Socket sender, byte[] eventResult)
@@ -375,25 +678,8 @@ namespace Launcher
             if (resultType == 0x05) //null
             {
                 Finish(sender);
-
-                //add second quest
-                byte[] data =
-                {
-                    0x1C, 0x04, 0xA5, 0xED, 0x74, 0x69, 0xB2, 0xAD, 0xF1, 0xA0, 0x94, 0x70, 0x6C, 0x61, 0x79, 0x65,
-                    0x72, 0x57, 0x6F, 0x72, 0x6B, 0x2F, 0x6A, 0x6F, 0x75, 0x72, 0x6E, 0x61, 0x6C, 0x00, 0x00, 0x00,
-                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-                };
-
-                Packet.Send(sender, ServerOpcode.ActorInit, data);
-
-                World.Instance.SendTextSheetMessage(sender, ServerOpcode.TextSheetMessageNoSource28b, new byte[] { 0xB2, 0xAD, 0xF1, 0xA0, 0x40, 0x01, 0x20, 0x00 });
-                World.Instance.SendTextSheetMessage(sender, ServerOpcode.TextSheetMessageNoSource28b, new byte[] { 0xB2, 0xAD, 0xF1, 0xA0, 0x41, 0x01, 0x20, 0x00 });
+                FinishQuest(sender, "110001");
+                AddQuest(sender, "110002");               
                 World.Instance.ChangeZone(sender, EntryPoints.Get(4), 0x0F);
             }
             else
@@ -429,7 +715,7 @@ namespace Launcher
         private void OpenShopBuy() { }
         private void SelectShopBuy() { }
         private void CloseShopBuy() { }
-        private void AskLogout() { }
+       
         #endregion
     }
 
@@ -463,10 +749,9 @@ namespace Launcher
 
                 Actor eventOwner = GetActor();
                 //finish exit door repeatable step.
-                User.Instance.Character.Quests.Find(x => x.Id == QuestId).ActorStepComplete(sender, GetType().Name, eventOwner.ClassId, eventOwner.Id, finishRepeatable: true);
+                User.Instance.Character.Journal.Quests.Find(x => x.Id == QuestId).ActorStepComplete(sender, GetType().Name, eventOwner.ClassId, eventOwner.Id, finishRepeatable: true);
                 World.Instance.SendTextQuestUpdated(sender, QuestId);
-
-                BattleTutorialStart(sender, "Man0l001", "SimpleContent30002", new List<uint> { 2290001, 2290002, 2205403 }, new Position(193, -5f, 16.35f, 6f, 0.5f, 16));               
+                BattleTutorialStart(sender);
             }
             else
             {
@@ -481,7 +766,7 @@ namespace Launcher
                         break;
                 }
             }
-        }        
+        }
     }
 
     public class noticeEvent : EventRequest
@@ -493,7 +778,7 @@ namespace Launcher
             RequestParameters.Add(Encoding.ASCII.GetBytes(GetType().Name));
         }
 
-        public override void Finish(Socket sender)
+        protected override void Finish(Socket sender)
         {
             base.Finish(sender);
 
@@ -514,22 +799,16 @@ namespace Launcher
             SendData(sender, new object[] { 0x04, null, null, 0x01, 0x0D }, 2);
             SendData(sender, new object[] { 0x05 }, 2);
             SendData(sender, new object[] { 0x02, null, null, 0x2369 }, 2);
-            SendData(sender, new object[] { "attention", (uint)0x5FF80001, "", 0xC781, 0x01 }); //second parameter is world id
+            SendData(sender, new object[] { "attention", (uint)0x5FF80001, "", 0xC781, User.Instance.Character.InitialTown }); //second parameter is world id
            
             World.Instance.SetMusic(sender, 0x07, MusicMode.Crossfade);
             User.Instance.Character.ToggleStance(sender, Command.NormalStance);
             ((QuestDirector)World.Instance.GetDirector("Quest")).StartEvent(sender, "noticeEvent");
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="sender"></param>
-        public void processEvent000_3(Socket sender)
-        {                        
-            User.Instance.Character.BindQuestDirector(sender, "Man0l001");
-            World.Instance.ChangeZone(sender, EntryPoints.Get(2), 0x0F);
-        }
+        public void processEvent000_3(Socket sender) => GoToQuestPrivateZone(sender, "Man0l001", 2);
+
+        public void processEvent020_1(Socket sender) => GoToQuestPrivateZone(sender, "Man0g001", 5);       
     }
 
     public class exit : EventRequest
@@ -538,6 +817,7 @@ namespace Launcher
 
         public override void Execute(Socket sender)
         {
+            base.Execute(sender);            
             Finish(sender);
         }
     }
@@ -548,6 +828,7 @@ namespace Launcher
 
         public override void Execute(Socket sender)
         {
+            base.Execute(sender);
             Finish(sender);
         }
     }

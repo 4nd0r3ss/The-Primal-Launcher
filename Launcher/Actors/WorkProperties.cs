@@ -4,9 +4,9 @@ using System.IO;
 using System.Net.Sockets;
 using System.Text;
 
-namespace Launcher
+namespace PrimalLauncher
 {
-    class WorkProperties
+    public class WorkProperties
     {
         public byte[] _buffer;
         private MemoryStream _ms;
@@ -206,10 +206,21 @@ namespace Launcher
             SendPacket();
         }
 
-        private void SendPacket(string key = null, object value = null)
+        public void SendUpdate()
         {
-            _bw.Write((byte)(_writeMore ? (0x60 + Command.Length) : (0x82 + Command.Length))); //write wrap byte
-            _index += 1;            
+            _writeMore = false;
+            _bw.Write((byte) 0x94);
+            _index += 1;
+            SendPacket(wrapByte: false);
+        }
+
+        private void SendPacket(string key = null, object value = null, bool wrapByte = true)
+        {
+            if (wrapByte)
+            {
+                _bw.Write((byte)(_writeMore ? (0x60 + Command.Length) : (0x82 + Command.Length))); //write wrap byte
+                _index += 1;
+            }                       
 
             _bw.Write(Command);
             _index += (ushort)Command.Length;

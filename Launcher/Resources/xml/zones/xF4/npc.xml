@@ -1,0 +1,149 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<chara>
+  <npc>
+    <Populace className="PopulaceCutScenePlayer">
+      <classId>1080120</classId>
+      <position x="159.84" y="0.7" z="167.17" r="-0.2" />
+      <animation>0</animation>
+      <events>
+        <talkDefault priority="1" enabled="1" />
+        <noticeEvent priority="1" enabled="1" />
+      </events>
+    </Populace>
+    <Populace className="PopulaceStandard">
+      <classId>1200335</classId>
+      <position x="159.98" y="0.02" z="151.9" r="-0.44" />
+      <animation>0</animation>
+      <events>
+        <talkDefault priority="4" enabled="1" />
+        <noticeEvent priority="0" enabled="0" />
+      </events>
+    </Populace>
+    <Object className="ObjectItemStorage">
+      <classId>1200376</classId>
+      <position x="164.91" y="-0.1" z="167.03" r="0.05" />
+      <animation>0</animation>
+      <events>
+        <talkDefault priority="1" enabled="1" />
+        <noticeEvent priority="1" enabled="1" />
+      </events>
+    </Object>
+    <Object className="ObjectBed">
+      <classId>1200379</classId>
+      <position x="155.97" y="0" z="165.14" r="-1.65" />
+      <animation>0</animation>
+      <talkFunction>AskLogout</talkFunction>
+      <events>
+        <talkDefault priority="1" enabled="1" />
+        <noticeEvent priority="1" enabled="1" />
+      </events>
+    </Object>
+    <Object className="ObjectBed">
+      <classId>1200380</classId>
+      <position x="-4.16" y="0" z="4.14" r="-1.65" />
+      <animation>0</animation>
+      <talkFunction>AskLogout</talkFunction>
+      <events>
+        <talkDefault priority="1" enabled="1" />
+        <noticeEvent priority="1" enabled="1" />
+      </events>
+    </Object>
+    <Object className="ObjectBed">
+      <classId>1200378</classId>
+      <position x="-164" y="0" z="-154.21" r="0" />
+      <animation>0</animation>
+      <talkFunction>AskLogout</talkFunction>
+      <events>
+        <talkDefault priority="1" enabled="1" />
+        <noticeEvent priority="1" enabled="1" />
+      </events>
+    </Object>
+    <Populace className="PopulaceCutScenePlayer">
+      <classId>1080120</classId>
+      <position x="-4" y="0.7" z="-0.03" r="0" />
+      <animation>0</animation>
+      <events>
+        <talkDefault priority="1" enabled="1" />
+        <noticeEvent priority="1" enabled="1" />
+      </events>
+    </Populace>
+    <Populace className="PopulaceCutScenePlayer">
+      <classId>1080120</classId>
+      <position x="-161.5" y="0.7" z="-152.8" r="0" />
+      <animation>0</animation>
+      <events>
+        <talkDefault priority="1" enabled="1" />
+        <noticeEvent priority="1" enabled="1" />
+      </events>
+    </Populace>
+    <Object className="ObjectItemStorage">
+      <classId>1200376</classId>
+      <position x="-155.31" y="-0.1" z="-153" r="0" />
+      <animation>0</animation>
+      <events>
+        <talkDefault priority="1" enabled="1" />
+        <noticeEvent priority="1" enabled="1" />
+      </events>
+    </Object>
+    <Object className="ObjectItemStorage">
+      <classId>1200376</classId>
+      <position x="3.3" y="-0.1" z="7" r="0" />
+      <animation>0</animation>
+      <events>
+        <talkDefault priority="1" enabled="1" />
+        <noticeEvent priority="1" enabled="1" />
+      </events>
+    </Object>
+    <Object className="ObjectInnDoor">
+      <classId>1090548</classId>
+      <position x="159.98" y="0.02" z="151.9" r="0" />
+      <animation>0</animation>
+      <events>
+        <pushCommand priority="4" enabled="1" />
+        <noticeEvent priority="0" enabled="0" />
+        <pushCommandIn radius="4.0" silent="true" outwards="false" />
+        <pushCommandOut radius="4.0" silent="true" outwards="true" />
+      </events>
+    </Object>
+    <Populace className="PopulaceStandard">
+      <classId>1200336</classId>
+      <position x="-0.02" y="0.02" z="-8.6" r="0" />
+      <animation>0</animation>
+      <events>
+        <talkDefault priority="4" enabled="1" />
+        <noticeEvent priority="0" enabled="0" />
+      </events>
+    </Populace>
+    <Populace className="PopulaceStandard">
+      <classId>1200334</classId>
+      <position x="-160.02" y="0.02" z="-168.4" r="0" />
+      <animation>0</animation>
+      <events>
+        <talkDefault priority="4" enabled="1" />
+        <noticeEvent priority="0" enabled="0" />
+      </events>
+    </Populace>
+    <Object className="ObjectInnDoor">
+      <classId>1090549</classId>
+      <position x="-0.02" y="0.02" z="-8.6" r="0" />
+      <animation>0</animation>
+      <events>
+        <pushCommand priority="4" enabled="1" />
+        <noticeEvent priority="0" enabled="0" />
+        <pushCommandIn radius="4.0" silent="true" outwards="false" />
+        <pushCommandOut radius="4.0" silent="true" outwards="true" />
+      </events>
+    </Object>
+    <Object className="ObjectInnDoor">
+      <classId>1090547</classId>
+      <position x="-160.02" y="0.02" z="-168.4" r="0" />
+      <animation>0</animation>
+      <events>
+        <pushCommand priority="4" enabled="1" />
+        <noticeEvent priority="0" enabled="0" />
+        <pushCommandIn radius="4.0" silent="true" outwards="false" />
+        <pushCommandOut radius="4.0" silent="true" outwards="true" />
+      </events>
+    </Object>
+  </npc>
+</chara>

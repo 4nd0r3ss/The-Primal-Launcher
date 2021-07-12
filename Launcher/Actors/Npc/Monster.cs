@@ -5,7 +5,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Launcher
+namespace PrimalLauncher
 {
     class Monster : Actor
     {
@@ -17,7 +17,7 @@ namespace Launcher
 
         public override void Prepare()
         {           
-            string actorName = GenerateActorName();
+            string actorName = GenerateName();
             actorName = actorName.Substring(0, actorName.IndexOf("_") - 1) + actorName.Substring(actorName.IndexOf("_")); //dirty way of removing extra character...
 
             LuaParameters = new LuaParameters
@@ -72,6 +72,11 @@ namespace Launcher
 
         public override void Init(Socket sender)
         {
+            //charaWork.battleSave.potencial
+            //charaWork.property[0]
+            //charaWork.property[1]
+            //charaWork.property[2]
+
             byte[] data =
             {
                 0x64,

@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 
-namespace Launcher
+namespace PrimalLauncher
 {
     class GameServer : Server
     {
@@ -51,7 +51,7 @@ namespace Launcher
                 worldListFile.LoadXml(file);
                 rootNode = worldListFile.SelectNodes("servers/region[@id = '" + "NA" + "']/world");
             }
-            catch (Exception e) { Log.Instance.Error(e.Message); }
+            catch (Exception e) { Log.Instance.Error(e.Message); throw e; }
 
             return rootNode;
         }
@@ -110,7 +110,7 @@ namespace Launcher
                     handler.Send(worldListPacket.ToBytes(blowfish));
                     Log.Instance.Info("World list sent.");
                 }
-                catch (Exception e) { Log.Instance.Error(e.Message); }
+                catch (Exception e) { Log.Instance.Error(e.Message); throw e; }
             }
             else
             {

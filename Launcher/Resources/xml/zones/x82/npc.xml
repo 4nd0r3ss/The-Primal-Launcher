@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<chara>
+  <npc>
+    <Populace className="PopulaceBountyPresenter">
+      <classId>1060027</classId>
+      <position x="1117.76" y="52.143" z="-445.258" r="2.173" />
+      <animation>0</animation>
+      <events>
+        <talkDefault priority="4" enabled="1" />
+        <noticeEvent priority="0" enabled="0" />
+      </events>
+    </Populace>
+  </npc>
+</chara>

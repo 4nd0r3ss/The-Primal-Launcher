@@ -26,7 +26,7 @@
       <position x="56.43" y="45.34" z="-40.84" r="-1.65" />
       <animation>0</animation>
     </Populace>
-    <Populace className="PopulaceShopSalesman">
+    <Populace className="Shop/PopulaceShopSalesman">
       <classId>1600016</classId>
       <position x="45.86" y="45.53" z="-11.5" r="-3.13" />
       <animation>0</animation>

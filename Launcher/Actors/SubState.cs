@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace Launcher
+namespace PrimalLauncher
 {
     [Serializable]
     public class SubState

@@ -1,4 +1,4 @@
-﻿namespace Launcher
+﻿namespace PrimalLauncher
 {
     partial class MainWindow
     {
@@ -33,6 +33,11 @@
             this.materialTabSelector1 = new MaterialSkin.Controls.MaterialTabSelector();
             this.materialTabControl1 = new MaterialSkin.Controls.MaterialTabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.materialCard3 = new MaterialSkin.Controls.MaterialCard();
+            this.lblPlaytime = new System.Windows.Forms.Label();
+            this.label11 = new System.Windows.Forms.Label();
+            this.materialDivider3 = new MaterialSkin.Controls.MaterialDivider();
+            this.materialLabel4 = new MaterialSkin.Controls.MaterialLabel();
             this.materialCard2 = new MaterialSkin.Controls.MaterialCard();
             this.lblr = new System.Windows.Forms.Label();
             this.lbly = new System.Windows.Forms.Label();
@@ -50,6 +55,22 @@
             this.LbxOutput = new System.Windows.Forms.ListBox();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.materialCard6 = new MaterialSkin.Controls.MaterialCard();
+            this.label12 = new System.Windows.Forms.Label();
+            this.label13 = new System.Windows.Forms.Label();
+            this.label14 = new System.Windows.Forms.Label();
+            this.label15 = new System.Windows.Forms.Label();
+            this.btnPatch = new System.Windows.Forms.Button();
+            this.materialCard5 = new MaterialSkin.Controls.MaterialCard();
+            this.btnGameUpdate = new System.Windows.Forms.Button();
+            this.chkKeepFiles = new System.Windows.Forms.CheckBox();
+            this.lblUpdate = new System.Windows.Forms.Label();
+            this.progressBar1 = new System.Windows.Forms.ProgressBar();
+            this.materialCard4 = new MaterialSkin.Controls.MaterialCard();
+            this.progressBar = new System.Windows.Forms.ProgressBar();
+            this.lblDownloadStat = new System.Windows.Forms.Label();
+            this.btnDownload = new System.Windows.Forms.Button();
+            this.btnDownloadCancel = new System.Windows.Forms.Button();
             this.tabPage4 = new System.Windows.Forms.TabPage();
             this.tabPage5 = new System.Windows.Forms.TabPage();
             this.tabPage6 = new System.Windows.Forms.TabPage();
@@ -70,16 +91,15 @@
             this.materialLabel2 = new MaterialSkin.Controls.MaterialLabel();
             this.materialDivider1 = new MaterialSkin.Controls.MaterialDivider();
             this.clock_ticker = new System.Windows.Forms.Timer(this.components);
-            this.materialCard3 = new MaterialSkin.Controls.MaterialCard();
-            this.materialDivider3 = new MaterialSkin.Controls.MaterialDivider();
-            this.materialLabel4 = new MaterialSkin.Controls.MaterialLabel();
-            this.label11 = new System.Windows.Forms.Label();
-            this.lblPlaytime = new System.Windows.Forms.Label();
             this.materialTabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
+            this.materialCard3.SuspendLayout();
             this.materialCard2.SuspendLayout();
             this.materialCard1.SuspendLayout();
-            this.materialCard3.SuspendLayout();
+            this.tabPage3.SuspendLayout();
+            this.materialCard6.SuspendLayout();
+            this.materialCard5.SuspendLayout();
+            this.materialCard4.SuspendLayout();
             this.SuspendLayout();
             // 
             // materialTabSelector1
@@ -124,6 +144,64 @@
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Log";
             this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // materialCard3
+            // 
+            this.materialCard3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
+            this.materialCard3.Controls.Add(this.lblPlaytime);
+            this.materialCard3.Controls.Add(this.label11);
+            this.materialCard3.Controls.Add(this.materialDivider3);
+            this.materialCard3.Controls.Add(this.materialLabel4);
+            this.materialCard3.Depth = 0;
+            this.materialCard3.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(222)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
+            this.materialCard3.Location = new System.Drawing.Point(17, 14);
+            this.materialCard3.Margin = new System.Windows.Forms.Padding(14);
+            this.materialCard3.MouseState = MaterialSkin.MouseState.HOVER;
+            this.materialCard3.Name = "materialCard3";
+            this.materialCard3.Padding = new System.Windows.Forms.Padding(14);
+            this.materialCard3.Size = new System.Drawing.Size(200, 100);
+            this.materialCard3.TabIndex = 27;
+            // 
+            // lblPlaytime
+            // 
+            this.lblPlaytime.AutoSize = true;
+            this.lblPlaytime.Location = new System.Drawing.Point(57, 38);
+            this.lblPlaytime.Name = "lblPlaytime";
+            this.lblPlaytime.Size = new System.Drawing.Size(10, 13);
+            this.lblPlaytime.TabIndex = 5;
+            this.lblPlaytime.Text = "-";
+            // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(17, 38);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(34, 13);
+            this.label11.TabIndex = 4;
+            this.label11.Text = "Total:";
+            // 
+            // materialDivider3
+            // 
+            this.materialDivider3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
+            this.materialDivider3.Depth = 0;
+            this.materialDivider3.Location = new System.Drawing.Point(10, 25);
+            this.materialDivider3.MouseState = MaterialSkin.MouseState.HOVER;
+            this.materialDivider3.Name = "materialDivider3";
+            this.materialDivider3.Size = new System.Drawing.Size(180, 1);
+            this.materialDivider3.TabIndex = 3;
+            this.materialDivider3.Text = "materialDivider3";
+            // 
+            // materialLabel4
+            // 
+            this.materialLabel4.AutoSize = true;
+            this.materialLabel4.Depth = 0;
+            this.materialLabel4.Font = new System.Drawing.Font("Roboto", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.materialLabel4.Location = new System.Drawing.Point(14, 9);
+            this.materialLabel4.MouseState = MaterialSkin.MouseState.HOVER;
+            this.materialLabel4.Name = "materialLabel4";
+            this.materialLabel4.Size = new System.Drawing.Size(72, 19);
+            this.materialLabel4.TabIndex = 2;
+            this.materialLabel4.Text = "Play Time";
             // 
             // materialCard2
             // 
@@ -307,6 +385,9 @@
             // 
             // tabPage3
             // 
+            this.tabPage3.Controls.Add(this.materialCard6);
+            this.tabPage3.Controls.Add(this.materialCard5);
+            this.tabPage3.Controls.Add(this.materialCard4);
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
@@ -314,6 +395,191 @@
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "Game Update";
             this.tabPage3.UseVisualStyleBackColor = true;
+            // 
+            // materialCard6
+            // 
+            this.materialCard6.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
+            this.materialCard6.Controls.Add(this.label12);
+            this.materialCard6.Controls.Add(this.label13);
+            this.materialCard6.Controls.Add(this.label14);
+            this.materialCard6.Controls.Add(this.label15);
+            this.materialCard6.Controls.Add(this.btnPatch);
+            this.materialCard6.Depth = 0;
+            this.materialCard6.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(222)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
+            this.materialCard6.Location = new System.Drawing.Point(10, 251);
+            this.materialCard6.Margin = new System.Windows.Forms.Padding(14);
+            this.materialCard6.MouseState = MaterialSkin.MouseState.HOVER;
+            this.materialCard6.Name = "materialCard6";
+            this.materialCard6.Padding = new System.Windows.Forms.Padding(14);
+            this.materialCard6.Size = new System.Drawing.Size(790, 145);
+            this.materialCard6.TabIndex = 18;
+            // 
+            // label12
+            // 
+            this.label12.AutoSize = true;
+            this.label12.Location = new System.Drawing.Point(32, 81);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(359, 13);
+            this.label12.TabIndex = 10;
+            this.label12.Text = "where the game is installed. The game will work only after this setp is done.";
+            // 
+            // label13
+            // 
+            this.label13.AutoSize = true;
+            this.label13.Location = new System.Drawing.Point(31, 64);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(510, 13);
+            this.label13.TabIndex = 9;
+            this.label13.Text = "Primal Launcher can comunicate with the game. It may ask you for administrator pe" +
+    "rmissions depending on ";
+            // 
+            // label14
+            // 
+            this.label14.AutoSize = true;
+            this.label14.Location = new System.Drawing.Point(31, 47);
+            this.label14.Name = "label14";
+            this.label14.Size = new System.Drawing.Size(508, 13);
+            this.label14.TabIndex = 8;
+            this.label14.Text = "This will replace the original servers IP addresses in the game binaries with you" +
+    "r computer\'s localhost IP so ";
+            // 
+            // label15
+            // 
+            this.label15.AutoSize = true;
+            this.label15.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.label15.Location = new System.Drawing.Point(31, 19);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(417, 13);
+            this.label15.TabIndex = 7;
+            this.label15.Text = "The patching process will only be available once the game is updated to version 1" +
+    ".23b.";
+            // 
+            // btnPatch
+            // 
+            this.btnPatch.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.btnPatch.Location = new System.Drawing.Point(31, 104);
+            this.btnPatch.Name = "btnPatch";
+            this.btnPatch.Size = new System.Drawing.Size(136, 24);
+            this.btnPatch.TabIndex = 6;
+            this.btnPatch.Text = "Patch game binaries";
+            this.btnPatch.UseVisualStyleBackColor = true;
+            this.btnPatch.Click += new System.EventHandler(this.btnPatch_Click);
+            // 
+            // materialCard5
+            // 
+            this.materialCard5.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
+            this.materialCard5.Controls.Add(this.btnGameUpdate);
+            this.materialCard5.Controls.Add(this.chkKeepFiles);
+            this.materialCard5.Controls.Add(this.lblUpdate);
+            this.materialCard5.Controls.Add(this.progressBar1);
+            this.materialCard5.Depth = 0;
+            this.materialCard5.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(222)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
+            this.materialCard5.Location = new System.Drawing.Point(10, 120);
+            this.materialCard5.Margin = new System.Windows.Forms.Padding(14);
+            this.materialCard5.MouseState = MaterialSkin.MouseState.HOVER;
+            this.materialCard5.Name = "materialCard5";
+            this.materialCard5.Padding = new System.Windows.Forms.Padding(14);
+            this.materialCard5.Size = new System.Drawing.Size(790, 114);
+            this.materialCard5.TabIndex = 17;
+            // 
+            // btnGameUpdate
+            // 
+            this.btnGameUpdate.Enabled = false;
+            this.btnGameUpdate.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.btnGameUpdate.Location = new System.Drawing.Point(31, 76);
+            this.btnGameUpdate.Name = "btnGameUpdate";
+            this.btnGameUpdate.Size = new System.Drawing.Size(136, 24);
+            this.btnGameUpdate.TabIndex = 6;
+            this.btnGameUpdate.Text = "Start game update";
+            this.btnGameUpdate.UseVisualStyleBackColor = true;
+            this.btnGameUpdate.Click += new System.EventHandler(this.btnGameUpdate_Click);
+            // 
+            // chkKeepFiles
+            // 
+            this.chkKeepFiles.AutoSize = true;
+            this.chkKeepFiles.Checked = true;
+            this.chkKeepFiles.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkKeepFiles.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.chkKeepFiles.Location = new System.Drawing.Point(518, 81);
+            this.chkKeepFiles.Name = "chkKeepFiles";
+            this.chkKeepFiles.Size = new System.Drawing.Size(192, 17);
+            this.chkKeepFiles.TabIndex = 4;
+            this.chkKeepFiles.Text = "Keep update files  (Recommended)";
+            this.chkKeepFiles.UseVisualStyleBackColor = true;
+            this.chkKeepFiles.CheckedChanged += new System.EventHandler(this.chkKeepFiles_CheckedChanged);
+            // 
+            // lblUpdate
+            // 
+            this.lblUpdate.AutoSize = true;
+            this.lblUpdate.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.lblUpdate.Location = new System.Drawing.Point(30, 22);
+            this.lblUpdate.Name = "lblUpdate";
+            this.lblUpdate.Size = new System.Drawing.Size(273, 13);
+            this.lblUpdate.TabIndex = 5;
+            this.lblUpdate.Text = "Click the button below to start the game update process.";
+            // 
+            // progressBar1
+            // 
+            this.progressBar1.Location = new System.Drawing.Point(31, 43);
+            this.progressBar1.Name = "progressBar1";
+            this.progressBar1.Size = new System.Drawing.Size(717, 23);
+            this.progressBar1.TabIndex = 3;
+            // 
+            // materialCard4
+            // 
+            this.materialCard4.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
+            this.materialCard4.Controls.Add(this.progressBar);
+            this.materialCard4.Controls.Add(this.lblDownloadStat);
+            this.materialCard4.Controls.Add(this.btnDownload);
+            this.materialCard4.Controls.Add(this.btnDownloadCancel);
+            this.materialCard4.Depth = 0;
+            this.materialCard4.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(222)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
+            this.materialCard4.Location = new System.Drawing.Point(10, 0);
+            this.materialCard4.Margin = new System.Windows.Forms.Padding(14);
+            this.materialCard4.MouseState = MaterialSkin.MouseState.HOVER;
+            this.materialCard4.Name = "materialCard4";
+            this.materialCard4.Padding = new System.Windows.Forms.Padding(14);
+            this.materialCard4.Size = new System.Drawing.Size(790, 103);
+            this.materialCard4.TabIndex = 16;
+            // 
+            // progressBar
+            // 
+            this.progressBar.Location = new System.Drawing.Point(31, 33);
+            this.progressBar.Name = "progressBar";
+            this.progressBar.Size = new System.Drawing.Size(717, 23);
+            this.progressBar.TabIndex = 10;
+            // 
+            // lblDownloadStat
+            // 
+            this.lblDownloadStat.AutoSize = true;
+            this.lblDownloadStat.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.lblDownloadStat.Location = new System.Drawing.Point(31, 12);
+            this.lblDownloadStat.Name = "lblDownloadStat";
+            this.lblDownloadStat.Size = new System.Drawing.Size(270, 13);
+            this.lblDownloadStat.TabIndex = 13;
+            this.lblDownloadStat.Text = "Click the download button to start downloading the files.";
+            // 
+            // btnDownload
+            // 
+            this.btnDownload.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.btnDownload.Location = new System.Drawing.Point(31, 66);
+            this.btnDownload.Name = "btnDownload";
+            this.btnDownload.Size = new System.Drawing.Size(136, 23);
+            this.btnDownload.TabIndex = 11;
+            this.btnDownload.Text = "Download";
+            this.btnDownload.UseVisualStyleBackColor = true;
+            this.btnDownload.Click += new System.EventHandler(this.btnDownload_Click);
+            // 
+            // btnDownloadCancel
+            // 
+            this.btnDownloadCancel.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.btnDownloadCancel.Location = new System.Drawing.Point(655, 66);
+            this.btnDownloadCancel.Name = "btnDownloadCancel";
+            this.btnDownloadCancel.Size = new System.Drawing.Size(93, 23);
+            this.btnDownloadCancel.TabIndex = 12;
+            this.btnDownloadCancel.Text = "Stop";
+            this.btnDownloadCancel.UseVisualStyleBackColor = true;
+            this.btnDownloadCancel.Click += new System.EventHandler(this.btnDownloadCancel_Click);
             // 
             // tabPage4
             // 
@@ -522,64 +788,6 @@
             this.clock_ticker.Enabled = true;
             this.clock_ticker.Tick += new System.EventHandler(this.clock_ticker_Tick);
             // 
-            // materialCard3
-            // 
-            this.materialCard3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
-            this.materialCard3.Controls.Add(this.lblPlaytime);
-            this.materialCard3.Controls.Add(this.label11);
-            this.materialCard3.Controls.Add(this.materialDivider3);
-            this.materialCard3.Controls.Add(this.materialLabel4);
-            this.materialCard3.Depth = 0;
-            this.materialCard3.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(222)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
-            this.materialCard3.Location = new System.Drawing.Point(17, 14);
-            this.materialCard3.Margin = new System.Windows.Forms.Padding(14);
-            this.materialCard3.MouseState = MaterialSkin.MouseState.HOVER;
-            this.materialCard3.Name = "materialCard3";
-            this.materialCard3.Padding = new System.Windows.Forms.Padding(14);
-            this.materialCard3.Size = new System.Drawing.Size(200, 100);
-            this.materialCard3.TabIndex = 27;
-            // 
-            // materialDivider3
-            // 
-            this.materialDivider3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
-            this.materialDivider3.Depth = 0;
-            this.materialDivider3.Location = new System.Drawing.Point(10, 25);
-            this.materialDivider3.MouseState = MaterialSkin.MouseState.HOVER;
-            this.materialDivider3.Name = "materialDivider3";
-            this.materialDivider3.Size = new System.Drawing.Size(180, 1);
-            this.materialDivider3.TabIndex = 3;
-            this.materialDivider3.Text = "materialDivider3";
-            // 
-            // materialLabel4
-            // 
-            this.materialLabel4.AutoSize = true;
-            this.materialLabel4.Depth = 0;
-            this.materialLabel4.Font = new System.Drawing.Font("Roboto", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.materialLabel4.Location = new System.Drawing.Point(14, 9);
-            this.materialLabel4.MouseState = MaterialSkin.MouseState.HOVER;
-            this.materialLabel4.Name = "materialLabel4";
-            this.materialLabel4.Size = new System.Drawing.Size(72, 19);
-            this.materialLabel4.TabIndex = 2;
-            this.materialLabel4.Text = "Play Time";
-            // 
-            // label11
-            // 
-            this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(17, 38);
-            this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(34, 13);
-            this.label11.TabIndex = 4;
-            this.label11.Text = "Total:";
-            // 
-            // lblPlaytime
-            // 
-            this.lblPlaytime.AutoSize = true;
-            this.lblPlaytime.Location = new System.Drawing.Point(57, 38);
-            this.lblPlaytime.Name = "lblPlaytime";
-            this.lblPlaytime.Size = new System.Drawing.Size(10, 13);
-            this.lblPlaytime.TabIndex = 5;
-            this.lblPlaytime.Text = "-";
-            // 
             // MainWindow
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
@@ -599,11 +807,18 @@
             this.Load += new System.EventHandler(this.MainWindow_Load);
             this.materialTabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
+            this.materialCard3.ResumeLayout(false);
+            this.materialCard3.PerformLayout();
             this.materialCard2.ResumeLayout(false);
             this.materialCard2.PerformLayout();
             this.materialCard1.ResumeLayout(false);
-            this.materialCard3.ResumeLayout(false);
-            this.materialCard3.PerformLayout();
+            this.tabPage3.ResumeLayout(false);
+            this.materialCard6.ResumeLayout(false);
+            this.materialCard6.PerformLayout();
+            this.materialCard5.ResumeLayout(false);
+            this.materialCard5.PerformLayout();
+            this.materialCard4.ResumeLayout(false);
+            this.materialCard4.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -655,6 +870,22 @@
         private MaterialSkin.Controls.MaterialLabel materialLabel4;
         private System.Windows.Forms.Label lblPlaytime;
         private System.Windows.Forms.Label label11;
+        private MaterialSkin.Controls.MaterialCard materialCard4;
+        private System.Windows.Forms.ProgressBar progressBar;
+        private System.Windows.Forms.Label lblDownloadStat;
+        private System.Windows.Forms.Button btnDownload;
+        private System.Windows.Forms.Button btnDownloadCancel;
+        private MaterialSkin.Controls.MaterialCard materialCard5;
+        private System.Windows.Forms.Button btnGameUpdate;
+        private System.Windows.Forms.CheckBox chkKeepFiles;
+        private System.Windows.Forms.Label lblUpdate;
+        private System.Windows.Forms.ProgressBar progressBar1;
+        private MaterialSkin.Controls.MaterialCard materialCard6;
+        private System.Windows.Forms.Label label12;
+        private System.Windows.Forms.Label label13;
+        private System.Windows.Forms.Label label14;
+        private System.Windows.Forms.Label label15;
+        private System.Windows.Forms.Button btnPatch;
     }
 }
 

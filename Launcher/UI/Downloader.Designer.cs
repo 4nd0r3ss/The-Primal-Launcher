@@ -1,4 +1,4 @@
-﻿namespace Launcher
+﻿namespace PrimalLauncher
 {
     partial class Downloader
     {

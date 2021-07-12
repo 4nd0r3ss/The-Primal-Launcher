@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<chara>
+  <npc>
+    <Populace className="DoorServer">
+      <classId>5900016</classId>
+      <position x="-686.923" y="171.343" z="1359.91" r="0" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+      </events>
+    </Populace>
+    <Populace className="DoorServer">
+      <classId>5900016</classId>
+      <position x="-733.348" y="171.92" z="1230.88" r="0" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+      </events>
+    </Populace>
+    <Populace className="DoorServer">
+      <classId>5900016</classId>
+      <position x="-996.74" y="196.244" z="1391.07" r="0" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+      </events>
+    </Populace>
+    <Populace className="DoorServer">
+      <classId>5900016</classId>
+      <position x="-1083.28" y="193.835" z="1264.69" r="0" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+      </events>
+    </Populace>
+    <Populace className="DoorServer">
+      <classId>5900016</classId>
+      <position x="-1163" y="188.093" z="1167.11" r="0" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+      </events>
+    </Populace>
+  </npc>
+</chara>

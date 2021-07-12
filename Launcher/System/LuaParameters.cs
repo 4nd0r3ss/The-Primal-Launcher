@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Launcher
+namespace PrimalLauncher
 {
     [Serializable]
     public class LuaParameters
@@ -14,7 +14,23 @@ namespace Launcher
         public string ActorName { get; set; }
         public string ClassName { get; set; }
         public uint ClassCode { get; set; }
-        public List<KeyValuePair<byte, object>> List { get; set; } = new List<KeyValuePair<byte, object>>();
+        public object[] Parameters
+        {
+            set
+            {
+                object[] toAdd = value;
+
+                if (toAdd != null && toAdd.Length > 0)
+                    AddRange(toAdd);
+            }
+        }
+
+        public List<KeyValuePair<byte, object>> List { get; set; }
+
+        public LuaParameters()
+        {
+            List = new List<KeyValuePair<byte, object>>();
+        }
 
         /// <summary>
         /// Adds one single Lua parameter to the parameter list of the instanced obj.
@@ -44,6 +60,12 @@ namespace Launcher
             else if (param is byte[])
                 List.Add(new KeyValuePair<byte, object>(0x99, (byte[])param));
            
+        }
+
+        public void AddRange(object[] toAdd)
+        {
+            foreach (object obj in toAdd)
+                Add(obj);
         }
 
         /// <summary>

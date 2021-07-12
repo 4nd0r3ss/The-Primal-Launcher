@@ -3,7 +3,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Launcher
+namespace PrimalLauncher
 {
     public class Blowfish
     {   
@@ -354,7 +354,7 @@ namespace Launcher
 	        return y;
         }
 
-        private void BlowfishEncipher(ref UInt32 xl, ref UInt32 xr)
+        public void BlowfishEncipher(ref UInt32 xl, ref UInt32 xr)
         {
 	        UInt32  temp;
 	        Int32          i;

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Launcher
+namespace PrimalLauncher
 {
     [Serializable]
     public class Job
@@ -25,6 +25,8 @@ namespace Launcher
         public ushort Hp { get; set; }
         public ushort Mp { get; set; }
         public ushort Tp { get; set; }
+
+        public ushort[] Hotbar { get; set; }
                
         public Job(byte id, string name, short maxLevel)
         {
@@ -43,26 +45,37 @@ namespace Launcher
             Hp = MaxHp;
             Mp = MaxMp;
             Tp = 0;
+
+            Hotbar = new ushort[0x1d];
+            Hotbar[0] = 27039; //remove later
         }
 
         public static Dictionary<byte, Job> LoadAll()
         {
-            //get job infor from game data
-            DataTable jobsTable = GameData.Instance.GetGameData("xtx/text_jobName");
             Dictionary<byte, Job> jobs = new Dictionary<byte, Job>();
 
-            //couldn't find a way in the game's files to say which ones of the jobs/classes are disabled, so using this for now
-            List<uint> disabledJobs = new List<uint>
+            try
             {
-                1, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 24, 25, 26, 27, 28, 37, 38, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58
-            };
+                //get job info from game data
+                DataTable jobsTable = GameData.Instance.GetGameData("xtx/text_jobName");                
 
-            foreach (DataRow row in jobsTable.Rows)
-            {                 
-                uint jobId = (uint)row.ItemArray[0];
-                short maxLevel = (short)(disabledJobs.Any(x => x == jobId) ? 255 : 50);
-                string jobName = (string)row.ItemArray[1];
-                jobs.Add((byte)jobId, new Job((byte)jobId, jobName, maxLevel));
+                //couldn't find a way in the game's files to say which ones of the jobs/classes are disabled, so using this for now
+                List<uint> disabledJobs = new List<uint>
+                {
+                    1, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 24, 25, 26, 27, 28, 37, 38, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58
+                };
+
+                foreach (DataRow row in jobsTable.Rows)
+                {
+                    uint jobId = (uint)row.ItemArray[0];
+                    short maxLevel = (short)(disabledJobs.Any(x => x == jobId) ? 255 : 50);
+                    string jobName = (string)row.ItemArray[1];
+                    jobs.Add((byte)jobId, new Job((byte)jobId, jobName, maxLevel));
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Instance.Equals(e.Message);                
             }
 
             return jobs;

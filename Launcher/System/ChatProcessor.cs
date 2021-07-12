@@ -5,7 +5,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Launcher
+namespace PrimalLauncher
 {
     public static class ChatProcessor
     {       
@@ -136,32 +136,31 @@ namespace Launcher
                         break;
 
                     case @"\text":
+                        World.Instance.SendTextSheetMessage(sender, ServerOpcode.TextSheetMessage38b, new byte[] {0x01, 0x00, 0xF8, 0x5F, 0xE2, 0x61, 0x20, 0x00, 0x0A, 0x00, 0x3D, 0xA7, 0x36, 0x00, 0x00, 0x00,
+                        0x01, 0x01, 0x0F, 0x00, 0x00, 0x00, 0x00, 0x00 });
+                        World.Instance.SendTextSheetMessage(sender, ServerOpcode.TextSheetMessage38b, new byte[] {0x01, 0x00, 0xF8, 0x5F, 0xAE, 0x62, 0x20, 0x00, 0x0A, 0x00, 0x2E, 0x17, 0x3B, 0x00, 0x00, 0x00,
+                        0x63, 0x01, 0x0F, 0x00, 0x00, 0x00, 0x00, 0x00 });
+                        World.Instance.SendTextSheetMessage(sender, ServerOpcode.TextSheetMessageNoSource28b, new byte[] { 0x01, 0x00, 0xF8, 0x5f, 0xc8, 0x61, 0x20, 0x00 });
 
-                        data = new byte[] { 0x41, 0x29, 0x9B, 0x02, 0x01, 0x00, 0xF8, 0x5F, 0x89, 0x77, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00,
-                                            0x02, 0x00, 0x00, 0x6B, 0x1E, 0x4C, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00,
-                                            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0F,
-                                            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                                            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
-                        if (parameters.Count > 0)
-                            Buffer.BlockCopy(BitConverter.GetBytes(Convert.ToUInt32(parameters[0])), 0, data, 0x08, 4);
 
-                        Buffer.BlockCopy(BitConverter.GetBytes(pc.Id), 0, data, 0, 4);
 
-                        GamePacket g = new GamePacket
-                        {
-                            Opcode = (ushort)ServerOpcode.TextSheetMessage70b,
-                            Data = data
-                        };
+                        //World.Instance.SendTextSheetMessage(sender, ServerOpcode.TextSheetMessageNoSource28b, new byte[] { 0xB6, 0xAD, 0xF1, 0xA0, 0x62, 0x01, 0x20, 0x00 });
 
-                        SubPacket sb = new SubPacket(g)
-                        {
-                            SourceId = 0x5ff80001
-                        };
 
-                        Packet pk = new Packet(sb);
+                        break;
 
-                        sender.Send(pk.ToBytes());
+                    case @"\questtext":
+                        byte[] datass = new byte[0x18];
+                        uint qid = Convert.ToUInt32(parameters[0]);
+
+                        Buffer.BlockCopy(BitConverter.GetBytes(World.Instance.Id), 0, datass, 0, sizeof(uint));
+                        Buffer.BlockCopy(BitConverter.GetBytes(qid), 0, datass, 0x04, sizeof(uint)); //sheet#
+                        Buffer.BlockCopy(BitConverter.GetBytes(LuaParameters.SwapEndian((uint)110002)), 0, datass, 0x09, sizeof(uint));
+                        Buffer.BlockCopy(BitConverter.GetBytes(0x0800000F), 0, datass, 0x0D, sizeof(uint)); //unknown
+
+                        World.Instance.SendTextSheetMessage(sender, ServerOpcode.TextSheetMessageNoSource38b, datass);
+
                         break;
 
                     case @"\addloot":

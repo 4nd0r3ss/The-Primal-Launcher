@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Launcher
+namespace PrimalLauncher
 {
     [Serializable]
     public class GameAccount

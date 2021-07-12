@@ -1,10 +1,8 @@
-﻿
-
-using System;
+﻿using System;
 using System.IO;
 using System.Windows.Forms;
 
-namespace Launcher
+namespace PrimalLauncher
 {
     class Updater
     {
@@ -46,7 +44,7 @@ namespace Launcher
             XPatchModule = "ZiPatch",
             XProtocol = "torrent",
             XInfoUrl = "http://www.example.com/",
-            XLatestVersion = "2010.07.10.0000",
+            XLatestVersion = "2012.09.19.0001",
             ContentLength = "0",
             KeepAlive = "timeout=5, max=99",
             Connection = "Keep-Alive",
@@ -83,7 +81,7 @@ namespace Launcher
 
             if (upToDate)
             {
-                _log.Success("You have the latest verion (1.23b).");
+                _log.Success("You have the latest version (1.23b).");
                 return GameUpToDate.ToBytes();
             }
             else
@@ -98,7 +96,7 @@ namespace Launcher
         /// In case a game installation is found, verifies the game version. This method is called every time the app is started.
         /// </summary>
         /// <returns>True if game installation exists AND it is up-to-date.</returns>
-        public static bool GameInstallationOk()
+        private static bool GameInstallationOk()
         {
             string gameInstallPath = Preferences.Instance.Options.GameInstallPath;
 
@@ -109,15 +107,40 @@ namespace Launcher
             }
             else
             {
-               //game installation exists, check version files.
-               string gameVersion = File.ReadAllText(gameInstallPath + @"\game.ver");
-               string bootVersion = File.ReadAllText(gameInstallPath + @"\boot.ver");
-                
-               //if (gameVersion.Equals("2010.07.10.0000") || bootVersion.Equals("2010.07.10.0000"))               
-                    //return false; //game is outdated   
+                //game installation exists, check version files.
+                string gameVersion = File.ReadAllText(gameInstallPath + @"\game.ver");
+                string bootVersion = File.ReadAllText(gameInstallPath + @"\boot.ver");
+                string patchVersion = "";
+
+                if (File.Exists(gameInstallPath + @"\patch.ver"))
+                    patchVersion = File.ReadAllText(gameInstallPath + @"\patch.ver");
+
+                if (gameVersion.IndexOf("2012.09.19.0001") < 0 || !(bootVersion.IndexOf("2010.07.10.0000") < 0))               
+                    return false; //game is outdated   
             }
 
             return true; //game is updated      
         }
+
+        public static bool GameIsUpdated()
+        {
+            MainWindow window = MainWindow.Get();
+
+            if (!GameInstallationOk())
+            {
+                window.SelectTab(2);
+                window.TabSelector.Enabled = false;
+                window.BtnLaunchGame.Enabled = false;
+                return false;
+            }
+            else
+            {
+                window.SelectTab(0);
+                window.TabSelector.Enabled = true;
+                window.BtnLaunchGame.Enabled = true;
+                return true;
+            }
+        }
+
     }
 }

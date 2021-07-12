@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Launcher
+namespace PrimalLauncher
 {
     class BitField
     {

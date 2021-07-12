@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<chara>
+  <npc>
+    <Populace className="MiningPoint">
+      <classId>1200052</classId>
+      <position x="-8.48" y="45.36" z="139.5" r="0" />
+      <animation>0</animation>
+      <events>
+        <talkDefault priority="4" enabled="1" />
+        <pushCommand priority="6" silent="0" />
+        <noticeEvent priority="0" enabled="0" />
+        <pushCommandIn radiud="4.0" silent="true" outwards="false" />
+        <pushCommandOut radius="4.0" silent="true" outwards="true" />
+      </events>
+    </Populace>
+  </npc>
+</chara>

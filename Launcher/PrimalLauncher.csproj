@@ -200,10 +200,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Actors\Appearance.cs" />
+    <Compile Include="Actors\CharaWork.cs" />
     <Compile Include="Actors\Directors\Director.cs" />
     <Compile Include="Actors\Directors\QuestDirector.cs" />
+    <Compile Include="Actors\Npc\MapObj.cs" />
     <Compile Include="Actors\Npc\Monster.cs" />
     <Compile Include="Actors\Npc\Object.cs" />
+    <Compile Include="Actors\PlayerCharacter\Journal.cs" />
     <Compile Include="Actors\PlayerCharacter\Quest.cs" />
     <Compile Include="Actors\Speeds.cs" />
     <Compile Include="Actors\State.cs" />
@@ -217,6 +220,7 @@
     <Compile Include="Events\Event.cs" />
     <Compile Include="Repositories\QuestRepository.cs" />
     <Compile Include="Repositories\ZoneRepository.cs" />
+    <Compile Include="System\ExtensionMethods.cs" />
     <Compile Include="System\LuaParameters.cs" />
     <Compile Include="System\BitField.cs" />
     <Compile Include="System\Blowfish.cs" />
@@ -265,12 +269,7 @@
     <Compile Include="UI\ucAbout.Designer.cs">
       <DependentUpon>ucAbout.cs</DependentUpon>
     </Compile>
-    <Compile Include="UI\ucGameUpdate.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="UI\ucGameUpdate.Designer.cs">
-      <DependentUpon>ucGameUpdate.cs</DependentUpon>
-    </Compile>
+    <Compile Include="UI\GameUpdate.cs" />
     <Compile Include="UI\ucOptions.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -290,6 +289,7 @@
     <Compile Include="System\Zip.cs" />
     <EmbeddedResource Include="UI\Downloader.resx">
       <DependentUpon>Downloader.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\MainWindow.resx">
       <DependentUpon>MainWindow.cs</DependentUpon>
@@ -305,9 +305,6 @@
     </Compile>
     <EmbeddedResource Include="UI\ucAbout.resx">
       <DependentUpon>ucAbout.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="UI\ucGameUpdate.resx">
-      <DependentUpon>ucGameUpdate.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\ucOptions.resx">
       <DependentUpon>ucOptions.cs</DependentUpon>
@@ -338,6 +335,40 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="icon.ico" />
+    <EmbeddedResource Include="Resources\xml\zones\xF5\npc.xml" />
+    <EmbeddedResource Include="Resources\xml\zones\xF4\npc.xml" />
+    <EmbeddedResource Include="Resources\xml\zones\xE7\npc.xml" />
+    <EmbeddedResource Include="Resources\xml\zones\xD1\npc.xml" />
+    <EmbeddedResource Include="Resources\xml\zones\xCE\npc.xml" />
+    <EmbeddedResource Include="Resources\xml\zones\xC8\npc.xml" />
+    <EmbeddedResource Include="Resources\xml\zones\xBE\npc.xml" />
+    <EmbeddedResource Include="Resources\xml\zones\xAF\npc.xml" />
+    <EmbeddedResource Include="Resources\xml\zones\xAE\npc.xml" />
+    <EmbeddedResource Include="Resources\xml\zones\xAD\npc.xml" />
+    <EmbeddedResource Include="Resources\xml\zones\xAC\npc.xml" />
+    <EmbeddedResource Include="Resources\xml\zones\xAB\npc.xml" />
+    <EmbeddedResource Include="Resources\xml\zones\xAA\npc.xml" />
+    <EmbeddedResource Include="Resources\xml\zones\x9F\npc.xml" />
+    <EmbeddedResource Include="Resources\xml\zones\x9A\npc.xml" />
+    <EmbeddedResource Include="Resources\xml\zones\x99\npc.xml" />
+    <EmbeddedResource Include="Resources\xml\zones\x98\npc.xml" />
+    <EmbeddedResource Include="Resources\xml\zones\x97\npc.xml" />
+    <EmbeddedResource Include="Resources\xml\zones\x96\npc.xml" />
+    <EmbeddedResource Include="Resources\xml\zones\x94\npc.xml" />
+    <EmbeddedResource Include="Resources\xml\zones\x93\npc.xml" />
+    <EmbeddedResource Include="Resources\xml\zones\x91\npc.xml" />
+    <EmbeddedResource Include="Resources\xml\zones\x90\npc.xml" />
+    <EmbeddedResource Include="Resources\xml\zones\x8F\npc.xml" />
+    <EmbeddedResource Include="Resources\xml\zones\x8D\npc.xml" />
+    <EmbeddedResource Include="Resources\xml\zones\x89\npc.xml" />
+    <EmbeddedResource Include="Resources\xml\zones\x87\npc.xml" />
+    <EmbeddedResource Include="Resources\xml\zones\x85\npc.xml" />
+    <EmbeddedResource Include="Resources\xml\zones\x84\npc.xml" />
+    <EmbeddedResource Include="Resources\xml\zones\x83\npc.xml" />
+    <EmbeddedResource Include="Resources\xml\zones\x82\npc.xml" />
+    <EmbeddedResource Include="Resources\xml\zones\x81\npc.xml" />
+    <EmbeddedResource Include="Resources\xml\zones\x6\npc.xml" />
+    <EmbeddedResource Include="Resources\xml\zones\x5\npc.xml" />
     <EmbeddedResource Include="Resources\xml\zones\xA6\npc.xml" />
     <EmbeddedResource Include="Resources\xml\MainScenarioQuests.xml" />
     <EmbeddedResource Include="Resources\xml\zones\x4\npc.xml" />

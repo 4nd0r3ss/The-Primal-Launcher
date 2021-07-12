@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Launcher
+namespace PrimalLauncher
 {   
     [Serializable]
     public class Position
@@ -43,11 +43,15 @@ namespace Launcher
             }            
         }
 
-        public byte[] ToBytes(uint actorId = 0)
+        public byte[] ToBytes(bool isPlayer, uint actorId = 0)
         {
             byte[] toBytes = new byte[0x28];
+            int idToPrint = (int)actorId;
 
-            Buffer.BlockCopy(BitConverter.GetBytes(actorId), 0, toBytes, 0x04, 0x04);
+            if (isPlayer)
+                idToPrint = -1;
+
+            Buffer.BlockCopy(BitConverter.GetBytes(idToPrint), 0, toBytes, 0x04, 0x04);
             Buffer.BlockCopy(BitConverter.GetBytes(X), 0, toBytes, 0x08, 0x04);
             Buffer.BlockCopy(BitConverter.GetBytes(Y), 0, toBytes, 0x0c, 0x04);
             Buffer.BlockCopy(BitConverter.GetBytes(Z), 0, toBytes, 0x10, 0x04);
@@ -73,7 +77,7 @@ namespace Launcher
             new Position(155, 58.92f, 4f, -1219.07f, 0.52f, 15),
 
             new Position(166, 356.09f, 3.74f, -701.62f, -1.4f, 15),// central shroud
-            new Position(166, 356.09f, 3.74f, -701.62f, -1.4f, 16),// central shroud, gridania opening
+            new Position(166, 364.0f, 4f, -703.8f, 1.5f, 16),// central shroud, gridania opening
 
             new Position(170, -27.015f, 181.798f,-79.72f, 2.513f, 15),
             new Position(175, -237.6312f, 184.8451f, -5.752599f, -2.536515f, 15),
@@ -102,7 +106,10 @@ namespace Launcher
             new Position(147, 0f, 0f, 0f, 0f, 15),
 
             new Position(2, -826.86f, 6f, 192.74f, -0.0083f, 15), //limsa opening private area (docks)
-            new Position(4, -459.61f, 40.00f, 196.37f, 2.01f, 15), //limsa opening private area (quicksand)     
+            new Position(4, -459.61f, 40.00f, 196.37f, 2.01f, 15), //limsa opening private area (drowning wrench) 
+            
+            new Position(5, 175.7f, -1.2f, -1156.1f, -2f, 15), //gridania opening private area (city entrance)
+            new Position(6, 65.3f, 4f, -1204.8f, -1.6f, 15), //gridania opening private area (canopy)
         };
 
         public static Position Get(uint zoneId, ushort spawnType = 15) => List.Find(x => x.ZoneId == zoneId && x.SpawnType == spawnType);

@@ -7,13 +7,14 @@ using System.Net.Sockets;
 using System.Text;
 using System.Linq;
 
-namespace Launcher
+namespace PrimalLauncher
 {
     [Serializable]
     public class PlayerCharacter : Actor
     {
-        #region Info        
-        
+        public CharaWork CharaWork { get; set; }
+
+        #region Info              
         public byte WorldId { get; set; }
         public byte Slot { get; set; }
         public long TotalPlaytime { get; set; }
@@ -33,13 +34,15 @@ namespace Launcher
         public byte CurrentClassId { get; set; }
         #endregion
 
-        public uint TotalAnima { get; set; }
+        public uint Anima { get; set; }
         public Inventory Inventory { get; set; }
+        public Journal Journal { get; set; }
         public Dictionary<byte, Job> Jobs { get; set; } = Job.LoadAll();
         public OrderedDictionary GeneralParameters { get; set; }
 
-        public List<Group> Groups { get; set; } = new List<Group>();       
-        public List<Quest> Quests { get; set; } = new List<Quest>();
+        public List<Group> Groups { get; set; } = new List<Group>();      
+        
+        public List<Quest> QuestsFinished { get; set; } = new List<Quest>();
         public Queue<byte[]> PacketQueue { get; set; }
 
         public string ChocoboName { get; set; }
@@ -61,28 +64,28 @@ namespace Launcher
             Speeds.Running = ActorSpeed.Running; // 0x40a00000;  //Running speed
             Speeds.Active = ActorSpeed.Active;  //Acive
 
-            //prepare packet info for decoding
+            //prepare packet data for decoding
             byte[] info = new byte[0x90];
             Buffer.BlockCopy(data, 0x30, info, 0, info.Length);
             string tmp = Encoding.ASCII.GetString(info).Trim(new[] { '\0' }).Replace('-', '+').Replace('_', '/');
 
-            //decoded packet info
+            //decoded packet data
             data = Convert.FromBase64String(tmp);
 
             //General
             Appearance.Size = data[0x09];
             Appearance.Voice = data[0x26];
-            SkinColor = (ushort)(data[0x23] >> 8 | data[0x22]);
+            Appearance.SkinColor = (ushort)(data[0x23] >> 8 | data[0x22]);
 
             //Head
-            HairStyle = (ushort)(data[0x0b] >> 8 | data[0x0a]);
-            HairColor = (ushort)(data[0x1d] >> 8 | data[0x1c]);
-            HairHighlightColor = data[0x0c];
-            HairVariation = data[0x0d];
-            EyeColor = (ushort)(data[0x25] >> 8 | data[0x24]);
+            Appearance.HairStyle = (ushort)(data[0x0b] >> 8 | data[0x0a]);
+            Appearance.HairColor = (ushort)(data[0x1d] >> 8 | data[0x1c]);
+            Appearance.HairHighlightColor = data[0x0c];
+            Appearance.HairVariation = data[0x0d];
+            Appearance.EyeColor = (ushort)(data[0x25] >> 8 | data[0x24]);
 
             //Face
-            Face = new Face
+            Appearance.Face = new Face
             {
                 Characteristics = data[0x0f],
                 CharacteristicsColor = data[0x10],
@@ -113,6 +116,7 @@ namespace Launcher
             LoadInitialEquipment();
 
             Position = Position.GetInitialPosition(InitialTown);
+            Journal = new Journal(InitialTown);
         }
 
         public void UpdatePlayTime()
@@ -165,6 +169,44 @@ namespace Launcher
             }
         }
 
+        public void SetUnendingJourney(Socket sender)
+        {
+            byte[] data = new byte[0x130];
+
+            using(MemoryStream ms = new MemoryStream(data))
+            using(BinaryWriter bw = new BinaryWriter(ms))
+            {
+                bw.Write((byte)0); //beast tribe intro
+                bw.Write((ushort)2); //nightmares/castrum
+                bw.Write((byte)0); //unknown
+                bw.Write((ushort)11);
+                bw.Write((byte)1); 
+                bw.Write((byte)1); 
+                //bw.Write((byte)126);
+
+                for (int i = 0; i < 256; i++)
+                    bw.Write((byte)0xFF);
+
+                bw.Seek(0x109, SeekOrigin.Begin);
+                bw.WriteNullTerminatedString("Companion Name");
+            }
+
+            Packet.Send(sender, ServerOpcode.UnendingJourney, data);
+        }
+
+        public void SetEntrustedItems(Socket sender)
+        {
+            byte[] data = new byte[0x30];
+
+            for (int i = 0; i < 15; i++)
+                data[i] = 0xFF;
+
+            data[0xf] = 0x3F;
+
+            Packet.Send(sender, ServerOpcode.EntrustedItems, data);
+
+        }
+
         public void SelectTarget(Socket handler, byte[] srcData)
         {
             uint targetId = (uint)(srcData[0x13] << 24 | srcData[0x12] << 16 | srcData[0x11] << 8 | srcData[0x10]);
@@ -179,8 +221,12 @@ namespace Launcher
         public void Spawn(Socket sender, ushort spawnType = 0x01, ushort isZoning = 0)
         {
             PacketQueue = null;
-            State.Main = MainState.Passive;
-            
+            State.Main = MainState.Passive;            
+
+            //remove later
+            if (CharaWork == null)
+                CharaWork = new CharaWork();
+                        
             CreateActor(sender, 0x08);
             CommandSequence(sender);
             SetSpeeds(sender);
@@ -193,6 +239,7 @@ namespace Launcher
             SetAllStatus(sender);
             SetIcon(sender);
             SetIsZoning(sender, false);
+
             SetGrandCompany(sender);
             SetTitle(sender);
             SendCurrentJob(sender);
@@ -206,6 +253,8 @@ namespace Launcher
             Inventory.Send(sender);
             Work(sender);
             StartPlayTime();
+
+           
         }
 
         public Zone GetCurrentZone() => World.Instance.Zones.Find(x => x.Id == Position.ZoneId);
@@ -222,6 +271,9 @@ namespace Launcher
 
         public void SetMounts(Socket sender)
         {
+            ChocoboName = "Boko";
+            HasGobbue = true;
+
             if (!string.IsNullOrEmpty(ChocoboName))
             {
                 Packet.Send(sender, ServerOpcode.SetChocoboName, Encoding.ASCII.GetBytes(ChocoboName));
@@ -232,42 +284,23 @@ namespace Launcher
                 Packet.Send(sender, ServerOpcode.SetHasGobbue, new byte[] { 0x1, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
         }
 
-        public void InitializeCurrentQuests(Socket sender)
+        public static void Logout(Socket sender) => Packet.Send(sender, ServerOpcode.Logout, new byte[0x08]);
+
+        public static void ExitGame(Socket sender) => Packet.Send(sender, ServerOpcode.ExitGame, new byte[0x08]);
+
+        public void InitializeOpening(Socket sender)
         {
             if (TotalPlaytime == 0)
-            {
+            {                
                 World.Instance.Directors.Add(new OpeningDirector());
-                World.Instance.Directors.Add(new QuestDirector());
-                
-                AddQuest(QuestRepository.GetInitialQuest(InitialTown));
-                Quests[0].StartPhase(sender);
-
+                World.Instance.Directors.Add(new QuestDirector());    
+                Journal.Quests[0].StartPhase(sender);
                 OpeningDirector director = (OpeningDirector)World.Instance.GetDirector("Opening");
                 director.Spawn(sender);
-                director.StartEvent(sender);                
-            }
-            else
-            {
-                QuestDirector questDirector = ((QuestDirector)World.Instance.GetDirector("Quest"));
-
-                if(questDirector == null)
-                {
-                    questDirector = new QuestDirector();
-                    World.Instance.Directors.Add(questDirector);
-                }
-                //questDirector.StartEvent(sender);
-                //questDirector.Spawn(sender, "Man0l001");
-                LuaParameters = null;
-                //LoadLuaParameters(questDirector.Id);
-                Position.SpawnType = 0x0F;
-            }
-        }
-
-        private void AddQuest(Quest quest)
-        {
-            if(Quests.Where(x => x.Id == quest.Id).FirstOrDefault() == null)
-                Quests.Add(quest);
-        }        
+                director.StartEvent(sender);
+                GetCurrentZone().ExcludeActorType = "Monster";
+            }            
+        }   
 
         public void LoadLuaParameters(uint director = 0)
         {
@@ -408,33 +441,7 @@ namespace Launcher
         public void Work(Socket sender)
         {
             WorkProperties property = new WorkProperties(sender, Id, @"/_init");
-            byte commandBorder = 0x20;
-
-            uint[] command = new uint[64];
-
-            command[0] = 21001; //active mode
-            command[1] = 21001; //active mode
-            command[2] = 21002; //passive mode
-            command[3] = 12004; //Begin the designated Battle Regimen.
-            command[4] = 21005; //Cast magic quickly at reduced potency.
-            command[5] = 21006; //Stop casting a spell.
-            command[6] = 21007; //use item
-            command[7] = 12009; //equip items
-            command[8] = 12010; //set abilities
-            command[9] = 12005; //attribute points
-            command[10] = 12007; //skill change
-            command[11] = 12011; //Place marks on enemies to coordinate your party's actions.
-            command[12] = 22012; //Bazaar
-            command[13] = 22013; //Repair
-            command[14] = 29497; //Engage in competitive discourse to win what you seek.
-            command[15] = 22015; //[no description]          
-
-            //hotbar
-            command[32] = 27039; //index 32 ~ 61 - hotbar
-
-            //????
-            //command[62] = 0xA0F00000 | 27150;
-            //command[63] = 0xA0F00000 | 27150; 
+           
 
             property.Add("charaWork.eventSave.bazaarTax", (byte)5);
             property.Add("charaWork.battleSave.potencial", 6.6f);
@@ -443,35 +450,15 @@ namespace Launcher
                 if (i < 5 && i != 3) property.Add(string.Format("charaWork.property[{0}]", i), (byte)1);
                        
             AddWorkClassParameters(ref property);
+            AddStatusShownTime(ref property);
+            AddGeneralParameters(ref property);
 
-            //status buff/ailment timer? database.cs ln 892
-            //property.Add(string.Format("charaWork.statusShownTime[{0}]", i), ); 
-
-            //Write character's parameters
-            for (int i = 0; i < GeneralParameters.Count; i++)
-            {
-                if ((ushort)GeneralParameters[i] > 0)
-                    property.Add(string.Format("charaWork.battleTemp.generalParameter[{0}]", i), GeneralParameters[i]);
-            }                
-
-            //unknown
             property.Add("charaWork.battleTemp.castGauge_speed[0]", 1.0f);
             property.Add("charaWork.battleTemp.castGauge_speed[1]", 0.25f);
-            property.Add("charaWork.commandBorder", commandBorder);
+            property.Add("charaWork.commandBorder", CharaWork.CommandBorder);
             property.Add("charaWork.battleSave.negotiationFlag[0]", true);
-                                        
-            for (int i = 0; i < command.Length; i++)
-            {
-                if (command[i] != 0)
-                {
-                    property.Add(string.Format("charaWork.command[{0}]", i), 0xA0F00000 | command[i]);
-                    //if (i >= commandBorder)
-                    //{
-                    //    property.Add(string.Format("charaWork.parameterTemp.maxCommandRecastTime[{0}]", i - commandBorder), (ushort)5);
-                    //    property.Add(string.Format("charaWork.parameterSave.commandSlot_recastTime[{0}]", i - commandBorder), (uint)(Server.GetTimeStamp() + 5));
-                    //}
-                }
-            }                
+
+            AddWorkCommand(ref property);               
 
             for (int i = 0; i < 64; i++)
                 property.Add(string.Format("charaWork.commandCategory[{0}]", i), (byte)1);
@@ -488,28 +475,63 @@ namespace Launcher
                         
             AddWorkSystem(ref property);
 
-            for (int i = 0; i < Quests.Count; i++)
-                property.Add(string.Format("playerWork.questScenario[{0}]", i), 0xA0F00000 | Quests[i].Id);     
-
-            AddWorkGuildleve(ref property);
+            Journal.AddToWork(ref property);            
             AddWorkNpcLinkshell(ref property);
             property.Add("playerWork.restBonusExpRate", 0f);
             AddWorkCharacterBackground(ref property);
             property.FinishWriting();
         }
 
+        
+        private void AddStatusShownTime(ref WorkProperties property)
+        {
+            //status buff/ailment timer? database.cs ln 892
+            //property.Add(string.Format("charaWork.statusShownTime[{0}]", i), );
+        }
+
+        private void AddGeneralParameters(ref WorkProperties property)
+        {
+            //Write character's parameters
+            for (int i = 0; i < GeneralParameters.Count; i++)
+            {
+                if ((ushort)GeneralParameters[i] > 0)
+                    property.Add(string.Format("charaWork.battleTemp.generalParameter[{0}]", i), GeneralParameters[i]);
+            }
+        }
+
+        private void AddWorkCommand(ref WorkProperties property)
+        {            
+            for (int i = 0; i < CharaWork.CommandBorder; i++)            
+                if (CharaWork.Command[i] != 0)               
+                    property.Add(string.Format("charaWork.command[{0}]", i), 0xA0F00000 | CharaWork.Command[i]);
+
+            //hotbar
+           // for(int i = CharaWork.CommandBorder; i < (CharaWork.CommandBorder + Jobs[CurrentClassId].Hotbar.Length); i++)
+            for(int i = 0; i < Jobs[CurrentClassId].Hotbar.Length; i++)
+            {
+                if (Jobs[CurrentClassId].Hotbar[i] != 0)
+                    property.Add(string.Format("charaWork.command[{0}]", CharaWork.CommandBorder + i), 0xA0F00000 | Jobs[CurrentClassId].Hotbar[i]);
+            }
+            //add hotbar here
+            //if (i >= commandBorder)
+            //{
+            //    property.Add(string.Format("charaWork.parameterTemp.maxCommandRecastTime[{0}]", i - commandBorder), (ushort)5);
+            //    property.Add(string.Format("charaWork.parameterSave.commandSlot_recastTime[{0}]", i - commandBorder), (uint)(Server.GetTimeStamp() + 5));
+            //}
+        }
+
         private void AddWorkClassParameters(ref WorkProperties property)
         {
             Job currentClass = Jobs[CurrentClassId];
-            property.Add("charaWork.parameterSave.hp[0]", currentClass.Hp); //always start with HP filled up
+            property.Add("charaWork.parameterSave.hp[0]", currentClass.Hp); 
             property.Add("charaWork.parameterSave.hpMax[0]", currentClass.MaxHp);
-            property.Add("charaWork.parameterSave.mp", currentClass.Mp); //always start with MP filled up
+            property.Add("charaWork.parameterSave.mp", currentClass.Mp);
             property.Add("charaWork.parameterSave.mpMax", currentClass.MaxMp);
-            property.Add("charaWork.parameterTemp.tp", (ushort)3000);// currentClass.Tp);
+            property.Add("charaWork.parameterTemp.tp", currentClass.Tp);
             property.Add("charaWork.parameterSave.state_mainSkill[0]", currentClass.Id);
-            property.Add("charaWork.parameterSave.state_mainSkillLevel", (short)currentClass.Level);
+            property.Add("charaWork.parameterSave.state_mainSkillLevel", currentClass.Level);
         }
-
+               
         private void AddWorkSystem(ref WorkProperties property)
         {
             property.Add("charaWork.parameterTemp.forceControl_float_forClientSelf[0]", 1.0f);
@@ -519,28 +541,8 @@ namespace Launcher
             property.Add("charaWork.parameterTemp.otherClassAbilityCount[0]", (byte)4);
             property.Add("charaWork.parameterTemp.otherClassAbilityCount[1]", (byte)5);
             property.Add("charaWork.parameterTemp.giftCount[1]", (byte)5);
-            property.Add("charaWork.depictionJudge", 0xA0F50911);
-        }
-
-        private void AddWorkGuildleve(ref WorkProperties property)
-        {
-            //GuildLeve - local
-            //for (int i = 0; i < 40; i++)
-            //property.Add(string.Format("playerWork.questGuildleve[{0}]", (uint)49), true);
-
-            //GuildLeve - regional
-            //for(int i = 0; i < 16; i++)
-            //{
-            //    if (guildLeveId[i] != 0)
-            //property.Add(string.Format("work.guildleveId[{0}]", 0), 1103);
-
-            //if(guildLeveDone[i]!=0)
-            //    property.Add(string.Format("work.guildleveDone[{0}]", i), guildLeveDone[i]);
-
-            //if(guildLeveChecked[i]!=0)
-            //    property.Add(string.Format("work.guildleveChecked[{0}]", i), guildLeveChecked[i]);
-            //}
-        }
+            property.Add("charaWork.depictionJudge", CharaWork.DepictionJudge);
+        }      
 
         private void AddWorkNpcLinkshell(ref WorkProperties property)
         {
@@ -963,9 +965,23 @@ namespace Launcher
         }
 
         #region Position Methods
-        public void GetPosition(Socket handler, ushort spawnType = 0, ushort isZonning = 0)
+        public void GetPosition(Socket sender, ushort spawnType = 0, ushort isZonning = 0)
         {
-            base.SetPosition(handler, spawnType, isZonning, true);
+            base.SetPosition(sender, spawnType, isZonning, true);
+        }
+
+        public void SetPosition(Socket sender, uint zoneId, float x, float y, float z, float r, ushort spawnType)
+        {
+            Position position = new Position(zoneId, x, y, z, r, spawnType);
+            Position = position;
+            base.SetPosition(sender, spawnType, 0, true);
+        }
+
+        public void SetPosition(Socket sender, string offsetStr)
+        {
+            float[] offset = Array.ConvertAll(offsetStr.Split(new char[] { ',' }), float.Parse);
+            World.Instance.MapUIChange(sender, 0x10);
+            SetPosition(sender, (uint)offset[0], offset[1], offset[2], offset[3], offset[4], (ushort)offset[5]);
         }
 
         public void UpdatePosition(byte[] data)
@@ -1002,9 +1018,8 @@ namespace Launcher
             Packet.Send(sender, ServerOpcode.Unknown0x02, data);           
         }       
     }
-
-    [Serializable]
-    public class GeneralParameter
+       
+    public static class GeneralParameter
     {
         //static initial attribute values. 
         //TODO: try to find these values in the game data files.

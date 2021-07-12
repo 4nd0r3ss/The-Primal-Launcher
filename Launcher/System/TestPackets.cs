@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Net.Sockets;
 
-namespace Launcher
+namespace PrimalLauncher
 {
     class TestPackets
     {

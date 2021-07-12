@@ -5,7 +5,7 @@ using System.IO;
 using System.Text;
 using System.Xml;
 
-namespace Launcher
+namespace PrimalLauncher
 {
     class GameData
     {
@@ -43,51 +43,65 @@ namespace Launcher
             DataRow dataRow;
             string file = Encoding.Default.GetString(DecodeFile(GetFilePath(Index[indexName])));
 
-            if (file.IndexOf("<") != 0)
-                file = file.Substring(file.IndexOf("<"));
-
-            infoFile.LoadXml(file);
-            string langSelector = "";
-
-            if (infoFile.SelectNodes("ssd/sheet").Count > 1) //if there is more than 1 sheet, we need to select a language.
-                langSelector = "[@lang = '" + Language + "']";
-
-            var blockNode = infoFile.SelectNodes("ssd/sheet" + langSelector + "/block/file");
-            var typeNode = infoFile.SelectNodes("ssd/sheet" + langSelector + "/type/param");
-
-            //add first column for id#
-            dataTable.Columns.Add(new DataColumn("id", typeof(uint)));
-
-            //add columns with types to data table
-            for (int i = 0; i < typeNode.Count; i++)
-                dataTable.Columns.Add(new DataColumn(typeNode[i].InnerText + "c" + i.ToString(), GetNodeType(typeNode[i].InnerText))); //we have no column names yet so we use index as name...
-
-            //each file node
-            foreach (XmlNode node in blockNode)
+            try
             {
-                FileStream enableStream = GetFilestream(node.Attributes["enable"].Value);
-                FileStream dataStream = GetFilestream(node.InnerText);
-                using (BinaryReader enable = new BinaryReader(enableStream))
-                {
-                    while (enable.BaseStream.Position != enable.BaseStream.Length)
-                    {
-                        uint startId = enable.ReadUInt32();
-                        uint numIds = enable.ReadUInt32();
-                        BinaryReader data = new BinaryReader(dataStream);
+                if (file.IndexOf("<") != 0)
+                    file = file.Substring(file.IndexOf("<"));
 
-                        //each datatable line
-                        for (int i = 0; i < numIds; i++)
+                infoFile.LoadXml(file);
+                string langSelector = "";
+
+                if (infoFile.SelectNodes("ssd/sheet").Count > 1) //if there is more than 1 sheet, we need to select a language.
+                    langSelector = "[@lang = '" + Language + "']";
+
+                var blockNode = infoFile.SelectNodes("ssd/sheet" + langSelector + "/block/file");
+                var typeNode = infoFile.SelectNodes("ssd/sheet" + langSelector + "/type/param");
+
+                //add first column for id#
+                dataTable.Columns.Add(new DataColumn("id", typeof(uint)));
+
+                //add columns with types to data table
+                for (int i = 0; i < typeNode.Count; i++)
+                    dataTable.Columns.Add(new DataColumn(typeNode[i].InnerText + "c" + i.ToString(), GetNodeType(typeNode[i].InnerText))); //we have no column names yet so we use index as name...
+
+                //each file node
+                foreach (XmlNode node in blockNode)
+                {
+                    FileStream enableStream = GetFilestream(node.Attributes["enable"].Value);
+                    FileStream dataStream = GetFilestream(node.InnerText);
+                    using (BinaryReader enable = new BinaryReader(enableStream))
+                    {
+                        while (enable.BaseStream.Position != enable.BaseStream.Length)
                         {
-                            dataRow = dataTable.NewRow();
-                            dataRow["id"] = startId + i; //add item id to first column
-                            //each datatable line column
-                            for (int j = 0; j < typeNode.Count; j++)
-                                AddColumnFromDataStream(ref data, ref dataRow, typeNode[j].InnerText, j);
-                            dataTable.Rows.Add(dataRow);
+                            uint startId = enable.ReadUInt32();
+                            uint numIds = enable.ReadUInt32();
+                            BinaryReader data = new BinaryReader(dataStream);
+
+                            //each datatable line
+                            for (int i = 0; i < numIds; i++)
+                            {
+                                dataRow = dataTable.NewRow();
+                                dataRow["id"] = startId + i; //add item id to first column
+                                                             //each datatable line column
+                                for (int j = 0; j < typeNode.Count; j++)
+                                {
+                                    int result = AddColumnFromDataStream(ref data, ref dataRow, typeNode[j].InnerText, j);
+
+                                    if (result > 0)
+                                        return dataTable;
+                                }
+                                    
+                                dataTable.Rows.Add(dataRow);
+                            }
                         }
                     }
                 }
+            }catch(Exception e)
+            {
+                Log.Instance.Error("Game Data: " + e.Message);
+                throw e;
             }
+            
             return dataTable;
         }
         /// <summary>
@@ -184,54 +198,63 @@ namespace Launcher
                     return null;
             }
         }
-        private void AddColumnFromDataStream(ref BinaryReader dataStream, ref DataRow dataRow, string typeText, int index)
+        private int AddColumnFromDataStream(ref BinaryReader dataStream, ref DataRow dataRow, string typeText, int index)
         {
             index++; //we want to skip column index 0
 
-            switch (typeText)
+            try
             {
-                case "s32":
-                    int int32 = dataStream.ReadInt32();
-                    dataRow[index] = int32;
-                    break;
-                case "s16":
-                    short int16 = dataStream.ReadInt16();
-                    dataRow[index] = int16;
-                    break;
-                case "float":
-                    float flt = dataStream.ReadSingle();
-                    dataRow[index] = flt;
-                    break;
-                case "u32":
-                    uint uint32 = dataStream.ReadUInt32();
-                    dataRow[index] = uint32;
-                    break;
-                case "u16":
-                    ushort uint16 = dataStream.ReadUInt16();
-                    dataRow[index] = uint16;
-                    break;
-                case "s8":
-                case "u8":
-                    byte int8 = dataStream.ReadByte();
-                    dataRow[index] = int8;
-                    break;
-                case "bool":
-                    bool boolean = dataStream.ReadBoolean();
-                    dataRow[index] = boolean;
-                    break;
-                case "str":
-                    ushort stringSize = dataStream.ReadUInt16();
-                    byte unknown = dataStream.ReadByte(); //the string size includes this unknown byte
-                    byte[] stringBytes = dataStream.ReadBytes(stringSize - 1);
+                switch (typeText)
+                {
+                    case "s32":
+                        int int32 = dataStream.ReadInt32();
+                        dataRow[index] = int32;
+                        break;
+                    case "s16":
+                        short int16 = dataStream.ReadInt16();
+                        dataRow[index] = int16;
+                        break;
+                    case "float":
+                        float flt = dataStream.ReadSingle();
+                        dataRow[index] = flt;
+                        break;
+                    case "u32":
+                        uint uint32 = dataStream.ReadUInt32();
+                        dataRow[index] = uint32;
+                        break;
+                    case "u16":
+                        ushort uint16 = dataStream.ReadUInt16();
+                        dataRow[index] = uint16;
+                        break;
+                    case "s8":
+                    case "u8":
+                        byte int8 = dataStream.ReadByte();
+                        dataRow[index] = int8;
+                        break;
+                    case "bool":
+                        bool boolean = dataStream.ReadBoolean();
+                        dataRow[index] = boolean;
+                        break;
+                    case "str":
+                        ushort stringSize = dataStream.ReadUInt16();
+                        byte unknown = dataStream.ReadByte(); //the string size includes this unknown byte
+                        byte[] stringBytes = dataStream.ReadBytes(stringSize - 1);
 
-                    for (int i = 0; i < stringSize - 1; i++)
-                        stringBytes[i] ^= 0x73;
+                        for (int i = 0; i < stringSize - 1; i++)
+                            stringBytes[i] ^= 0x73;
 
-                    dataRow[index] = Encoding.UTF8.GetString(stringBytes);
-                    break;
-                default:
-                    break;
+                        dataRow[index] = Encoding.UTF8.GetString(stringBytes);
+                        break;
+                    default:
+                        break;
+                }
+            }catch(Exception e)
+            {
+                Log.Instance.Error("Game Data: " + e.Message);
+                return 1;
             }
+
+            return 0;
         }
     }
 }

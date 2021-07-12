@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
 
-namespace Launcher
+namespace PrimalLauncher
 {
     public class Packet
     {
@@ -221,7 +221,11 @@ namespace Launcher
                     targetId = User.Instance.Character.Id;
 
                 Packet packet = new Packet(new SubPacket(gamePacket) { SourceId = sourceId, TargetId = targetId });
-                sender.Send(packet.ToBytes());
+                
+                //TODO: for some reason the socket randomly comes null. It happens rarely, so shelving for later
+                if(sender != null)
+                    sender.Send(packet.ToBytes());
+
             }catch(Exception e)
             {
                 Log.Instance.Error("Packet missed. Opcode: " + opcode.ToString() + ". Exception: " + e.Message);

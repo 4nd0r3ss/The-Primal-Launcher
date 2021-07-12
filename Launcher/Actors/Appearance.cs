@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace Launcher
+namespace PrimalLauncher
 {
     /// <summary>
     /// Keeps a set of the character's currently equipped gear grahic ids.
@@ -10,6 +11,17 @@ namespace Launcher
     [Serializable]
     public class Appearance
     {
+        #region Head       
+        public ushort HairStyle { get; set; }
+        public ushort HairColor { get; set; }
+        public ushort HairHighlightColor { get; set; }
+        public ushort HairVariation { get; set; }
+        public ushort EyeColor { get; set; }
+        public ushort SkinColor { get; set; }
+        #endregion
+
+        public Face Face { get; set; }
+
         public uint BaseModel { get; set; }
         public uint Size { get; set; }
         public uint Voice { get; set; }       
@@ -192,6 +204,60 @@ namespace Launcher
                     LeftFinger = ItemGraphics.Finger.First(x => x.Key == equipId).Value;
                     break;
             }
+        }
+
+        public byte[] ToSlotBytes()
+        {
+            byte[] data = new byte[0x108];
+
+            Dictionary<uint, uint> AppearanceSlots = new Dictionary<uint, uint>
+            {
+                //slot number, value
+                { 0x00, BaseModel },
+                { 0x01, Size },
+                { 0x02, (uint)(SkinColor | HairColor << 10 | EyeColor << 20) },
+                { 0x03, BitField.PrimitiveConversion.ToUInt32(Face) },
+                { 0x04, (uint)(HairHighlightColor | HairStyle << 10) },
+                { 0x05, Voice },
+                { 0x06, MainWeapon },
+                { 0x07, SecondaryWeapon },
+                { 0x08, SPMainWeapon },
+                { 0x09, SPSecondaryWeapon },
+                { 0x0a, Throwing },
+                { 0x0b, Pack },
+                { 0x0c, Pouch },
+                { 0x0d, Head },
+                { 0x0e, Body },
+                { 0x0f, Legs },
+                { 0x10, Hands },
+                { 0x11, Feet },
+                { 0x12, Waist },
+                { 0x13, Neck },
+                { 0x14, RightEar },
+                { 0x15, LeftEar },
+                { 0x16, Wrists },
+                { 0x17, 0 },
+                { 0x18, LeftFinger },
+                { 0x19, RightFinger },
+                { 0x1a, RightIndex },
+                { 0x1b, LeftIndex }
+            };
+
+            using (MemoryStream stream = new MemoryStream(data))
+            {
+                using (BinaryWriter writer = new BinaryWriter(stream))
+                {
+                    foreach (var slot in AppearanceSlots)
+                    {
+                        writer.Write(slot.Value);
+                        writer.Write(slot.Key);
+                    }
+                }
+            }
+
+            data[0x100] = (byte)AppearanceSlots.Count;
+
+            return data;
         }
     }
 

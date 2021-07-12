@@ -4,15 +4,16 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
-namespace Launcher
+namespace PrimalLauncher
 {    
     [Serializable]
     public class Zone : Actor
     {
+        public string ExcludeActorType { get; set; } = "";
         public uint RegionId { get; set; }
         public string MapName { get; set; }
-        public string LocationName { get; set; }      
-        public bool MountAllowed { get; set; }       
+        public string LocationName { get; set; }
+        public bool MountAllowed { get; set; } = true;     
         public string ContentFunction { get; set; }
         public MusicSet MusicSet { get; set; }
         public ZoneType Type { get; set; } = ZoneType.Default;
@@ -61,18 +62,23 @@ namespace Launcher
             try
             {
                 for (int i = 0; i < Actors.Count; i++)
-                    Actors[i].Spawn(sender);
+                {
+                    if(Actors[i].GetType().Name != ExcludeActorType)
+                        Actors[i].Spawn(sender);
+                }
+
+                ExcludeActorType = "";
             }
-            catch (Exception e) { Log.Instance.Error(e.Message); }
+            catch (Exception e) { Log.Instance.Error(e.Message); throw e; }
         }
 
         public virtual void LoadActors()
         {
             //we want to load actors just once.
-            if(Actors == null)
+            if (Actors == null)
             {
                 Actors = new List<Actor>();
-                List<Actor> actors = ActorRepository.Instance.GetZoneNpcs(Id);
+                List<Actor> actors = ActorRepository.Instance.GetZoneNpcs(Id);                
                 int index = 1;
 
                 foreach (Actor actor in actors)
@@ -85,6 +91,11 @@ namespace Launcher
                 Actors.AddRange(ActorRepository.Instance.Aetherytes.FindAll(x => x.Position.ZoneId == Id));
                 Log.Instance.Success("Loaded " + Actors.Count + " actors in zone " + LocationName);
             }            
+        }
+
+        public void LoadMonsters()
+        {
+
         }
 
         public uint GetCurrentBGM()
@@ -106,18 +117,35 @@ namespace Launcher
             return result;
         }
 
+        public List<Actor> GetActorsByFamily(string family)
+        {
+            List<Actor> result = new List<Actor>();
+
+            if (Actors != null)
+                result.AddRange(Actors.Where(x => x.Family == family));
+
+            return result;
+        }
+
         public Actor GetActorByClassId(uint classId)
         {
             return Actors.Find(x => x.ClassId == classId);
         }
 
-        public void SpawnAsPrivate(string function)
+        public void SpawnAsPrivate(string function, string excludeOfType = "")
         {
             if(!string.IsNullOrEmpty(function))
-                ContentFunction = "SimpleContent30002";
+                ContentFunction = function;
 
             PrivLevel = 1;
             Type = ZoneType.Nothing;
+
+            ExcludeActorType = excludeOfType;
+        }
+
+        public Position GetEntrypoint()
+        {
+            return new Position();
         }
     }
 }

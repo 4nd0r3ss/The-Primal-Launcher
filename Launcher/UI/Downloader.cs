@@ -11,7 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace Launcher
+namespace PrimalLauncher
 {
     public partial class Downloader : Form
     {

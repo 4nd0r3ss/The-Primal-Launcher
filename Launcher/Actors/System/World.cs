@@ -5,7 +5,7 @@ using System.Text;
 using System.Xml;
 using System.IO;
 
-namespace Launcher
+namespace PrimalLauncher
 {
     [Serializable]
     public class World : Actor
@@ -67,13 +67,16 @@ namespace Launcher
             playerCharacter.GetGroups(sender);
             playerCharacter.IsNew = false;
             SetMapEnvironment(sender, zone);
-            playerCharacter.InitializeCurrentQuests(sender);           
+            playerCharacter.InitializeOpening(sender);           
                        
             playerCharacter.Spawn(sender, spawnType: 0x01, isZoning: 0);
             zone.Spawn(sender);
             Debug.Spawn(sender);
             Spawn(sender, 0x01);
-            
+
+            User.Instance.Character.SetUnendingJourney(sender);
+            User.Instance.Character.SetEntrustedItems(sender);
+            User.Instance.Character.Journal.InitializeQuests(sender);
             zone.SpawnActors(sender);
         }
 
@@ -127,7 +130,16 @@ namespace Launcher
             if (entryPoint == null)
                 entryPoint = new Position() { ZoneId = zoneId };
 
-            ChangeZone(sender, position: entryPoint);
+            ChangeZone(sender, position: entryPoint, spawnType: 2);
+        }
+
+        public void TeleportPlayer(Socket sender, Position position)
+        {
+            position.X += 2;
+            position.Z += 2;
+            MassDeleteActors(sender);
+            User.Instance.Character.Position = position;
+            ChangeZone(sender, position: position, spawnType: 2);
         }
 
         public Zone GetZone(uint id) => Zones.Find(x => x.Id == id);
@@ -137,7 +149,7 @@ namespace Launcher
             MassDeleteActors(sender);
             MapUIChange(sender, mapUiChange);
 
-            User.Instance.Character.Position = position;           
+            User.Instance.Character.Position = position;
             Zone toZone = Zones.Find(x => x.Id == position.ZoneId);   
                
             SetMapEnvironment(sender, toZone);
@@ -146,6 +158,7 @@ namespace Launcher
             Debug.Spawn(sender);
             Spawn(sender, 0x01);
             toZone.LoadActors();
+            User.Instance.Character.Journal.InitializeQuests(sender);
             toZone.SpawnActors(sender);
         }
 
@@ -156,7 +169,7 @@ namespace Launcher
             PlayerCharacter playerCharacter = User.Instance.Character;
             Zone zone = Zones.Find(x => x.Id == playerCharacter.Position.ZoneId);
 
-            if(zone.Actors.Count > 0) //anti-crash for debugging
+            if(zone.Actors != null && zone.Actors.Count > 0) //anti-crash for debugging
                 zone.Actors.ForEach(x => x.Spawned = false); // 'despawn' zone actors.
 
             Packet.Send(sender, ServerOpcode.MassDeleteEnd, new byte[0x08], playerCharacter.Id, playerCharacter.Id);
@@ -172,6 +185,18 @@ namespace Launcher
 
         #region World Text Sheet Methods
         public void SendTextSheetMessage(Socket sender, ServerOpcode opcode, byte[] data) => Packet.Send(sender, opcode, data, Id);
+
+        public void SendTextSheetMessage(Socket sender, uint sheetNumber, uint questId)
+        {
+            byte[] data = new byte[0x18];
+
+            Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, data, 0, sizeof(uint));
+            Buffer.BlockCopy(BitConverter.GetBytes(sheetNumber), 0, data, 0x04, sizeof(uint)); //sheet#
+            Buffer.BlockCopy(BitConverter.GetBytes(LuaParameters.SwapEndian(questId)), 0, data, 0x09, sizeof(uint));
+            Buffer.BlockCopy(BitConverter.GetBytes(0x0800000F), 0, data, 0x0D, sizeof(uint)); //unknown
+
+            Instance.SendTextSheetMessage(sender, ServerOpcode.TextSheetMessageNoSource38b, data);
+        }
 
         public void SendTextQuestUpdated(Socket sender, uint questId)
         {
@@ -194,13 +219,25 @@ namespace Launcher
 
             Instance.SendTextSheetMessage(sender, ServerOpcode.TextSheetMessageNoSource28b, data);
         }
+
+        public void SendTextLeaveInstance(Socket sender)
+        {
+            byte[] data = new byte[0x10];
+
+            Buffer.BlockCopy(BitConverter.GetBytes(User.Instance.Character.Id), 0, data, 0, sizeof(uint));
+            Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, data, 0x04, sizeof(uint));
+            Buffer.BlockCopy(BitConverter.GetBytes(0x20853D), 0, data, 0x08, sizeof(uint)); //sheet#
+
+            Instance.SendTextSheetMessage(sender, ServerOpcode.TextSheetMessage30b, data);
+        }
+
+
         #endregion
 
         public void GMActiveRequest(Socket sender)
         {
             byte[] data = new byte[0x08];
             Packet.Send(sender, ServerOpcode.GMTicketActiveRequest, data);
-        }
-       
+        }    
     }    
 }

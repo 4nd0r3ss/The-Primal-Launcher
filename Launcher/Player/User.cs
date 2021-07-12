@@ -7,7 +7,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Launcher
+namespace PrimalLauncher
 {
     [Serializable]
     public class User
@@ -63,10 +63,10 @@ namespace Launcher
         }
 
         public byte[] GetCharacters(int accountId)
-        {
-            int numSlots = 2;
+        {            
             ushort characterSlotSize = 0x1d0;
             List<PlayerCharacter> characterList = AccountList[accountId].CharacterList;
+            int numSlots = 2;// characterList.Count < 8 ? characterList.Count + 1 : 8;
             byte[] result = new byte[(characterSlotSize * numSlots) + 0x10];
 
             result[0x08] = 0x01; //list sequence (?)
@@ -76,7 +76,7 @@ namespace Launcher
             {
                 byte[] characterSlot = new byte[characterSlotSize];
                 characterSlot[0x08] = (byte)i;
-                characterSlot[0x09] = 0x00; //0X01 = inactive, 0x02 = rename char, 0x08 = legacy                
+                characterSlot[0x09] = 0x08; //0X01 = inactive, 0x02 = rename char, 0x08 = legacy                
 
                 if (characterList.Count >= (i + 1))
                 {
@@ -112,9 +112,9 @@ namespace Launcher
                                 bw.Write((ulong)0x040000001c); //??                           
                                 bw.Write(character.Appearance.BaseModel);
                                 bw.Write(character.Appearance.Size);
-                                bw.Write(character.SkinColor | (uint)(character.HairColor << 10) | (uint)(character.EyeColor << 20));
-                                bw.Write(BitField.PrimitiveConversion.ToUInt32(character.Face));
-                                bw.Write(character.HairHighlightColor | (uint)(character.HairStyle << 10) | character.Face.CharacteristicsColor << 20);
+                                bw.Write(character.Appearance.SkinColor | (uint)(character.Appearance.HairColor << 10) | (uint)(character.Appearance.EyeColor << 20));
+                                bw.Write(BitField.PrimitiveConversion.ToUInt32(character.Appearance.Face));
+                                bw.Write(character.Appearance.HairHighlightColor | (uint)(character.Appearance.HairStyle << 10) | character.Appearance.Face.CharacteristicsColor << 20);
                                 bw.Write(character.Appearance.Voice);
                                 bw.Write(gearSet);
                                 bw.Write((ulong)0);

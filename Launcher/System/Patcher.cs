@@ -6,34 +6,28 @@ using System.Net.Sockets;
 using System.Text;
 using System.Windows.Forms;
 
-namespace Launcher
+namespace PrimalLauncher
 {
     public static class Patcher
     {       
         private static string GameInstallPath { get; set; } = Preferences.Instance.Options.GameInstallPath;
-
-        //Login server address
+        
         private static readonly byte[] loginServerAddress = { 0xCA, 0xCF, 0xB8, 0xA2, 0x96, 0x96, 0x14, 0xCC, 0xF2, 0x9C, 0x9A, 0x8, 0x55, 0xAC, 0x7E, 0x35, 0x99, 0xB9, 0x57, }; //127.0.0.1/login (encoded string)
-        //Lobby server address (localhost)
         private static readonly byte[] lobbyServerAddress = { 0x31, 0x32, 0x37, 0x2e, 0x30, 0x2e, 0x30, 0x2e, 0x31, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }; //[lobby01.ffxiv.com] -> [127.0.0.1        ] size: 0x11
-        //Lobby server port (54997)
-        private static readonly byte[] lobbyServerPort = { 0x35, 0x34, 0x39, 0x39, 0x37 };
+        private static readonly byte[] updateServerAddress = { 0x31, 0x32, 0x37, 0x2e, 0x30, 0x2e, 0x30, 0x2e, 0x31, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }; //[lobby01.ffxiv.com] -> [127.0.0.1        ] size: 0x09
+        private static readonly byte[] lobbyServerPort = { 0x35, 0x34, 0x39, 0x39, 0x37 }; //54997
 
         #region Check patched files
-        public static void CheckInstallation()
+        public static bool GameIsPatched()
         {
-            bool bakFilesExist = true;
+            //TODO: change this method to verify the dates of the files instead.
+            bool bakFilesExist = false;
 
-            if (bakFilesExist)
-            {
+            bakFilesExist = File.Exists(GameInstallPath + "/ffxivlogin.exe.bak");
+            bakFilesExist = File.Exists(GameInstallPath + "/ffxivboot.exe.bak");
+            bakFilesExist = File.Exists(GameInstallPath + "/ffxivgame.exe.bak");
 
-            }
-            else
-            {
-
-            }
-
-            throw new NotImplementedException();
+            return bakFilesExist;
         }
 
         #endregion
@@ -79,7 +73,7 @@ namespace Launcher
 
                     //Change update server address
                     binaryWriter.BaseStream.Seek(0x00966404, SeekOrigin.Begin);
-                    binaryWriter.Write(lobbyServerAddress);
+                    binaryWriter.Write(updateServerAddress);
                 }
             }
 
@@ -89,7 +83,6 @@ namespace Launcher
 
         private static void PatchGameExe()
         {            
-
             //Load binary into memory 
             byte[] exeDataGame = File.ReadAllBytes(GameInstallPath + @"/ffxivgame.exe");
 

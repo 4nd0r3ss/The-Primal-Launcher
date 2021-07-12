@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Data;
 
-namespace Launcher
+namespace PrimalLauncher
 {
     [Serializable]
     public class Actor
@@ -25,27 +25,23 @@ namespace Launcher
         public int QuestIcon { get; set; }
         public bool Spawned { get; set; }
         public string Family { get; set; }
+        public string TalkFunction { get; set; }
 
         #region States
         public State State { get; set; } = new State();
         public SubState SubState { get; set; } = new SubState();
         #endregion
-
-        #region Head       
-        public ushort HairStyle { get; set; }
-        public ushort HairColor { get; set; }
-        public ushort HairHighlightColor { get; set; }
-        public ushort HairVariation { get; set; }
-        public ushort EyeColor { get; set; }
-        public ushort SkinColor { get; set; }
-        #endregion        
-
-        public Face Face { get; set; }
+       
         public Appearance Appearance { get; set; } = new Appearance();      
         public Position Position { get; set; } = new Position();
         public LuaParameters LuaParameters { get; set; }
         public List<Event> Events { get; set; } = new List<Event>();
         public Speeds Speeds { get; set; } = new Speeds();
+
+        #region CharaWork
+
+
+        #endregion
 
         public virtual void Spawn(Socket sender, ushort spawnType = 0, ushort isZoning = 0, int changingZone = 0)
         {
@@ -70,85 +66,26 @@ namespace Launcher
         {          
             LuaParameters = new LuaParameters
             {
-                ActorName = GenerateActorName(),
+                ActorName = GenerateName(),
                 ClassName = ClassName,
-                ClassCode = ClassCode
-            };
-
-            LuaParameters.Add(ClassPath + ClassName);
-            LuaParameters.Add(false);
-            LuaParameters.Add(false);
-            LuaParameters.Add(false);
-            LuaParameters.Add(false);
-            LuaParameters.Add(false);
-            LuaParameters.Add((int)ClassId);
-            LuaParameters.Add(false);
-            LuaParameters.Add(false);
-            LuaParameters.Add((int)0);
-            LuaParameters.Add((int)0);
-            //LuaParameters.Add("TEST");
+                ClassCode = ClassCode,
+                Parameters = new object[] {ClassPath + ClassName, false, false, false, false, false, (int)ClassId, false, false, 0, 0}
+            };         
         }
 
         public void SetEventConditions(Socket sender)
         {
-            if (Events.Count > 0) //not all actors have event conditions
-            {
-                foreach (var e in Events)
-                {
-                    byte[] data = new byte[0x28];
-                    byte[] conditionName = Encoding.ASCII.GetBytes(e.Name);
-                    int conditionNameLength = e.Name.Length;
+            if (Events.Count > 0)   
+                foreach (var e in Events)                
+                    e.SetEventCondition(sender, Id);
+        }
 
-                    switch (e.Opcode)
-                    {
-                        case ServerOpcode.EmoteEvent:
-                            Buffer.BlockCopy(BitConverter.GetBytes(e.Priority), 0, data, 0, sizeof(byte));
-                            Buffer.BlockCopy(BitConverter.GetBytes(e.Enabled), 0, data, 0x1, sizeof(byte));
-                            Buffer.BlockCopy(BitConverter.GetBytes(e.EmoteId), 0, data, 0x2, sizeof(ushort));
-                            Buffer.BlockCopy(conditionName, 0, data, 0x4, conditionNameLength);
-                            break;
-                        case ServerOpcode.PushEventCircle:
-                            data = new byte[0x38];
-                            Buffer.BlockCopy(BitConverter.GetBytes(e.Radius), 0, data, 0, sizeof(uint));
-                            Buffer.BlockCopy(BitConverter.GetBytes(0x44533088), 0, data, 0x04, sizeof(uint));
-                            Buffer.BlockCopy(BitConverter.GetBytes(100.0f), 0, data, 0x08, sizeof(uint));
-                            Buffer.BlockCopy(BitConverter.GetBytes(0), 0, data, 0x0c, sizeof(uint));
-                            Buffer.BlockCopy(BitConverter.GetBytes(e.Direction), 0, data, 0x10, sizeof(byte));
-                            Buffer.BlockCopy(BitConverter.GetBytes(0), 0, data, 0x11, sizeof(byte));
-                            Buffer.BlockCopy(BitConverter.GetBytes(e.Silent), 0, data, 0x12, sizeof(byte));
-                            Buffer.BlockCopy(conditionName, 0, data, 0x13, conditionNameLength);
-                            break;
-                        case ServerOpcode.PushEvenFan:
-                            data = new byte[0x40];
-                            Buffer.BlockCopy(BitConverter.GetBytes(e.Radius), 0, data, 0, sizeof(uint));
-                            Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, data, 0x04, sizeof(uint));
-                            Buffer.BlockCopy(BitConverter.GetBytes(e.Radius), 0, data, 0x08, sizeof(uint));
-                            Buffer.BlockCopy(BitConverter.GetBytes(e.Direction), 0, data, 0x10, sizeof(byte));
-                            Buffer.BlockCopy(BitConverter.GetBytes(e.Priority), 0, data, 0x11, sizeof(byte));
-                            Buffer.BlockCopy(BitConverter.GetBytes(e.Silent), 0, data, 0x12, sizeof(byte));
-                            Buffer.BlockCopy(conditionName, 0, data, 0x13, conditionNameLength);
-                            break;
-                        case ServerOpcode.PushEventTriggerBox:
-                            data = new byte[0x40];
-                            Buffer.BlockCopy(BitConverter.GetBytes(e.BgObjectId), 0, data, 0, sizeof(uint));
-                            Buffer.BlockCopy(BitConverter.GetBytes(e.LayoutId), 0, data, 0x4, sizeof(uint));
-                            Buffer.BlockCopy(BitConverter.GetBytes(e.ActorId), 0, data, 0x8, sizeof(byte));
-                            Buffer.BlockCopy(BitConverter.GetBytes(e.Direction), 0, data, 0x14, sizeof(byte));
-                            Buffer.BlockCopy(conditionName, 0, data, 0x17, conditionNameLength);
-                            Buffer.BlockCopy(Encoding.ASCII.GetBytes(e.ReactionName), 0, data, 0x38, e.ReactionName.Length);
-                            break;
-                        case ServerOpcode.NoticeEvent:
-                        case ServerOpcode.TalkEvent:
-                        default:
-                            Buffer.BlockCopy(BitConverter.GetBytes(e.Priority), 0, data, 0, sizeof(byte));
-                            Buffer.BlockCopy(BitConverter.GetBytes(e.Silent), 0, data, 0x1, sizeof(byte));
-                            Buffer.BlockCopy(conditionName, 0, data, 0x2, conditionNameLength);
-                            break;
-                    }
+        public void ToggleEvents(Socket sender, bool enable)
+        {
+            foreach (Event e in Events)
+                e.Enabled = (byte)(enable ? 1 : 0);
 
-                    Packet.Send(sender, e.Opcode, data, Id);
-                }
-            }
+            SetEventStatus(sender);
         }
 
         public virtual void Init(Socket sender) { }
@@ -229,64 +166,12 @@ namespace Launcher
             Buffer.BlockCopy(BitConverter.GetBytes(spawnType), 0, data, 0x24, sizeof(ushort));
             Buffer.BlockCopy(BitConverter.GetBytes(isZonning), 0, data, 0x26, sizeof(ushort));
 
-            Packet.Send(sender, ServerOpcode.SetPosition, data, Id);
+            Packet.Send(sender, ServerOpcode.SetPosition, data, Id);           
         }
 
         public void SetSpeeds(Socket sender, uint[] value = null) => Packet.Send(sender, ServerOpcode.SetSpeed, Speeds.ToBytes(), Id);       
 
-        public void SetAppearance(Socket sender)
-        {
-            byte[] data = new byte[0x108];
-
-            Dictionary<uint, uint> AppearanceSlots = new Dictionary<uint, uint>
-            {
-                //slot number, value
-                { 0x00, Appearance.BaseModel },
-                { 0x01, Appearance.Size },
-                { 0x02, (uint)(SkinColor | HairColor << 10 | EyeColor << 20) },
-                { 0x03, BitField.PrimitiveConversion.ToUInt32(Face) },
-                { 0x04, (uint)(HairHighlightColor | HairStyle << 10) },
-                { 0x05, Appearance.Voice },
-                { 0x06, Appearance.MainWeapon },
-                { 0x07, Appearance.SecondaryWeapon },
-                { 0x08, Appearance.SPMainWeapon },
-                { 0x09, Appearance.SPSecondaryWeapon },
-                { 0x0a, Appearance.Throwing },
-                { 0x0b, Appearance.Pack },
-                { 0x0c, Appearance.Pouch },
-                { 0x0d, Appearance.Head },
-                { 0x0e, Appearance.Body },
-                { 0x0f, Appearance.Legs },
-                { 0x10, Appearance.Hands },
-                { 0x11, Appearance.Feet },
-                { 0x12, Appearance.Waist },
-                { 0x13, Appearance.Neck },
-                { 0x14, Appearance.RightEar },
-                { 0x15, Appearance.LeftEar },
-                { 0x16, Appearance.Wrists },
-                { 0x17, 0 },
-                { 0x18, Appearance.LeftFinger },
-                { 0x19, Appearance.RightFinger },
-                { 0x1a, Appearance.RightIndex },
-                { 0x1b, Appearance.LeftIndex }
-            };
-
-            using (MemoryStream stream = new MemoryStream(data))
-            {
-                using (BinaryWriter writer = new BinaryWriter(stream))
-                {
-                    foreach (var slot in AppearanceSlots)
-                    {
-                        writer.Write(slot.Value);
-                        writer.Write(slot.Key);
-                    }
-                }
-            }
-
-            data[0x100] = (byte)AppearanceSlots.Count;
-
-            Packet.Send(sender, ServerOpcode.SetAppearance, data, Id);
-        }
+        public void SetAppearance(Socket sender) => Packet.Send(sender, ServerOpcode.SetAppearance, Appearance.ToSlotBytes(), Id);       
                
         public void DoEmote(Socket sender)
         {
@@ -327,9 +212,26 @@ namespace Launcher
 
         public virtual void pushDefault(Socket sender) { }
 
-        public virtual void talkDefault(Socket sender) { }
-        #endregion
+        public virtual void talkDefault(Socket sender)
+        {
+            if (TalkFunction.IndexOf(":") > 0)
+            {
+                string[] split = TalkFunction.Split(new char[] { ':' });
+                List<object> parameters = new List<object> { sender };
 
+                switch (split[0])
+                {
+                    case "DelegateEvent":
+                        EventManager.Instance.CurrentEvent.DelegateEvent(sender, (uint)0x1AFCD, split[1], null);
+                        break;                    
+                }
+            }
+            else //if the function has no parameters, just call it.
+            {
+                EventManager.Instance.CurrentEvent.InvokeMethod(TalkFunction, new object[] { sender });
+            }
+        }
+        #endregion
         public void SetQuestIcon(Socket sender)
         {
             if(QuestIcon >= 0)
@@ -352,7 +254,7 @@ namespace Launcher
             return secondDigit + firstDigit;
         }
 
-        public string GenerateActorName()
+        public string GenerateName()
         {
             Zone zone = World.Instance.Zones.Find(x => x.Id == Position.ZoneId);
 
@@ -375,7 +277,7 @@ namespace Launcher
 
             if(className.Length > 6 && (className.Length + (zoneName.Length + 4)) > 25)
                 try{ className = className.Substring(0, 21 - zoneName.Length); }
-                catch (ArgumentOutOfRangeException e) { Log.Instance.Error(e.Message); }
+                catch (ArgumentOutOfRangeException e) { Log.Instance.Error(e.Message); throw e; }
                         
             return string.Format("{0}_{1}_{2}@{3:X3}{4:X2}", className, zoneName, ToStringBase63((int)(Id & 0xff)), zoneId, privLevel);
         }

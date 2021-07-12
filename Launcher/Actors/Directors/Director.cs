@@ -2,7 +2,7 @@
 using System.Text;
 using System.Net.Sockets;
 
-namespace Launcher
+namespace PrimalLauncher
 {
     public class Director : Actor
     {
@@ -19,7 +19,7 @@ namespace Launcher
                     idMask = 0x65300000;
                     break;
                 case 3:
-                    idMask = 0; 
+                    idMask = 0x64000000; 
                     break;                
             }
 
@@ -28,9 +28,9 @@ namespace Launcher
             ClassCode = 0x30400000;
             Appearance.BaseModel = 0;
             Appearance.Size = 0;
-            SkinColor = 0;
-            HairColor = 0;
-            EyeColor = 0;
+            Appearance.SkinColor = 0;
+            Appearance.HairColor = 0;
+            Appearance.EyeColor = 0;
             NameId = -1;
         }
 

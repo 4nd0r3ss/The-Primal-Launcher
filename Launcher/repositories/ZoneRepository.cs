@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 
-namespace Launcher
+namespace PrimalLauncher
 {
     public static class ZoneRepository
     {
@@ -23,7 +23,7 @@ namespace Launcher
                                
                 foreach (XmlNode node in root.ChildNodes)
                 {
-                    Type type = Type.GetType("Launcher." + node.Name);
+                    Type type = Type.GetType("PrimalLauncher." + node.Name);
                     Zone zone = (Zone)Activator.CreateInstance(type);
                   
                     zone.ClassName = "ZoneMaster" + node.Attributes["className"].Value;
@@ -32,6 +32,7 @@ namespace Launcher
                     zone.LocationName = node.Attributes["locationName"].Value;
                     zone.MusicSet = MusicSet.Get(Convert.ToInt32(node.Attributes["musicSetId"].Value));                    
                     zone.MapName = node.Attributes["mapName"].Value;
+                    zone.Type = node.Attributes["type"] != null ? (ZoneType)Enum.Parse(typeof(ZoneType), node.Attributes["type"].Value) : ZoneType.Default;
                     zones.Add(zone);
                 }
             }

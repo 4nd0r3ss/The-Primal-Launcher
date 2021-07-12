@@ -1,7 +1,7 @@
 ﻿using Ionic.Zlib;
 using System.IO;
 
-namespace Launcher
+namespace PrimalLauncher
 {
     public class Zip
     {
