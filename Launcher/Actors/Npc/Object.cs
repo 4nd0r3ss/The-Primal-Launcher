@@ -111,8 +111,8 @@ namespace PrimalLauncher
 
                     switch (split[0])
                     {
-                        case "SetPosition":                            
-                            User.Instance.Character.SetPosition(sender, split[1]);
+                        case "TurnBack":                            
+                            User.Instance.Character.TurnBack(sender, Convert.ToSingle(split[1]));
                             break;
                     }
                 }

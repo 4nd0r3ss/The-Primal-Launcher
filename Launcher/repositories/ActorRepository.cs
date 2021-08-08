@@ -15,6 +15,11 @@ namespace PrimalLauncher
         private static ActorRepository _instance = null;           
         private static readonly Log _log = Log.Instance;
 
+        //get game data tables with actors data
+        private readonly DataTable ActorsGraphics = GameData.Instance.GetGameData("actorclass_graphic");
+        private readonly DataTable ActorsNameIds = GameData.Instance.GetGameData("actorclass");
+        private readonly DataTable ActorsNames = GameData.Instance.GetGameData("xtx/displayName");
+
         public static ActorRepository Instance
         {
             get
@@ -41,7 +46,7 @@ namespace PrimalLauncher
             //new Aetheryte(1280126, AetheryteType.Crystal, new Position(0,484f, 19f, 672f, 0f, 0), 2048),                   //            
             
             //Aetherytes - grouped by teleport menu pages
-            new Aetheryte(1280001, AetheryteType.Crystal, new Position(230,-395.1f, 42.5f, 337.12f, 0f, 0), 1, 1),       // lanoscea_limsa
+            new Aetheryte(1280001, AetheryteType.Crystal, new Position(230,-395.1f, 42.5f, 337.12f, -1.8f, 0), 1, 1),       // lanoscea_limsa
             new Aetheryte(1280002, AetheryteType.Crystal, new Position(128,29.97f, 45.83f, -35.47f, 0f, 0), 1, 2),       // lanoscea_beardedrock
             new Aetheryte(1280003, AetheryteType.Crystal, new Position(129,-991.88f, 61.71f, -1120.79f, 0f, 0), 1, 3),   // lanoscea_skullvalley
             new Aetheryte(1280004, AetheryteType.Crystal, new Position(129,-1883.47f, 53.77f, -1372.68f, 0f, 0), 1, 4),  // lanoscea_baldknoll
@@ -54,7 +59,7 @@ namespace PrimalLauncher
             new Aetheryte(1280095, AetheryteType.Crystal, new Position(147,-163f, 223f, 1151f, 0f, 0), 2, 4),            // coerthas_everlakes
             new Aetheryte(1280096, AetheryteType.Crystal, new Position(148,-1761f, 270f, -198f, 0f, 0), 2, 5),           // coerthas_riversmeet
 
-            new Aetheryte(1280061, AetheryteType.Crystal, new Position(206,-130.63f, 16.08f, -1323.99f, 0f, 0), 3, 1),   // blackshroud_gridania
+            new Aetheryte(1280061, AetheryteType.Crystal, new Position(206,-130.63f, 16.08f, -1323.99f, 2.4f, 0), 3, 1), // blackshroud_gridania
             new Aetheryte(1280062, AetheryteType.Crystal, new Position(150,288f, 4f, -543.928f, 0f, 0), 3, 2),           // blackshroud_bentbranch
             new Aetheryte(1280063, AetheryteType.Crystal, new Position(151,1702f, 20f, -862f, 0f, 0), 3, 3),             // blackshroud_nineivies
             new Aetheryte(1280064, AetheryteType.Crystal, new Position(152,-1052f, 20f, -1760f, 0f, 0), 3, 4),           // blackshroud_emeraldmoss
@@ -69,7 +74,7 @@ namespace PrimalLauncher
             new Aetheryte(1280036, AetheryteType.Crystal, new Position(174,1686f, 297f, 995f, 0f, 0), 4, 6),             // thanalan_brokenwater      
 
             new Aetheryte(1280121, AetheryteType.Crystal, new Position(190,484f, 19f, 672f, 0f, 0), 5, 1),               // mordhona_brittlebark
-            new Aetheryte(1280122, AetheryteType.Crystal, new Position(190,-400f, 19f, 338f, 0f, 0), 5, 2),              // mordhona_revenantstoll
+            new Aetheryte(1280122, AetheryteType.Crystal, new Position(190,-215.6f, 19f, -668.9f, -1.8f, 0), 5, 2),      // mordhona_revenantstoll
             
             //Aetheryte Gates
             new Aetheryte(1280007, AetheryteType.Gate, new Position(128,582.47f, 54.52f, -1.2f, 0f, 0)),        // cedarwood
@@ -137,28 +142,26 @@ namespace PrimalLauncher
             new Aetheryte(1280125, AetheryteType.Gate, new Position(190,-365f, -13f, -37f, 0f, 0)),             // jaggedcrestcave          
             
             //Aetheryte shards in cities
-            new Aetheryte(1200288, AetheryteType.Shard, new Position(206,-112.1921f, 16.274f, -1337.151f, 0f, 0)),    // gridania_
+            //new Aetheryte(1200288, AetheryteType.Shard, new Position(206,-112.1921f, 16.274f, -1337.151f, 0f, 0)),    // gridania_
         };
 
         public List<Aetheryte> GetZoneAetherytes(uint zoneId) => Aetherytes.FindAll(x => x.Position.ZoneId == zoneId);
 
-        public List<Actor> GetZoneNpcs(uint zoneId, string excludeOfType = "")
+        public List<Actor> GetZoneNpcs(uint zoneId, string fileName = "npc.xml")
         {
-            string npcListPath = @"" + zoneId.ToString("X") ;
-            string fileNamePath = npcListPath + @".npc.xml";
+            if (string.IsNullOrEmpty(fileName))
+                fileName = "npc.xml";
+
+            string zoneDir = @"" + zoneId.ToString("X") ;       
+            string fileNamePath = zoneDir + "." + fileName;
             XmlDocument npcFile = new XmlDocument();
-            string file = GetXmlResource(fileNamePath);
+            string file = GetXmlResource("zones.x" + fileNamePath);
             List<Actor> zoneNpcs = new List<Actor>();           
 
             if (file != "")
             {
                 try
-                {
-                    //get game data tables with actors data
-                    DataTable actorsGraphics = GameData.Instance.GetGameData("actorclass_graphic");
-                    DataTable actorsNameIds = GameData.Instance.GetGameData("actorclass");
-                    DataTable actorsNames = GameData.Instance.GetGameData("xtx/displayName");
-
+                {           
                     //prepare xml nodes
                     npcFile.LoadXml(file);
                     XmlElement root = npcFile.DocumentElement;
@@ -167,60 +170,11 @@ namespace PrimalLauncher
                     //each npc node in xml 
                     foreach (XmlNode node in chara.ChildNodes)
                     {
-                        if (node.Name == excludeOfType) continue;
+                        Actor actor = LoadActor(node, zoneId);
 
-                        Type type = Type.GetType("PrimalLauncher." + node.Name);
-
-                        if (type != null 
-                            && (node.Attributes["className"].Value == "PopulaceStandard" || type.Name == "Monster" || type.Name == "Object")
-                        )
-                        {
-                            //XmlNode node = objNode.SelectSingleNode("PopulaceStandard");
-                            uint classId = Convert.ToUInt32(node.SelectSingleNode("classId").InnerText);
-                            uint state = node.SelectSingleNode("state") != null ? Convert.ToUInt32(node.SelectSingleNode("state").InnerText) : 0; //TODO: fix this as it is 2 bytes. so far it's alaways 0 so it's ok.
-                            ushort animation = node.SelectSingleNode("animation") != null ? Convert.ToUInt16(node.SelectSingleNode("animation").InnerText) : (ushort)0;
-                            int questIcon = node.SelectSingleNode("questIcon") != null ? Convert.ToInt32(node.SelectSingleNode("questIcon").InnerText) : -1;
-                            string talkFunction = node.SelectSingleNode("talkFunction") != null ? node.SelectSingleNode("talkFunction").InnerText : "";
-
-                            //get table lines with npc data
-                            //had to separate the selects as it throws an exception when the actor have no appearance and/or nameid data.
-                            DataRow[] actorsGraphicsSelect = actorsGraphics.Select("id = '" + classId + "'");
-                            DataRow[] actorsNameIdsSelect = actorsNameIds.Select("id = '" + classId + "'");
-                            DataRow actorGraphics = actorsGraphicsSelect != null && actorsGraphicsSelect.Length > 0 ? actorsGraphicsSelect[0] : null;
-                            DataRow actorNameId = actorsNameIdsSelect != null && actorsNameIdsSelect.Length > 0 ? actorsNameIdsSelect[0] : null;
-
-                            Actor actor = (Actor)Activator.CreateInstance(type);
-
-                            //if there is a talk function node, it will just add the function and skip the block below. Useful for cases when the function name
-                            //does not match the NPC name, like 'Noncomenanco has a typo in the function name, Noncomananco
-                            if (string.IsNullOrEmpty(talkFunction) && classId < 3000000 && actorNameId != null && (int)actorNameId.ItemArray[1] > 0) //< 3000000 is NPC. > is monster.
-                            {
-                                DataRow displayNameRow = actorsNames.Select("id = '" + actorNameId.ItemArray[1] + "'")[0];
-                                string displayName = (displayNameRow.ItemArray[1] + ""); //just to parse to string.
-                                displayName = displayName
-                                    .Replace(" ", "")
-                                    .Replace("`", "")
-                                    .Replace("\0", "")
-                                    .Replace("'", "");
-                                displayName = char.ToUpper(displayName[0]) + displayName.Substring(1, displayName.Length - 1).ToLower();
-
-                                talkFunction = "DelegateEvent:defaultTalkWith" + displayName + "_001";
-                            }
-
-                            actor.Family = node.Attributes["family"] != null ? node.Attributes["family"].Value : "";
-                            actor.ClassId = classId;
-                            actor.ClassName = node.Attributes["className"].Value;
-                            actor.NameId = actorNameId != null ? Convert.ToInt32(actorNameId.ItemArray[1]) : 0;                            
-                            actor.Appearance = SetAppearance(actorGraphics);                            
-                            actor.Position = SetPosition(zoneId, node.SelectSingleNode("position"));
-                            actor.QuestIcon = questIcon;
-                            actor.SubState = new SubState { MotionPack = animation };
-                            actor.Events = SetEvents(node.SelectSingleNode("events"));
-                            actor.TalkFunction = talkFunction;                            
-                           
+                        if(actor != null)
                             zoneNpcs.Add(actor);
-                        }                        
-                    }
+                    }                                                    
                 }
                 catch (Exception e)
                 {
@@ -229,6 +183,173 @@ namespace PrimalLauncher
             }
 
             return zoneNpcs;
+        }
+
+        public List<Actor> GetCompanyWarp(uint zoneId)
+        {            
+            XmlDocument npcFile = new XmlDocument();
+            string file = GetXmlResource("CompanyWarp.xml");
+            List<Actor> npcs = new List<Actor>();
+
+            if (file != "")
+            {
+                try
+                {
+                    //prepare xml nodes
+                    npcFile.LoadXml(file);
+                    XmlElement root = npcFile.DocumentElement;
+                    XmlNode chara = root.FirstChild;
+
+                    //each npc node in xml 
+                    foreach (XmlNode node in chara.ChildNodes)
+                    {
+                        if (Convert.ToUInt32(node.Attributes["zone"].Value) == zoneId)
+                        {
+                            CompanyWarp companyWarp = (CompanyWarp)LoadActor(node, zoneId);
+                            companyWarp.Region = Convert.ToUInt32(node.Attributes["region"].Value);
+                            companyWarp.Zone = Convert.ToUInt32(node.Attributes["zone"].Value);
+                            companyWarp.WarpId = Convert.ToInt32(node.Attributes["id"].Value);
+                            npcs.Add(companyWarp);
+                        }
+                    }                        
+                }
+                catch (Exception e)
+                {
+                    _log.Warning(e.Message);
+                }
+            }
+
+            return npcs;
+        }
+
+        public Position GetCompanyWarpPositionById(uint region, uint id)
+        {
+            XmlDocument npcFile = new XmlDocument();
+            string file = GetXmlResource("CompanyWarp.xml");
+
+            try
+            {
+                //prepare xml nodes
+                npcFile.LoadXml(file);
+                XmlElement root = npcFile.DocumentElement;
+                XmlNode chara = root.FirstChild;
+
+                //each npc node in xml 
+                foreach (XmlNode node in chara.ChildNodes)
+                {
+                    if (Convert.ToUInt32(node.Attributes["region"].Value) == region && Convert.ToUInt32(node.Attributes["id"].Value) == id)
+                        return SetPosition(Convert.ToUInt32(node.Attributes["zone"].Value), node.SelectSingleNode("position"));
+                }
+            }
+            catch (Exception e)
+            {
+                _log.Warning(e.Message);
+            }
+
+            return null;
+        }
+
+        private Actor LoadActor(XmlNode node, uint zoneId)
+        {
+            Type type = Type.GetType("PrimalLauncher." + node.Name);
+
+            if (type != null
+                && (
+                node.Attributes["className"].Value == "PopulaceCutScenePlayer" ||
+                node.Attributes["className"].Value == "PopulaceStandard" ||
+                node.Attributes["className"].Value == "PopulaceCompanyWarp" ||
+                type.Name == "Monster" ||
+                type.Name == "Object"
+                )
+            )
+            {
+                //XmlNode node = objNode.SelectSingleNode("PopulaceStandard");
+                uint classId = Convert.ToUInt32(node.SelectSingleNode("classId").InnerText);
+                uint state = node.SelectSingleNode("state") != null ? Convert.ToUInt32(node.SelectSingleNode("state").InnerText) : 0; //TODO: fix this as it is 2 bytes. so far it's alaways 0 so it's ok.
+                ushort animation = node.SelectSingleNode("animation") != null ? Convert.ToUInt16(node.SelectSingleNode("animation").InnerText) : (ushort)0;
+                int questIcon = node.SelectSingleNode("questIcon") != null ? Convert.ToInt32(node.SelectSingleNode("questIcon").InnerText) : -1;
+
+                //get table lines with npc data
+                //had to separate the selects as it throws an exception when the actor have no appearance and/or nameid data.
+                DataRow[] actorsGraphicsSelect = ActorsGraphics.Select("id = '" + classId + "'");
+                DataRow[] actorsNameIdsSelect = ActorsNameIds.Select("id = '" + classId + "'");
+                DataRow actorGraphics = actorsGraphicsSelect != null && actorsGraphicsSelect.Length > 0 ? actorsGraphicsSelect[0] : null;
+                DataRow actorNameId = actorsNameIdsSelect != null && actorsNameIdsSelect.Length > 0 ? actorsNameIdsSelect[0] : null;
+
+                Actor actor = (Actor)Activator.CreateInstance(type);
+                actor.Family = node.Attributes["family"] != null ? node.Attributes["family"].Value : "";
+                actor.ClassId = classId;
+                actor.ClassName = node.Attributes["className"] != null ? node.Attributes["className"].Value : actor.ClassName;
+                actor.NameId = actorNameId != null ? Convert.ToInt32(actorNameId.ItemArray[1]) : 0;
+                actor.Appearance = SetAppearance(actorGraphics);
+                actor.Position = SetPosition(zoneId, node.SelectSingleNode("position"));
+                actor.QuestIcon = questIcon;
+                actor.SubState = new SubState { MotionPack = animation };
+                actor.Events.AddRange(SetEvents(node.SelectSingleNode("events")));
+                actor.TalkFunctions = GetTalkFunctions(classId, actorNameId, node.SelectSingleNode("talkFunctions"));
+
+                return actor;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        private KeyValuePair<uint, string> GenerateDefaultTalkFunction(uint classId, DataRow actorNameId)
+        {                      
+            if (classId < 3000000 && actorNameId != null && (int)actorNameId.ItemArray[1] > 0) //< 3000000 is NPC. > is monster.
+            {
+                DataRow displayNameRow = ActorsNames.Select("id = '" + actorNameId.ItemArray[1] + "'")[0];
+                string displayName = (displayNameRow.ItemArray[1] + ""); //just to parse to string.
+                displayName = displayName
+                    .Replace(" ", "")
+                    .Replace("`", "")
+                    .Replace("\0", "")
+                    .Replace("'", "");
+                displayName = char.ToUpper(displayName[0]) + displayName.Substring(1, displayName.Length - 1).ToLower();
+
+                return new KeyValuePair<uint, string>(
+                    0,
+                    "defaultTalkWith" + displayName + "_001"
+                );
+            }
+            else
+            {
+                return new KeyValuePair<uint, string>();
+            }
+        }
+
+        private Dictionary<uint, string> GetTalkFunctions(uint classId, DataRow actorNameId, XmlNode talkFunctionsNode)
+        {
+            Dictionary<uint, string> functions = new Dictionary<uint, string>();
+
+            //try to generate a default talk function for the actor. If successful, add to the list of talk functions.
+            KeyValuePair<uint, string> defaultFunction = GenerateDefaultTalkFunction(classId, actorNameId);
+
+            if (!string.IsNullOrEmpty(defaultFunction.Value))
+                functions.Add(defaultFunction.Key, defaultFunction.Value);
+
+            //get additional talk functions from the xml file.
+            if (talkFunctionsNode != null && talkFunctionsNode.ChildNodes != null && talkFunctionsNode.ChildNodes.Count > 0)
+            {
+                foreach (XmlNode node in talkFunctionsNode.ChildNodes)
+                {                    
+                    uint questId = node.Attributes["questId"] != null ? Convert.ToUInt32(node.Attributes["questId"].Value) : 0;
+                    string function = node.Attributes["name"] != null ? node.Attributes["name"].Value : "";
+
+                    //if there is already a default talk function, replace the one generated above, if any.
+                    if (functions.ContainsKey(0) && questId == 0)
+                    {
+                        functions[0] = function;
+                        continue;
+                    }
+
+                    functions.Add(questId, function);                        
+                }
+            }            
+
+            return functions;
         }
 
         private List<Event> SetEvents(XmlNode eventNode)
@@ -402,7 +523,7 @@ namespace PrimalLauncher
         {
             //From https://social.msdn.microsoft.com/Forums/vstudio/en-US/6990068d-ddee-41e9-86fc-01527dcd99b5/how-to-embed-xml-file-in-project-resources?forum=csharpgeneral
             string result = string.Empty;
-            Stream stream = typeof(ActorRepository).Assembly.GetManifestResourceStream("Launcher.Resources.xml.zones.x" + fileName);
+            Stream stream = typeof(ActorRepository).Assembly.GetManifestResourceStream("Launcher.Resources.xml." + fileName);
             if(stream != null)
                 using (stream)            
                     using (StreamReader sr = new StreamReader(stream))                

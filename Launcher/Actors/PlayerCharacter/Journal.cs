@@ -89,13 +89,27 @@ namespace PrimalLauncher
         public void GetQuestData(Socket sender, int questId, ref LuaParameters parameters)
         {
             byte[] data = new byte[0xc0];
-            //int questId = ;
+            Quest quest = Quests.Find(x => x.Id == questId);
             parameters.Add("requestedData");
             parameters.Add("qtdata");
             parameters.Add(questId);
-            parameters.Add(5);
+            parameters.Add(quest.HistoryIndex);
             LuaParameters.WriteParameters(ref data, parameters, 0);
             Packet.Send(sender, ServerOpcode.GeneralData, data);
+        }
+
+        public void AdvanceQuestHistory(uint questId)
+        {
+            Quest quest = Quests.Find(x => x.Id == questId);
+            quest.HistoryIndex++;
+            Log.Instance.Warning("Quest history index: " + quest.HistoryIndex);
+        }
+
+        public void ResetQuestHistory(uint questId)
+        {
+            Quest quest = Quests.Find(x => x.Id == questId);
+            quest.HistoryIndex = 1;
+            Log.Instance.Warning("Quest history index reset.");
         }
         #endregion
 

@@ -65,21 +65,21 @@
         <noticeEvent priority="0" enabled="0" />
       </events>
     </Populace>
-    <Populace className="DoorStandard">
+    <MapObj className="DoorStandard">
       <classId>5900001</classId>
       <position x="191.217" y="-14.427" z="-2924.85" r="0" />
       <animation>0</animation>
       <events>
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
-    <Populace className="DoorStandard">
+    </MapObj>
+    <MapObj className="DoorStandard">
       <classId>5900001</classId>
       <position x="191.217" y="-14.427" z="-2924.85" r="0" />
       <animation>0</animation>
       <events>
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
+    </MapObj>
   </npc>
 </chara>

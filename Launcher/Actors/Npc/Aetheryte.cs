@@ -62,11 +62,11 @@ namespace PrimalLauncher
 
             if (AetheryteType != AetheryteType.Shard)
             {
-                Events.Add(new Event { Opcode = ServerOpcode.TalkEvent, Name = "talkDefault", Priority = 0x04 });
+                Events.Add(new Event { Opcode = ServerOpcode.TalkEvent, Name = "talkDefault", Priority = 0x04, Enabled=1 });
                 Events.Add(new Event { Opcode = ServerOpcode.NoticeEvent, Name = "pushCommand", Priority = 0x04 });
                 //push event
-                Events.Add(new Event { Opcode = ServerOpcode.PushEventCircle, Name = "pushCommandIn", ServerCodes = 0x44c00014, Radius = pushEventRadius, Direction = 0x01, Silent = 0x00 });
-                Events.Add(new Event { Opcode = ServerOpcode.PushEventCircle, Name = "pushCommandOut", ServerCodes = 0x44c00014, Radius = pushEventRadius, Direction = 0x11, Silent = 0x00 });
+                Events.Add(new Event { Opcode = ServerOpcode.PushEventCircle, Enabled=1, Name = "pushCommandIn", ServerCodes = 0x44c00014, Radius = pushEventRadius, Direction = 0x01, Silent = 0x00, Action= "defaultTalkWithMiniaeth_arc_001" });
+                Events.Add(new Event { Opcode = ServerOpcode.PushEventCircle, Enabled=1, Name = "pushCommandOut", ServerCodes = 0x44c00014, Radius = pushEventRadius, Direction = 0x11, Silent = 0x00 });
             }
 
             Events.Add(new Event{ Opcode = ServerOpcode.NoticeEvent, Name = "noticeEvent", Enabled = 0x01 });
@@ -93,6 +93,11 @@ namespace PrimalLauncher
             }
 
             property.FinishWriting();
+        }
+
+        public override void talkDefault(Socket sender)
+        {
+            EventManager.Instance.CurrentEvent.DelegateEvent(sender, 0x01AFCD, "defaultTalkWithMiniaeth_arc_001", null);
         }
 
     }

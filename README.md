@@ -6,12 +6,13 @@ This project aims to transform the long-abandoned PC videogame FFXIV1.0 in a sin
 
 Features
 ========
-Unlike the other great efforts to bring this game back to life, PL has no complicated installation and compiling processes. You don't need to install a database and/or a web server. The single executable file creates all the necessary files to run the game.
+Unlike the other great efforts to bring this game back to life, PL has no installation or compiling processes. You don't need to install a database and/or a web server. 
+The single executable file has all the necessary data to run the game.
 
 Some of the main features are:
 - 1 Click binaries patching process and binaries backup creation;
 - Built-in game update files downloader and updater;
-- Built-in micro web-server to handle http requests using original login window and mock-up login screen mimicking the original one (can be edited!);
+- Built-in micro web-server to handle http requests using original login window and mock-up login screen mimicking the original one;
 
 What works so far
 =================
@@ -27,32 +28,40 @@ Lobby
 - Rename character
 - Game start
 
-Opening
-- Limsa opening working all the way to battle toturial.
-- Gridania and UlDah not working yet.
+Openings
+- All 3 openings fully implemented (no tutorial battle or class distinction yet).
 
 In-game general
 - Change class/job
-- Currency add/remove
-- Items add/remove
-- Mounts - both chocobo and gobbue (unlocked from start)
-- Map static objects (aetheryte crystals, gates and shards, no interaction)
-- Map NPCs in some zones
-- Add/remove exp
-- Level up/down
+- Currency add/remove (custom command)
+- Items add/remove (custom command)
+- Mounts - both chocobo and gobbue (available from start for now)
+- NPCs in most zones with default talk dialog.
+- Add/remove exp (custom command)
+- Level up/down (custom command)
+- Dynamic NPC spawn/despawn
 
 In-game main menu
-- Attributes - Character initial attributes, currency, key items
-- Gear - Equip/unequip items (items attr not applied to character stat yet)
-- Inventory - manage items
-- Teleport - Teleport from main menu works but it's limited, total anima for display only
+- Attributes - Character initial attributes, currency, key items.
+- Gear - Equip/unequip items (items attr not applied to character stat yet).
+- Inventory - Items for display only for now.
+- Teleport - Teleport from main menu implemented (total anima for display only, no favored destinations yet).
 
 Battle
-- No battle so far
+- Not implemented.
 
-Map
-- PL Custom teleport command (can visit any map in the game, including jail and cottage)
+Weaponskills, abilities, traits, etc.
+- Not implemented.
+
+Travel
+- PL Custom teleport command (can visit most maps in the game, including jail and cottage)
+- Company warp (aethernet) fully functional in all 3 cities.
 
 Dungeons
-- It's possible to find dungeons by walking around the map but no instancing so far.
+- It's possible to find some dungeons by walking around the map.
+
+Raids/Trials
+- Not implemented.
+
+
 

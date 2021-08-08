@@ -49,7 +49,7 @@ namespace PrimalLauncher
                         {
                             Id = id,
                             Name = node.Attributes["name"].Value ?? "",
-                            StartRegion = Convert.ToUInt32(node.Attributes["startRegion"].Value ?? "0"),
+                            StartRegion = node.Attributes["startRegion"] != null ? Convert.ToUInt32(node.Attributes["startRegion"].Value) : 0,
                             Phases = GetQuestPhases(node)
                         };
                     }
@@ -93,6 +93,7 @@ namespace PrimalLauncher
                 step.OnFinish = childNode.Attributes["onFinish"] != null ? childNode.Attributes["onFinish"].Value : "";
                 step.OnDelegate = childNode.Attributes["onDelegate"] != null ? childNode.Attributes["onDelegate"].Value : "";
                 step.EndPhase = childNode.Attributes["endPhase"] != null ? Convert.ToBoolean(childNode.Attributes["endPhase"].Value) : false;
+                step.PhaseIgnore = childNode.Attributes["phaseIgnore"] != null ? Convert.ToBoolean(childNode.Attributes["phaseIgnore"].Value) : false;
                 stepList.Add(step);
             }
 

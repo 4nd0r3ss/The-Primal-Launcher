@@ -139,8 +139,9 @@ namespace PrimalLauncher
             SetGameUpdateNavigation();
 
             //List<Zone> myList = ZoneRepository.GetZones();
-            //List<Actor> acto = ActorRepository.Instance.GetZoneNpcs(155);
+            //List<Actor> acto = ActorRepository.Instance.GetZoneNpcs(206);
             //Quest quest = QuestRepository.GetInitialQuest(1);
+            //List<Actor> acto = ActorRepository.Instance.GetCompanyWarp(206);
 
             Log.Instance.Info("Welcome to Primal Launcher!");
             Task.Run(() => { new GameServer(); });

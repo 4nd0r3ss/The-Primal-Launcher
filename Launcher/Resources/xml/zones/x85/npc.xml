@@ -305,5 +305,29 @@
         <noticeEvent priority="0" enabled="0" />
       </events>
     </Populace>
+    <Populace className="PopulaceStandard">
+      <classId>1200288</classId>
+      <position x="-438.9" y="40" z="237.8" r="2.47" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+      </events>
+    </Populace>
+    <Populace className="PopulaceStandard">
+      <classId>1200288</classId>
+      <position x="-235.4" y="12" z="196.3" r="2.47" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+      </events>
+    </Populace>
+    <Populace className="PopulaceStandard">
+      <classId>1200288</classId>
+      <position x="-493" y="44" z="64.2" r="0" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+      </events>
+    </Populace>
   </npc>
 </chara>

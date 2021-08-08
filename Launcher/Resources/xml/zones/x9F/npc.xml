@@ -1,38 +1,38 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <chara>
   <npc>
-    <Populace className="DoorStandard">
+    <MapObj className="DoorStandard">
       <classId>5900001</classId>
       <position x="880.116" y="-22.89" z="648.988" r="0" />
       <animation>0</animation>
       <events>
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
-    <Populace className="DoorStandard">
+    </MapObj>
+    <MapObj className="DoorStandard">
       <classId>5900001</classId>
       <position x="1216.05" y="-47.89" z="-912.021" r="0" />
       <animation>0</animation>
       <events>
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
-    <Populace className="DoorStandard">
+    </MapObj>
+    <MapObj className="DoorStandard">
       <classId>5900001</classId>
       <position x="1312.07" y="-63.89" z="560.007" r="0" />
       <animation>0</animation>
       <events>
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
-    <Populace className="DoorStandard">
+    </MapObj>
+    <MapObj className="DoorStandard">
       <classId>5900001</classId>
       <position x="1456.01" y="-59.89" z="671.623" r="0" />
       <animation>0</animation>
       <events>
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
+    </MapObj>
     <Populace className="DoorServer">
       <classId>5900016</classId>
       <position x="1119.88" y="-44.125" z="880.115" r="0" />

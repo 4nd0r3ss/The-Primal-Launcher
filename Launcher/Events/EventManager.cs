@@ -58,6 +58,7 @@ namespace PrimalLauncher
            return "PrimalLauncher." + Encoding.ASCII.GetString(nameBytes);
         }
     }
+
     public class EventRequest
     {
         protected LuaParameters _requestParameters;
@@ -80,6 +81,7 @@ namespace PrimalLauncher
         public bool IsQuestion { get; set; }
         public uint Selection { get; set; }
         public QuestPhaseStep QuestStep { get; set; }
+        public bool ReturnToOwner { get; set; }
 
         public EventRequest(byte[] data)
         {
@@ -98,14 +100,20 @@ namespace PrimalLauncher
 
             Actor eventOwner = GetActor();
 
+            //if actor exists in current zone
             if (eventOwner != null)
             {
+                //check if any of the active quests phases has a step for the actor
+                //TODO: what if more than one quest phase has a step for this actor?
                 foreach (Quest quest in User.Instance.Character.Journal.Quests)
                 {
+                    //if a step is found for this actor, execute and return the executed step
                     QuestStep = quest.ActorStepComplete(sender, GetType().Name, eventOwner.ClassId, eventOwner.Id);
 
+                    //if there is an executed step for the actor
                     if (QuestStep != null)
                     {
+                        //execute the step function.
                         FunctionName = QuestStep.Value ?? "";
                         QuestId = QuestStep.QuestId > 0 ? QuestStep.QuestId : quest.Id;
 
@@ -118,7 +126,10 @@ namespace PrimalLauncher
                     }
                 }
 
-                eventOwner.InvokeMethod(GetType().Name, new object[] { sender });
+                //if reached here, there wasn't a step for the actor in any active quest, so we give back control to the actor.
+                var type = GetType();
+                eventOwner.InvokeMethod(type.Name, new object[] { sender });
+                ReturnToOwner = true;
             }
             else
                 Log.Instance.Error("Actor 0x" + OwnerId.ToString("X") + " not found.");
@@ -148,7 +159,7 @@ namespace PrimalLauncher
             Packet.Send(sender, ServerOpcode.EventRequestResponse, data);
         }
 
-        protected virtual void Finish(Socket sender)
+        public virtual void Finish(Socket sender)
         {        
             byte[] data = new byte[0x30];
             Buffer.BlockCopy(BitConverter.GetBytes(User.Instance.Character.Id), 0, data, 0, sizeof(uint));
@@ -199,7 +210,30 @@ namespace PrimalLauncher
             Finish(sender);
         }
 
+        /// <summary>
+        /// Position player character according to the coordinates passed as parameters. 
+        /// Used from quest scripts.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="parameters"></param>
         #region helper methods  
+        public void SetPlayerPosition(Socket sender, string parameters)
+        {
+            string[] split = parameters.Split(new char[] { ',' });
+            Position pos = new Position
+            {
+                ZoneId = Convert.ToUInt32(split[0]),
+                X = (float)Convert.ToDouble(split[1]),
+                Y = (float)Convert.ToDouble(split[2]),
+                Z = (float)Convert.ToDouble(split[3]),
+                R = (float)Convert.ToDouble(split[4]),
+                SpawnType = Convert.ToUInt16(split[0])
+            };
+            World.Instance.RepositionPlayer(sender, pos);
+        }
+
+        public void BackInsideStopper(Socket sender) => User.Instance.Character.TurnBack(sender, 5);
+
         /// <summary>
         /// This function is used by reflection.
         /// </summary>
@@ -253,6 +287,12 @@ namespace PrimalLauncher
             uint id = Convert.ToUInt32(questId);
             User.Instance.Character.Journal.AddQuest(sender, id);
         }
+
+        /// <summary>
+        /// This will close the current tutorial dialog being shown.
+        /// </summary>
+        /// <param name="sender"></param>
+        public void CloseTutorialDialog(Socket sender) => SendData(sender, new object[] { 0x05 }, 2);
 
         /// <summary>
         /// Get the Actor obj by its id#.
@@ -319,7 +359,7 @@ namespace PrimalLauncher
         /// <param name="sender"></param>
         /// <param name="toSend"></param>
         /// <param name="sleepSeconds"></param>
-        public void SendData(Socket sender, object[] toSend, int sleepSeconds = 0)
+        public static void SendData(Socket sender, object[] toSend, int sleepSeconds = 0)
         {
             byte[] data = new byte[0xC0];
             LuaParameters parameters = new LuaParameters();
@@ -360,9 +400,10 @@ namespace PrimalLauncher
                     dutyActorsClassId = new List<uint> { 2290005, 2290006, 2201407 };
                     break;
                 case 3:
-                    simpleContentNumber = "30010"; //change for uldah
+                    simpleContentNumber = "30079";
                     questName = "Man0u001";
-                    dutyActorsClassId = new List<uint> {  };
+                    openingStoperClassId = 1090373;
+                    dutyActorsClassId = new List<uint> { 2290003, 2290004, 2203301 };
                     break;
             }
 
@@ -371,26 +412,30 @@ namespace PrimalLauncher
             if (openingStoperClassId > 0)
             {
                 openingStoper = User.Instance.Character.GetCurrentZone().GetActorByClassId(openingStoperClassId);
-                openingStoper.ToggleEvents(sender, false);                
-                Thread.Sleep(1500);
+
+                if(openingStoper != null)
+                {
+                    openingStoper.ToggleEvents(sender, false);
+                    Thread.Sleep(1500);
+                }                
             }
 
-            User.Instance.Character.GetCurrentZone().SpawnAsPrivate("SimpleContent" + simpleContentNumber, "Populace");
+            User.Instance.Character.GetCurrentZone().SpawnAsInstance("SimpleContent" + simpleContentNumber, "opening.monster.xml");
+            World.Instance.ChangeZone(sender, EntryPoints.Get(User.Instance.Character.GetCurrentZone().Id, 0x10));
+
             User.Instance.Character.BindQuestDirector(sender, questName, true);
-            User.Instance.Character.AddDutyGroup(sender, dutyActorsClassId, true);
+            User.Instance.Character.AddDutyGroup(sender, dutyActorsClassId, true);            
             SendData(sender, new object[] { 0x09 });
 
             List<Actor> fighters = User.Instance.Character.GetCurrentZone().GetActorsByFamily("fighter");
 
             foreach (Actor fighter in fighters)
+            {
                 fighter.State.Main = MainState.Active;
+                fighter.SetMainState(sender);
+            }
 
-
-            World.Instance.SendTextEnteredDuty(sender);
-            World.Instance.ChangeZone(sender, EntryPoints.Get(User.Instance.Character.GetCurrentZone().Id, 0x10));
-
-            //if (openingStoper != null) //this is causing a bug
-            //    openingStoper.ToggleEvents(sender, true);
+            World.Instance.SendTextEnteredDuty(sender); 
         }
 
         /// <summary>
@@ -409,7 +454,7 @@ namespace PrimalLauncher
                         PlayerCharacter.Logout(sender);
                         break;
                     case 4:
-                        Log.Instance.Success("Selected 4");
+                        Log.Instance.Success("Check bed selected.");
                         break;
                 }
             }
@@ -505,7 +550,7 @@ namespace PrimalLauncher
             Finish(sender);            
         }
 
-        protected override void Finish(Socket sender)
+        public override void Finish(Socket sender)
         {
             base.Finish(sender);
 
@@ -553,9 +598,7 @@ namespace PrimalLauncher
             else
             {
                 Finish(sender);
-            }
-
-                 
+            }                 
         }
 
         public void Teleport(Socket sender)
@@ -564,8 +607,13 @@ namespace PrimalLauncher
             if (Selection == 0xFF)
             {
                 if (MenuPage == 2) //from aetheryte selection back to region selection
-                    MenuPage = 0;               
-                
+                    MenuPage = 0;
+
+                if (MenuPage == 1) //finish event when closing region selection
+                {
+                    Finish(sender);
+                    return;
+                }                                  
             }
 
             InitLuaParameters();
@@ -613,7 +661,19 @@ namespace PrimalLauncher
                                                select a;
 
                         if (destinationAetheryte != null)
-                            World.Instance.TeleportPlayer(sender, ((Aetheryte)destinationAetheryte.ToList()[0]).Position);
+                        {
+                            Position aethPosition = destinationAetheryte.ToList()[0].Position;
+                            Position newPosition = new Position
+                            {
+                                ZoneId = aethPosition.ZoneId,
+                                X = aethPosition.X + (float)(7 * Math.Sin(aethPosition.R)),
+                                Z = aethPosition.Z + (float)(7 * Math.Cos(aethPosition.R)),
+                                Y = aethPosition.Y,
+                                R = aethPosition.R + 0.8f
+                            };
+                        
+                            World.Instance.TeleportPlayer(sender, newPosition);
+                        }                           
                         else
                             Log.Instance.Error("Something went wrong, aetheryte not found.");
                     }
@@ -622,7 +682,6 @@ namespace PrimalLauncher
                         Finish(sender);
                     }
                     break;
-
             }
 
             MenuPage++;
@@ -662,12 +721,20 @@ namespace PrimalLauncher
             {
                 if (IsQuestion)
                 {
-                    GetQuestionSelection(data);                    
-                    InvokeMethod(FunctionName, new object[] { sender });
+                    GetQuestionSelection(data);
+
+                    if (ReturnToOwner)
+                    {
+                        GetActor().InvokeMethod(FunctionName, new object[] { sender });
+                        return;
+                    }else
+                    {
+                        InvokeMethod(FunctionName, new object[] { sender });
+                    }
                 }
 
                 Finish(sender);
-            }                          
+            }
         }
 
         public void processEvent020_9(Socket sender, byte[] eventResult)
@@ -778,7 +845,7 @@ namespace PrimalLauncher
             RequestParameters.Add(Encoding.ASCII.GetBytes(GetType().Name));
         }
 
-        protected override void Finish(Socket sender)
+        public override void Finish(Socket sender)
         {
             base.Finish(sender);
 
@@ -793,22 +860,28 @@ namespace PrimalLauncher
         public void processTtrBtl002(Socket sender)
         {
             SendData(sender, new object[] { 0x05 }, 2);
-            SendData(sender, new object[] { 0x02, null, null, 0x235f }, 2);
-            SendData(sender, new object[] { 0x04, null, null, 0x01, 0x0C }, 2);
+            SendData(sender, new object[] { 0x02, null, null, 0x235f }, 2); //attack success
+            SendData(sender, new object[] { 0x04, null, null, 0x01, 0x0C }, 2);//TP tutorial (4th parameter is keyboard_controller)
             SendData(sender, new object[] { 0x05 }, 2);
-            SendData(sender, new object[] { 0x04, null, null, 0x01, 0x0D }, 2);
+            SendData(sender, new object[] { 0x04, null, null, 0x01, 0x0D }, 2);//weaponskill tutorial (4th parameter is keyboard_controller)
             SendData(sender, new object[] { 0x05 }, 2);
             SendData(sender, new object[] { 0x02, null, null, 0x2369 }, 2);
-            SendData(sender, new object[] { "attention", (uint)0x5FF80001, "", 0xC781, User.Instance.Character.InitialTown }); //second parameter is world id
+            SendData(sender, new object[] { "attention", World.Instance.Id, "", 0xC781, (int)User.Instance.Character.InitialTown });
            
             World.Instance.SetMusic(sender, 0x07, MusicMode.Crossfade);
             User.Instance.Character.ToggleStance(sender, Command.NormalStance);
             ((QuestDirector)World.Instance.GetDirector("Quest")).StartEvent(sender, "noticeEvent");
         }
 
+        /// <summary>
+        /// TODO: put this in the quest script later.
+        /// </summary>
+        /// <param name="sender"></param>
         public void processEvent000_3(Socket sender) => GoToQuestPrivateZone(sender, "Man0l001", 2);
 
-        public void processEvent020_1(Socket sender) => GoToQuestPrivateZone(sender, "Man0g001", 5);       
+        public void processEvent020_1(Socket sender) => GoToQuestPrivateZone(sender, "Man0g001", 5);
+        
+        public void processEvent020(Socket sender) => GoToQuestPrivateZone(sender, "Man0u001", 1);       
     }
 
     public class exit : EventRequest

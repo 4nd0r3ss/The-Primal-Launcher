@@ -25,7 +25,7 @@ namespace PrimalLauncher
         public int QuestIcon { get; set; }
         public bool Spawned { get; set; }
         public string Family { get; set; }
-        public string TalkFunction { get; set; }
+        public Dictionary<uint, string> TalkFunctions { get; set; }
 
         #region States
         public State State { get; set; } = new State();
@@ -60,6 +60,12 @@ namespace PrimalLauncher
             SetLuaScript(sender);
             Init(sender);
             Spawned = true;
+        }
+
+        public virtual void Despawn(Socket sender)
+        {
+            Spawned = false;            
+            Packet.Send(sender, ServerOpcode.RemoveActor, new byte[0x08], Id);
         }
 
         public virtual void Prepare()
@@ -168,6 +174,18 @@ namespace PrimalLauncher
 
             Packet.Send(sender, ServerOpcode.SetPosition, data, Id);           
         }
+        public void MoveToPosition(Socket sender, Position position)
+        {            
+            byte[] data = new byte[0x30];   
+            Buffer.BlockCopy(BitConverter.GetBytes(position.X), 0, data, 0x08, sizeof(int));
+            Buffer.BlockCopy(BitConverter.GetBytes(position.Y), 0, data, 0x0c, sizeof(int));
+            Buffer.BlockCopy(BitConverter.GetBytes(position.Z), 0, data, 0x10, sizeof(int));
+            Buffer.BlockCopy(BitConverter.GetBytes(position.R), 0, data, 0x14, sizeof(int));
+            Buffer.BlockCopy(BitConverter.GetBytes(1), 0, data, 0x18, sizeof(int));
+            Buffer.BlockCopy(BitConverter.GetBytes(position.FloatingHeight), 0, data, 0x24, sizeof(int));           
+
+            Packet.Send(sender, ServerOpcode.MoveToPosition, data, Id);
+        }
 
         public void SetSpeeds(Socket sender, uint[] value = null) => Packet.Send(sender, ServerOpcode.SetSpeed, Speeds.ToBytes(), Id);       
 
@@ -214,22 +232,44 @@ namespace PrimalLauncher
 
         public virtual void talkDefault(Socket sender)
         {
-            if (TalkFunction.IndexOf(":") > 0)
-            {
-                string[] split = TalkFunction.Split(new char[] { ':' });
-                List<object> parameters = new List<object> { sender };
+            //if there is a function for a specific quest, execute it. (used for opening mostly)
+            KeyValuePair<uint, string> talkFunction = TalkFunctions.FirstOrDefault(x => x.Key > 0);
 
-                switch (split[0])
-                {
-                    case "DelegateEvent":
-                        EventManager.Instance.CurrentEvent.DelegateEvent(sender, (uint)0x1AFCD, split[1], null);
-                        break;                    
-                }
-            }
-            else //if the function has no parameters, just call it.
+            //if not, we try to get the default function
+            if(talkFunction.Key == 0) //zero key means nothing returned.
             {
-                EventManager.Instance.CurrentEvent.InvokeMethod(TalkFunction, new object[] { sender });
+                string regionName = User.Instance.Character.GetCurrentZone().MapName.Substring(0, 3).ToLower();
+                uint talkCode = 0;
+
+                switch (regionName)
+                {
+                    case "sea":
+                        talkCode = 0x01AFCC;
+                        break;
+                    case "fst":
+                        talkCode = 0x01AFCD;
+                        break;
+                    case "roc":
+                        talkCode = 0x01AFCE;
+                        break;
+                    case "wil":
+                        talkCode = 0x01AFCF;
+                        break;
+                    case "srt":
+                        talkCode = 0x01AFD0;
+                        break;
+                    case "lak":
+                        talkCode = 0x01AFD1;
+                        break;
+                }
+
+                talkFunction = TalkFunctions.FirstOrDefault(x => x.Key == 0);
+                EventManager.Instance.CurrentEvent.DelegateEvent(sender, talkCode, talkFunction.Value, null);
             }
+            else
+            {
+                EventManager.Instance.CurrentEvent.DelegateEvent(sender, talkFunction.Key, talkFunction.Value, null);
+            } 
         }
         #endregion
         public void SetQuestIcon(Socket sender)

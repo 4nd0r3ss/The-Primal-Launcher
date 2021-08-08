@@ -14,7 +14,8 @@ namespace PrimalLauncher
         private static World _instance = null;       
         public List<Zone> Zones { get; set;}
         public List<Director> Directors { get; set; } = new List<Director>();
-        public Debug Debug { get; set; } = new Debug();
+        public Debug Debug { get; set; } = new Debug();       
+
         public static World Instance
         {
             get
@@ -32,7 +33,7 @@ namespace PrimalLauncher
             Id = 0x5ff80001;
             Zones = ZoneRepository.GetZones();           
             Name = Encoding.ASCII.GetBytes("worldMaster");     
-        }       
+        }   
 
         public override void Spawn(Socket handler, ushort spawnType = 0, ushort isZoning = 0, int changingZone = 0)
         {
@@ -61,14 +62,14 @@ namespace PrimalLauncher
         public void Initialize(Socket sender)
         {
             PlayerCharacter playerCharacter = User.Instance.Character;
-            Zone zone = playerCharacter.GetCurrentZone();           
-
-            zone.LoadActors();
+            Zone zone = playerCharacter.GetCurrentZone();
+            
             playerCharacter.GetGroups(sender);
             playerCharacter.IsNew = false;
             SetMapEnvironment(sender, zone);
-            playerCharacter.InitializeOpening(sender);           
-                       
+            playerCharacter.InitializeOpening(sender);
+            zone.LoadActors();
+
             playerCharacter.Spawn(sender, spawnType: 0x01, isZoning: 0);
             zone.Spawn(sender);
             Debug.Spawn(sender);
@@ -77,7 +78,7 @@ namespace PrimalLauncher
             User.Instance.Character.SetUnendingJourney(sender);
             User.Instance.Character.SetEntrustedItems(sender);
             User.Instance.Character.Journal.InitializeQuests(sender);
-            zone.SpawnActors(sender);
+            User.Instance.Character.ToggleZoneActors(sender);
         }
 
         #region World Environment Methods
@@ -135,12 +136,17 @@ namespace PrimalLauncher
 
         public void TeleportPlayer(Socket sender, Position position)
         {
-            position.X += 2;
-            position.Z += 2;
             MassDeleteActors(sender);
             User.Instance.Character.Position = position;
             ChangeZone(sender, position: position, spawnType: 2);
         }
+
+        public void RepositionPlayer(Socket sender, Position position)
+        {
+            MassDeleteActors(sender);
+            User.Instance.Character.Position = position;
+            ChangeZone(sender, position: position, spawnType: 0x11);
+        }       
 
         public Zone GetZone(uint id) => Zones.Find(x => x.Id == id);
 
@@ -159,20 +165,19 @@ namespace PrimalLauncher
             Spawn(sender, 0x01);
             toZone.LoadActors();
             User.Instance.Character.Journal.InitializeQuests(sender);
-            toZone.SpawnActors(sender);
+            User.Instance.Character.ToggleZoneActors(sender);
         }
 
         public Director GetDirector(string directorName) => Directors.Find(x => x.GetType().Name == directorName + "Director");        
 
         public void MassDeleteActors(Socket sender)
-        {
-            PlayerCharacter playerCharacter = User.Instance.Character;
-            Zone zone = Zones.Find(x => x.Id == playerCharacter.Position.ZoneId);
+        {            
+            Zone zone = User.Instance.Character.GetCurrentZone();
 
             if(zone.Actors != null && zone.Actors.Count > 0) //anti-crash for debugging
                 zone.Actors.ForEach(x => x.Spawned = false); // 'despawn' zone actors.
 
-            Packet.Send(sender, ServerOpcode.MassDeleteEnd, new byte[0x08], playerCharacter.Id, playerCharacter.Id);
+            Packet.Send(sender, ServerOpcode.MassDeleteEnd, new byte[0x08], User.Instance.Character.Id, User.Instance.Character.Id);
         }
 
         public void MapUIChange(Socket sender, uint code)

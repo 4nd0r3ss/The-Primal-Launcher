@@ -7,23 +7,8 @@ namespace PrimalLauncher
     public class Director : Actor
     {
         public Director()
-        {
-            uint idMask = 0;
-
-            switch (User.Instance.Character.InitialTown)
-            {
-                case 1:
-                    idMask = 0x66080000;
-                    break;
-                case 2:
-                    idMask = 0x65300000;
-                    break;
-                case 3:
-                    idMask = 0x64000000; 
-                    break;                
-            }
-
-            Id = idMask + (uint)World.Instance.Directors.Count + 1;
+        {           
+            Id = (6 << 28 | User.Instance.Character.GetCurrentZone().Id << 19 | (uint)World.Instance.Directors.Count + 1) ;
             ClassName = GetType().Name;
             ClassCode = 0x30400000;
             Appearance.BaseModel = 0;

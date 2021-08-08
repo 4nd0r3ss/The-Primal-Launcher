@@ -446,6 +446,9 @@
       <classId>1001471</classId>
       <position x="-226.15" y="190" z="46.2" r="2.45" />
       <animation>1015</animation>
+      <talkFunctions>
+        <talkFunction name="downTownTalk" />
+      </talkFunctions>
       <events>
         <talkDefault priority="4" enabled="1" />
         <noticeEvent priority="0" enabled="0" />
@@ -700,16 +703,7 @@
         <talkDefault priority="4" enabled="1" />
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
-    <Populace className="PopulaceCompanyWarp">
-      <classId>1500327</classId>
-      <position x="-187.61" y="190" z="15.88" r="-1.04" />
-      <animation>0</animation>
-      <events>
-        <talkDefault priority="4" enabled="1" />
-        <noticeEvent priority="0" enabled="0" />
-      </events>
-    </Populace>
+    </Populace>    
     <Populace className="Shop/PopulaceShopSalesman">
       <classId>1600043</classId>
       <position x="-109.62" y="198" z="80.59" r="-1.29" />
@@ -890,37 +884,54 @@
         <noticeEvent priority="0" enabled="0" />
       </events>
     </Populace>
-    <Populace className="DoorStandard">
+    <MapObj className="DoorStandard">
       <classId>5900001</classId>
       <position x="-183" y="191" z="100" r="0" />
       <animation>0</animation>
       <events>
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
-    <Populace className="DoorStandard">
+    </MapObj>
+    <MapObj className="DoorStandard">
       <classId>5900001</classId>
       <position x="-91" y="196" z="56" r="0" />
       <animation>0</animation>
       <events>
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
-    <Populace className="DoorStandard">
+    </MapObj>
+    <MapObj className="DoorStandard">
       <classId>5900001</classId>
       <position x="-64" y="196" z="40" r="0" />
       <animation>0</animation>
       <events>
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
-    <Populace className="DoorStandard">
+    </MapObj>
+    <MapObj className="DoorStandard">
       <classId>5900001</classId>
       <position x="-48" y="196" z="67" r="0" />
       <animation>0</animation>
       <events>
         <noticeEvent priority="0" enabled="0" />
       </events>
+    </MapObj>
+    <Populace className="PopulaceStandard">
+      <classId>1200288</classId>
+      <position x="-151.2" y="198" z="160.5" r="0" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+      </events>
     </Populace>
+    <Populace className="PopulaceStandard">
+      <classId>1200288</classId>
+      <position x="-39" y="192.1" z="39.9" r="0" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+      </events>
+    </Populace>
+    
   </npc>
 </chara>

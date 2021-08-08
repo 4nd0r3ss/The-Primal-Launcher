@@ -49,6 +49,8 @@ namespace PrimalLauncher
         public ChocoboAppearance ChocoboAppearance { get; set; }
         public bool HasGobbue { get; set; }
 
+        private uint SpawnDistance { get; set; }
+
         public void Setup(byte[] data)
         {
             //Character ID
@@ -115,7 +117,7 @@ namespace PrimalLauncher
             Jobs[CurrentClassId].IsCurrent = true; //current class the player will start with.                        
             LoadInitialEquipment();
 
-            Position = Position.GetInitialPosition(InitialTown);
+            Position = EntryPoints.GetStartPosition(InitialTown);
             Journal = new Journal(InitialTown);
         }
 
@@ -221,7 +223,8 @@ namespace PrimalLauncher
         public void Spawn(Socket sender, ushort spawnType = 0x01, ushort isZoning = 0)
         {
             PacketQueue = null;
-            State.Main = MainState.Passive;            
+            State.Main = MainState.Passive;
+            SpawnDistance = 30;
 
             //remove later
             if (CharaWork == null)
@@ -294,11 +297,11 @@ namespace PrimalLauncher
             {                
                 World.Instance.Directors.Add(new OpeningDirector());
                 World.Instance.Directors.Add(new QuestDirector());    
-                Journal.Quests[0].StartPhase(sender);
+                //Journal.Quests[0].StartPhase(sender);
                 OpeningDirector director = (OpeningDirector)World.Instance.GetDirector("Opening");
                 director.Spawn(sender);
                 director.StartEvent(sender);
-                GetCurrentZone().ExcludeActorType = "Monster";
+                GetCurrentZone().NpcFile = "opening.npc.xml";
             }            
         }   
 
@@ -716,7 +719,36 @@ namespace PrimalLauncher
             }
 
             Packet.Send(sender, ServerOpcode.CommandResult01, data);
-        }       
+        }   
+        
+        public void ToggleZoneActors(Socket sender)
+        {
+            foreach (Actor actor in GetCurrentZone().Actors)
+            {
+                //if actor position is inside player's aquare...
+                if (
+                   actor.Position.X >= (Position.X - SpawnDistance) &&
+                   actor.Position.X <= (Position.X + SpawnDistance) &&
+
+                   actor.Position.Y >= (Position.Y - SpawnDistance) &&
+                   actor.Position.Y <= (Position.Y + SpawnDistance) &&
+
+                   actor.Position.Z >= (Position.Z - SpawnDistance) &&
+                   actor.Position.Z <= (Position.Z + SpawnDistance)
+                )
+                {
+                    //if actor is not spawned, spawn and add to remove exemption list.
+                    if (!actor.Spawned)
+                        actor.Spawn(sender);
+                }
+                else
+                {
+                    //if actor is NOT inside the player's square, set it do despawn.
+                    if (actor.Spawned)
+                        actor.Despawn(sender);
+                }
+            }
+        }
 
         public void ToggleMount(Socket sender, Command command, bool isChocobo)
         {         
@@ -965,6 +997,19 @@ namespace PrimalLauncher
         }
 
         #region Position Methods
+        public void GoForward(Socket sender, float distance)
+        {
+            Position.X += (float)(distance * Math.Sin(Position.R));
+            Position.Z += (float)(distance * Math.Cos(Position.R));
+            SetPosition(sender);
+        }
+
+        public void TurnBack(Socket sender, float distance)
+        {
+            Position.R = (3.2f - Math.Abs(Position.R)) * (Position.R <= 0 ? 1 : -1);
+            GoForward(sender, distance);
+        }
+
         public void GetPosition(Socket sender, ushort spawnType = 0, ushort isZonning = 0)
         {
             base.SetPosition(sender, spawnType, isZonning, true);
@@ -984,16 +1029,26 @@ namespace PrimalLauncher
             SetPosition(sender, (uint)offset[0], offset[1], offset[2], offset[3], offset[4], (ushort)offset[5]);
         }
 
-        public void UpdatePosition(byte[] data)
+        public void UpdatePosition(Socket sender, byte[] data)
         {
             //get player character
             PlayerCharacter pc = User.Instance.Character;
 
+            //position from packet
+            float x = BitConverter.ToSingle(new byte[] { data[0x18], data[0x19], data[0x1a], data[0x1b] }, 0);
+            float y = BitConverter.ToSingle(new byte[] { data[0x1c], data[0x1d], data[0x1e], data[0x1f] }, 0);
+            float z = BitConverter.ToSingle(new byte[] { data[0x20], data[0x21], data[0x22], data[0x23] }, 0);
+            float r = BitConverter.ToSingle(new byte[] { data[0x24], data[0x25], data[0x26], data[0x27] }, 0);
+
+            //execute toggle zone actors only if position changes
+            if(x != pc.Position.X || y != pc.Position.Y || z != pc.Position.Z)
+                ToggleZoneActors(sender);
+
             //get player position from packet
-            pc.Position.X = BitConverter.ToSingle(new byte[] { data[0x18], data[0x19], data[0x1a], data[0x1b] }, 0);
-            pc.Position.Y = BitConverter.ToSingle(new byte[] { data[0x1c], data[0x1d], data[0x1e], data[0x1f] }, 0);
-            pc.Position.Z = BitConverter.ToSingle(new byte[] { data[0x20], data[0x21], data[0x22], data[0x23] }, 0);
-            pc.Position.R = BitConverter.ToSingle(new byte[] { data[0x24], data[0x25], data[0x26], data[0x27] }, 0);
+            pc.Position.X = x;
+            pc.Position.Y = y;
+            pc.Position.Z = z;
+            pc.Position.R = r;
 
             //byte[] moveState = new byte[] { data[0x28], data[0x29] }; //unused so far. maybe part of mouse positioning?
             //byte[] mousePosition = byte[] { data[0x2a], data[0x2b] }; //2d mouse cursor hud position?
@@ -1001,8 +1056,8 @@ namespace PrimalLauncher
 
             //save player position 
             User.Instance.AccountList[0].CharacterList[pc.Slot] = pc;
-            User.Instance.Save();           
-        }
+            User.Instance.Save();
+        }     
         #endregion
 
         public uint NewId()

@@ -10,9 +10,9 @@
       <step actorClassId="1001652" event="talkDefault" value="processTtrNomal003" />
     </phase>
     <phase>
-      <step actorClassId="1001652" event="talkDefault" value="processTtrMini001" onExecute="QuestIcon:0" />
-      <step actorClassId="1000447" event="talkDefault" value="processTtrMini002" onExecute="QuestIcon:0" />
-      <step actorClassId="1000442" event="talkDefault" value="processTtrMini003" onExecute="QuestIcon:0" />
+      <step actorClassId="1001652" event="talkDefault" value="processTtrMini001" onExecute="QuestIcon:0" onFinish="CloseTutorialDialog" />
+      <step actorClassId="1000447" event="talkDefault" value="processTtrMini002" onExecute="QuestIcon:0" onFinish="CloseTutorialDialog" />
+      <step actorClassId="1000442" event="talkDefault" value="processTtrMini003" onExecute="QuestIcon:0" onFinish="CloseTutorialDialog" />
     </phase>
     <phase>
       <step actorClassId="1090025" event="questIcon" value="3" />
@@ -31,7 +31,7 @@
   <quest id="110002" name="Man0l001">
     <phase>
       <step actorClassId="1000137" event="questIcon" value="2" />
-      <step actorClassId="1000137" event="talkDefault" value="processEvent020" />
+      <step actorClassId="1000137" event="talkDefault" value="processEvent020" onExecute="QuestIcon:0" endPhase="true" onFinish="GoToZone:133" />
     </phase>
   </quest>
   <quest id="110005" name="Man0g001" startRegion="166">
@@ -68,7 +68,7 @@
       <step actorClassId="1099047" event="pushDefault" value="processTtrBlkNml001" repeatable="true" onFinish="SetPlayerPosition:5,109.3,8.2,-1207.6,0.4,15" />
     </phase>
   </quest>
-  <quest id="110006" name="Man0g001" startRegion="155">
+  <quest id="110006" name="Man0g001" startRegion="184">
     <phase>
       <step actorClassId="1000876" event="questIcon" value="0" />
       <step actorClassId="1000230" event="questIcon" value="2" />
@@ -88,9 +88,48 @@
       <step actorClassId="1099047" event="pushDefault" value="processTtrBlkNml001" repeatable="true" onFinish="SetPlayerPosition:5,109.3,8.2,-1207.6,0.4,15" />
     </phase>
   </quest>  
-  <quest id="110009" name="Man0u001" startRegion="155">
+  <quest id="110009" name="Man0u001" startRegion="184">
     <phase>
-      <step actorClassId="1000876" event="questIcon" value="0" />      
+      <step actorClassId="1000042" event="questIcon" value="2" />
+      <step actorClassId="1001491" event="questIcon" value="2" />
+      <step actorClassId="1001495" event="questIcon" value="2" />
+      <step actorId="1707081729" event="noticeEvent" value="processTtrNomal001withHQ" />
+      <step actorClassId="1000042" event="pushDefault" value="processTtrNomal002" onExecute="Enabled:0" />
+      <step actorClassId="1000042" event="talkDefault" value="processTtrNomal003" onExecute="QuestIcon:0" />
+      <step actorClassId="1090373" event="exit" onExecute="TurnBack:5" repeatable="true" phaseIgnore="true" />
+      <step actorClassId="1090372" event="pushDefault" onExecute="TurnBack:5" repeatable="true" phaseIgnore="true" />
     </phase>
-  </quest> 
+    <phase>
+      <step actorClassId="1000042" event="questIcon" value="2" />
+      <step actorClassId="1001491" event="talkDefault" value="processTtrMini002_first" onExecute="QuestIcon:0" onFinish="CloseTutorialDialog" />
+      <step actorClassId="1001495" event="talkDefault" value="processTtrMini003_first" onExecute="QuestIcon:0" onFinish="CloseTutorialDialog" />
+      <step actorClassId="1000042" event="talkDefault" value="processTtrMini001" onExecute="QuestIcon:0" onFinish="CloseTutorialDialog" />
+      <step actorClassId="1090373" event="exit" onExecute="TurnBack:5" repeatable="true" phaseIgnore="true" />
+      <step actorClassId="1090372" event="pushDefault" onExecute="TurnBack:5" repeatable="true" phaseIgnore="true" />
+    </phase>
+    <phase>
+      <step actorClassId="1090372" event="questIcon" value="3" />
+      <step actorClassId="1000042" event="talkDefault" value="processTtrMini001" repeatable="true" phaseIgnore="true" />
+      <step actorClassId="1001491" event="talkDefault" value="processTtrMini002" repeatable="true" phaseIgnore="true" />
+      <step actorClassId="1001495" event="talkDefault" value="processTtrMini003" repeatable="true" phaseIgnore="true" />
+      <step actorClassId="1090372" event="pushDefault" onExecute="QuestIcon:0" onFinish="BattleTutorialStart" />
+      <step actorClassId="1090373" event="exit" onExecute="TurnBack:5" repeatable="true" phaseIgnore="true" />
+    </phase>
+    <phase>
+      <step actorId="1707081730" event="noticeEvent" value="processTtrBtl001" />
+      <step event="commandForced" value="noticeEvent" />
+      <step actorId="1707081730" event="noticeEvent" value="processTtrBtl002" />
+      <step actorId="1707081730" event="noticeEvent" value="processEvent020" onExecute="AddKeyItem:velodyna cosmos" onDelegate="sleep:5" />      
+    </phase>
+    <phase>
+      <step actorClassId="1500129" event="questIcon" value="2" />     
+      <step actorClassId="1099046" event="pushDefault" value="processEventMomodiStart" onExecute="QuestIcon:0;FinishQuest:110009;AddQuest:110010" enabled="0" parameters="none" onFinish="GoToPrivateZone:8" />
+    </phase>
+  </quest>
+  <quest id="110010" name="Man0u001" startRegion="175">
+    <phase>
+      <step actorClassId="1000841" event="questIcon" value="2" />
+      <step actorClassId="1000841" event="talkDefault" value="processEvent010" onExecute="QuestIcon:0" endPhase="true" onFinish="GoToZone:175" />
+    </phase>
+  </quest>
 </quests>

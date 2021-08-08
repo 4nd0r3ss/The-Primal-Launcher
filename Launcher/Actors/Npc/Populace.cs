@@ -9,10 +9,6 @@ namespace PrimalLauncher
 {
     public class Populace : Actor
     {
-       
-        
-        public string QuestFunction { get; set; }
-
         public Populace()
         {
             ClassPath = "/chara/npc/populace/";           
@@ -67,18 +63,6 @@ namespace PrimalLauncher
             };
 
             Packet.Send(sender, ServerOpcode.ActorInit, data, Id);
-        }
-
-        #region Event methods       
-        //public override void talkDefault(Socket sender)
-        //{            
-        //    EventManager.Instance.CurrentEvent.DelegateEvent(sender, 0x1AFCD, TalkFunction);           
-        //}
-
-        //public override void pushDefault(Socket sender)
-        //{     
-        //    //EventManager.Instance.CurrentEvent.DelegateEvent(sender, 0x1ADB1, "processTtrNomal002");            
-        //}
-        #endregion
+        }              
     }
 }

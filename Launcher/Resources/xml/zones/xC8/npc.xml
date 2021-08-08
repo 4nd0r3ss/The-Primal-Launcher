@@ -35,37 +35,37 @@
         <noticeEvent priority="0" enabled="0" />
       </events>
     </Populace>
-    <Populace className="DoorStandard">
+    <MapObj className="DoorStandard">
       <classId>5900001</classId>
       <position x="-10.242" y="7.75" z="133.405" r="0" />
       <animation>0</animation>
       <events>
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
-    <Populace className="DoorStandard">
+    </MapObj>
+    <MapObj className="DoorStandard">
       <classId>5900001</classId>
       <position x="4.066" y="4.76" z="133.573" r="0" />
       <animation>0</animation>
       <events>
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
-    <Populace className="DoorStandard">
+    </MapObj>
+    <MapObj className="DoorStandard">
       <classId>5900001</classId>
       <position x="10.211" y="7.75" z="-133.43" r="0" />
       <animation>0</animation>
       <events>
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
-    <Populace className="DoorStandard">
+    </MapObj>
+    <MapObj className="DoorStandard">
       <classId>5900001</classId>
       <position x="-4.066" y="4.76" z="-133.573" r="0" />
       <animation>0</animation>
       <events>
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
+    </MapObj>
   </npc>
 </chara>

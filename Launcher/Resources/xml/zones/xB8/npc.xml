@@ -1,65 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <chara>
   <npc>
-    <populace className="PopulaceStandard">
-      <classId>1000042</classId>
-      <position x="-1.5" y="196" z="124.5" r="1.8" />
-      <animation>0</animation>
-    </populace>
-    <populace className="PopulaceStandard">
-      <classId>1000186</classId>
-      <position x="-0.2" y="196" z="123.26" r="-0.8" />
-      <animation>0</animation>
-    </populace>
-    <populace className="PopulaceStandard">
-      <classId>1001644</classId>
-      <position x="12.18" y="196" z="133.42" r="-1.26" />
-      <animation>1017</animation>
-    </populace>
-    <populace className="PopulaceChocoboLender">
-      <classId>1000840</classId>
-      <position x="9.07" y="196" z="126.69" r="-1.26" />
-      <animation>1017</animation>
-    </populace>
-    <populace className="PopulaceStandard">
-      <classId>1001490</classId>
-      <position x="-19.7" y="196" z="79.93" r="-0.38" />
-      <animation>1009</animation>
-    </populace>
-    <populace className="PopulaceStandard">
-      <classId>1001491</classId>
-      <position x="3.4" y="196" z="115.5" r="2.7" />
-      <animation>1021</animation>
-    </populace>
-    <populace className="PopulaceStandard">
-      <classId>1001492</classId>
-      <position x="0.8" y="196" z="103.18" r="-1.13" />
-      <animation>1015</animation>
-    </populace>
-    <populace className="PopulaceStandard">
-      <classId>1001493</classId>
-      <position x="-33.57" y="196" z="82.42" r="1.63" />
-      <animation>1013</animation>
-    </populace>
-    <populace className="PopulaceStandard">
-      <classId>1001494</classId>
-      <position x="-9.13" y="196" z="114.84" r="2.33" />
-      <animation>1031</animation>
-    </populace>
-    <populace className="PopulaceStandard">
-      <classId>1001495</classId>
-      <position x="-19.11" y="196" z="95.09" r="2.13" />
-      <animation>1037</animation>
-    </populace>
-    <populace className="PopulaceStandard">
-      <classId>1001496</classId>
-      <position x="-32.37" y="196" z="80.75" r="-0.74" />
-      <animation>1101</animation>
-    </populace>
-    <populace className="PopulaceStandard">
-      <classId>1090372</classId>
-      <position x="-13" y="194.91" z="76.75" r="-2.72" />
-      <animation>0</animation>
-    </populace>
+    
   </npc>
 </chara>

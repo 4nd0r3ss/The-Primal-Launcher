@@ -1,0 +1,83 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<chara>
+  <npc>
+    <CompanyWarp className="PopulaceCompanyWarp" region="103" zone="206" id="1">
+      <classId>1500324</classId>
+      <position x="-112.0" y="16.3" z="-1337.4" r="-2.2" />
+    </CompanyWarp>   
+    <CompanyWarp className="PopulaceCompanyWarp" region="103" zone="155" id="2">
+      <classId>1500334</classId>
+      <position x="97.81" y="3.53" z="-1213.97" r="-0.21" />  
+    </CompanyWarp>
+    <CompanyWarp className="PopulaceCompanyWarp" region="103" zone="206" id="3">
+      <classId>1500326</classId>
+      <position x="87.4" y="20.16" z="-1423.39" r="-0.22" />
+    </CompanyWarp>
+    <CompanyWarp className="PopulaceCompanyWarp" region="103" zone="206" id="4">
+      <classId>1500333</classId>
+      <position x="-82.66" y="19.06" z="-1500.24" r="-2.27" />
+    </CompanyWarp>   
+    <CompanyWarp className="PopulaceCompanyWarp" region="103" zone="206" id="5">
+      <classId>1500325</classId>
+      <position x="201.78" y="9.53" z="-1245.48" r="1.53" />
+    </CompanyWarp>
+    <CompanyWarp className="PopulaceCompanyWarp" region="103" zone="206" id="6">
+      <classId>1500335</classId>
+      <position x="163.75" y="25.06" z="-1558.3" r="-1.17" />  
+    </CompanyWarp>  
+    
+    <CompanyWarp className="PopulaceCompanyWarp" region="104" zone="175" id="1">
+      <classId>1500327</classId>
+      <position x="-187.61" y="190" z="15.88" r="-1.04" /> 
+    </CompanyWarp>
+    <CompanyWarp className="PopulaceCompanyWarp" region="104" zone="175" id="2">
+      <classId>1500336</classId>
+      <position x="-38" y="192.1" z="40.3" r="2.8" />
+    </CompanyWarp>
+    <CompanyWarp className="PopulaceCompanyWarp" region="104" zone="209" id="3">
+      <classId>1500338</classId>
+      <position x="-192" y="230" z="205.4" r="0" />
+    </CompanyWarp>
+    <CompanyWarp className="PopulaceCompanyWarp" region="104" zone="209" id="4">
+      <classId>1500337</classId>
+      <position x="-64.8" y="200" z="258.5" r="2" />
+    </CompanyWarp>
+    <CompanyWarp className="PopulaceCompanyWarp" region="104" zone="209" id="5">
+      <classId>1500328</classId>
+      <position x="-151.2" y="198" z="159.5" r="1.6" />
+    </CompanyWarp>
+    <CompanyWarp className="PopulaceCompanyWarp" region="104" zone="209" id="6">
+      <classId>1500329</classId>
+      <position x="-263.5" y="202" z="201" r="0.3" />
+    </CompanyWarp>
+    
+    <CompanyWarp className="PopulaceCompanyWarp" region="101" zone="230" id="1">
+      <classId>1500332</classId>
+      <position x="-426.9" y="42" z="367.9" r="0.5" />
+    </CompanyWarp>
+    <CompanyWarp className="PopulaceCompanyWarp" region="101" zone="133" id="2">
+      <classId>1500339</classId>
+      <position x="-440" y="40" z="238" r="3.2" /> 
+    </CompanyWarp>
+    <CompanyWarp className="PopulaceCompanyWarp" region="101" zone="133" id="3">
+      <classId>1500330</classId>
+      <position x="-492" y="44" z="64.1" r="-3" />
+    </CompanyWarp>
+    <CompanyWarp className="PopulaceCompanyWarp" region="101" zone="230" id="4">
+      <classId>1500323</classId>
+      <position x="-765.9" y="12" z="242.2" r="-3" />
+    </CompanyWarp>
+    <CompanyWarp className="PopulaceCompanyWarp" region="101" zone="230" id="5">
+      <classId>1500322</classId>
+      <position x="-622.7" y="4" z="374.2" r="2.4" /> 
+    </CompanyWarp>
+    <CompanyWarp className="PopulaceCompanyWarp" region="101" zone="230" id="6">
+      <classId>1500321</classId>
+      <position x="-525.5" y="18" z="168.8" r="0" />
+    </CompanyWarp>
+    <CompanyWarp className="PopulaceCompanyWarp" region="101" zone="133" id="7">
+      <classId>1500331</classId>
+      <position x="-236" y="12" z="195.8" r="2.3" /> 
+    </CompanyWarp>
+  </npc>
+</chara>

@@ -203,6 +203,7 @@
     <Compile Include="Actors\CharaWork.cs" />
     <Compile Include="Actors\Directors\Director.cs" />
     <Compile Include="Actors\Directors\QuestDirector.cs" />
+    <Compile Include="Actors\Npc\CompanyWarp.cs" />
     <Compile Include="Actors\Npc\MapObj.cs" />
     <Compile Include="Actors\Npc\Monster.cs" />
     <Compile Include="Actors\Npc\Object.cs" />
@@ -262,7 +263,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Servers\Server.cs" />
     <Compile Include="Servers\UpdateServer.cs" />
-    <Compile Include="System\TestPackets.cs" />
     <Compile Include="UI\ucAbout.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -309,8 +309,8 @@
     <EmbeddedResource Include="UI\ucOptions.resx">
       <DependentUpon>ucOptions.cs</DependentUpon>
     </EmbeddedResource>
-    <None Include="app.config" />
-    <None Include="packages.config" />
+    <EmbeddedResource Include="app.config" />
+    <EmbeddedResource Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -335,6 +335,21 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="icon.ico" />
+    <EmbeddedResource Include="Resources\xml\CompanyWarp.xml" />
+    <EmbeddedResource Include="Resources\xml\AetheryteList.xml" />
+    <EmbeddedResource Include="Resources\xml\zones\xE9\npc.xml" />
+    <EmbeddedResource Include="Resources\xml\zones\xB8\opening\npc.xml" />
+    <EmbeddedResource Include="Resources\xml\zones\xB8\opening\monster.xml" />
+    <EmbeddedResource Include="Resources\xml\zones\xC1\opening\npc.xml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\xml\zones\xC1\opening\monster.xml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\xml\zones\xA6\opening\monster.xml" />
+    <EmbeddedResource Include="Resources\xml\zones\xA6\opening\npc.xml" />
+    <EmbeddedResource Include="Resources\xml\zones\x8\npc.xml" />
+    <EmbeddedResource Include="Resources\xml\zones\x1\npc.xml" />
     <EmbeddedResource Include="Resources\xml\zones\xF5\npc.xml" />
     <EmbeddedResource Include="Resources\xml\zones\xF4\npc.xml" />
     <EmbeddedResource Include="Resources\xml\zones\xE7\npc.xml" />

@@ -38,6 +38,7 @@ namespace PrimalLauncher
         Unknown = 0x0f,
         CreateActor = 0xca,
         SetPosition = 0xce,
+        MoveToPosition = 0xCF,
         SetSpeed = 0xd0,
         SetAppearance = 0xd6,
         BindToMapObj = 0xd8,
@@ -70,6 +71,12 @@ namespace PrimalLauncher
         //Delete actors
         MassDeleteStart = 0x06,
         MassDeleteEnd = 0x07,
+        MassDeletex1 = 0x08,
+        MassDeletex10 = 0x09,
+        MassDeletex20 = 0x0A,
+        MassDeletex40 = 0x0B,        
+        RemoveActor = 0xCB,
+
 
         //Targeting
         UnloadClassScript = 0xcd,
@@ -263,24 +270,11 @@ namespace PrimalLauncher
         Twilight = 8066
     }
 
-    [Serializable]
-    public enum CityState
-    {
-        Limsa = 193,
-        Gridania = 166,
-        UlDah = 184
-    }
-
     public enum AetheryteType
     {
         Crystal = 0x51a6,
         Shard = 0x51a7,
         Gate = 0x51bd
-    }
-
-    public enum Region
-    {
-        //Thanalan = 
     }
 
     /// <summary>

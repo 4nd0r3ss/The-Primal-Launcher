@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<chara>
+  <npc>
+    <Monster family="fighter" className="FighterAllyOpeningHealer">
+      <classId>2290003</classId>
+      <position x="-15.3" y="192" z="35.3" r="0.5" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="1" silent="1" />
+      </events>
+    </Monster>
+    <Monster family="fighter" className="FighterAllyOpeningAttacker">
+      <classId>2290004</classId>
+      <position x="-21" y="192" z="42.4" r="1.2" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="1" silent="1" />
+      </events>
+    </Monster>
+    <Monster family="goobbue" className="GoobbueLesserStandard">
+      <classId>2203301</classId>
+      <position x="-4.4" y="192" z="49.3" r="-2.3" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="1" silent="1" />
+      </events>
+    </Monster>   
+    <Object className="PrivateAreaPastExit">
+      <classId>1290002</classId>
+      <position x="-21.4" y="192" z="36.3" r="1.0" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="1" enabled="1" />
+        <exit radius="40.0" silent="true" outwards="true" enabled="1" action="TurnBack:5" />
+        <caution radius="30.0" silent="true" outwards="true" enabled="1" action="SendTextLeaveInstance" />
+      </events>
+    </Object>
+  </npc>
+</chara>

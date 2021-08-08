@@ -11,6 +11,7 @@ namespace PrimalLauncher
         public uint Id { get; set; }
         public string Name { get; set; }
         public uint StartRegion { get; set; }
+        public int HistoryIndex { get; set; } = 1;
         public OrderedDictionary Phases { get; set; } = new OrderedDictionary();
         public byte PhaseIndex { get; set; } = 0;
 
@@ -60,7 +61,7 @@ namespace PrimalLauncher
 
         public void CheckPhase(Socket sender)
         {
-            if(CurrentPhase.Steps.TrueForAll(x => x.Done == true) && PhaseIndex < Phases.Count-1)
+            if(CurrentPhase.Steps.FindAll(x => !x.PhaseIgnore).TrueForAll(x => x.Done == true) && PhaseIndex < Phases.Count-1)
             {
                 //if all steps are done, we set the phase as done.
                 CurrentPhase.Done = true;
@@ -110,7 +111,7 @@ namespace PrimalLauncher
 
             foreach (var step in Steps)
             {                
-                Populace actorRef = (Populace)zone.Actors.Find(x => x.ClassId == step.ActorClassId);
+                Actor actorRef = zone.Actors.Find(x => x.ClassId == step.ActorClassId);
                 
                 if(actorRef != null)
                 {
@@ -149,12 +150,13 @@ namespace PrimalLauncher
         public string OnDelegate { get; set; }   
         public bool EndPhase { get; set; }
         public uint QuestId { get; set; }
+        public bool PhaseIgnore { get; set; }
 
         public void Execute(Socket sender)
         {
             if (!string.IsNullOrEmpty(OnExecute))
             {
-                Populace actorRef = ActorClassId > 0 ? (Populace)User.Instance.Character.GetCurrentZone().GetActorByClassId(ActorClassId) : null;
+                Actor actorRef = ActorClassId > 0 ? User.Instance.Character.GetCurrentZone().GetActorByClassId(ActorClassId) : null;
                 List<string> tasks = new List<string>();
 
                 if (OnExecute.IndexOf(";") > 0)
@@ -190,6 +192,9 @@ namespace PrimalLauncher
                                 break;
                             case "GoToZone":
                                 World.Instance.ChangeZone(sender, EntryPoints.Get(Convert.ToUInt32(command[1])), 0x0F);
+                                break;
+                            case "TurnBack":
+                                User.Instance.Character.TurnBack(sender, Convert.ToSingle(command[1]));
                                 break;
                         }
                     }

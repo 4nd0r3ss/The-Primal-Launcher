@@ -9,7 +9,7 @@ namespace PrimalLauncher
     [Serializable]
     public class Zone : Actor
     {
-        public string ExcludeActorType { get; set; } = "";
+        public string NpcFile { get; set; } = "";
         public uint RegionId { get; set; }
         public string MapName { get; set; }
         public string LocationName { get; set; }
@@ -55,47 +55,25 @@ namespace PrimalLauncher
             SetMainState(sender);            
             SetIsZoning(sender);
             SetLuaScript(sender);
-        }       
-
-        public void SpawnActors(Socket sender)
-        {       
-            try
-            {
-                for (int i = 0; i < Actors.Count; i++)
-                {
-                    if(Actors[i].GetType().Name != ExcludeActorType)
-                        Actors[i].Spawn(sender);
-                }
-
-                ExcludeActorType = "";
-            }
-            catch (Exception e) { Log.Instance.Error(e.Message); throw e; }
-        }
+        } 
 
         public virtual void LoadActors()
-        {
-            //we want to load actors just once.
-            if (Actors == null)
-            {
-                Actors = new List<Actor>();
-                List<Actor> actors = ActorRepository.Instance.GetZoneNpcs(Id);                
-                int index = 1;
+        {           
+           Actors = new List<Actor>();
+           List<Actor> actors = ActorRepository.Instance.GetZoneNpcs(Id, NpcFile);                
+           actors.AddRange(ActorRepository.Instance.Aetherytes.FindAll(x => x.Position.ZoneId == Id));
+           actors.AddRange(ActorRepository.Instance.GetCompanyWarp(Id));
+           int index = 1;
+            NpcFile = "";
 
-                foreach (Actor actor in actors)
-                {
-                    actor.Id = 4 << 28 | Id << 19 | (uint)index;
-                    Actors.Add(actor);
-                    index++;
-                }
-
-                Actors.AddRange(ActorRepository.Instance.Aetherytes.FindAll(x => x.Position.ZoneId == Id));
-                Log.Instance.Success("Loaded " + Actors.Count + " actors in zone " + LocationName);
-            }            
-        }
-
-        public void LoadMonsters()
-        {
-
+           foreach (Actor actor in actors)
+           {
+               actor.Id = 4 << 28 | Id << 19 | (uint)index;
+               Actors.Add(actor);
+               index++;
+           }
+           
+           Log.Instance.Success("Loaded " + Actors.Count + " actors in zone " + LocationName);                   
         }
 
         public uint GetCurrentBGM()
@@ -132,15 +110,14 @@ namespace PrimalLauncher
             return Actors.Find(x => x.ClassId == classId);
         }
 
-        public void SpawnAsPrivate(string function, string excludeOfType = "")
+        public void SpawnAsInstance(string function, string npcFile = "")
         {
             if(!string.IsNullOrEmpty(function))
                 ContentFunction = function;
 
             PrivLevel = 1;
             Type = ZoneType.Nothing;
-
-            ExcludeActorType = excludeOfType;
+            NpcFile = npcFile;            
         }
 
         public Position GetEntrypoint()

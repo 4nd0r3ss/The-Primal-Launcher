@@ -96,14 +96,14 @@
         <noticeEvent priority="0" enabled="0" />
       </events>
     </Populace>
-    <Populace className="DoorStandard">
+    <MapObj className="DoorStandard">
       <classId>5900001</classId>
       <position x="-206" y="20" z="-1466" r="0" />
       <animation>0</animation>
       <events>
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
+    </MapObj>
     <Populace className="PopulaceStandard">
       <classId>1090046</classId>
       <position x="-202.91" y="18.09" z="-1477.51" r="-1.42" />
@@ -162,22 +162,13 @@
         <talkDefault priority="4" enabled="1" />
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
-    <Populace className="PopulaceCompanyWarp">
-      <classId>1500324</classId>
-      <position x="-106.59" y="17.14" z="-1341.73" r="-2.62" />
-      <animation>0</animation>
-      <events>
-        <talkDefault priority="4" enabled="1" />
-        <noticeEvent priority="0" enabled="0" />
-      </events>
-    </Populace>
+    </Populace>    
     <Populace className="PopulaceStandard">
       <classId>1200288</classId>
-      <position x="-105.7" y="17.13" z="-1342.14" r="1.82" />
-      <animation>0</animation>
+      <position x="-111.8" y="16.5" z="-1338.5" r="1.3" />
+      <animation>0</animation>      
       <events>
-        <noticeEvent priority="0" enabled="0" />
+        <noticeEvent priority="0" enabled="0" />        
       </events>
     </Populace>
     <Populace className="PopulaceStandard">
@@ -189,14 +180,14 @@
         <noticeEvent priority="0" enabled="0" />
       </events>
     </Populace>
-    <Populace className="DoorStandard">
+    <MapObj className="DoorStandard">
       <classId>5900001</classId>
       <position x="-70" y="19" z="-1474" r="0" />
       <animation>0</animation>
       <events>
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
+    </MapObj>
     <Populace className="Shop/PopulaceShopSalesman">
       <classId>1600030</classId>
       <position x="-61.5" y="19" z="-1479.4" r="-1.1" />
@@ -205,16 +196,7 @@
         <talkDefault priority="4" enabled="1" />
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
-    <Populace className="PopulaceCompanyWarp">
-      <classId>1500333</classId>
-      <position x="-82.66" y="19.06" z="-1500.24" r="-2.27" />
-      <animation>0</animation>
-      <events>
-        <talkDefault priority="4" enabled="1" />
-        <noticeEvent priority="0" enabled="0" />
-      </events>
-    </Populace>
+    </Populace>    
     <Populace className="PopulaceStandard">
       <classId>1200288</classId>
       <position x="-81.98" y="19.06" z="-1501.04" r="-2.27" />
@@ -277,62 +259,62 @@
         <noticeEvent priority="0" enabled="0" />
       </events>
     </Populace>
-    <Populace className="DoorStandard">
+    <MapObj className="DoorStandard">
       <classId>5900001</classId>
       <position x="18" y="9" z="-1270" r="0" />
       <animation>0</animation>
       <events>
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
-    <Populace className="DoorStandard">
+    </MapObj>
+    <MapObj className="DoorStandard">
       <classId>5900001</classId>
       <position x="87" y="20" z="-1452" r="0" />
       <animation>0</animation>
       <events>
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
-    <Populace className="DoorStandard">
+    </MapObj>
+    <MapObj className="DoorStandard">
       <classId>5900001</classId>
       <position x="114" y="20" z="-1402" r="0" />
       <animation>0</animation>
       <events>
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
-    <Populace className="DoorStandard">
+    </MapObj>
+    <MapObj className="DoorStandard">
       <classId>5900001</classId>
       <position x="136" y="25" z="-1542" r="0" />
       <animation>0</animation>
       <events>
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
-    <Populace className="DoorStandard">
+    </MapObj>
+    <MapObj className="DoorStandard">
       <classId>5900001</classId>
       <position x="172" y="28" z="-1576" r="0" />
       <animation>0</animation>
       <events>
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
-    <Populace className="DoorStandard">
+    </MapObj>
+    <MapObj className="DoorStandard">
       <classId>5900001</classId>
       <position x="227" y="12" z="-1264" r="0" />
       <animation>0</animation>
       <events>
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
-    <Populace className="DoorStandard">
+    </MapObj>
+    <MapObj className="DoorStandard">
       <classId>5900001</classId>
       <position x="-325" y="8" z="-1669" r="0" />
       <animation>0</animation>
       <events>
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
+    </MapObj>
     <Populace className="PopulaceGuildShop">
       <classId>1000466</classId>
       <position x="11.85" y="8.75" z="-1266.45" r="1.48" />
@@ -836,16 +818,7 @@
         <talkDefault priority="4" enabled="1" />
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
-    <Populace className="PopulaceCompanyWarp">
-      <classId>1500326</classId>
-      <position x="87.4" y="20.16" z="-1423.39" r="-0.22" />
-      <animation>0</animation>
-      <events>
-        <talkDefault priority="4" enabled="1" />
-        <noticeEvent priority="0" enabled="0" />
-      </events>
-    </Populace>
+    </Populace>    
     <Populace className="PopulaceStandard">
       <classId>1000231</classId>
       <position x="97.02" y="20" z="-1459.46" r="-0.48" />
@@ -899,16 +872,7 @@
         <talkDefault priority="4" enabled="1" />
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
-    <Populace className="PopulaceCompanyWarp">
-      <classId>1500325</classId>
-      <position x="201.78" y="9.53" z="-1245.48" r="1.53" />
-      <animation>0</animation>
-      <events>
-        <talkDefault priority="4" enabled="1" />
-        <noticeEvent priority="0" enabled="0" />
-      </events>
-    </Populace>
+    </Populace>    
     <Populace className="PopulaceStandard">
       <classId>1001188</classId>
       <position x="221.77" y="9.4" z="-1230.49" r="-2.29" />
@@ -1106,16 +1070,7 @@
         <talkDefault priority="4" enabled="1" />
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
-    <Populace className="PopulaceCompanyWarp">
-      <classId>1500335</classId>
-      <position x="163.75" y="25.06" z="-1558.3" r="-1.17" />
-      <animation>0</animation>
-      <events>
-        <talkDefault priority="4" enabled="1" />
-        <noticeEvent priority="0" enabled="0" />
-      </events>
-    </Populace>
+    </Populace>    
     <Populace className="PopulaceStandard">
       <classId>1001430</classId>
       <position x="-194" y="23" z="-1610" r="0.9" />

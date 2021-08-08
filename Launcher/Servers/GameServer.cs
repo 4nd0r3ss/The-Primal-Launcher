@@ -204,7 +204,7 @@ namespace PrimalLauncher
                     break;
 
                 case (ushort)ClientOpcode.PlayerPosition:
-                    User.Instance.Character.UpdatePosition(subpacket.Data);
+                    User.Instance.Character.UpdatePosition(_connection.socket, subpacket.Data);
                     break;
 
                 case (ushort)ClientOpcode.Unknown0x07:

@@ -33,7 +33,6 @@ namespace PrimalLauncher
                     parameters.AddRange(message.Split(' '));
                     command = parameters[0];
                     parameters.RemoveAt(0);
-
                 }
                 else
                     command = message;
@@ -94,11 +93,6 @@ namespace PrimalLauncher
 
                         pc.LevelDown(sender, level);
                         break;
-
-                    //case @"\spawn":
-                    //    //_world.ZoneList.GetZone(_user.Character.Position.ZoneId).SpawnActors(sender);
-                    //    break;
-
                     case @"\teleport":
                         if (parameters.Count > 0)
                             World.Instance.TeleportPlayer(sender, Convert.ToUInt32(parameters[0]));
@@ -112,42 +106,57 @@ namespace PrimalLauncher
                             pos.Y = Convert.ToSingle(parameters[1]);
                             pos.Z = Convert.ToSingle(parameters[2]);
 
+                            if(parameters.Count > 3)
+                                pos.R = Convert.ToSingle(parameters[3]);
+
                             pc.Position = pos;
                             pc.GetPosition(sender);
                         }
                         break;
-
-                    case @"\spawn":
-                        if (hasParameters)
+                    case @"\setnpcposition":
+                        if (parameters.Count > 0)
                         {
-                            if (parameters[0] == "antelope")
-                                TestPackets.Antelope(pc.Id, pc.Position, sender);
-                            else if (parameters[0] == "populace")
-                                TestPackets.Populace(pc.Id, pc.Position, sender);
-                            else if (parameters[0] == "company")
-                                TestPackets.CompanyWarp(pc.Id, pc.Position, sender);
-
+                            Actor npc = User.Instance.Character.GetCurrentZone().GetActorByClassId(Convert.ToUInt32(parameters[0]));
+                            Position pos = npc.Position;
+                            pos.X = Convert.ToSingle(parameters[1]);
+                            pos.Y = Convert.ToSingle(parameters[2]);
+                            pos.Z = Convert.ToSingle(parameters[3]);
+                            pos.R = Convert.ToSingle(parameters[4]);
+                            npc.Position = pos;
+                            npc.SetPosition(sender);
                         }
-
-                        //TestPackets.Antelope(pc.Id, pc.Position, sender);
-                        //TestPackets.TeleportInn(UserFactory.Instance.User.Character.Id, UserFactory.Instance.User.Character.Position, sender);                      
-                        //Aetheryte ae = new Aetheryte(1280007, 20925, new Position(128, 582.47f, 54.52f, -1.2f, 0f, 0));
-                        //_log.Info("sent test");
+                        break;
+                    case @"\setnpcanimation":
+                        if (parameters.Count > 0)
+                        {
+                            Actor npc = User.Instance.Character.GetCurrentZone().GetActorByClassId(Convert.ToUInt32(parameters[0]));
+                            npc.SubState.MotionPack = Convert.ToUInt16(parameters[1]);
+                            npc.SetSubState(sender);
+                            npc.SetMainState(sender);
+                        }
                         break;
 
                     case @"\text":
-                        World.Instance.SendTextSheetMessage(sender, ServerOpcode.TextSheetMessage38b, new byte[] {0x01, 0x00, 0xF8, 0x5F, 0xE2, 0x61, 0x20, 0x00, 0x0A, 0x00, 0x3D, 0xA7, 0x36, 0x00, 0x00, 0x00,
-                        0x01, 0x01, 0x0F, 0x00, 0x00, 0x00, 0x00, 0x00 });
-                        World.Instance.SendTextSheetMessage(sender, ServerOpcode.TextSheetMessage38b, new byte[] {0x01, 0x00, 0xF8, 0x5F, 0xAE, 0x62, 0x20, 0x00, 0x0A, 0x00, 0x2E, 0x17, 0x3B, 0x00, 0x00, 0x00,
-                        0x63, 0x01, 0x0F, 0x00, 0x00, 0x00, 0x00, 0x00 });
-                        World.Instance.SendTextSheetMessage(sender, ServerOpcode.TextSheetMessageNoSource28b, new byte[] { 0x01, 0x00, 0xF8, 0x5f, 0xc8, 0x61, 0x20, 0x00 });
-
-
-
-
+                        //World.Instance.SendTextSheetMessage(sender, ServerOpcode.TextSheetMessage38b, new byte[] {0x01, 0x00, 0xF8, 0x5F, 0xE2, 0x61, 0x20, 0x00, 0x0A, 0x00, 0x3D, 0xA7, 0x36, 0x00, 0x00, 0x00,
+                        //0x01, 0x01, 0x0F, 0x00, 0x00, 0x00, 0x00, 0x00 });
+                        //World.Instance.SendTextSheetMessage(sender, ServerOpcode.TextSheetMessage38b, new byte[] {0x01, 0x00, 0xF8, 0x5F, 0xAE, 0x62, 0x20, 0x00, 0x0A, 0x00, 0x2E, 0x17, 0x3B, 0x00, 0x00, 0x00,
+                        //0x63, 0x01, 0x0F, 0x00, 0x00, 0x00, 0x00, 0x00 });
+                        //World.Instance.SendTextSheetMessage(sender, ServerOpcode.TextSheetMessageNoSource28b, new byte[] { 0x01, 0x00, 0xF8, 0x5f, 0xc8, 0x61, 0x20, 0x00 });
                         //World.Instance.SendTextSheetMessage(sender, ServerOpcode.TextSheetMessageNoSource28b, new byte[] { 0xB6, 0xAD, 0xF1, 0xA0, 0x62, 0x01, 0x20, 0x00 });
+                        
+                        uint qids = Convert.ToUInt32(parameters[0]);
 
 
+                        object[] toSend = new object[] { "attention", (uint)0x5FF80001, "", qids };
+
+                        byte[] datat = new byte[0xC0];
+                        LuaParameters parameterss = new LuaParameters();
+
+                        foreach (object obj in toSend)
+                            parameterss.Add(obj);
+
+                        LuaParameters.WriteParameters(ref datat, parameterss, 0);
+                        Packet.Send(sender, ServerOpcode.GeneralData, datat);
                         break;
 
                     case @"\questtext":
@@ -219,23 +228,48 @@ namespace PrimalLauncher
                             Data = anim
                         }).ToBytes());
                         break;
-
-                    case @"\mapui":
-                        uint code = 0;
-
+                   
+                    case @"\advancequest":
                         if (hasParameters)
-                            code = Convert.ToUInt32(parameters[0]);
-
-                        //User.Instance.Character.ToggleControl(sender, code);
+                        {
+                            User.Instance.Character.Journal.AdvanceQuestHistory(Convert.ToUInt32(parameters[0]));
+                        }
+                        break;
+                    case @"\resetquest":
+                        if (hasParameters)
+                        {
+                            User.Instance.Character.Journal.ResetQuestHistory(Convert.ToUInt32(parameters[0]));
+                        }
+                        break;
+                    case @"\forward":
+                        if (hasParameters)  
+                            User.Instance.Character.GoForward(sender, Convert.ToSingle(parameters[0]));                        
+                        break;
+                    case @"\turnback":
+                        if (hasParameters)
+                            User.Instance.Character.TurnBack(sender, Convert.ToSingle(parameters[0]));
                         break;
 
                     default:
                         SendMessage(sender, MessageType.System, "Unknown command.");
                         break;
+                    case @"\changetalk":
+                        if (hasParameters)
+                        {
+                            Actor actor = User.Instance.Character.GetCurrentZone().GetActorByClassId(1000807);
+                            actor.Events.Find(x => x.Name == "talkDefault").Action = "processEvent000_" + parameters[0];
+                        }
+                        break;
+                    case @"\changemap":
+                        if (hasParameters)
+                        {
+                            User.Instance.Character.Position.ZoneId = Convert.ToUInt32(parameters[0]);
+                        }
+                        break;
                 }
             }
             else
-                SendMessage(sender, MessageType.System, "Sorry, no one is listening. What a lonely life...");
+                SendMessage(sender, MessageType.System, "Sorry, nobody is listening. What a lonely life...");
         }
 
         /// <summary>
