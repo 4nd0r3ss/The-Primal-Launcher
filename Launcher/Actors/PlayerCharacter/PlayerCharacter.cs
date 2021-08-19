@@ -1040,9 +1040,16 @@ namespace PrimalLauncher
             float z = BitConverter.ToSingle(new byte[] { data[0x20], data[0x21], data[0x22], data[0x23] }, 0);
             float r = BitConverter.ToSingle(new byte[] { data[0x24], data[0x25], data[0x26], data[0x27] }, 0);
 
-            //execute toggle zone actors only if position changes
-            if(x != pc.Position.X || y != pc.Position.Y || z != pc.Position.Z)
+            //execute toggle zone actors only if:
+            //zone is not instance, is not inn, position changed
+            if(
+                pc.GetCurrentZone().PrivLevel != 1 && 
+                pc.Position.ZoneId != 0xF4 && 
+                (x != pc.Position.X || y != pc.Position.Y || z != pc.Position.Z)
+            )
+            {
                 ToggleZoneActors(sender);
+            }                
 
             //get player position from packet
             pc.Position.X = x;
@@ -1050,6 +1057,7 @@ namespace PrimalLauncher
             pc.Position.Z = z;
             pc.Position.R = r;
 
+            //this might be useful someday...
             //byte[] moveState = new byte[] { data[0x28], data[0x29] }; //unused so far. maybe part of mouse positioning?
             //byte[] mousePosition = byte[] { data[0x2a], data[0x2b] }; //2d mouse cursor hud position?
             //byte[] cameraRotation = new byte[] { data[0x2c], data[0x2d], data[0x2e], data[0x2f] }; //indicates the camera rotation (maybe it's 2 shorts?).

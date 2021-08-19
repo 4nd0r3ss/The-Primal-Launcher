@@ -75,8 +75,12 @@ namespace PrimalLauncher
             Debug.Spawn(sender);
             Spawn(sender, 0x01);
 
-            User.Instance.Character.SetUnendingJourney(sender);
-            User.Instance.Character.SetEntrustedItems(sender);
+            if(zone.Id == 0xF4) //if it's inn
+            {
+                User.Instance.Character.SetUnendingJourney(sender);
+                User.Instance.Character.SetEntrustedItems(sender);
+            }
+            
             User.Instance.Character.Journal.InitializeQuests(sender);
             User.Instance.Character.ToggleZoneActors(sender);
         }
@@ -146,7 +150,27 @@ namespace PrimalLauncher
             MassDeleteActors(sender);
             User.Instance.Character.Position = position;
             ChangeZone(sender, position: position, spawnType: 0x11);
-        }       
+        }
+
+        public void TeleportPlayerToAetheryte(Socket sender, Aetheryte destinationAetheryte)
+        {
+            if (destinationAetheryte != null)
+            {
+                Position aethPosition = destinationAetheryte.Position;
+                Position newPosition = new Position
+                {
+                    ZoneId = aethPosition.ZoneId,
+                    X = aethPosition.X + (float)(7 * Math.Sin(aethPosition.R)),
+                    Z = aethPosition.Z + (float)(7 * Math.Cos(aethPosition.R)),
+                    Y = aethPosition.Y,
+                    R = aethPosition.R + 0.8f
+                };
+
+                TeleportPlayer(sender, newPosition);
+            }
+            else
+                Log.Instance.Error("Something went wrong, aetheryte not found.");
+        }
 
         public Zone GetZone(uint id) => Zones.Find(x => x.Id == id);
 
@@ -164,8 +188,16 @@ namespace PrimalLauncher
             Debug.Spawn(sender);
             Spawn(sender, 0x01);
             toZone.LoadActors();
+
+            if (toZone.Id == 0xF4) //if it's inn
+            {
+                User.Instance.Character.SetUnendingJourney(sender);
+                User.Instance.Character.SetEntrustedItems(sender);
+                User.Instance.Character.ToggleZoneActors(sender);
+            }
+
             User.Instance.Character.Journal.InitializeQuests(sender);
-            User.Instance.Character.ToggleZoneActors(sender);
+            //
         }
 
         public Director GetDirector(string directorName) => Directors.Find(x => x.GetType().Name == directorName + "Director");        

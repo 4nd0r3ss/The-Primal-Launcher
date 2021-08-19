@@ -200,10 +200,10 @@ namespace PrimalLauncher
             }
         }
 
-        public void FinishWriting()
+        public void FinishWriting(uint actorId = 0)
         {
             _writeMore = false;
-            SendPacket();
+            SendPacket(actorId: actorId);
         }
 
         public void SendUpdate()
@@ -214,7 +214,7 @@ namespace PrimalLauncher
             SendPacket(wrapByte: false);
         }
 
-        private void SendPacket(string key = null, object value = null, bool wrapByte = true)
+        private void SendPacket(string key = null, object value = null, bool wrapByte = true, uint actorId = 0)
         {
             if (wrapByte)
             {
@@ -228,7 +228,9 @@ namespace PrimalLauncher
             _bw.Seek(0, SeekOrigin.Begin);
             _bw.Write((byte)_index);
 
-            _sender.Send(new Packet(new GamePacket { Opcode = (ushort)ServerOpcode.ActorInit, Data = _buffer }).ToBytes());
+
+            Packet.Send(_sender, ServerOpcode.ActorInit, _buffer, actorId);
+            //_sender.Send(new Packet(new GamePacket { Opcode = (ushort)ServerOpcode.ActorInit, Data = _buffer }).ToBytes());
 
             _bw.Dispose();
             _ms.Dispose();

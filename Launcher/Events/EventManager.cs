@@ -150,7 +150,7 @@ namespace PrimalLauncher
         /// Send a packet to the client acknowledging the start of an event processing.
         /// </summary>
         /// <param name="sender"></param>
-        protected void Response(Socket sender)
+        public void Response(Socket sender)
         {
             byte[] data = new byte[0x298];
             Buffer.BlockCopy(BitConverter.GetBytes(CallerId), 0, data, 0, 4);
@@ -439,36 +439,6 @@ namespace PrimalLauncher
         }
 
         /// <summary>
-        /// Logout function
-        /// </summary>
-        public void AskLogout(Socket sender) 
-        {
-            if (IsQuestion)
-            {
-                switch (Selection)
-                {                    
-                    case 2:
-                        PlayerCharacter.ExitGame(sender);
-                        break;
-                    case 3:
-                        PlayerCharacter.Logout(sender);
-                        break;
-                    case 4:
-                        Log.Instance.Success("Check bed selected.");
-                        break;
-                }
-            }
-            else
-            {
-                IsQuestion = true;
-                FunctionName = "AskLogout";
-                RequestParameters.Add(Encoding.ASCII.GetBytes("askLogout"));
-                RequestParameters.Add(User.Instance.Character.Id);
-                Response(sender);
-            }
-        }
-
-        /// <summary>
         /// Get player selection from a question dialog.
         /// </summary>
         public void GetQuestionSelection(byte[] data)
@@ -583,17 +553,24 @@ namespace PrimalLauncher
             switch (CommandId)
             {
                 case Command.Teleport:
-                    Teleport(sender);
+                    if (Data[0x41] == 0x05)
+                        Return(sender);
+                    else
+                        Teleport(sender);                                       
+                    break;
+                case Command.Logout:
+                    Logout(sender);
                     break;
             }
         }
 
         public override void ProcessEventResult(Socket sender, byte[] data)
         {            
-             if (IsQuestion)
-             {
-                 GetQuestionSelection(data);
-                 InvokeMethod(FunctionName, new object[] { sender });
+            if (IsQuestion)
+            {
+                GetQuestionSelection(data);
+                Data = data;
+                InvokeMethod(FunctionName, new object[] { sender });
             }
             else
             {
@@ -601,9 +578,63 @@ namespace PrimalLauncher
             }                 
         }
 
+        public void Return(Socket sender)
+        {
+            if (IsQuestion)
+            {
+                Finish(sender);
+
+                if (Selection == 1)
+                {
+                    byte subSelection = Data[0x26];
+                    World.Instance.SendTextSheetMessage(sender, ServerOpcode.TextSheetMessageNoSource28b, new byte[] { 0x01, 0x00, 0xF8, 0x5F, 0x39, 0x85, 0x20, 0x00 });
+
+                    if (subSelection == 0x05)
+                    {         
+                        var destinationAetheryte = from a in ActorRepository.Instance.Aetherytes
+                                                   where a.ClassId == 0x13883f
+                                                   orderby a.TeleportMenuId ascending
+                                                   select a;
+
+                        World.Instance.TeleportPlayerToAetheryte(sender, destinationAetheryte.ToList()[0]);
+                    }
+                    else if(subSelection == 0x03)
+                    {                        
+                        World.Instance.TeleportPlayer(sender, EntryPoints.GetInnEntry(User.Instance.Character.InitialTown));
+                    }
+                }
+            }
+            else
+            {
+                IsQuestion = true;
+                FunctionName = "Return";
+                //TODO: 0x13883f is the favored aetheryte classid
+                DelegateCommand(sender, new object[] { "eventConfirm", true, false, (int)User.Instance.Character.InitialTown, 0x13883f, false });
+                User.Instance.Character.PlayAnimationEffect(sender, AnimationEffect.TeleportWait);
+            }
+        }
+
+        public void Logout(Socket sender)
+        {
+            if (IsQuestion)
+            {
+                if (Selection == 1)
+                    PlayerCharacter.ExitGame(sender);
+                else if (Selection == 2)
+                    PlayerCharacter.Logout(sender);
+                else
+                    Finish(sender);
+            }
+            else
+            {
+                IsQuestion = true;
+                FunctionName = "Logout";
+                DelegateCommand(sender, new object[] { "eventConfirm", false, false, false });
+            }
+        }
+
         public void Teleport(Socket sender)
         {
-            
             if (Selection == 0xFF)
             {
                 if (MenuPage == 2) //from aetheryte selection back to region selection
@@ -621,7 +652,6 @@ namespace PrimalLauncher
             switch (MenuPage)
             {
                 case 0:
-                
                     IsQuestion = true;
                     FunctionName = "Teleport";
                     DelegateCommand(sender, new object[] { "eventRegion", (int)User.Instance.Character.Anima });
@@ -645,7 +675,7 @@ namespace PrimalLauncher
                 case 2:
                     PageItem = Selection;
                     User.Instance.Character.PlayAnimationEffect(sender, AnimationEffect.TeleportWait);
-                    DelegateCommand(sender, new object[] { "eventConfirm", false, false, 0x02, 0x13883f, false });                    
+                    DelegateCommand(sender, new object[] { "eventConfirm", false, false, 0x02, 0x13883f, false }); //TODO: 0x13883f is the favored aetheryte classid
                     break;
                 case 3:
                     if(Selection == 1)
@@ -660,22 +690,7 @@ namespace PrimalLauncher
                                                orderby a.TeleportMenuId ascending
                                                select a;
 
-                        if (destinationAetheryte != null)
-                        {
-                            Position aethPosition = destinationAetheryte.ToList()[0].Position;
-                            Position newPosition = new Position
-                            {
-                                ZoneId = aethPosition.ZoneId,
-                                X = aethPosition.X + (float)(7 * Math.Sin(aethPosition.R)),
-                                Z = aethPosition.Z + (float)(7 * Math.Cos(aethPosition.R)),
-                                Y = aethPosition.Y,
-                                R = aethPosition.R + 0.8f
-                            };
-                        
-                            World.Instance.TeleportPlayer(sender, newPosition);
-                        }                           
-                        else
-                            Log.Instance.Error("Something went wrong, aetheryte not found.");
+                        World.Instance.TeleportPlayerToAetheryte(sender, destinationAetheryte.ToList()[0]);
                     }
                     else
                     {

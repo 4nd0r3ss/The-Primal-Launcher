@@ -272,8 +272,7 @@ namespace PrimalLauncher
 
     public enum AetheryteType
     {
-        Crystal = 0x51a6,
-        Shard = 0x51a7,
+        Crystal = 0x51a6,       
         Gate = 0x51bd
     }
 

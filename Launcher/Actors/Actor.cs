@@ -75,7 +75,7 @@ namespace PrimalLauncher
                 ActorName = GenerateName(),
                 ClassName = ClassName,
                 ClassCode = ClassCode,
-                Parameters = new object[] {ClassPath + ClassName, false, false, false, false, false, (int)ClassId, false, false, 0, 0}
+                Parameters = new object[] {ClassPath + ClassName, false, false, false, false, false, (int)ClassId, false, false, 0, 1}
             };         
         }
 
@@ -189,8 +189,14 @@ namespace PrimalLauncher
 
         public void SetSpeeds(Socket sender, uint[] value = null) => Packet.Send(sender, ServerOpcode.SetSpeed, Speeds.ToBytes(), Id);       
 
-        public void SetAppearance(Socket sender) => Packet.Send(sender, ServerOpcode.SetAppearance, Appearance.ToSlotBytes(), Id);       
-               
+        public void SetAppearance(Socket sender) => Packet.Send(sender, ServerOpcode.SetAppearance, Appearance.ToSlotBytes(), Id);
+
+        public void SetQuestIcon(Socket sender)
+        {
+            if (QuestIcon >= 0)
+                Packet.Send(sender, ServerOpcode.SetQuestIcon, BitConverter.GetBytes((ulong)QuestIcon), Id);
+        }
+
         public void DoEmote(Socket sender)
         {
             byte[] data = new byte[] { 0x00, 0xB0, 0x00, 0x05, 0x41, 0x29, 0x9B, 0x02, 0x6E, 0x52, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
@@ -234,50 +240,50 @@ namespace PrimalLauncher
         {
             //if there is a function for a specific quest, execute it. (used for opening mostly)
             KeyValuePair<uint, string> talkFunction = TalkFunctions.FirstOrDefault(x => x.Key > 0);
+            uint talkCode = talkFunction.Key;
 
             //if not, we try to get the default function
-            if(talkFunction.Key == 0) //zero key means nothing returned.
-            {
-                string regionName = User.Instance.Character.GetCurrentZone().MapName.Substring(0, 3).ToLower();
-                uint talkCode = 0;
-
-                switch (regionName)
-                {
-                    case "sea":
-                        talkCode = 0x01AFCC;
-                        break;
-                    case "fst":
-                        talkCode = 0x01AFCD;
-                        break;
-                    case "roc":
-                        talkCode = 0x01AFCE;
-                        break;
-                    case "wil":
-                        talkCode = 0x01AFCF;
-                        break;
-                    case "srt":
-                        talkCode = 0x01AFD0;
-                        break;
-                    case "lak":
-                        talkCode = 0x01AFD1;
-                        break;
-                }
-
+            if (talkCode == 0) //zero key means nothing returned.
+            {                
+                string regionName = User.Instance.Character.GetCurrentZone().MapName.Substring(0, 3).ToLower();                
                 talkFunction = TalkFunctions.FirstOrDefault(x => x.Key == 0);
-                EventManager.Instance.CurrentEvent.DelegateEvent(sender, talkCode, talkFunction.Value, null);
+
+                //if the actor has the method, just call it.
+                if(GetType().GetMethod(talkFunction.Value) != null)
+                {
+                    InvokeMethod(talkFunction.Value, new object[] { sender });
+                    return;
+                }  
+
+                talkCode = GetTalkCode(regionName);                
             }
-            else
-            {
-                EventManager.Instance.CurrentEvent.DelegateEvent(sender, talkFunction.Key, talkFunction.Value, null);
-            } 
-        }
-        #endregion
-        public void SetQuestIcon(Socket sender)
-        {
-            if(QuestIcon >= 0)
-                Packet.Send(sender, ServerOpcode.SetQuestIcon, BitConverter.GetBytes((ulong)QuestIcon), Id);
+
+            EventManager.Instance.CurrentEvent.DelegateEvent(sender, talkCode, talkFunction.Value, null);
         }
 
+        public static uint GetTalkCode(string regionName)
+        {
+            switch (regionName)
+            {
+                case "sea":
+                    return 0x01AFCC;                   
+                case "fst":
+                    return 0x01AFCD;                
+                case "roc":
+                    return 0x01AFCE;                   
+                case "wil":
+                    return 0x01AFCF;                 
+                case "srt":
+                    return 0x01AFD0;                   
+                case "lak":
+                    return 0x01AFD1;
+                default:
+                    return 0;
+            }
+        }
+        #endregion       
+
+        #region Misc methods
         /// <summary>
         /// Converts a number to a base 63 string. This function was taken from Ioncannon's code, all credit goes to him. 
         /// </summary>
@@ -367,7 +373,13 @@ namespace PrimalLauncher
             if (method != null)
                 method.Invoke(this, methodParams);
             else
-                Log.Instance.Error("Actor.InvokeMethod: Type " + GetType().Name + " has no method " + methodName + ".");
+            {
+                string msg = "Actor.InvokeMethod: Type " + GetType().Name + " has no method " + methodName + ".";
+                Log.Instance.Error(msg);
+                ChatProcessor.SendMessage((Socket)methodParams[0], MessageType.SystemError, msg);
+                EventManager.Instance.CurrentEvent.Finish((Socket)methodParams[0]);
+            }            
         }
+        #endregion
     }
 }

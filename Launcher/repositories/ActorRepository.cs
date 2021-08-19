@@ -55,9 +55,9 @@ namespace PrimalLauncher
 
             new Aetheryte(1280092, AetheryteType.Crystal, new Position(143,216f, 303f, -258f, 0f, 0), 2, 1),             // coerthas_dragonhead
             new Aetheryte(1280093, AetheryteType.Crystal, new Position(144,1122f, 271f, -1149f, 0f, 0), 2, 2),           // coerthas_crookedfork
-            new Aetheryte(1280094, AetheryteType.Crystal, new Position(145,1498f, 207f, 767f, 0f, 0), 2, 3),             // coerthas_glory
-            new Aetheryte(1280095, AetheryteType.Crystal, new Position(147,-163f, 223f, 1151f, 0f, 0), 2, 4),            // coerthas_everlakes
-            new Aetheryte(1280096, AetheryteType.Crystal, new Position(148,-1761f, 270f, -198f, 0f, 0), 2, 5),           // coerthas_riversmeet
+            new Aetheryte(1280094, AetheryteType.Crystal, new Position(145,1499.8f, 206f, 776.2f, 0f, 0), 2, 3),         // coerthas_glory
+            new Aetheryte(1280095, AetheryteType.Crystal, new Position(147,-160.1f, 222f, 1155.2f, 0f, 0), 2, 4),        // coerthas_everlakes
+            new Aetheryte(1280096, AetheryteType.Crystal, new Position(148,-1759.8f, 270f, -195f, 0f, 0), 2, 5),         // coerthas_riversmeet
 
             new Aetheryte(1280061, AetheryteType.Crystal, new Position(206,-130.63f, 16.08f, -1323.99f, 2.4f, 0), 3, 1), // blackshroud_gridania
             new Aetheryte(1280062, AetheryteType.Crystal, new Position(150,288f, 4f, -543.928f, 0f, 0), 3, 2),           // blackshroud_bentbranch

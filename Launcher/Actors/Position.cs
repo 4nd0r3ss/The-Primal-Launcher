@@ -71,9 +71,9 @@ namespace PrimalLauncher
             switch (town)
             {
                 case 1: //limsa
-                    return new Position(244, 160.048f, 0f, 154.263f, 0f, 15);
+                    return new Position(244, -160.048f, 0f, -165.737f, 0f, 15);                    
                 case 2: //gridania
-                    return new Position(244, -160.048f, 0f, -165.737f, 0f, 15);
+                    return new Position(244, 160.048f, 0f, 154.263f, 0f, 15);
                 case 3: //uldah
                     return new Position(244, 0.048f, 0f, -5.737f, 0f, 15);
                 default:

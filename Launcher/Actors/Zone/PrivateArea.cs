@@ -12,7 +12,7 @@ namespace PrimalLauncher
 
         public PrivateArea()
         {
-                               
+            PrivLevel = 1;        
         }
 
         public override void Prepare()
