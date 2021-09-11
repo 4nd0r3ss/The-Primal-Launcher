@@ -1262,5 +1262,41 @@
         <noticeEvent priority="0" enabled="0" />
       </events>
     </Populace>
+    <ZoneSwitch>
+      <classId>1090372</classId>
+      <position x="-225.3" y="195" z="98.6" r="0" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+        <pushDefault enabled="1" radius="11.0" silent="true" outwards="false" action="175" />
+      </events>
+    </ZoneSwitch>
+    <ZoneSwitch>
+      <classId>1090372</classId>
+      <position x="-108.4" y="198" z="113.6" r="0" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+        <pushDefault enabled="1" radius="11.0" silent="true" outwards="false" action="175" />
+      </events>
+    </ZoneSwitch>
+    <ZoneSwitch>
+      <classId>1090372</classId>
+      <position x="9.5" y="196" z="188.5" r="0" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+        <pushDefault enabled="1" radius="6" silent="true" outwards="false" action="175" />
+      </events>
+    </ZoneSwitch>
+    <ZoneSwitch>
+      <classId>1090372</classId>
+      <position x="-17.5" y="196" z="114.6" r="0" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+        <pushDefault enabled="1" radius="6" silent="true" outwards="false" action="175" />
+      </events>
+    </ZoneSwitch>
   </npc>
 </chara>

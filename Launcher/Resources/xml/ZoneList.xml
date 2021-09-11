@@ -1,61 +1,61 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <zones> 
-  <Zone id="128" regionId="101" locationName="Lower La Noscea" className="SeaS0" musicSetId="0" mapName="sea0Field01" />
-  <Zone id="129" regionId="101" locationName="Western La Noscea" className="SeaS0" musicSetId="0" mapName="sea0Field02" />
-  <Zone id="130" regionId="101" locationName="Eastern La Noscea" className="SeaS0" musicSetId="0" mapName="sea0Field03" />
+  <Zone id="128" regionId="101" locationName="Lower La Noscea" className="SeaS0" musicSetId="1" mapName="sea0Field01" />
+  <Zone id="129" regionId="101" locationName="Western La Noscea" className="SeaS0" musicSetId="1" mapName="sea0Field02" />
+  <Zone id="130" regionId="101" locationName="Eastern La Noscea" className="SeaS0" musicSetId="1" mapName="sea0Field03" />
   <Zone id="131" regionId="101" locationName="Mistbeard Cove" className="SeaS0" musicSetId="0" mapName="sea0Dungeon01" />
   <Zone id="132" regionId="101" locationName="Cassiopeia Hollow" className="SeaS0" musicSetId="0" mapName="sea0Dungeon03" />
-  <Zone id="133" regionId="101" locationName="Limsa Lominsa" className="SeaS0" musicSetId="0" mapName="sea0Town01" />
+  <Zone id="133" regionId="101" locationName="Limsa Lominsa" className="SeaS0" musicSetId="2" mapName="sea0Town01" />
   <Zone id="134" regionId="202" locationName="Market Wards" className="MarketSeaS0" musicSetId="0" mapName="sea0Market01" />
-  <Zone id="135" regionId="101" locationName="Upper La Noscea" className="SeaS0" musicSetId="0" mapName="sea0Field04" />
+  <Zone id="135" regionId="101" locationName="Upper La Noscea" className="SeaS0" musicSetId="1" mapName="sea0Field04" />
   <Zone id="137" regionId="101" locationName="U'Ghamaro Mines" className="SeaS0" musicSetId="0" mapName="sea0Dungeon06" />
   <Zone id="138" regionId="101" locationName="La Noscea" className="" musicSetId="0" mapName="" />
   <Zone id="139" regionId="112" locationName="The Cieldalaes" className="SeaS0" musicSetId="0" mapName="sea0Field01a" />
   <Zone id="140" regionId="101" locationName="Sailors Ward" className="" musicSetId="0" mapName="" />
-  <Zone id="141" regionId="101" locationName="Lower La Noscea" className="SeaS0" musicSetId="0" mapName="sea0Field01a" />
-  <Zone id="143" regionId="102" locationName="Coerthas Central Highlands" className="RocR0" musicSetId="0" mapName="roc0Field01" />
-  <Zone id="144" regionId="102" locationName="Coerthas Eastern Highlands" className="RocR0" musicSetId="0" mapName="roc0Field02" />
-  <Zone id="145" regionId="102" locationName="Coerthas Eastern Lowlands" className="RocR0" musicSetId="0" mapName="roc0Field03" />
+  <Zone id="141" regionId="101" locationName="Lower La Noscea" className="SeaS0" musicSetId="1" mapName="sea0Field01a" />
+  <Zone id="143" regionId="102" locationName="Coerthas Central Highlands" className="RocR0" musicSetId="3" mapName="roc0Field01" />
+  <Zone id="144" regionId="102" locationName="Coerthas Eastern Highlands" className="RocR0" musicSetId="3" mapName="roc0Field02" />
+  <Zone id="145" regionId="102" locationName="Coerthas Eastern Lowlands" className="RocR0" musicSetId="3" mapName="roc0Field03" />
   <Zone id="146" regionId="102" locationName="Coerthas" className="" musicSetId="0" mapName="" />
-  <Zone id="147" regionId="102" locationName="Coerthas Central Lowlands" className="RocR0" musicSetId="0" mapName="roc0Field04" />
-  <Zone id="148" regionId="102" locationName="Coerthas Western Highlands" className="RocR0" musicSetId="0" mapName="roc0Field05" />
-  <Zone id="150" regionId="103" locationName="Central Shroud" className="FstF0" musicSetId="0" mapName="fst0Field01" />
-  <Zone id="151" regionId="103" locationName="East Shroud" className="FstF0" musicSetId="0" mapName="fst0Field02" />
-  <Zone id="152" regionId="103" locationName="North Shroud" className="FstF0" musicSetId="0" mapName="fst0Field03" />
-  <Zone id="153" regionId="103" locationName="West Shroud" className="FstF0" musicSetId="0" mapName="fst0Field04" />
-  <Zone id="154" regionId="103" locationName="South Shroud" className="FstF0" musicSetId="0" mapName="fst0Field05" />
-  <Zone id="155" regionId="103" locationName="Gridania" className="FstF0" musicSetId="0" mapName="fst0Town01" />
+  <Zone id="147" regionId="102" locationName="Coerthas Central Lowlands" className="RocR0" musicSetId="3" mapName="roc0Field04" />
+  <Zone id="148" regionId="102" locationName="Coerthas Western Highlands" className="RocR0" musicSetId="3" mapName="roc0Field05" />
+  <Zone id="150" regionId="103" locationName="Central Shroud" className="FstF0" musicSetId="6" mapName="fst0Field01" />
+  <Zone id="151" regionId="103" locationName="East Shroud" className="FstF0" musicSetId="6" mapName="fst0Field02" />
+  <Zone id="152" regionId="103" locationName="North Shroud" className="FstF0" musicSetId="6" mapName="fst0Field03" />
+  <Zone id="153" regionId="103" locationName="West Shroud" className="FstF0" musicSetId="6" mapName="fst0Field04" />
+  <Zone id="154" regionId="103" locationName="South Shroud" className="FstF0" musicSetId="6" mapName="fst0Field05" />
+  <Zone id="155" regionId="103" locationName="Gridania" className="FstF0" musicSetId="5" mapName="fst0Town01" />
   <Zone id="156" regionId="103" locationName="The Black Shroud" className="" musicSetId="0" mapName="" />
   <Zone id="157" regionId="103" locationName="The Mun-Tuy Cellars" className="FstF0" musicSetId="0" mapName="fst0Dungeon01" />
   <Zone id="158" regionId="103" locationName="The Tam-Tara Deepcroft" className="FstF0" musicSetId="0" mapName="fst0Dungeon02" />
   <Zone id="159" regionId="103" locationName="The Thousand Maws of Toto-Rak" className="FstF0" musicSetId="0" mapName="fst0Dungeon03" />
   <Zone id="160" regionId="204" locationName="Market Wards" className="MarketFstF0" musicSetId="0" mapName="fst0Market01" />
   <Zone id="161" regionId="103" locationName="Peasants Ward" className="" musicSetId="0" mapName="" />
-  <Zone id="162" regionId="103" locationName="Central Shroud" className="FstF0" musicSetId="0" mapName="fst0Field01a" />
-  <Zone id="164" regionId="106" locationName="Central Shroud" className="BattleFstF0" musicSetId="0" mapName="fst0Battle01" />
-  <Zone id="165" regionId="106" locationName="Central Shroud" className="BattleFstF0" musicSetId="0" mapName="fst0Battle02" />
+  <Zone id="162" regionId="103" locationName="Central Shroud" className="FstF0" musicSetId="6" mapName="fst0Field01a" />
+  <Zone id="164" regionId="106" locationName="Central Shroud" className="BattleFstF0" musicSetId="6" mapName="fst0Battle01" />
+  <Zone id="165" regionId="106" locationName="Central Shroud" className="BattleFstF0" musicSetId="6" mapName="fst0Battle02" />
   <Zone id="166" regionId="106" locationName="Central Shroud" className="BattleFstF0" musicSetId="6" mapName="fst0Battle03" />
-  <Zone id="167" regionId="106" locationName="Central Shroud" className="BattleFstF0" musicSetId="0" mapName="fst0Battle04" />
-  <Zone id="168" regionId="106" locationName="Central Shroud" className="BattleFstF0" musicSetId="0" mapName="fst0Battle05" />
-  <Zone id="170" regionId="104" locationName="Central Thanalan" className="WilW0" musicSetId="0" mapName="wil0Field01" />
-  <Zone id="171" regionId="104" locationName="Eastern Thanalan" className="WilW0" musicSetId="0" mapName="wil0Field02" />
-  <Zone id="172" regionId="104" locationName="Western Thanalan" className="WilW0" musicSetId="0" mapName="wil0Field03" />
-  <Zone id="173" regionId="104" locationName="Northern Thanalan" className="WilW0" musicSetId="0" mapName="wil0Field04" />
-  <Zone id="174" regionId="104" locationName="Southern Thanalan" className="WilW0" musicSetId="0" mapName="wil0Field05" />
-  <Zone id="175" regionId="104" locationName="Ul'dah" className="WilW0" musicSetId="0" mapName="wil0Town01" />
-  <Zone id="176" regionId="104" locationName="Nanawa Mines" className="WilW0" musicSetId="0" mapName="wil0Dungeon02" />
+  <Zone id="167" regionId="106" locationName="Central Shroud" className="BattleFstF0" musicSetId="6" mapName="fst0Battle04" />
+  <Zone id="168" regionId="106" locationName="Central Shroud" className="BattleFstF0" musicSetId="6" mapName="fst0Battle05" />
+  <Zone id="170" regionId="104" locationName="Central Thanalan" className="WilW0" musicSetId="17" mapName="wil0Field01" />
+  <Zone id="171" regionId="104" locationName="Eastern Thanalan" className="WilW0" musicSetId="17" mapName="wil0Field02" />
+  <Zone id="172" regionId="104" locationName="Western Thanalan" className="WilW0" musicSetId="17" mapName="wil0Field03" />
+  <Zone id="173" regionId="104" locationName="Northern Thanalan" className="WilW0" musicSetId="17" mapName="wil0Field04" />
+  <Zone id="174" regionId="104" locationName="Southern Thanalan" className="WilW0" musicSetId="17" mapName="wil0Field05" />
+  <Zone id="175" regionId="104" locationName="Ul'dah" className="WilW0" musicSetId="11" mapName="wil0Town01" />
+  <Zone id="176" regionId="104" locationName="Nanawa Mines" className="WilW0" musicSetId="17" mapName="wil0Dungeon02" />
   <Zone id="177" regionId="207" locationName="-" className="Jail" musicSetId="0" mapName="_jail" />
   <Zone id="178" regionId="104" locationName="Copperbell Mines" className="WilW0" musicSetId="0" mapName="wil0Dungeon04" />
   <Zone id="179" regionId="104" locationName="Thanalan" className="" musicSetId="0" mapName="" />
   <Zone id="180" regionId="205" locationName="Market Wards" className="MarketWilW0" musicSetId="0" mapName="wil0Market01" />
   <Zone id="181" regionId="104" locationName="Merchants Ward" className="" musicSetId="0" mapName="" />
   <Zone id="182" regionId="104" locationName="Central Thanalan" className="" musicSetId="0" mapName="" />
-  <Zone id="184" regionId="107" locationName="Ul'dah" className="BattleWilW0" musicSetId="0" mapName="wil0Battle01" />
-  <Zone id="185" regionId="107" locationName="Ul'dah" className="BattleWilW0" musicSetId="0" mapName="wil0Battle01" />
-  <Zone id="186" regionId="104" locationName="Ul'dah" className="BattleWilW0" musicSetId="0" mapName="wil0Battle02" />
-  <Zone id="187" regionId="104" locationName="Ul'dah" className="BattleWilW0" musicSetId="0" mapName="wil0Battle03" />
-  <Zone id="188" regionId="104" locationName="Ul'dah" className="BattleWilW0" musicSetId="0" mapName="wil0Battle04" />
-  <Zone id="190" regionId="105" locationName="Mor Dhona" className="LakL0" musicSetId="0" mapName="lak0Field01" />
+  <Zone id="184" regionId="107" locationName="Ul'dah" className="BattleWilW0" musicSetId="11" mapName="wil0Battle01" />
+  <Zone id="185" regionId="107" locationName="Ul'dah" className="BattleWilW0" musicSetId="11" mapName="wil0Battle01" />
+  <Zone id="186" regionId="104" locationName="Ul'dah" className="BattleWilW0" musicSetId="11" mapName="wil0Battle02" />
+  <Zone id="187" regionId="104" locationName="Ul'dah" className="BattleWilW0" musicSetId="11" mapName="wil0Battle03" />
+  <Zone id="188" regionId="104" locationName="Ul'dah" className="BattleWilW0" musicSetId="11" mapName="wil0Battle04" />
+  <Zone id="190" regionId="105" locationName="Mor Dhona" className="LakL0" musicSetId="8" mapName="lak0Field01" />
   <Zone id="192" regionId="112" locationName="Rhotano Sea" className="BattleOcnO1" musicSetId="0" mapName="ocn1Battle01" />
   <Zone id="193" regionId="111" locationName="Rhotano Sea" className="BattleOcnO0" musicSetId="0" mapName="ocn0Battle02" />
   <Zone id="194" regionId="112" locationName="Rhotano Sea" className="BattleOcnO1" musicSetId="0" mapName="ocn1Battle03" />
@@ -66,13 +66,13 @@
   <Zone id="201" regionId="208" locationName="-" className="CottagePrv00" musicSetId="0" mapName="prv0Cottage00" />
   <Zone id="204" regionId="101" locationName="Western La Noscea" className="" musicSetId="0" mapName="sea0Field02a" />
   <Zone id="205" regionId="101" locationName="Eastern La Noscea" className="" musicSetId="0" mapName="sea0Field03a" />
-  <Zone id="206" regionId="103" locationName="Gridania" className="FstF0" musicSetId="0" mapName="fst0Town01a" />
+  <Zone id="206" regionId="103" locationName="Gridania" className="FstF0" musicSetId="5" mapName="fst0Town01a" />
   <Zone id="207" regionId="103" locationName="North Shroud" className="FstF0" musicSetId="0" mapName="fst0Field03a" />
   <Zone id="208" regionId="103" locationName="South Shroud" className="FstF0" musicSetId="0" mapName="fst0Field05a" />
-  <Zone id="209" regionId="104" locationName="Ul'dah" className="WilW0" musicSetId="0" mapName="wil0Town01a" />
+  <Zone id="209" regionId="104" locationName="Ul'dah" className="WilW0" musicSetId="11" mapName="wil0Town01a" />
   <Zone id="210" regionId="104" locationName="Eastern Thanalan" className="" musicSetId="0" mapName="" />
   <Zone id="211" regionId="104" locationName="Western Thanalan" className="" musicSetId="0" mapName="" />
-  <Zone id="230" regionId="101" locationName="Limsa Lominsa" className="SeaS0" musicSetId="0" mapName="sea0Town01a" />
+  <Zone id="230" regionId="101" locationName="Limsa Lominsa" className="SeaS0" musicSetId="2" mapName="sea0Town01a" />
   <Zone id="231" regionId="102" locationName="Dzemael Darkhold" className="RocR0" musicSetId="0" mapName="roc0Dungeon01" />
   <Zone id="232" regionId="202" locationName="Maelstrom Command" className="OfficeSeaS0" musicSetId="0" mapName="sea0Office01" />
   <Zone id="233" regionId="205" locationName="Hall of Flames" className="OfficeWilW0" musicSetId="0" mapName="wil0Office01" />
@@ -105,7 +105,7 @@
   <Zone id="263" regionId="104" locationName="Eastern Thanalan" className="" musicSetId="0" mapName="" />
   <Zone id="264" regionId="105" locationName="Transmission Tower" className="" musicSetId="0" mapName="lak0Field01" />
   <Zone id="265" regionId="104" locationName="The Bowl of Embers" className="" musicSetId="0" mapName="" />
-  <Zone id="266" regionId="105" locationName="Mor Dhona" className="LakL0" musicSetId="0" mapName="lak0Field01a" />
+  <Zone id="266" regionId="105" locationName="Mor Dhona" className="LakL0" musicSetId="8" mapName="lak0Field01a" />
   <Zone id="267" regionId="109" locationName="Rivenroad" className="RocR1" musicSetId="0" mapName="roc1Field02" />
   <Zone id="268" regionId="109" locationName="Rivenroad" className="RocR1" musicSetId="0" mapName="roc1Field03" />
   <Zone id="269" regionId="101" locationName="Locke's Lie" className="" musicSetId="0" mapName="" />

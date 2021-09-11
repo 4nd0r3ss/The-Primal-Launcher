@@ -10,5 +10,23 @@
         <noticeEvent priority="0" enabled="0" />
       </events>
     </Populace>
+    <ZoneSwitch>
+      <classId>1090372</classId>
+      <position x="868.3" y="64.5" z="-279.7" r="0" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+        <pushDefault enabled="1" radius="5" silent="true" outwards="false" action="128" />
+      </events>
+    </ZoneSwitch>
+    <ZoneSwitch>
+      <classId>1090372</classId>
+      <position x="922.7" y="64.5" z="-1634.5" r="0" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+        <pushDefault enabled="1" radius="5" silent="true" outwards="false" action="135" />
+      </events>
+    </ZoneSwitch>
   </npc>
 </chara>

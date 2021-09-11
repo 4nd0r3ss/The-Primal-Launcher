@@ -64,8 +64,7 @@ namespace PrimalLauncher
             PlayerCharacter playerCharacter = User.Instance.Character;
             Zone zone = playerCharacter.GetCurrentZone();
             
-            playerCharacter.GetGroups(sender);
-            playerCharacter.IsNew = false;
+            playerCharacter.GetGroups(sender);           
             SetMapEnvironment(sender, zone);
             playerCharacter.InitializeOpening(sender);
             zone.LoadActors();
@@ -169,7 +168,7 @@ namespace PrimalLauncher
                 TeleportPlayer(sender, newPosition);
             }
             else
-                Log.Instance.Error("Something went wrong, aetheryte not found.");
+                Log.Instance.Error("Something went wrong, aetheryte or gate not found.");
         }
 
         public Zone GetZone(uint id) => Zones.Find(x => x.Id == id);
@@ -178,12 +177,13 @@ namespace PrimalLauncher
         {                 
             MassDeleteActors(sender);
             MapUIChange(sender, mapUiChange);
+            PlayerCharacter pc = User.Instance.Character;
 
-            User.Instance.Character.Position = position;
+            pc.Position = position;
             Zone toZone = Zones.Find(x => x.Id == position.ZoneId);   
                
             SetMapEnvironment(sender, toZone);
-            User.Instance.Character.Spawn(sender, spawnType, 1);
+            pc.Spawn(sender, spawnType, 1);
             toZone.Spawn(sender);
             Debug.Spawn(sender);
             Spawn(sender, 0x01);
@@ -191,13 +191,14 @@ namespace PrimalLauncher
 
             if (toZone.Id == 0xF4) //if it's inn
             {
-                User.Instance.Character.SetUnendingJourney(sender);
-                User.Instance.Character.SetEntrustedItems(sender);
-                User.Instance.Character.ToggleZoneActors(sender);
+                pc.SetUnendingJourney(sender);
+                pc.SetEntrustedItems(sender);                
             }
 
-            User.Instance.Character.Journal.InitializeQuests(sender);
-            //
+            pc.Journal.InitializeQuests(sender);
+            pc.ToggleZoneActors(sender);
+            User.Instance.AccountList[0].CharacterList[pc.Slot] = pc;
+            User.Instance.Save();
         }
 
         public Director GetDirector(string directorName) => Directors.Find(x => x.GetType().Name == directorName + "Director");        
@@ -221,6 +222,15 @@ namespace PrimalLauncher
         }
 
         #region World Text Sheet Methods
+        public void SendTextSheetMessage(Socket sender, uint sheetNumber, LuaParameters parameters)
+        {
+            byte[] data = new byte[0x30];
+            Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, data, 0, sizeof(uint));
+            Buffer.BlockCopy(BitConverter.GetBytes(sheetNumber), 0, data, 0x04, sizeof(uint)); //sheet#
+            LuaParameters.WriteParameters(ref data, parameters, 0x08);
+            Packet.Send(sender, ServerOpcode.TextSheetMessageNoSource48b, data);
+        }
+
         public void SendTextSheetMessage(Socket sender, ServerOpcode opcode, byte[] data) => Packet.Send(sender, opcode, data, Id);
 
         public void SendTextSheetMessage(Socket sender, uint sheetNumber, uint questId)

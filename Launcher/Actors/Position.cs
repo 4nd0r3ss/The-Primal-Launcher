@@ -146,7 +146,7 @@ namespace PrimalLauncher
 
             Dictionary<string, Position> exits = new Dictionary<string, Position>
             {
-                { "101-7", new Position(133, -8.0f, 45.4f, 139.3f, 2.9f, 15) },
+                { "101-8", new Position(128, -7.6f, 45.5f, 138.8f, 2f, 15) },
 
                 { "103-7", new Position(150, 333.2f, 5.8f, -943.2f, 0.7f, 15) },
                 { "103-8", new Position(150, -185.3f, 5.4f, -977f, 0f, 15) },

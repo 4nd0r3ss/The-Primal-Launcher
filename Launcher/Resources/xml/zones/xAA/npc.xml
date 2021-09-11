@@ -45,5 +45,50 @@
         <pushCommandOut radius="4.0" silent="true" outwards="true" />
       </events>
     </Populace>
+    <ZoneSwitch className="PopulaceStandard" comment="to central thanalan">
+      <classId>1090372</classId>
+      <position x="-45" y="187" z="-30.1" r="0" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+        <pushDefault enabled="1" radius="12.0" silent="true" outwards="false" action="175" />
+      </events>
+    </ZoneSwitch>
+    <ZoneSwitch className="PopulaceStandard" comment="to central thanalan">
+      <classId>1090372</classId>
+      <position x="97.2" y="187" z="211.6" r="0" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+        <pushDefault enabled="1" radius="12.0" silent="true" outwards="false" action="175" />
+      </events>
+    </ZoneSwitch>
+    <ZoneSwitch className="PopulaceStandard" comment="to central thanalan">
+      <classId>1090372</classId>
+      <position x="-658.5" y="121.4" z="-422.1" r="0" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+        <pushDefault enabled="1" radius="6" silent="true" outwards="false" action="172" />
+      </events>
+    </ZoneSwitch>
+    <ZoneSwitch className="PopulaceStandard" comment="to central thanalan">
+      <classId>1090372</classId>
+      <position x="860.8" y="250.7" z="-602.9" r="0" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+        <pushDefault enabled="1" radius="6" silent="true" outwards="false" action="171" />
+      </events>
+    </ZoneSwitch>
+    <ZoneSwitch className="PopulaceStandard" comment="to central thanalan">
+      <classId>1090372</classId>
+      <position x="-265" y="215.4" z="-731.8" r="0" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+        <pushDefault enabled="1" radius="6" silent="true" outwards="false" action="173" />
+      </events>
+    </ZoneSwitch>
   </npc>
 </chara>

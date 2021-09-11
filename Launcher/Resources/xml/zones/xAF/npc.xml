@@ -605,7 +605,7 @@
         <noticeEvent priority="0" enabled="0" />
       </events>
     </Populace>
-    <Populace className="RetainerFurniture">
+    <Object className="RetainerFurniture">
       <classId>1200027</classId>
       <position x="-58.4" y="195" z="75.84" r="-0.89" />
       <animation>0</animation>
@@ -616,8 +616,8 @@
         <pushCommandIn radiud="4.0" silent="true" outwards="false" />
         <pushCommandOut radius="4.0" silent="true" outwards="true" />
       </events>
-    </Populace>
-    <Populace className="RetainerFurniture">
+    </Object>
+    <Object className="RetainerFurniture">
       <classId>1200027</classId>
       <position x="27.35" y="192.1" z="109.02" r="3.13" />
       <animation>0</animation>
@@ -628,7 +628,7 @@
         <pushCommandIn radiud="4.0" silent="true" outwards="false" />
         <pushCommandOut radius="4.0" silent="true" outwards="true" />
       </events>
-    </Populace>
+    </Object>
     <Populace className="PopulaceStandard">
       <classId>1200044</classId>
       <position x="-41.24" y="192.1" z="12.87" r="0.1" />
@@ -704,7 +704,7 @@
         <noticeEvent priority="0" enabled="0" />
       </events>
     </Populace>    
-    <Populace className="Shop/PopulaceShopSalesman">
+    <PopulaceShopSalesman>
       <classId>1600043</classId>
       <position x="-109.62" y="198" z="80.59" r="-1.29" />
       <animation>1041</animation>
@@ -712,8 +712,8 @@
         <talkDefault priority="4" enabled="1" />
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
-    <Populace className="Shop/PopulaceShopSalesman">
+    </PopulaceShopSalesman>
+    <PopulaceShopSalesman>
       <classId>1600044</classId>
       <position x="25.49" y="192" z="102.36" r="2.01" />
       <animation>1041</animation>
@@ -721,8 +721,8 @@
         <talkDefault priority="4" enabled="1" />
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
-    <Populace className="Shop/PopulaceShopSalesman">
+    </PopulaceShopSalesman>
+    <PopulaceShopSalesman>
       <classId>1600045</classId>
       <position x="-112.39" y="197" z="71.19" r="-1.43" />
       <animation>1041</animation>
@@ -730,8 +730,8 @@
         <talkDefault priority="4" enabled="1" />
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
-    <Populace className="Shop/PopulaceShopSalesman">
+    </PopulaceShopSalesman>
+    <PopulaceShopSalesman>
       <classId>1600046</classId>
       <position x="45.2" y="192" z="99.92" r="-1.13" />
       <animation>1041</animation>
@@ -739,8 +739,8 @@
         <talkDefault priority="4" enabled="1" />
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
-    <Populace className="Shop/PopulaceShopSalesman">
+    </PopulaceShopSalesman>
+    <PopulaceShopSalesman>
       <classId>1600047</classId>
       <position x="26.57" y="192" z="67.47" r="-0.88" />
       <animation>1041</animation>
@@ -748,8 +748,8 @@
         <talkDefault priority="4" enabled="1" />
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
-    <Populace className="Shop/PopulaceShopSalesman">
+    </PopulaceShopSalesman>
+    <PopulaceShopSalesman>
       <classId>1600048</classId>
       <position x="15.51" y="192.45" z="84.32" r="2.17" />
       <animation>1041</animation>
@@ -757,8 +757,8 @@
         <talkDefault priority="4" enabled="1" />
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
-    <Populace className="Shop/PopulaceShopSalesman">
+    </PopulaceShopSalesman>
+    <PopulaceShopSalesman>
       <classId>1600049</classId>
       <position x="31.77" y="192" z="75.48" r="-0.99" />
       <animation>1041</animation>
@@ -766,8 +766,8 @@
         <talkDefault priority="4" enabled="1" />
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
-    <Populace className="Shop/PopulaceShopSalesman">
+    </PopulaceShopSalesman>
+    <PopulaceShopSalesman>
       <classId>1600050</classId>
       <position x="41.18" y="192.45" z="91.8" r="-1.13" />
       <animation>1041</animation>
@@ -775,8 +775,8 @@
         <talkDefault priority="4" enabled="1" />
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
-    <Populace className="Shop/PopulaceShopSalesman">
+    </PopulaceShopSalesman>
+    <PopulaceShopSalesman>
       <classId>1600051</classId>
       <position x="20.57" y="192" z="92.96" r="2.07" />
       <animation>1041</animation>
@@ -784,8 +784,8 @@
         <talkDefault priority="4" enabled="1" />
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
-    <Populace className="Shop/PopulaceShopSalesman">
+    </PopulaceShopSalesman>
+    <PopulaceShopSalesman>
       <classId>1600052</classId>
       <position x="36.82" y="192" z="83.36" r="-1.08" />
       <animation>1041</animation>
@@ -793,8 +793,8 @@
         <talkDefault priority="4" enabled="1" />
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
-    <Populace className="Shop/PopulaceShopSalesman">
+    </PopulaceShopSalesman>
+    <PopulaceShopSalesman>
       <classId>1600053</classId>
       <position x="-123.59" y="198" z="84.96" r="1.83" />
       <animation>1041</animation>
@@ -802,8 +802,8 @@
         <talkDefault priority="4" enabled="1" />
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
-    <Populace className="Shop/PopulaceShopSalesman">
+    </PopulaceShopSalesman>
+    <PopulaceShopSalesman>
       <classId>1600054</classId>
       <position x="-127.5" y="197.1" z="75.21" r="1.83" />
       <animation>1041</animation>
@@ -811,8 +811,8 @@
         <talkDefault priority="4" enabled="1" />
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
-    <Populace className="Shop/PopulaceShopSalesman">
+    </PopulaceShopSalesman>
+    <PopulaceShopSalesman>
       <classId>1600055</classId>
       <position x="-106.56" y="198" z="90.21" r="-1.28" />
       <animation>1041</animation>
@@ -820,8 +820,8 @@
         <talkDefault priority="4" enabled="1" />
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
-    <Populace className="Shop/PopulaceShopSalesman">
+    </PopulaceShopSalesman>
+    <PopulaceShopSalesman>
       <classId>1600056</classId>
       <position x="-121.16" y="198" z="94.12" r="1.82" />
       <animation>1041</animation>
@@ -829,8 +829,8 @@
         <talkDefault priority="4" enabled="1" />
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
-    <Populace className="Shop/PopulaceShopSalesman">
+    </PopulaceShopSalesman>
+    <PopulaceShopSalesman>
       <classId>1600059</classId>
       <position x="-163.44" y="192.59" z="52.55" r="-2.59" />
       <animation>1015</animation>
@@ -838,8 +838,8 @@
         <talkDefault priority="4" enabled="1" />
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
-    <Populace className="Shop/PopulaceShopSalesman">
+    </PopulaceShopSalesman>
+    <PopulaceShopSalesman>
       <classId>1600066</classId>
       <position x="-105.68" y="198" z="95.23" r="-1.29" />
       <animation>0</animation>
@@ -847,8 +847,8 @@
         <talkDefault priority="4" enabled="1" />
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
-    <Populace className="Shop/PopulaceShopSalesman">
+    </PopulaceShopSalesman>
+    <PopulaceShopSalesman>
       <classId>1600077</classId>
       <position x="-181.53" y="190" z="115.54" r="2.41" />
       <animation>0</animation>
@@ -856,8 +856,8 @@
         <talkDefault priority="4" enabled="1" />
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
-    <Populace className="Shop/PopulaceShopSalesman">
+    </PopulaceShopSalesman>
+    <PopulaceShopSalesman>
       <classId>1600129</classId>
       <position x="-76.95" y="195" z="80.8" r="2.88" />
       <animation>0</animation>
@@ -865,8 +865,8 @@
         <talkDefault priority="4" enabled="1" />
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
-    <Populace className="Shop/PopulaceShopSalesman">
+    </PopulaceShopSalesman>
+    <PopulaceShopSalesman>
       <classId>1600133</classId>
       <position x="-72.84" y="195" z="81.96" r="3.02" />
       <animation>0</animation>
@@ -874,7 +874,7 @@
         <talkDefault priority="4" enabled="1" />
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
+    </PopulaceShopSalesman>
     <Populace className="PopulaceStandard">
       <classId>1700039</classId>
       <position x="33.77" y="192.1" z="129.97" r="2.57" />
@@ -932,6 +932,59 @@
         <noticeEvent priority="0" enabled="0" />
       </events>
     </Populace>
-    
+    <ZoneSwitch className="PopulaceStandard" comment="to central thanalan north">
+      <classId>1090372</classId>
+      <position x="-38.6" y="184.4" z="-55.2" r="0" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+        <pushDefault enabled="1" radius="11.0" silent="true" outwards="false" action="170" />
+      </events>
+    </ZoneSwitch>
+    <ZoneSwitch>
+      <classId>1090372</classId>
+      <position x="-232.7" y="197.4" z="116.8" r="0" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+        <pushDefault enabled="1" radius="11.0" silent="true" outwards="false" action="209" />
+      </events>
+    </ZoneSwitch>
+    <ZoneSwitch>
+      <classId>1090372</classId>
+      <position x="-102.4" y="202" z="136.2" r="0" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+        <pushDefault enabled="1" radius="11.0" silent="true" outwards="false" action="209" />
+      </events>
+    </ZoneSwitch>
+    <ZoneSwitch>
+      <classId>1090372</classId>
+      <position x="0.2" y="200" z="202.7" r="0" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+        <pushDefault enabled="1" radius="6" silent="true" outwards="false" action="209" />
+      </events>
+    </ZoneSwitch>
+    <ZoneSwitch>
+      <classId>1090372</classId>
+      <position x="-31.7" y="195.9" z="122.6" r="0" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+        <pushDefault enabled="1" radius="8" silent="true" outwards="false" action="209" />
+      </events>
+    </ZoneSwitch>
+    <ZoneSwitch>
+      <classId>1090372</classId>
+      <position x="117.3" y="184.9" z="217.2" r="0" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+        <pushDefault enabled="1" radius="11" silent="true" outwards="false" action="170" />
+      </events>
+    </ZoneSwitch>
   </npc>
 </chara>

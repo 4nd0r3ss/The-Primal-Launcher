@@ -600,7 +600,7 @@
         <noticeEvent priority="0" enabled="0" />
       </events>
     </Populace>
-    <Populace className="RetainerFurniture">
+    <Object className="RetainerFurniture">
       <classId>1200027</classId>
       <position x="190.95" y="27.5" z="-1401.98" r="-2.71" />
       <animation>0</animation>
@@ -611,7 +611,7 @@
         <pushCommandIn radiud="4.0" silent="true" outwards="false" />
         <pushCommandOut radius="4.0" silent="true" outwards="true" />
       </events>
-    </Populace>
+    </Object>
     <Populace className="PopulaceStandard">
       <classId>1080101</classId>
       <position x="68.44" y="10.87" z="-1244.42" r="2.45" />
@@ -1080,5 +1080,23 @@
         <noticeEvent priority="0" enabled="0" />
       </events>
     </Populace>
+    <ZoneSwitch>
+      <classId>1090372</classId>
+      <position x="110.7" y="6.9" z="-1203.5" r="0" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+        <pushDefault enabled="1" radius="4" silent="true" outwards="false" action="155" />
+      </events>
+    </ZoneSwitch>
+    <ZoneSwitch>
+      <classId>1090372</classId>
+      <position x="-192" y="6.4" z="-1074.7" r="0" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+        <pushDefault enabled="1" radius="6" silent="true" outwards="false" action="150" />
+      </events>
+    </ZoneSwitch>
   </npc>
 </chara>

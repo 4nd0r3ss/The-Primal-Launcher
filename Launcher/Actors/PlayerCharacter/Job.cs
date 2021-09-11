@@ -96,7 +96,7 @@ namespace PrimalLauncher
             { 4, 33936 },   //Marauder
             { 7, 33937 },   //Archer
             { 8, 33938 },   //Lancer
-            { 10, 33939 },  //Sentinel, this doesn't exist anymore but it's still in the files so may as well put it here just in case
+            { 10, 33939 },  //Sentinel, this doesn't exist but it's still in the files so may as well put it here just in case
             { 22, 33940 },  //Thaumaturge
             { 23, 33941 },  //Conjurer
             { 29, 33945 },  //Carpenter, for some reason there's a a few different messages between 33941 and 33945

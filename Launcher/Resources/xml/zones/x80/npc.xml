@@ -5,31 +5,83 @@
       <classId>1500007</classId>
       <position x="23.98" y="46.05" z="-42.96" r="0.6" />
       <animation>1041</animation>
+      <events>
+        <talkDefault priority="4" enabled="1" />
+        <noticeEvent priority="0" enabled="0" />
+      </events>
     </Populace>
     <Populace className="PopulaceCampSubMaster">
       <classId>1000613</classId>
       <position x="22.57" y="45.5" z="-23.08" r="1.5" />
       <animation>1041</animation>
+      <events>
+        <talkDefault priority="4" enabled="1" />
+        <noticeEvent priority="0" enabled="0" />
+      </events>
     </Populace>
     <Populace className="PopulaceStandard">
       <classId>1000359</classId>
       <position x="58.78" y="46.1" z="-12.45" r="0.6" />
       <animation>1056</animation>
+      <events>
+        <talkDefault priority="4" enabled="1" />
+        <noticeEvent priority="0" enabled="0" />
+      </events>
     </Populace>
     <Populace className="PopulaceStandard">
       <classId>1000360</classId>
       <position x="8.37" y="45.62" z="-37.45" r="-1.64" />
       <animation>1056</animation>
+      <events>
+        <talkDefault priority="4" enabled="1" />
+        <noticeEvent priority="0" enabled="0" />
+      </events>
     </Populace>    
     <Populace className="PopulaceRequestWarden">
       <classId>1500013</classId>
       <position x="56.43" y="45.34" z="-40.84" r="-1.65" />
       <animation>0</animation>
+      <events>
+        <talkDefault priority="4" enabled="1" />
+        <noticeEvent priority="0" enabled="0" />
+      </events>
     </Populace>
     <Populace className="Shop/PopulaceShopSalesman">
       <classId>1600016</classId>
       <position x="45.86" y="45.53" z="-11.5" r="-3.13" />
       <animation>0</animation>
+      <events>
+        <talkDefault priority="4" enabled="1" />
+        <noticeEvent priority="0" enabled="0" />
+      </events>
     </Populace>
+    <ZoneSwitch>
+      <classId>1090372</classId>
+      <position x="-157" y="15" z="192.1" r="0" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+        <pushDefault enabled="1" radius="8" silent="true" outwards="false" action="133" />
+      </events>
+    </ZoneSwitch>
+    <ZoneSwitch>
+      <classId>1090372</classId>
+      <position x="-546.4" y="71.2" z="-653.6" r="0" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+        <pushDefault enabled="1" radius="6" silent="true" outwards="false" action="129" />
+      </events>
+    </ZoneSwitch>
+    
+    <ZoneSwitch>
+      <classId>1090372</classId>
+      <position x="909.9" y="63.1" z="-354.6" r="0" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+        <pushDefault enabled="1" radius="5" silent="true" outwards="false" action="130" />
+      </events>
+    </ZoneSwitch>
   </npc>
 </chara>

@@ -12,8 +12,7 @@ namespace PrimalLauncher
         public Populace()
         {
             ClassPath = "/chara/npc/populace/";           
-            ClassCode = 0x30400000;
-            //TalkFunction = "processEvent000_9"; // random speech for all npcs, need to change this.
+            ClassCode = 0x30400000;           
         }
 
         public override void Spawn(Socket sender, ushort spawnType = 0, ushort isZoning = 0, int changingZone = 0)

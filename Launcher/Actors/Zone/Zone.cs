@@ -58,28 +58,35 @@ namespace PrimalLauncher
         } 
 
         public virtual void LoadActors()
-        {           
-           Actors = new List<Actor>();
-           List<Actor> actors = ActorRepository.Instance.GetZoneNpcs(Id, NpcFile);                
-           actors.AddRange(ActorRepository.Instance.Aetherytes.FindAll(x => x.Position.ZoneId == Id));
-           actors.AddRange(ActorRepository.Instance.GetCompanyWarp(Id));
-           int index = 1;
-            NpcFile = "";
+        {       
+           if(Actors == null || Actors.Count == 0)
+            {
+                Actors = new List<Actor>();
+                List<Actor> actors = ActorRepository.Instance.GetZoneNpcs(Id, NpcFile);
+                actors.AddRange(ActorRepository.Instance.Aetherytes.FindAll(x => x.Position.ZoneId == Id));
+                actors.AddRange(ActorRepository.Instance.GetCompanyWarp(Id));
+                int index = 1;
+                NpcFile = "";
 
-           foreach (Actor actor in actors)
-           {
-               actor.Id = 4 << 28 | Id << 19 | (uint)index;
-               Actors.Add(actor);
-               index++;
-           }
-           
-           Log.Instance.Success("Loaded " + Actors.Count + " actors in zone " + LocationName);                   
+                foreach (Actor actor in actors)
+                {
+                    actor.Id = 4 << 28 | Id << 19 | (uint)index;
+                    Actors.Add(actor);
+                    index++;
+                }
+
+                Log.Instance.Success("Loaded " + Actors.Count + " actors in zone " + LocationName + " ("+ Id +").");
+            }
+            else
+            {
+                Reset();
+            }
         }
 
         public uint GetCurrentBGM()
         {
             //if it's past 8 in the morning, play day music.
-            if (Clock.Instance.Time == new TimeSpan(7, 0, 0))
+            if (Clock.Instance.Time >= new TimeSpan(7, 0, 0) && Clock.Instance.Time <= new TimeSpan(19, 0, 0))
                 return MusicSet.DayMusic;
             else
                 return MusicSet.NightMusic;
@@ -110,6 +117,11 @@ namespace PrimalLauncher
             return Actors.Find(x => x.ClassId == classId);
         }
 
+        public Actor GetActorById(uint id)
+        {
+            return Actors.Find(x => x.Id == id);
+        }
+
         public void SpawnAsInstance(string function, string npcFile = "")
         {
             if(!string.IsNullOrEmpty(function))
@@ -117,12 +129,32 @@ namespace PrimalLauncher
 
             PrivLevel = 1;
             Type = ZoneType.Nothing;
-            NpcFile = npcFile;            
+            NpcFile = npcFile;
+
+            //this is to fix an issue where when we create an instance using the same zone actor, it won't load the instance actors.
+            Actors = null; 
         }
 
         public Position GetEntrypoint()
         {
             return new Position();
+        }
+
+        public void DespawnAllActors(Socket sender)
+        {
+            foreach(Actor actor in Actors)
+            {
+                if (actor.Spawned)
+                    actor.Despawn(sender);
+            }
+        }
+
+        public void Reset()
+        {
+            foreach(Actor actor in Actors)
+            {
+                actor.Spawned = false;
+            }
         }
     }
 }

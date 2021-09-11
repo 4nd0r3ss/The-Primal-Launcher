@@ -25,6 +25,7 @@ namespace PrimalLauncher
         public int QuestIcon { get; set; }
         public bool Spawned { get; set; }
         public string Family { get; set; }
+        public uint Icon { get; set; }
         public Dictionary<uint, string> TalkFunctions { get; set; }
 
         #region States
@@ -120,7 +121,7 @@ namespace PrimalLauncher
         public void SetIcon(Socket sender)
         {
             byte[] data = new byte[0x08];
-            /* will be properly implemented later */
+            Buffer.BlockCopy(BitConverter.GetBytes(Icon), 0, data, 0, sizeof(uint));
             Packet.Send(sender, ServerOpcode.SetIcon, data, Id);
         }
 
@@ -218,6 +219,8 @@ namespace PrimalLauncher
                     case "pushDefault":
                     case "exit":
                     case "caution":
+                    case "pushCommandIn":
+                    case "pushCommandOut":
                         eventType = 2;
                         break;
                     default:
@@ -249,7 +252,7 @@ namespace PrimalLauncher
                 talkFunction = TalkFunctions.FirstOrDefault(x => x.Key == 0);
 
                 //if the actor has the method, just call it.
-                if(GetType().GetMethod(talkFunction.Value) != null)
+                if(talkFunction.Value != null && GetType().GetMethod(talkFunction.Value) != null)
                 {
                     InvokeMethod(talkFunction.Value, new object[] { sender });
                     return;

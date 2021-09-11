@@ -54,7 +54,7 @@ namespace PrimalLauncher
                 case ServerOpcode.PushEventCircle:
                     data = new byte[0x38];
                     Buffer.BlockCopy(BitConverter.GetBytes(Radius), 0, data, 0, sizeof(uint));
-                    Buffer.BlockCopy(BitConverter.GetBytes(ServerCodes), 0, data, 0x04, sizeof(uint));
+                    Buffer.BlockCopy(BitConverter.GetBytes(id), 0, data, 0x04, sizeof(uint));
                     Buffer.BlockCopy(BitConverter.GetBytes(0x41200000), 0, data, 0x08, sizeof(uint));
                     Buffer.BlockCopy(BitConverter.GetBytes(0), 0, data, 0x0c, sizeof(uint));
                     Buffer.BlockCopy(BitConverter.GetBytes(Direction), 0, data, 0x10, sizeof(byte));

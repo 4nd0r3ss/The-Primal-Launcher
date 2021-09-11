@@ -228,9 +228,7 @@ namespace PrimalLauncher
             _bw.Seek(0, SeekOrigin.Begin);
             _bw.Write((byte)_index);
 
-
-            Packet.Send(_sender, ServerOpcode.ActorInit, _buffer, actorId);
-            //_sender.Send(new Packet(new GamePacket { Opcode = (ushort)ServerOpcode.ActorInit, Data = _buffer }).ToBytes());
+            Packet.Send(_sender, ServerOpcode.ActorInit, _buffer, actorId);            
 
             _bw.Dispose();
             _ms.Dispose();

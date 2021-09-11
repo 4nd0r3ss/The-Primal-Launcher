@@ -225,7 +225,7 @@
             this.materialCard2.MouseState = MaterialSkin.MouseState.HOVER;
             this.materialCard2.Name = "materialCard2";
             this.materialCard2.Padding = new System.Windows.Forms.Padding(14);
-            this.materialCard2.Size = new System.Drawing.Size(281, 100);
+            this.materialCard2.Size = new System.Drawing.Size(301, 100);
             this.materialCard2.TabIndex = 26;
             // 
             // lblr
@@ -271,7 +271,7 @@
             // lblLocation
             // 
             this.lblLocation.AutoSize = true;
-            this.lblLocation.Location = new System.Drawing.Point(88, 38);
+            this.lblLocation.Location = new System.Drawing.Point(80, 38);
             this.lblLocation.Name = "lblLocation";
             this.lblLocation.Size = new System.Drawing.Size(10, 13);
             this.lblLocation.TabIndex = 7;
@@ -326,10 +326,10 @@
             // 
             this.materialDivider2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
             this.materialDivider2.Depth = 0;
-            this.materialDivider2.Location = new System.Drawing.Point(12, 25);
+            this.materialDivider2.Location = new System.Drawing.Point(11, 25);
             this.materialDivider2.MouseState = MaterialSkin.MouseState.HOVER;
             this.materialDivider2.Name = "materialDivider2";
-            this.materialDivider2.Size = new System.Drawing.Size(260, 1);
+            this.materialDivider2.Size = new System.Drawing.Size(280, 1);
             this.materialDivider2.TabIndex = 1;
             this.materialDivider2.Text = "materialDivider2";
             // 

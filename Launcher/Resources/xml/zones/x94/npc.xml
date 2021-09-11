@@ -1,6 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <chara>
   <npc>
-
+    <ZoneSwitch>
+      <classId>1090372</classId>
+      <position x="-1163.8" y="244.8" z="0" r="0" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+        <pushDefault enabled="1" radius="6" silent="true" outwards="false" action="143" />
+      </events>
+    </ZoneSwitch>
   </npc>
 </chara>

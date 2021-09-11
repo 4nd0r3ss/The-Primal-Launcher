@@ -86,7 +86,7 @@ namespace PrimalLauncher
             var materialSkinManager = MaterialSkinManager.Instance;
             materialSkinManager.AddFormToManage(this);
             materialSkinManager.Theme = MaterialSkinManager.Themes.LIGHT;            
-            materialSkinManager.ColorScheme = new ColorScheme((Primary)0x800101, (Primary)0x630101, (Primary)0x800101, (Accent)0xf5d800, TextShade.WHITE);         
+            materialSkinManager.ColorScheme = new ColorScheme((Primary)0x0b124f, (Primary)0x020834, (Primary)0x800101, (Accent)0xf5d800, TextShade.WHITE);         
         }
 
         private void BtnLaunchGame_Click(object sender, EventArgs e)
@@ -139,9 +139,11 @@ namespace PrimalLauncher
             SetGameUpdateNavigation();
 
             //List<Zone> myList = ZoneRepository.GetZones();
-            //List<Actor> acto = ActorRepository.Instance.GetZoneNpcs(206);
+            ///List<Actor> acto = ActorRepository.Instance.GetZoneNpcs(175);
             //Quest quest = QuestRepository.GetInitialQuest(1);
             //List<Actor> acto = ActorRepository.Instance.GetCompanyWarp(206);
+            //var a = ActorRepository.Instance.Aetherytes;
+            //Actor acto = ActorRepository.Instance.CreateTestActor(1001618);
 
             Log.Instance.Info("Welcome to Primal Launcher!");
             Task.Run(() => { new GameServer(); });
@@ -201,7 +203,7 @@ namespace PrimalLauncher
             if(User.Instance.Character != null)
             {
                 Position pos = User.Instance.Character.Position;
-                lblLocation.Text = pos.ZoneId.ToString();
+                lblLocation.Text = User.Instance.Character.GetCurrentZone().LocationName + " (" + pos.ZoneId.ToString() + ")";
                 lblx.Text = string.Format("{0:0.0}", pos.X);
                 lbly.Text = string.Format("{0:0.0}", pos.Y);
                 lblz.Text = string.Format("{0:0.0}", pos.Z);

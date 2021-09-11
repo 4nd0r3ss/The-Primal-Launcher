@@ -41,10 +41,10 @@ namespace PrimalLauncher
 
         public void SetMounted()
         {
-            Walking = ActorSpeed.Walking;
-            Running = ActorSpeed.Running;
-            //Walking = ActorSpeed.WalkingMount;
-            //Running = ActorSpeed.RunningMount;
+            //Walking = ActorSpeed.Walking;
+            //Running = ActorSpeed.Running;
+            Walking = ActorSpeed.WalkingMount;
+            Running = ActorSpeed.RunningMount;
         }
 
         public void SetUnmounted()

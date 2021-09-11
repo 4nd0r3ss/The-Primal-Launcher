@@ -10,18 +10,21 @@
         <noticeEvent priority="0" enabled="0" />
       </events>
     </Populace>
-    <Populace className="RetainerFurniture">
+    <Object className="RetainerFurniture">
       <classId>1200027</classId>
       <position x="55.82" y="4" z="-1216.88" r="2.8" />
       <animation>1041</animation>
+      <talkFunctions>
+        <talkFunction name="" />
+      </talkFunctions>
       <events>
         <talkDefault priority="4" enabled="1" />
         <pushCommand priority="4" silent="0" />
         <noticeEvent priority="0" enabled="0" />
-        <pushCommandIn radiud="4.0" silent="true" outwards="false" />
-        <pushCommandOut radius="4.0" silent="true" outwards="true" />
+        <pushCommandIn radius="4.0" silent="true" outwards="false" enabled="1" />
+        <pushCommandOut radius="4.0" silent="true" outwards="true" enabled="1" />
       </events>
-    </Populace>
+    </Object>
     <Populace className="PopulaceStandard">
       <classId>1000458</classId>
       <position x="55.82" y="4" z="-1212.23" r="1.91" />
@@ -134,27 +137,30 @@
       <classId>1001184</classId>
       <position x="55.39" y="4" z="-1194.95" r="1.09" />
       <animation>1041</animation>
+      <talkFunctions>
+        <talkFunction name="newEventTalkStep1" />
+      </talkFunctions>
       <events>
         <talkDefault priority="4" enabled="1" />
         <noticeEvent priority="0" enabled="0" />
       </events>
     </Populace>
-    <Populace className="MapObjShipPort">
+    <MapObj className="MapObjShipPort">
       <classId>5900011</classId>
       <position x="54" y="-7" z="-1197" r="0" />
       <animation>0</animation>
       <events>
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
-    <Populace className="MapObjShipPort">
+    </MapObj>
+    <MapObj className="MapObjShipPort">
       <classId>5900011</classId>
       <position x="54" y="-7" z="-1197" r="0" />
       <animation>0</animation>
       <events>
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
+    </MapObj>
     <Populace className="Shop/PopulaceShopSalesman">
       <classId>1600092</classId>
       <position x="72" y="-7.4" z="-1193" r="-1.46" />
@@ -410,5 +416,23 @@
         <noticeEvent priority="0" enabled="0" />
       </events>
     </Populace>
+    <ZoneSwitch>
+      <classId>1090372</classId>
+      <position x="103.3" y="11.9" z="-1224" r="0" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+        <pushDefault enabled="1" radius="5" silent="true" outwards="false" action="206" />
+      </events>
+    </ZoneSwitch>
+    <ZoneSwitch>
+      <classId>1090372</classId>
+      <position x="319.8" y="6" z="-1009" r="0" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+        <pushDefault enabled="1" radius="6" silent="true" outwards="false" action="150" />
+      </events>
+    </ZoneSwitch>    
   </npc>
 </chara>

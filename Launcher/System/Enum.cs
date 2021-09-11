@@ -91,6 +91,7 @@ namespace PrimalLauncher
         TextSheetMessage38b = 0x168,
         TextSheetMessageNoSource28b = 0x166,
         TextSheetMessageNoSource38b = 0x167,
+        TextSheetMessageNoSource48b = 0x169,
 
         //World specific
         SetDalamud = 0x10,
@@ -176,19 +177,19 @@ namespace PrimalLauncher
     /// </summary>
     public enum Command
     {
-        ChangeEquipment = 0x2ee9,
-        Mount = 0x2eee,
-        Umount = 0x2eef,
-        EquipSoulStone = 0x2ef1,
+        ChangeEquipment = 0x2EE9,
+        Mount = 0x2EEE,
+        Umount = 0x2EEF,
+        EquipSoulStone = 0x2EF1,
 
-        QuestData = 0x5e93,
-        GuildleveData = 0x5e94,
-        Logout = 0x5e9b,
-        Teleport = 0x5e9c,
-        DoEmote = 0x5e26,
+        QuestData = 0x5E93,
+        GuildleveData = 0x5E94,
+        Logout = 0x5E9B,
+        Teleport = 0x5e9C,
+        DoEmote = 0x5E26,
         BattleStance = 0x5209,
-        NormalStance = 0x520a,
-        
+        NormalStance = 0x520A,
+        PlaceDriven = 0x5EED,
     }
        
     /// <summary>
@@ -441,5 +442,14 @@ namespace PrimalLauncher
         ImmortalFlames2 = 0x3E,
         ImmortalFlames3 = 0x3F,
         ImmortalFlames4 = 0x40,
-}
+    }
+
+    public enum ShopType
+    {
+        Item = 0,
+        Class = 1,
+        Weapon = 2,
+        Armor = 3,
+        Hamlet = 4
+    }
 }

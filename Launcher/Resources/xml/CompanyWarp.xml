@@ -59,7 +59,7 @@
       <classId>1500339</classId>
       <position x="-440" y="40" z="238" r="3.2" /> 
     </CompanyWarp>
-    <CompanyWarp className="PopulaceCompanyWarp" region="101" zone="133" id="3">
+    <CompanyWarp className="PopulaceCompanyWarp" region="101" zone="230" id="3">
       <classId>1500330</classId>
       <position x="-492" y="44" z="64.1" r="-3" />
     </CompanyWarp>

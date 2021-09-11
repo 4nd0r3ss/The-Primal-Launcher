@@ -1,6 +1,23 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <chara>
   <npc>
-
+    <ZoneSwitch>
+      <classId>1090372</classId>
+      <position x="-895.1" y="20" z="-1443.2" r="0" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+        <pushDefault enabled="1" radius="5" silent="true" outwards="false" action="150" />
+      </events>
+    </ZoneSwitch>
+    <ZoneSwitch>
+      <classId>1090372</classId>
+      <position x="-1615.7" y="20.8" z="-1926.1" r="0" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+        <pushDefault enabled="1" radius="6" silent="true" outwards="false" action="145,1792.8,142.7,1678.4,-3" />
+      </events>
+    </ZoneSwitch>
   </npc>
 </chara>

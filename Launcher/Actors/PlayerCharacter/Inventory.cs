@@ -75,7 +75,7 @@ namespace PrimalLauncher
         /// <param name="sender"></param>
         /// <param name="itemName"></param>
         /// <param name="quantity"></param>
-        public void AddItem(ref Dictionary<ushort, object> inventory, string itemName, uint quantity = 1, Socket sender = null)
+        public void AddItem(InventoryType type, string itemName, int quantity = 1, Socket sender = null)
         {
             DataTable itemNames = GameData.Instance.GetGameData("xtx/itemName");
             DataRow[] selected = itemNames.Select("strc0 = '" + itemName + "'");
@@ -83,13 +83,13 @@ namespace PrimalLauncher
             if (selected.Length > 0)
             {
                 uint itemId = (uint)selected[0][0];
-                AddItemById(ref inventory, itemId, quantity, sender);
+                AddItemById(type, itemId, quantity, sender);
             }
         }
 
-        public void AddKeyItem(string itemName, uint quantity = 1, Socket sender = null)
+        public void AddKeyItem(string itemName, int quantity = 1, Socket sender = null)
         {
-            AddItem(ref KeyItems, itemName, quantity, sender);
+            AddItem(InventoryType.KeyItems, itemName, quantity, sender);
         }
 
         /// <summary>
@@ -99,7 +99,7 @@ namespace PrimalLauncher
         /// <param name="itemId"></param>
         /// <param name="quantity"></param>
         /// <param name="sender"></param>
-        public void AddItemById(ref Dictionary<ushort, object> inventory, uint itemId, uint quantity, Socket sender = null)
+        public void AddItemById(InventoryType type, uint itemId, int quantity, Socket sender = null)
         {
             DataTable itemsData = GameData.Instance.GetGameData("itemData");
             DataTable itemsStack = GameData.Instance.GetGameData("_item");
@@ -109,12 +109,42 @@ namespace PrimalLauncher
 
             int itemMaxStack = (int)itemStack.ItemArray[2];
             int itemKind = (int)itemData.ItemArray[4];
+            Dictionary<ushort, object> inventory;
+            InventoryMaxSlots maxSlots;
+
+            switch (type)
+            {                
+                case InventoryType.Bazaar:
+                    inventory = Bazaar;
+                    maxSlots = InventoryMaxSlots.Bazaar;
+                    break;
+                case InventoryType.Currency:
+                    inventory = Currency;
+                    maxSlots = InventoryMaxSlots.Currency;
+                    break;                
+                case InventoryType.KeyItems:
+                    inventory = KeyItems;
+                    maxSlots = InventoryMaxSlots.KeyItems;
+                    break;
+                case InventoryType.Loot:
+                    inventory = Loot;
+                    maxSlots = InventoryMaxSlots.Loot;
+                    break;
+                case InventoryType.MeldRequest:
+                    inventory = MeldRequest;
+                    maxSlots = InventoryMaxSlots.MeldRequest;
+                    break;
+                default:
+                    inventory = Bag;
+                    maxSlots = InventoryMaxSlots.Bag;
+                    break;
+            }
 
             //if max stack is > 1, we change the quantity bytes to the quantity the user requested. 
             if (itemMaxStack > 1)
             {
                 //if the requested quantity is greater than the max stack, we limit it to the max stack.
-                uint itemQuantity = quantity > itemMaxStack ? (uint)itemMaxStack : quantity;
+                int itemQuantity = quantity > itemMaxStack ? itemMaxStack : quantity;
                 ushort slotToAddTo = GetFirstEmptySlot(inventory);
 
                 Item item = new Item
@@ -129,7 +159,7 @@ namespace PrimalLauncher
                 inventory[slotToAddTo] = item;
 
                 if (sender != null)
-                    SendBagItem(sender, item.ToBytes());
+                    SendItem(sender, type, maxSlots, item.ToBytes());
             }
             else
             {
@@ -155,7 +185,7 @@ namespace PrimalLauncher
                     inventory[slotToAddTo] = item;
 
                     if (sender != null)
-                        SendBagItem(sender, item.ToBytes());
+                        SendItem(sender, type, maxSlots, item.ToBytes());
                 }
             }
         }
@@ -165,10 +195,10 @@ namespace PrimalLauncher
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="data"></param>
-        public void SendBagItem(Socket sender, byte[] data)
+        public void SendItem(Socket sender, InventoryType type, InventoryMaxSlots maxSlots, byte[] data)
         {
             InventoryStart(sender);
-            ChunkStart(sender, InventoryMaxSlots.Bag, InventoryType.Bag);
+            ChunkStart(sender, maxSlots, type);
             SendChunk(sender, ServerOpcode.x01InventoryChunk, data);
             ChunkEnd(sender);
             InventoryEnd(sender);
@@ -193,8 +223,30 @@ namespace PrimalLauncher
             AddEquipmentPiece(ItemGraphics.Waist, 15, graphicId: graphId[13]);
 
             // giveaway on me =)
-            AddItem(ref Bag, "Potion", 10);             
-            AddItem(ref Currency, "Gil", 200);           
+            AddItem(InventoryType.Bag, "Potion", 10);             
+            AddItem(InventoryType.Currency, "Gil", 200);           
+        }
+
+        public void AddGil(Socket sender, int quantity)
+        {
+            foreach(var slot in Currency)
+            {
+                if(slot.Value != null)
+                {
+                    Item item = (Item)slot.Value;
+
+                    if(item.Id == 1000001)
+                    {
+                        //we do it like this because quantity can be negative, meaning we are taking Gil.
+                        item.Quantity += quantity;
+                        SendItem(sender, InventoryType.Currency, InventoryMaxSlots.Currency, item.ToBytes());
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }
+            }
         }
               
         /// <summary>
@@ -663,7 +715,7 @@ namespace PrimalLauncher
         public uint Id { get; set; }
         public ushort InventorySlot { get; set; }
 
-        public uint Quantity { get; set; } = 1;
+        public int Quantity { get; set; } = 1;
         public uint Durability { get; set; }
 
         public uint MaxQuantity { get; set; }

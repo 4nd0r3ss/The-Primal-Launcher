@@ -36,8 +36,19 @@ namespace PrimalLauncher
         }
 
         public override void Init(Socket sender)
-        {          
+        {
             WorkProperties property = new WorkProperties(sender, Id, @"/_init");
+
+            if (ClassName == "RetainerFurniture")
+            {                
+                property.Add("charaWork.property[0]", true);
+                property.Add("charaWork.property[1]", true);
+                property.Add("npcWork.pushCommand", (short)0x2718);
+                property.Add("npcWork.pushCommandPriority", (byte)0x08);
+                property.FinishWriting(Id);
+                return;
+            }
+            
             property.Add("charaWork.battleSave.potencial", 0x3F800000);
             property.Add("charaWork.property[0]", true);  
             

@@ -22,10 +22,10 @@ namespace PrimalLauncher
 
         private static Dictionary<int, MusicSet> MusicSets { get; } = new Dictionary<int, MusicSet>
         {
-            {0, new MusicSet(66, 67, 0)},
-            {1, new MusicSet(60, 60, 21)},
+            {0, new MusicSet(0, 0, 0)}, //dummy
+            {1, new MusicSet(53, 60, 21)},
             {2, new MusicSet(59, 59, 0)}, //limsa
-            {3, new MusicSet(55, 55, 15)},
+            {3, new MusicSet(55, 55, 15)}, //coerthas
             {4, new MusicSet(52, 52, 13)},
             {5, new MusicSet(51, 51, 0)}, //gridania
             {6, new MusicSet(57, 52, 13)}, //black shroud
@@ -38,7 +38,8 @@ namespace PrimalLauncher
             {13, new MusicSet(3, 3, 0)}, //maelstrom
             {14, new MusicSet(4, 4, 0)}, //immortal flames
             {15, new MusicSet(61, 61, 0)}, //inn
-            {16, new MusicSet(51, 51, 13)}
+            {16, new MusicSet(51, 51, 13)},
+            {17, new MusicSet(62, 67, 25)} //thanalan
         };
 
         public static MusicSet Get(int id)

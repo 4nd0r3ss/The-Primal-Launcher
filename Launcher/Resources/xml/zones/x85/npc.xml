@@ -284,7 +284,7 @@
         <noticeEvent priority="0" enabled="0" />
       </events>
     </Populace>
-    <Populace className="RetainerFurniture">
+    <Object className="RetainerFurniture">
       <classId>1200027</classId>
       <position x="-432" y="40" z="202" r="-1" />
       <animation>0</animation>
@@ -295,7 +295,7 @@
         <pushCommandIn radiud="4.0" silent="true" outwards="false" />
         <pushCommandOut radius="4.0" silent="true" outwards="true" />
       </events>
-    </Populace>
+    </Object>
     <Populace className="TaskBoard">
       <classId>1200193</classId>
       <position x="-464.77" y="41.71" z="183.27" r="0" />
@@ -320,14 +320,60 @@
       <events>
         <noticeEvent priority="0" enabled="0" />
       </events>
-    </Populace>
-    <Populace className="PopulaceStandard">
-      <classId>1200288</classId>
-      <position x="-493" y="44" z="64.2" r="0" />
+    </Populace>    
+    <ZoneSwitch>
+      <classId>1090372</classId>
+      <position x="-483.9" y="20" z="191.1" r="0" />
       <animation>0</animation>
       <events>
         <noticeEvent priority="0" enabled="0" />
+        <pushDefault enabled="1" radius="6" silent="true" outwards="false" action="230" />
+      </events>
+    </ZoneSwitch>
+    <ZoneSwitch>
+      <classId>1090372</classId>
+      <position x="-495.8" y="40.1" z="242.8" r="0" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+        <pushDefault enabled="1" radius="6" silent="true" outwards="false" action="230" />
+      </events>
+    </ZoneSwitch>
+    <ZoneSwitch>
+      <classId>1090372</classId>
+      <position x="-447.9" y="44" z="118.3" r="0" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+        <pushDefault enabled="1" radius="4" silent="true" outwards="false" action="230" />
+      </events>
+    </ZoneSwitch>
+    <Populace className="PopulaceStandard">
+      <classId>1001509</classId>
+      <position x="-245.5" y="12.5" z="186.6" r="0.9" />
+      <animation>1040</animation>
+      <events>
+        <talkDefault priority="4" enabled="1" />
+        <noticeEvent priority="0" enabled="0" />
       </events>
     </Populace>
+    <Populace className="PopulaceStandard">
+      <classId>1001511</classId>
+      <position x="-242.5" y="12.5" z="197.8" r="-2.1" />
+      <animation>1040</animation>
+      <events>
+        <talkDefault priority="4" enabled="1" />
+        <noticeEvent priority="0" enabled="0" />
+      </events>
+    </Populace>
+    <ZoneSwitch>
+      <classId>1090372</classId>
+      <position x="-87.1" y="30" z="179.6" r="0" />
+      <animation>0</animation>
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+        <pushDefault enabled="1" radius="8" silent="true" outwards="false" action="128" />
+      </events>
+    </ZoneSwitch>
   </npc>
 </chara>

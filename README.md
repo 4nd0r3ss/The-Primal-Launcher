@@ -39,13 +39,17 @@ In-game general
 - NPCs in most zones with default talk dialog.
 - Add/remove exp (custom command)
 - Level up/down (custom command)
-- Dynamic NPC spawn/despawn
+- Dynamic NPC spawn/despawn (load/unload only actors around player at a certain distance).
+- All map transitions done.
+- Some shops (buy only).
 
 In-game main menu
 - Attributes - Character initial attributes, currency, key items.
 - Gear - Equip/unequip items (items attr not applied to character stat yet).
 - Inventory - Items for display only for now.
 - Teleport - Teleport from main menu implemented (total anima for display only, no favored destinations yet).
+- Return - implemented (no home point selection yet).
+- Exit game - fully implemented
 
 Battle
 - Not implemented.
@@ -54,8 +58,9 @@ Weaponskills, abilities, traits, etc.
 - Not implemented.
 
 Travel
-- PL Custom teleport command (can visit most maps in the game, including jail and cottage)
+- PL Custom teleport command (can visit most maps in the game, including jail and cottage).
 - Company warp (aethernet) fully functional in all 3 cities.
+- Teleport from Aetherytes to Gates and Gates to Aetherytes.
 
 Dungeons
 - It's possible to find some dungeons by walking around the map.

@@ -17,8 +17,7 @@ namespace PrimalLauncher
         #region Info              
         public byte WorldId { get; set; }
         public byte Slot { get; set; }
-        public long TotalPlaytime { get; set; }
-        public bool IsNew { get; set; }
+        public long TotalPlaytime { get; set; }        
         #endregion       
 
         #region Background
@@ -34,31 +33,32 @@ namespace PrimalLauncher
         public byte CurrentClassId { get; set; }
         #endregion
 
+        #region Travel
         public uint Anima { get; set; }
+        public uint HomePoint { get; set; }
+        public List<uint> AttunedAetherytes { get; set; }
+        #endregion
+
         public Inventory Inventory { get; set; }
         public Journal Journal { get; set; }
         public Dictionary<byte, Job> Jobs { get; set; } = Job.LoadAll();
         public OrderedDictionary GeneralParameters { get; set; }
-
-        public List<Group> Groups { get; set; } = new List<Group>();      
-        
-        public List<Quest> QuestsFinished { get; set; } = new List<Quest>();
+        public List<Group> Groups { get; set; } = new List<Group>();   
         public Queue<byte[]> PacketQueue { get; set; }
 
+        #region Mounts
         public string ChocoboName { get; set; }
         public ChocoboAppearance ChocoboAppearance { get; set; }
         public bool HasGobbue { get; set; }
+        #endregion
 
-        private uint SpawnDistance { get; set; }
+        private uint SpawnDistance { get; set; } = 30; //this is the maximum distance in wich NPCs will be spawned at.
 
         public void Setup(byte[] data)
         {
             //Character ID
             Id = NewId();
-            IsNew = true;
-
             ClassPath = "/Chara/Player/Player_work";
-
             State.Type = MainStateType.Player;
 
             //speeds 
@@ -119,6 +119,7 @@ namespace PrimalLauncher
 
             Position = EntryPoints.GetStartPosition(InitialTown);
             Journal = new Journal(InitialTown);
+            Anima = 100;
         }
 
         public void UpdatePlayTime()
@@ -220,15 +221,38 @@ namespace PrimalLauncher
             Packet.Send(handler, ServerOpcode.SetTarget, data);
         }
 
+        public void GetTargetData(Socket sender)
+        {
+            if(CurrentTarget > 0)
+            {
+                Actor actor = User.Instance.Character.GetCurrentZone().Actors.Find(x => x.Id == CurrentTarget);
+
+                if(actor != null)
+                {
+                    ChatProcessor.SendMessage(sender, MessageType.System, "ClassId: " + actor.ClassId);
+                    ChatProcessor.SendMessage(sender, MessageType.System, "ClassName: " + actor.ClassName);
+                    //ChatProcessor.SendMessage(sender, MessageType.System, "ClassPath: " + actor.ClassName);
+                }                
+            }
+            else
+            {
+                ChatProcessor.SendMessage(sender, MessageType.System, "No target selected.");
+            }
+        }
+
         public void Spawn(Socket sender, ushort spawnType = 0x01, ushort isZoning = 0)
         {
             PacketQueue = null;
             State.Main = MainState.Passive;
-            SpawnDistance = 30;
+            SpawnDistance = 50;
+            Icon = 0x00_02_00_00;
 
             //remove later
             if (CharaWork == null)
                 CharaWork = new CharaWork();
+
+            //in case the player quit the game while monted.
+            Speeds.SetUnmounted();
                         
             CreateActor(sender, 0x08);
             CommandSequence(sender);
@@ -241,7 +265,7 @@ namespace PrimalLauncher
             SetSubState(sender);
             SetAllStatus(sender);
             SetIcon(sender);
-            SetIsZoning(sender, false);
+            SetIsZoning(sender);
 
             SetGrandCompany(sender);
             SetTitle(sender);
@@ -255,9 +279,7 @@ namespace PrimalLauncher
             SetLuaScript(sender);           
             Inventory.Send(sender);
             Work(sender);
-            StartPlayTime();
-
-           
+            StartPlayTime();           
         }
 
         public Zone GetCurrentZone() => World.Instance.Zones.Find(x => x.Id == Position.ZoneId);
@@ -1043,7 +1065,7 @@ namespace PrimalLauncher
             //execute toggle zone actors only if:
             //zone is not instance, is not inn, position changed
             if(
-                pc.GetCurrentZone().PrivLevel != 1 && 
+                /*pc.GetCurrentZone().PrivLevel != 1 && */
                 pc.Position.ZoneId != 0xF4 && 
                 (x != pc.Position.X || y != pc.Position.Y || z != pc.Position.Z)
             )

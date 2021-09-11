@@ -121,7 +121,10 @@ namespace PrimalLauncher
                             pos.X = Convert.ToSingle(parameters[1]);
                             pos.Y = Convert.ToSingle(parameters[2]);
                             pos.Z = Convert.ToSingle(parameters[3]);
-                            pos.R = Convert.ToSingle(parameters[4]);
+
+                            if (parameters.Count > 3)
+                                pos.R = Convert.ToSingle(parameters[4]);
+
                             npc.Position = pos;
                             npc.SetPosition(sender);
                         }
@@ -177,16 +180,19 @@ namespace PrimalLauncher
                         break;
 
                     case @"\additem":
-                        pc.Inventory.AddItem(ref pc.Inventory.Bag,
+                        pc.Inventory.AddItem(InventoryType.Bag,
                             parameters[0].Replace("_", " ").Replace("'", "''"),
-                            (parameters.Count > 2 ? Convert.ToUInt32(parameters[1]) : 1),
+                            (parameters.Count > 2 ? Convert.ToInt32(parameters[1]) : 1),
                             sender);
+                        break;
+                    case @"\addgil":
+                        pc.Inventory.AddGil(sender, Convert.ToInt32(parameters[0]));                            
                         break;
 
                     case @"\addkeyitem":
-                        pc.Inventory.AddItem(ref pc.Inventory.KeyItems,
+                        pc.Inventory.AddItem(InventoryType.KeyItems,
                             parameters[0].Replace("_", " ").Replace("'", "''"),
-                            (parameters.Count > 2 ? Convert.ToUInt32(parameters[1]) : 1), //TODO: should key items be always 1?
+                            (parameters.Count > 2 ? Convert.ToInt32(parameters[1]) : 1), //TODO: should key items be always 1?
                             sender);
                         break;
 
@@ -249,22 +255,62 @@ namespace PrimalLauncher
                         if (hasParameters)
                             User.Instance.Character.TurnBack(sender, Convert.ToSingle(parameters[0]));
                         break;
-
-                    default:
-                        SendMessage(sender, MessageType.System, "Unknown command.");
-                        break;
+                    
                     case @"\changetalk":
                         if (hasParameters)
                         {
                             Actor actor = User.Instance.Character.GetCurrentZone().GetActorByClassId(1000807);
                             actor.Events.Find(x => x.Name == "talkDefault").Action = "processEvent000_" + parameters[0];
                         }
+                        break;                   
+                    case @"\target":                        
+                        User.Instance.Character.GetTargetData(sender);
+                        
                         break;
-                    case @"\changemap":
+                    case @"\spawn":
                         if (hasParameters)
                         {
-                            User.Instance.Character.Position.ZoneId = Convert.ToUInt32(parameters[0]);
+                            Actor actor = ActorRepository.Instance.CreateTestActor(Convert.ToUInt32(parameters[0]));
+                            actor.Id = 4 << 28 | User.Instance.Character.Position.ZoneId << 19 | (uint)(User.Instance.Character.GetCurrentZone().Actors.Count + 1);
+                            actor.Spawn(sender);
+                            User.Instance.Character.GetCurrentZone().Actors.Add(actor);
                         }
+
+                        break;
+                    case @"\despawn":
+                        if (hasParameters)
+                        {
+                            Actor actor = User.Instance.Character.GetCurrentZone().Actors.Find(x => x.ClassId == Convert.ToUInt32(parameters[0]));
+
+                            if (actor != null)
+                                actor.Despawn(sender);
+                            else
+                                SendMessage(sender, MessageType.System, "Actor " + parameters[0] + " not found.");
+                        }
+
+                        break;
+                    case @"\setmap":
+                        if (hasParameters)
+                        {
+                            ZoneSwitch.ChangeMap(sender, parameters[0]);
+                        }
+
+                        break;
+                    case @"\icon":
+                        if (hasParameters)
+                        {
+                            byte b1 = Convert.ToByte(parameters[0]);
+                            byte b2 = Convert.ToByte(parameters[1]);
+                            byte b3 = Convert.ToByte(parameters[2]);
+                            byte b4 = Convert.ToByte(parameters[3]);
+                            User.Instance.Character.Icon = (uint)(b1 << 24 | b2 << 16 | b3 << 8 | b4);
+                            User.Instance.Character.SetIcon(sender);
+                        }
+
+                        break;
+
+                    default:
+                        SendMessage(sender, MessageType.System, "Unknown command.");
                         break;
                 }
             }

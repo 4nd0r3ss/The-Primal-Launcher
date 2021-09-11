@@ -1,9 +1,292 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <list>
-  <Aetheryte classId="">
-    <type></type>
-    <body></body>
-    <position zoneId="" x="" y="" z="" r="" />
-    <teleport page="" id="" />
+  <Aetheryte classId="1280001" type="Crystal"	location="lanoscea_limsa">
+    <position zoneId="230" x="-395.1" y="42.5" z="337.12" r="-1.8" />
+    <teleportMenu page="1" id="1" />
+  </Aetheryte>
+  <Aetheryte classId="1280002" type="Crystal"	location="lanoscea_beardedrock">
+    <position zoneId="128" x="29.97" y="45.83" z="-35.47" r="0" />
+    <teleportMenu page="1" id="2" />
+  </Aetheryte>
+  <Aetheryte classId="1280003" type="Crystal"	location="lanoscea_skullvalley">
+    <position zoneId="129" x="-991.88" y="61.71" z="-1120.79" r="0" />
+    <teleportMenu page="1" id="3" />
+  </Aetheryte>
+  <Aetheryte classId="1280004" type="Crystal"	location="lanoscea_baldknoll">
+    <position zoneId="129" x="-1883.47" y="53.77" z="-1372.68" r="0" />
+    <teleportMenu page="1" id="4" />
+  </Aetheryte>
+  <Aetheryte classId="1280005" type="Crystal"	location="lanoscea_bloodshore">
+    <position zoneId="130" x="1123.29" y="45.7" z="-928.69" r="0" />
+    <teleportMenu page="1" id="5" />
+  </Aetheryte>
+  <Aetheryte classId="1280006" type="Crystal"	location="lanoscea_ironlake">
+    <position zoneId="135" x="-278.181" y="77.63" z="-2260.79" r="0" />
+    <teleportMenu page="1" id="6" />
+  </Aetheryte>
+  <Aetheryte classId="1280092" type="Crystal"	location="coerthas_dragonhead">
+    <position zoneId="143" x="221.2" y="302.5" z="-255.6" r="0" />
+    <teleportMenu page="2" id="1" />
+  </Aetheryte>
+  <Aetheryte classId="1280093" type="Crystal"	location="coerthas_crookedfork">
+    <position zoneId="144" x="1123" y="270.5" z="-1152" r="-2.1" />
+    <teleportMenu page="2" id="2" />
+  </Aetheryte>
+  <Aetheryte classId="1280094" type="Crystal"	location="coerthas_glory">
+    <position zoneId="145" x="1499.8" y="206" z="776.2" r="0" />
+    <teleportMenu page="2" id="3" />
+  </Aetheryte>
+  <Aetheryte classId="1280095" type="Crystal"	location="coerthas_everlakes">
+    <position zoneId="147" x="-160.1" y="222" z="1155.2" r="0" />
+    <teleportMenu page="2" id="4" />
+  </Aetheryte>
+  <Aetheryte classId="1280096" type="Crystal"	location="coerthas_riversmeet">
+    <position zoneId="148" x="-1759.8" y="271" z="-195" r="0" />
+    <teleportMenu page="2" id="5" />
+  </Aetheryte>
+  <Aetheryte classId="1280061" type="Crystal"	location="blackshroud_gridania">
+    <position zoneId="206" x="-130.63" y="16.08" z="-1323.99" r="2.4" />
+    <teleportMenu page="3" id="1" />
+  </Aetheryte>
+  <Aetheryte classId="1280062" type="Crystal"	location="blackshroud_bentbranch">
+    <position zoneId="150" x="288" y="4" z="-543.928" r="0" />
+    <teleportMenu page="3" id="2" />
+  </Aetheryte>
+  <Aetheryte classId="1280063" type="Crystal"	location="blackshroud_nineivies">
+    <position zoneId="151" x="1702" y="20" z="-862" r="0" />
+    <teleportMenu page="3" id="3" />
+  </Aetheryte>
+  <Aetheryte classId="1280064" type="Crystal"	location="blackshroud_emeraldmoss">
+    <position zoneId="152" x="-1052" y="20" z="-1760" r="0" />
+    <teleportMenu page="3" id="4" />
+  </Aetheryte>
+  <Aetheryte classId="1280065" type="Crystal"	location="blackshroud_crimsonbark">
+    <position zoneId="153" x="-1566.04" y="-11.89" z="-550.51" r="0" />
+    <teleportMenu page="3" id="5" />
+  </Aetheryte>
+  <Aetheryte classId="1280066" type="Crystal"	location="blackshroud_tranquil">
+    <position zoneId="154" x="734" y="-12" z="1126" r="0" />
+    <teleportMenu page="3" id="6" />
+  </Aetheryte>
+  <Aetheryte classId="1280031" type="Crystal"	location="thanalan_uldah">
+    <position zoneId="175" x="-240.45" y="185.93" z="-9.56" r="0" />
+    <teleportMenu page="4" id="1" />
+  </Aetheryte>
+  <Aetheryte classId="1280032" type="Crystal"	location="thanalan_blackbrush">
+    <position zoneId="170" x="35" y="200.4" z="-480" r="0" />
+    <teleportMenu page="4" id="2" />
+  </Aetheryte>
+  <Aetheryte classId="1280033" type="Crystal"	location="thanalan_drybone">
+    <position zoneId="171" x="1250.9" y="264" z="-544.2" r="0" />
+    <teleportMenu page="4" id="3" />
+  </Aetheryte>
+  <Aetheryte classId="1280034" type="Crystal"	location="thanalan_horizon">
+    <position zoneId="172" x="-1315" y="57" z="-147" r="0" />
+    <teleportMenu page="4" id="4" />
+  </Aetheryte>
+  <Aetheryte classId="1280035" type="Crystal"	location="thanalan_bluefog">
+    <position zoneId="173" x="-165" y="281" z="-1699" r="0" />
+    <teleportMenu page="4" id="5" />
+  </Aetheryte>
+  <Aetheryte classId="1280036" type="Crystal"	location="thanalan_brokenwater">
+    <position zoneId="174" x="1686" y="297" z="995" r="0" />
+    <teleportMenu page="4" id="6" />
+  </Aetheryte>
+  <Aetheryte classId="1280121" type="Crystal"	location="mordhona_brittlebark">
+    <position zoneId="190" x="484" y="19" z="672" r="0" />
+    <teleportMenu page="5" id="1" />
+  </Aetheryte>
+  <Aetheryte classId="1280122" type="Crystal"	location="mordhona_revenantstoll">
+    <position zoneId="190" x="-215.6" y="19" z="-668.9" r="-1.8" />
+    <teleportMenu page="5" id="2" />
+  </Aetheryte>
+  <Aetheryte classId="1280007" type="Gate" location="cedarwood">
+    <position zoneId="128" x="582.47" y="54.52" z="-1.2" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280008" type="Gate" location="widowcliffs">
+    <position zoneId="128" x="966" y="50" z="833" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280009" type="Gate" location="morabybay">
+    <position zoneId="128" x="318" y="25" z="581" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280010" type="Gate" location="woadwhisper">
+    <position zoneId="129" x="-636" y="50" z="-1287" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280011" type="Gate" location="islesofumbra">
+    <position zoneId="129" x="-2018" y="61" z="-763" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280012" type="Gate" location="tigerhelm">
+    <position zoneId="130" x="1628" y="62" z="-449" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280013" type="Gate" location="southbloodshore">
+    <position zoneId="130" x="1522" y="3" z="-669" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280014" type="Gate" location="agelysswise">
+    <position zoneId="130" x="1410" y="55" z="-1650" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280015" type="Gate" location="zelmasrun">
+    <position zoneId="135" x="-125" y="61" z="-1440" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280016" type="Gate" location="bronzelake">
+    <position zoneId="135" x="-320" y="53" z="-1826" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280017" type="Gate" location="oakwood">
+    <position zoneId="135" x="-894" y="42" z="-2188" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280018" type="Gate" location="mistbeardcove">
+    <position zoneId="131" x="-1694.5" y="-19" z="-1534" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280020" type="Gate" location="cassiopeia">
+    <position zoneId="132" x="1343.5" y="-54.38" z="-870.84" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280037" type="Gate" location="cactusbasin">
+    <position zoneId="170" x="639" y="185" z="122" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280038" type="Gate" location="foursisters">
+    <position zoneId="170" x="539" y="218" z="-14" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280039" type="Gate" location="halatali">
+    <position zoneId="171" x="1599" y="259" z="-233" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280040" type="Gate" location="burningwall">
+    <position zoneId="171" x="2010" y="281" z="-768" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280041" type="Gate" location="sandgate">
+    <position zoneId="171" x="2015" y="248" z="64" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280042" type="Gate" location="nophicaswells">
+    <position zoneId="172" x="-866" y="89" z="376" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280043" type="Gate" location="footfalls">
+    <position zoneId="172" x="-1653" y="25" z="-469" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280044" type="Gate" location="scorpionkeep">
+    <position zoneId="172" x="-1223" y="70" z="191" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280045" type="Gate" location="hiddengorge">
+    <position zoneId="173" x="-635" y="281" z="-1797" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280046" type="Gate" location="seaofspires">
+    <position zoneId="173" x="447" y="260" z="-2158" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280047" type="Gate" location="cutterspass">
+    <position zoneId="173" x="-710" y="281" z="-2212" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280048" type="Gate" location="redlabyrinth">
+    <position zoneId="174" x="1797" y="249" z="1856" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280049" type="Gate" location="burntlizardcreek">
+    <position zoneId="174" x="1185" y="280" z="1407" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280050" type="Gate" location="zanrak">
+    <position zoneId="174" x="2416" y="249" z="1535" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280052" type="Gate" location="nanawamines">
+    <position zoneId="176" x="80.5" y="169" z="-1268.5" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280054" type="Gate" location="copperbellmines">
+    <position zoneId="178" x="-621" y="112" z="-118" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280067" type="Gate" location="humblehearth">
+    <position zoneId="150" x="-94.07" y="4" z="-543.16" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280068" type="Gate" location="sorrelhaven">
+    <position zoneId="150" x="-285" y="-21" z="-46" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280069" type="Gate" location="fivehangs">
+    <position zoneId="150" x="636" y="17" z="-324" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280070" type="Gate" location="verdantdrop">
+    <position zoneId="151" x="1529" y="27" z="-1147" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280071" type="Gate" location="lynxpeltpatch">
+    <position zoneId="151" x="1296" y="48" z="-1534" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280072" type="Gate" location="larkscall">
+    <position zoneId="151" x="2297" y="33" z="-703" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280073" type="Gate" location="treespeak">
+    <position zoneId="152" x="-887" y="35" z="-2188" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280074" type="Gate" location="aldersprings">
+    <position zoneId="152" x="-1567" y="17" z="-2593" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280075" type="Gate" location="lasthold">
+    <position zoneId="152" x="-801" y="32" z="-2792" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280076" type="Gate" location="lichenweed">
+    <position zoneId="153" x="-1908" y="1" z="-1042" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280077" type="Gate" location="mumurrills">
+    <position zoneId="153" x="-2158" y="-45" z="-166" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280078" type="Gate" location="turningleaf">
+    <position zoneId="153" x="-1333" y="-13" z="324" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280079" type="Gate" location="silentarbor">
+    <position zoneId="154" x="991" y="-11" z="600" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280080" type="Gate" location="longroot">
+    <position zoneId="154" x="1126" y="1" z="1440" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280081" type="Gate" location="snakemolt">
+    <position zoneId="154" x="189" y="1" z="1337" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280082" type="Gate" location="muntuycellars">
+    <position zoneId="157" x="-689" y="-15" z="-2065" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280083" type="Gate" location="tamtaradeeprcroft  ">
+    <position zoneId="158" x="315.2" y="-36" z="-168" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280097" type="Gate" location="boulderdowns">
+    <position zoneId="143" x="-517" y="208" z="543" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280098" type="Gate" location="prominencepoint">
+    <position zoneId="143" x="190" y="368" z="-662" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280099" type="Gate" location="feathergorge">
+    <position zoneId="143" x="960" y="288" z="-22" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280100" type="Gate" location="maidenglen">
+    <position zoneId="144" x="1737" y="177" z="-1250" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280101" type="Gate" location="hushedboughs">
+    <position zoneId="144" x="1390" y="223" z="-736" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280102" type="Gate" location="scarwingfall">
+    <position zoneId="144" x="1788" y="166" z="-829" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280103" type="Gate" location="weepingvale">
+    <position zoneId="145" x="1383" y="232" z="422" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280104" type="Gate" location="clearwater">
+    <position zoneId="145" x="2160" y="143" z="622" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280105" type="Gate" location="teriggansstand">
+    <position zoneId="147" x="-1" y="145" z="1373" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280106" type="Gate" location="shepherdpeak">
+    <position zoneId="147" x="-64" y="186" z="1924" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280107" type="Gate" location="fellwood">
+    <position zoneId="147" x="-908" y="192" z="2162" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280108" type="Gate" location="wyrmkingspearch">
+    <position zoneId="148" x="-1738" y="286" z="-844" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280109" type="Gate" location="lance">
+    <position zoneId="148" x="-2366" y="337" z="-1058" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280110" type="Gate" location="twinpools">
+    <position zoneId="148" x="-2821" y="257" z="-290" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280123" type="Gate" location="fogfens">
+    <position zoneId="190" x="-458" y="-40" z="-318" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280124" type="Gate" location="singingshards">
+    <position zoneId="190" x="580" y="59" z="206" r="0" />
+  </Aetheryte>
+  <Aetheryte classId="1280125" type="Gate" location="jaggedcrestcave">
+    <position zoneId="190" x="-362" y="-15" z="-40" r="2.9" />
   </Aetheryte>
 </list>
