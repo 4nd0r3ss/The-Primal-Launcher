@@ -1,37 +1,37 @@
-## Welcome to GitHub Pages
+## Welcome to The Primal Launcher official page
 
-You can use the [editor on GitHub](https://github.com/4nd0r3ss/The-Primal-Launcher/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
+The Primal Launcher (TPL) is a launcher for long-abandoned PC videogame FFXIV version 1.23b. I aims to transform the game into a single player experience for those who want to experience this game's story and lore. It is *NOT* compatible with later versions of FFXIV, and it will never be.
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+**The Primal Launcher is NOT a private server!** (in a way) 
+You will not be able to play with other people as TPL does not accept external connections.
 
-### Markdown
+This project is focused on easy of use so no databases, web servers, compilation or configurations are required to run TPL. All you need is the game installed in your computer, TPL will take care of everything for you.
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+TPL was built to be an open source, single executable application with no installation. Just download the binary and run the app. 
+It is highly recommended to download TPL only from its official channels.
 
-```markdown
-Syntax highlighted code block
+### How to get the game
+It is fairly easy to find copies of this game for a few bucks on sites like ebay, so make sure to buy yours (it looks nice on the shelf!). Any other way of getting a copy of the game is **NOT** recommended, for obvious reasons.
 
-# Header 1
-## Header 2
-### Header 3
+### How to use TPL
+First of all, install the game (duh). **It must be installed in a non-system folder, otherwise TPL won't be able to upgrade the game's version**. *This is by design.*
 
-- Bulleted
-- List
+After game installation you will have version 1.0, so we need to upgrade it to version 1.23b. Run TPL, it will detect the game installation and guide you through the update process. There are three steps:
+- Download update files (~5GB)
+- Update game to 1.23b
+- Patch binaries
 
-1. Numbered
-2. List
+The process is very simple, all you have to do is to click one button to start each step. The UI is self-explanatory.
 
-**Bold** and _Italic_ and `Code` text
+### TPL options
+I'm in the process of implementing different options to enhance/tweak gameplay.
 
-[Link](url) and ![Image](src)
-```
+### TPL generated Files
+When first executed, TPL will create a directory 'The Primal Launcher User Files' inside your 'Documents' folder. 
+There you will find your characters file, an app config file and the update files.
 
-For more details see [Basic writing and formatting syntax](https://docs.github.com/en/github/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax).
+### Update files
+All update files are automatically downloaded by TPL. The files are downloaded from the 3rd party website [http://ffxivpatches.s3.amazonaws.com/]
 
-### Jekyll Themes
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/4nd0r3ss/The-Primal-Launcher/settings/pages). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
 
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
