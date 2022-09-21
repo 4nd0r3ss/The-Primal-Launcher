@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<chara>
+  <npc>
+    <ZoneSwitch>
+      <classId>1090372</classId>
+      <position x="791" y="285.6" z="-378.8" r="0" />
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+        <pushDefault enabled="1" radius="6" silent="true" outwards="false" action="143" />
+      </events>
+    </ZoneSwitch>
+      <PopulaceShopSalesman welcomeTalk="281" menuId="-8" shopType="Item" itemSet="4001">
+          <classId>1600097</classId>
+          <position x="1132.7" y="269.98" z="-1147.9" r="-0.84" />
+      </PopulaceShopSalesman>
+  </npc>
+</chara>

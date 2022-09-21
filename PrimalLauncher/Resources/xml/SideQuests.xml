@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<quests>
+	<quest id="110828" name="etc5g0" level="1">
+		<phase>			
+			<step actorClassId="1000458" event="talkDefault" value="processEventVKOROLONStart" questIcon="2" repeatable="true" switchEvent="true" isQuestion="true">
+				<option selection="null" onExecute="FinishEvent"  />
+				<option selection="-1" subSelection="-3" onExecute="FinishEvent"  />
+				<option selection="0" subSelection="1" onExecute="TalkDefault"  />
+				<option selection="0" subSelection="2" onExecute="StepFunction" />
+				<option selection="1" onExecute="FinishEvent" onFinish="QuestIcon:0;AcceptQuest;EndPhase"  />
+				<option selection="2" onExecute="FinishEvent" />
+			</step>
+		</phase>	
+		<phase>							
+			<step actorClassId="1000458" event="talkDefault" value="processEvent_000_1" repeatable="true" />
+			<step actorClassId="1001707" event="talkDefault" value="processEvent_010" questIcon="2" onExecute="QuestIcon:0;" endPhase="true" />
+		</phase>
+		<phase>			
+			<step actorClassId="1001707" event="talkDefault" value="processEvent_010_1" repeatable="true" />
+			<step actorClassId="1000458" event="talkDefault" value="processEvent_020" questIcon="2" endPhase="true" />
+		</phase>
+		<phase>			
+			<step actorClassId="1000458" event="talkDefault" value="sqrwa" questIcon="4" parameters="200, 1, 1" onFinish="QuestIcon:0;AddExp:200;FinishQuest:110828" />
+		</phase>
+	</quest>
+	<quest id="22" name="test01" level="50">
+		<phase>
+			<step actorClassId="1000458" event="questIcon" endPhase="true" value="2" repeatable="true" />
+		</phase>
+	</quest>
+</quests>

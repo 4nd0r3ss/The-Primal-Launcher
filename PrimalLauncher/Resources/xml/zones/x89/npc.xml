@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<chara>
+  <npc>
+    <Populace className="DoorServer">
+      <classId>5900015</classId>
+      <position x="79.8" y="-12.2" z="-2949.8" r="0" />
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+      </events>
+    </Populace>
+    <Populace className="DoorServer">
+      <classId>5900015</classId>
+      <position x="16.011" y="-12.218" z="-3077.03" r="0" />
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+      </events>
+    </Populace>
+    <Populace className="DoorServer">
+      <classId>5900015</classId>
+      <position x="96.858" y="-12.567" z="-3055.05" r="0" />
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+      </events>
+    </Populace>
+    <Populace className="DoorServer">
+      <classId>5900015</classId>
+      <position x="144.761" y="-12.497" z="-2975.01" r="0" />
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+      </events>
+    </Populace>
+    <Populace className="DoorServer">
+      <classId>5900015</classId>
+      <position x="127.904" y="-11.875" z="-2928" r="0" />
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+      </events>
+    </Populace>
+    <Populace className="DoorServer">
+      <classId>5900015</classId>
+      <position x="303.918" y="-19.875" z="-2991.97" r="0" />
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+      </events>
+    </Populace>
+    <Populace className="DoorServer">
+      <classId>5900015</classId>
+      <position x="320.025" y="-19.875" z="-3040.02" r="0" />
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+      </events>
+    </Populace>
+    <Populace className="DoorServer">
+      <classId>5900015</classId>
+      <position x="383.833" y="-19.875" z="-3039.93" r="0" />
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+      </events>
+    </Populace>
+    <MapObj className="DoorStandard">
+      <classId>5900001</classId>
+      <position x="191.217" y="-14.427" z="-2924.85" r="0" />
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+      </events>
+    </MapObj>
+    <MapObj className="DoorStandard">
+      <classId>5900001</classId>
+      <position x="191.217" y="-14.427" z="-2924.85" r="0" />
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+      </events>
+    </MapObj>
+  </npc>
+</chara>

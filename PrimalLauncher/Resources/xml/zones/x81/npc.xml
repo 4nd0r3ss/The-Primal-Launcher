@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<chara>
+  <npc>
+    <ZoneSwitch>
+      <classId>1090372</classId>
+      <position x="-477.7" y="71.1" z="-626.5" r="0" />
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+        <pushDefault enabled="1" radius="5" silent="true" outwards="false" action="128" />
+      </events>
+    </ZoneSwitch>
+    <ZoneSwitch>
+      <classId>1090372</classId>
+      <position x="-983.4" y="72.5" z="-1379.5" r="0" />
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+        <pushDefault enabled="1" radius="5" silent="true" outwards="false" action="135" />
+      </events>
+    </ZoneSwitch>
+      <PopulaceShopSalesman welcomeTalk="281" menuId="-8" shopType="Item" itemSet="1005">
+          <classId>1600125</classId>
+          <position x="-997.7" y="61.5" z="-1134.1" r="-0.5" />
+      </PopulaceShopSalesman>
+      <PopulaceShopSalesman welcomeTalk="281" menuId="-8" shopType="Item" itemSet="1005">
+          <classId>1600137</classId>
+          <position x="-1896.1" y="53.3" z="-1362.4" r="3.1" />
+      </PopulaceShopSalesman>
+  </npc>
+</chara>

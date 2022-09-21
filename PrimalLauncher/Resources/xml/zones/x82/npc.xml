@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<chara>
+  <npc>
+    <Populace className="PopulaceBountyPresenter">
+      <classId>1060027</classId>
+      <position x="1117.76" y="52.143" z="-445.258" r="2.173" />
+    </Populace>
+    <ZoneSwitch>
+      <classId>1090372</classId>
+      <position x="868.3" y="64.5" z="-279.7" r="0" />
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+        <pushDefault enabled="1" radius="5" silent="true" outwards="false" action="128" />
+      </events>
+    </ZoneSwitch>
+    <ZoneSwitch>
+      <classId>1090372</classId>
+      <position x="922.7" y="64.5" z="-1634.5" r="0" />
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+        <pushDefault enabled="1" radius="5" silent="true" outwards="false" action="135" />
+      </events>
+    </ZoneSwitch>
+      <PopulaceShopSalesman welcomeTalk="281" menuId="-8" shopType="Item" itemSet="1005">
+          <classId>1600095</classId>
+          <position x="1133.2" y="45.39" z="-919.6" r="-1.6" />
+      </PopulaceShopSalesman>
+  </npc>
+</chara>

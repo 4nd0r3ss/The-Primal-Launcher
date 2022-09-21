@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<chara>
+  <npc>
+      <Populace className="PopulaceStandard">
+          <classId>1500212</classId>
+          <position x="169" y="0" z="-172.3" r="-1.8" />
+      </Populace>
+      <PopulaceCompanyGLPublisher>
+          <classId>1500198</classId>
+          <position x="169.19" y="0" z="-174.8" r="-1.8" />
+      </PopulaceCompanyGLPublisher>
+      <Populace className="PopulaceStandard">
+          <classId>1500201</classId>
+          <position x="169" y="0" z="-177.5" r="-1.5" />
+      </Populace>
+      <PopulaceCompanyGuide>
+          <classId>1001739</classId>
+          <position x="155.32" y="0" z="-181.6" r="0.8" />
+      </PopulaceCompanyGuide>
+      <Populace className="PopulaceStandard">
+          <classId>1500282</classId>
+          <position x="168.4" y="0" z="-183.3" r="-1" />
+      </Populace>
+      <Populace className="PopulaceStandard">
+          <classId>1500390</classId>
+          <position x="165.7" y="0" z="-164.6" r="-2.9" />
+      </Populace>
+      <MarketEntrance>
+          <classId>1090264</classId>
+          <position x="160" y="0" z="-142.76" r="0" />
+      </MarketEntrance>
+  </npc>
+</chara>

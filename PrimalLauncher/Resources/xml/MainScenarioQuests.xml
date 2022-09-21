@@ -1,0 +1,196 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<quests>
+	<quest id="110001" name="Man0l0" startRegion="193" level="1" autoAccept="true" director="01">
+		<phase>			
+			<step director="opening" event="noticeEvent" value="processTtrNomal001withHQ" />
+		</phase>
+		<phase>
+			<step actorClassId="1001652" questIcon="2" event="pushDefault" value="processTtrNomal002" onExecute="Enabled:0" />
+			<step actorClassId="1001652" event="talkDefault" value="processTtrNomal003" />
+		</phase>
+		<phase>
+			<step actorClassId="1001652" event="talkDefault" value="processTtrMini001" onExecute="QuestIcon:0" onFinish="CloseTutorialWidget" />
+			<step actorClassId="1000447" event="talkDefault" questIcon="2" value="processTtrMini002" onExecute="QuestIcon:0" onFinish="CloseTutorialWidget" />
+			<step actorClassId="1000442" event="talkDefault" questIcon="2" value="processTtrMini003" onExecute="QuestIcon:0" onFinish="CloseTutorialWidget" />
+		</phase>
+		<phase>
+			<step actorClassId="1090025" event="pushDefault" questIcon="3" value="processEventNewRectAsk" repeatable="true" isQuestion="true">
+				<option selection="null" onExecute="FinishEvent" onFinish="EndPhase;QuestIcon:0;BattleTutorialStart;UpdateQuest:2" />
+				<option selection="1" onExecute="DelegateEvent:processEvent000_2;" onFinish=""  />
+				<option selection="2" onExecute="FinishEvent" />
+			</step>			
+		</phase>
+		<phase>
+			<step director="opening" event="noticeEvent" value="processTtrBtl001" />
+			<step event="commandForced" value="noticeEvent" onFinish="Sleep:1.5;StartQuestDirectorNotice:noticeEvent" />
+			<step director="quest" event="noticeEvent" value="processTtrBtl002" onDelegate="Sleep:2" />
+			<step director="quest" event="noticeEvent" value="processEvent000_3" onExecute="AddKeyItem:balloonfish" onFinish="Sleep:5;ToInstance:3" />
+		</phase>
+		<phase>
+			<step actorClassId="1000151" event="talkDefault" value="processEvent020_9" repeatable="true" parameters="null" isQuestion="true">
+				<option selection="null" onExecute="FinishEvent;FinishQuest:110001;AddQuest:110002;ToInstance:4" />
+				<option selection="1" questId="110006" onExecute="DelegateEvent:processEvent010,110002" />
+				<option selection="2" onExecute="FinishEvent" />
+			</step>
+		</phase>
+	</quest>
+	
+	<quest id="110002" name="Man0l1" level="1" autoAccept="true" director="01">
+		<phase>			
+			<step actorClassId="1000137" questIcon="2" event="talkDefault" value="processEvent020" onExecute="QuestIcon:0" endPhase="true" onFinish="QuestIcon:0;ExitInstance;NpcLSAdd:1;UpdateQuest:5" />
+		</phase>
+	</quest>
+	
+	
+	
+	
+	<quest id="110005" name="Man0g0" level="1" startRegion="5" autoAccept="true" director="01">
+		<phase>
+			<step director="opening" event="noticeEvent" value="processTtrNomal001withHQ" />
+		</phase>
+		<phase>					
+			<step actorClassId="1000009" questIcon="2" event="pushDefault" value="processTtrNomal002" onExecute="Enabled:0" />
+			<step actorClassId="1000009" event="talkDefault" value="processTtrNomal003" onExecute="QuestIcon:0" />
+		</phase>
+		<phase>
+			<step actorClassId="1000009" questIcon="2" event="talkDefault" value="processEvent000_1" onExecute="QuestIcon:0" />
+			<step actorClassId="1000010" questIcon="2" event="talkDefault" value="processEvent000_2" onExecute="QuestIcon:0" />
+		</phase>
+		<phase>
+			<step actorClassId="1000009" questIcon="2" event="talkDefault" value="processEvent000_3" onExecute="QuestIcon:0;" />
+		</phase>
+		<phase>
+			<step actorClassId="1000010" questIcon="2" event="talkDefault" value="processEvent000_4" onExecute="QuestIcon:0" />
+		</phase>		
+		<phase>
+			<step actorClassId="1000009" questIcon="2" event="talkDefault" onExecute="QuestIcon:0" onFinish="BattleTutorialStart;UpdateQuest:5" />
+		</phase>
+		<phase>
+			<step director="opening" event="noticeEvent" value="processTtrBtl001" />
+			<step event="commandForced" onFinish="Sleep:1.5;StartQuestDirectorNotice:noticeEvent" />
+			<step director="quest" event="noticeEvent" value="processTtrBtl002" onDelegate="Sleep:2" />			
+			<step director="quest" event="noticeEvent" value="processEvent020_1" onExecute="AddKeyItem:treant vine" onFinish="Sleep:5;ToInstance:7;UpdateQuest:10" />
+		</phase>
+		<phase>			
+			<step actorClassId="1000680" event="talkDefault" value="processEvent020_2" repeatable="true" />
+			<step actorClassId="1000683" event="talkDefault" value="processEvent020_3" repeatable="true" />
+			<step actorClassId="1000017" event="talkDefault" value="processEvent020_4" repeatable="true" />
+			<step actorClassId="1000876" event="talkDefault" value="processEvent020_5" questIcon="2" onExecute="QuestIcon:0" repeatable="true" />
+			<step actorClassId="1000951" event="talkDefault" value="processEvent020_6" repeatable="true" />
+			<step actorClassId="1001648" event="talkDefault" value="processEvent100_9" repeatable="true" />
+			<step actorClassId="1099047" event="pushDefault" value="processTtrBlkNml001" repeatable="true" onFinish="SetPlayerPosition:5,109.3,8.2,-1207.6,0.4,15" />
+			<step actorClassId="1099046" questIcon="3" event="pushDefault" value="processEvent100" questId="110006" onExecute="QuestIcon:0;FinishQuest:110005;AddQuest:110006" enabled="0" parameters="none" onFinish="ToInstance:8" />
+		</phase>
+	</quest>
+	<quest id="110006" name="Man0g1" level="1" startRegion="184" autoAccept="true" director="01">
+		<phase>			
+			<step actorClassId="1001058" event="talkDefault" value="processEvent100_2" repeatable="true" />
+			<step actorClassId="1001057" event="talkDefault" value="processEvent100_3" repeatable="true" />
+			<step actorClassId="1001060" event="talkDefault" value="processEvent100_4" repeatable="true" />
+			<step actorClassId="1001062" event="talkDefault" value="processEvent100_6" repeatable="true" />
+			<step actorClassId="1001059" event="talkDefault" value="processEvent100_7" repeatable="true" />
+			<step actorClassId="1000562" event="talkDefault" value="processEvent100_8" repeatable="true" />
+			<step actorClassId="1001648" event="talkDefault" value="processEvent100_9" repeatable="true" />
+			<step actorClassId="1000230" event="talkDefault" value="processEvent110" questIcon="2" endPhase="true" onFinish="QuestIcon:0;ExitInstance;NpcLSAdd:1;UpdateQuest:5" />
+		</phase>
+		<phase>			
+			<step actorClassId="1000230" event="talkDefault" value="processEvent110_2" repeatable="true" />
+			<step actorClassId="1280062" event="talkDefault" value="processEvent013_2" questIcon="5" executionType="after" />			
+			<step actorClassId="1280062" event="talkDefault" value="default" endPhase="true" onExecute="QuestIcon:0;" onFinish="UpdateQuest:12" />			
+		</phase>
+		<phase>			
+			<step actorClassId="1000230" event="talkDefault" value="processEvent114" questIcon="2" />
+			<step actorClassId="1000230" event="talkDefault" value="processEvent115_2" endPhase="true" onFinish="QuestIcon:0;UpdateQuest:15" />			
+		</phase>
+		<phase>			
+			<step actorClassId="1000231" event="talkDefault" value="processEvent120" questIcon="2" onFinish="QuestIcon:0;AddGil:2000" />
+		</phase>
+		<phase>		
+			<step actorClassId="1700030" event="talkDefault" value="processEvent125" questIcon="2" endPhase="true" onFinish="QuestIcon:0" />
+		</phase>
+		<phase>
+			<actors>
+				<Populace className="PopulaceStandard">
+					<questIcon>3</questIcon>
+					<classId>1099046</classId>
+					<position zoneId="206" x="-340.62" y="8.09" z="-1684.69" r="1.17" />
+					<events>
+						<noticeEvent priority="0" enabled="0" />
+						<pushDefault enabled="1" radius="3.0" silent="false" outwards="false" />
+					</events>
+				</Populace>
+			</actors>					
+			<step actorClassId="1099046" event="pushDefault" value="processEvent130" onFinish="ToInstance:13" />			
+		</phase>
+		<phase>			
+			<step actorClassId="1000028" event="talkDefault" value="processEvent135" questIcon="2" endPhase="true" onFinish="ExitInstance;UpdateQuest:40" />
+		</phase>
+		<phase>
+			<step actorClassId="1000236" event="talkDefault" value="processEvent140" questIcon="2" endPhase="true" onFinish="ToInstance:14" />
+		</phase>
+		<phase targetCount="1" onTargetCount="StartQuestDirectorNotice">			
+			<step actorClassId="1000410" event="talkDefault" value="processEvent140_1" repeatable="true" onFinish="TextSheet:Int32|25083,Int32|2" />
+			<step actorClassId="1000238" event="talkDefault" value="processEvent140_2" repeatable="true" onFinish="TextSheet:Int32|25083,Int32|2" />
+			<step actorClassId="1000239" event="talkDefault" value="processEvent140_3" repeatable="true" onFinish="TextSheet:Int32|25083,Int32|2" />
+			<step actorClassId="1000409" event="talkDefault" value="processEvent140_4" repeatable="true" onFinish="TextSheet:Int32|25083,Int32|2" />
+			<step actorClassId="1000412" event="talkDefault" value="processEvent140_5" repeatable="true" onFinish="TextSheet:Int32|25083,Int32|2" />
+			<step actorClassId="1000411" event="talkDefault" value="processEvent140_6" repeatable="true" onFinish="TextSheet:Int32|25083,Int32|2" />
+			<step actorClassId="1000410" event="DoEmote" value="108" onExecute="DisableStep:0;Sleep:2;StartTalkEvent;" />
+			<step actorClassId="1000238" event="DoEmote" value="107" onExecute="DisableStep:1;Sleep:2;StartTalkEvent;" />
+			<step actorClassId="1000239" event="DoEmote" value="105" onExecute="DisableStep:2;Sleep:2;StartTalkEvent;" />
+			<step actorClassId="1000409" event="DoEmote" value="106" onExecute="DisableStep:3;Sleep:2;StartTalkEvent;" />
+			<step actorClassId="1000412" event="DoEmote" value="101" onExecute="DisableStep:4;Sleep:2;StartTalkEvent;" />
+			<step actorClassId="1000411" event="DoEmote" value="122" onExecute="DisableStep:5;Sleep:2;StartTalkEvent;" />
+			<step actorClassId="1000410" event="talkDefault" value="processEvent142_1" onFinish="PhaseCounterIncrement;" />
+			<step actorClassId="1000238" event="talkDefault" value="processEvent142_2" onFinish="PhaseCounterIncrement;" />
+			<step actorClassId="1000239" event="talkDefault" value="processEvent142_3" onFinish="PhaseCounterIncrement;" />
+			<step actorClassId="1000409" event="talkDefault" value="processEvent142_4" onFinish="PhaseCounterIncrement;" />
+			<step actorClassId="1000412" event="talkDefault" value="processEvent142_5" onFinish="PhaseCounterIncrement;" />
+			<step actorClassId="1000411" event="talkDefault" value="processEvent142_6" onFinish="PhaseCounterIncrement;" />
+			<step director="quest" event="noticeEvent" value="processEvent150" onFinish="Sleep:1;ExitInstance;ToInstance:15" />
+			<step actorClassId="1000236" event="talkDefault" value="processEvent1000_3" questIcon="2" onFinish="ToInstance:14" repeatable="true" phaseIgnore="true" />	
+			<step actorClassId="1000236" event="talkDefault" value="processEvent1000_3" questIcon="2" onFinish="ToInstance:15" repeatable="true" phaseIgnore="true" />
+			<step actorClassId="1000009" event="pushDefault" value="processTtrNomal002" onExecute="Enabled:0" />
+		</phase>
+		<phase>
+			
+		</phase>
+	</quest>
+	
+	<quest id="110009" name="Man0u0" level="1" startRegion="184" autoAccept="true" director="01">
+		<phase>
+			<step director="opening" event="noticeEvent" value="processTtrNomal001withHQ" />
+		</phase>
+		<phase>
+			<step actorClassId="1000042" questIcon="2" event="pushDefault" value="processTtrNomal002" onExecute="Enabled:0" />
+			<step actorClassId="1000042" event="talkDefault" value="processTtrNomal003" />			
+			<step actorClassId="1090372" event="pushDefault" onExecute="TurnBack:5" repeatable="true" phaseIgnore="true" />
+		</phase>
+		<phase>			
+			<step actorClassId="1001491" questIcon="2" event="talkDefault" value="processTtrMini002_first" onExecute="QuestIcon:0" onFinish="CloseTutorialWidget" />
+			<step actorClassId="1001495" questIcon="2" event="talkDefault" value="processTtrMini003_first" onExecute="QuestIcon:0" onFinish="CloseTutorialWidget" />
+			<step actorClassId="1000042" event="talkDefault" value="processTtrMini001" onExecute="QuestIcon:0" onFinish="CloseTutorialWidget" />			
+			<step actorClassId="1090372" event="pushDefault" onExecute="TurnBack:5" repeatable="true" phaseIgnore="true" />
+		</phase>
+		<phase>			
+			<step actorClassId="1000042" event="talkDefault" value="processTtrMini001" repeatable="true" phaseIgnore="true" />
+			<step actorClassId="1001491" event="talkDefault" value="processTtrMini002" repeatable="true" phaseIgnore="true" />
+			<step actorClassId="1001495" event="talkDefault" value="processTtrMini003" repeatable="true" phaseIgnore="true" />
+			<step actorClassId="1090372" questIcon="3" event="pushDefault" onExecute="QuestIcon:0" onFinish="BattleTutorialStart" />			
+		</phase>
+		<phase>
+			<step director="opening" event="noticeEvent" value="processTtrBtl001" />
+			<step event="commandForced" onFinish="Sleep:1.5;StartQuestDirectorNotice:noticeEvent" />
+			<step director="quest" event="noticeEvent" value="processTtrBtl002" onDelegate="Sleep:2" />
+			<step director="quest" event="noticeEvent" value="processEvent020" onExecute="AddKeyItem:velodyna cosmos" onFinish="Sleep:5;ToInstance:11" />
+		</phase>
+		<phase>			
+			<step actorClassId="1099046" questIcon="3" event="pushDefault" questId="110010" value="processEventMomodiStart" onExecute="QuestIcon:0;FinishQuest:110009;AddQuest:110010" onFinish="ToInstance:12" />
+		</phase>
+	</quest>
+	<quest id="110010" name="Man0u1" level="1" startRegion="175" autoAccept="true" director="01">
+		<phase>			
+			<step actorClassId="1000841" questIcon="2" event="talkDefault" value="processEvent010" onExecute="QuestIcon:0" endPhase="true" onFinish="ExitInstance;NpcLSAdd:1" />
+		</phase>
+	</quest>
+</quests>

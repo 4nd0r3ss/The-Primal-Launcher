@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<chara>
+  <npc>
+    <ZoneSwitch>
+      <classId>1090372</classId>
+      <position x="393.2" y="-7.7" z="264.3" r="0" />
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+        <pushDefault enabled="1" radius="5" silent="true" outwards="false" action="150" />
+      </events>
+    </ZoneSwitch>
+    <ZoneSwitch>
+      <classId>1090372</classId>
+      <position x="698.8" y="-12.1" z="1708.8" r="0" />
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+        <pushDefault enabled="1" radius="6" silent="true" outwards="false" action="171,1933.7,280.8,-1165.9,-0.7" />
+      </events>
+    </ZoneSwitch>
+      <PopulaceShopSalesman welcomeTalk="281" menuId="-8" shopType="Item" itemSet="2009">
+          <classId>1600096</classId>
+          <position x="722.6" y="-11.56" z="1124.78" r="1.5" />
+      </PopulaceShopSalesman>
+      <PopulaceShopSalesman welcomeTalk="281" menuId="-8" shopType="Item" itemSet="2009">
+          <classId>1600111</classId>
+          <position x="421.49" y="3.92" z="536.6" r="0.11" />
+      </PopulaceShopSalesman>
+
+      <Populace className="PopulaceStandard">
+          <classId>1001613</classId>
+          <position x="433.86" y="4.6" z="547.7" r="1.77" />
+          <animation>1017</animation>
+      </Populace>
+      <Populace className="PopulaceStandard">
+          <classId>1001610</classId>
+          <position x="413.89" y="4" z="544.5" r="2.9" />        
+      </Populace>
+      <Populace className="PopulaceStandard">
+          <classId>1001614</classId>
+          <position x="415.57" y="3.94" z="538.6" r="-2.11" />
+      </Populace>
+      
+  </npc>
+</chara>

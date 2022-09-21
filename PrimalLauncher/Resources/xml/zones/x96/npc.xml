@@ -1,0 +1,71 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<chara>
+	<npc>
+		<Monster family="Lemming" className="HareStandard" respawnDelay="30">
+			<classId>2104028</classId>	
+			<position x="333.2" y="5.84" z="-943" r="-1.94" />
+			<events>
+				<noticeEvent priority="0" enabled="1" silent="1" />
+			</events>
+		</Monster>
+		<Monster family="Funguar" className="FunguarLesserStandard" respawnDelay="30">
+			<classId>2105901</classId>
+			<position x="335.2" y="5.84" z="-940" r="-1.94" />
+			<events>
+				<noticeEvent priority="0" enabled="1" silent="1" />
+			</events>
+		</Monster>
+		<ZoneSwitch>
+			<classId>1090372</classId>
+			<position x="320.1" y="6.5" z="-1025.9" r="0" />
+			<events>
+				<noticeEvent priority="0" enabled="0" />
+				<pushDefault enabled="1" radius="5" silent="true" outwards="false" action="155" />
+			</events>
+		</ZoneSwitch>
+		<ZoneSwitch>
+			<classId>1090372</classId>
+			<position x="-192" y="6.5" z="-1089.3" r="0" />
+			<events>
+				<noticeEvent priority="0" enabled="0" />
+				<pushDefault enabled="1" radius="5" silent="true" outwards="false" action="206" />
+			</events>
+		</ZoneSwitch>
+		<ZoneSwitch>
+			<classId>1090372</classId>
+			<position x="1085.8" y="20.1" z="-933" r="0" />
+			<events>
+				<noticeEvent priority="0" enabled="0" />
+				<pushDefault enabled="1" radius="8" silent="true" outwards="false" action="151" />
+			</events>
+		</ZoneSwitch>
+		<ZoneSwitch>
+			<classId>1090372</classId>
+			<position x="383.2" y="-11.8" z="355.3" r="0" />
+			<events>
+				<noticeEvent priority="0" enabled="0" />
+				<pushDefault enabled="1" radius="5" silent="true" outwards="false" action="154" />
+			</events>
+		</ZoneSwitch>
+		<ZoneSwitch>
+			<classId>1090372</classId>
+			<position x="-827.2" y="0.7" z="-659.7" r="0" />
+			<events>
+				<noticeEvent priority="0" enabled="0" />
+				<pushDefault enabled="1" radius="5" silent="true" outwards="false" action="153" />
+			</events>
+		</ZoneSwitch>
+		<ZoneSwitch>
+			<classId>1090372</classId>
+			<position x="-886.5" y="19.3" z="-1523.2" r="0" />
+			<events>
+				<noticeEvent priority="0" enabled="0" />
+				<pushDefault enabled="1" radius="5" silent="true" outwards="false" action="152" />
+			</events>
+		</ZoneSwitch>
+        <PopulaceShopSalesman welcomeTalk="95" menuId="-8" shopType="Item" itemSet="2009">
+            <classId>1600061</classId>
+            <position x="292.1" y="5.1" z="-519.5" r="-3" />
+        </PopulaceShopSalesman>
+	</npc>
+</chara>

@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<chara>
+  <npc>
+    <ZoneSwitch>
+      <classId>1090372</classId>
+      <position x="-102.9" y="264.5" z="-2817.3" r="0" />
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+        <pushDefault enabled="1" radius="6" silent="true" outwards="false" action="190,-287.7,7.9,797.5,2.2" />
+      </events>
+    </ZoneSwitch>
+    <ZoneSwitch>
+      <classId>1090372</classId>
+      <position x="-228.7" y="213.2" z="-738" r="0" />
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+        <pushDefault enabled="1" radius="6" silent="true" outwards="false" action="170" />
+      </events>
+    </ZoneSwitch>
+      <PopulaceShopSalesman welcomeTalk="281" menuId="-8" shopType="Item" itemSet="3008">
+          <classId>1600120</classId>
+          <position x="-149.29" y="280" z="-1707.62" r="-1.84" />
+      </PopulaceShopSalesman>
+  </npc>
+</chara>

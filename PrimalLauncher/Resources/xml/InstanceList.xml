@@ -1,0 +1,1294 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<instances>
+	<Instance id="1" canAbandon="false" description="Rhotano Sea - Limsa start point">
+		<startPoint zoneId="193" x="0.016" y="10.35" z="-36.91" r="0.025" />		
+		<actors>
+			<Populace className="PopulaceStandard">
+				<classId>1000438</classId>
+				<position x="-0.71" y="10.35" z="-40.51" r="0.3"/>
+				<animation>1035</animation>
+				<talkFunctions>
+					<function name="processEvent000_4" questId="110001" />
+				</talkFunctions>
+				<events>
+					<talkDefault priority="4" enabled="1"/>
+					<noticeEvent priority="0" enabled="0"/>
+				</events>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000439</classId>
+				<position x="-1.87" y="9.15" z="-30.67" r="2.44"/>
+				<animation>1032</animation>
+				<talkFunctions>
+					<function name="processEvent000_5" questId="110001" />
+				</talkFunctions>
+				<events>
+					<talkDefault priority="4" enabled="1"/>
+					<noticeEvent priority="0" enabled="0"/>
+				</events>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000440</classId>
+				<position x="7.06" y="9.15" z="-28.62" r="-1.54"/>
+				<animation>1041</animation>
+				<talkFunctions>
+					<function name="processEvent000_6" questId="110001" />
+				</talkFunctions>
+				<events>
+					<talkDefault priority="4" enabled="1"/>
+					<noticeEvent priority="0" enabled="0"/>
+				</events>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000441</classId>
+				<position x="2.63" y="9.15" z="-33.91" r="-0.16"/>
+				<animation>1041</animation>
+				<talkFunctions>
+					<function name="processEvent000_7" questId="110001" />
+				</talkFunctions>
+				<events>
+					<talkDefault priority="4" enabled="1"/>
+					<noticeEvent priority="0" enabled="0"/>
+				</events>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000442</classId>
+				<position x="4.2" y="10.35" z="-21.98" r="3.11"/>
+				<animation>1015</animation>
+				<talkFunctions>
+					<function name="processEvent000_8" questId="110001" />
+				</talkFunctions>
+				<events>
+					<talkDefault priority="4" enabled="1"/>
+					<noticeEvent priority="0" enabled="0"/>
+				</events>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000443</classId>
+				<position x="4.06" y="10.35" z="-35.24" r="2.52"/>
+				<animation>1036</animation>
+				<talkFunctions>
+					<function name="processEvent000_9" questId="110001" />
+				</talkFunctions>
+				<events>
+					<talkDefault priority="4" enabled="1"/>
+					<noticeEvent priority="0" enabled="0"/>
+				</events>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000444</classId>
+				<position x="-4.72" y="10.35" z="-22.56" r="2.06"/>
+				<animation>1041</animation>
+				<talkFunctions>
+					<function name="processEvent000_10" questId="110001" />
+				</talkFunctions>
+				<events>
+					<talkDefault priority="4" enabled="1"/>
+					<noticeEvent priority="0" enabled="0"/>
+				</events>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000445</classId>
+				<position x="-4.09" y="9.15" z="-24.55" r="2.09"/>
+				<animation>1035</animation>
+				<talkFunctions>
+					<function name="processEvent000_11" questId="110001" />
+				</talkFunctions>
+				<events>
+					<talkDefault priority="4" enabled="1"/>
+					<noticeEvent priority="0" enabled="0"/>
+				</events>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000446</classId>
+				<position x="-0.72" y="9.15" z="-31.81" r="-1.18"/>
+				<animation>1041</animation>
+				<talkFunctions>
+					<function name="processEvent000_12" questId="110001" />
+				</talkFunctions>
+				<events>
+					<talkDefault priority="4" enabled="1"/>
+					<noticeEvent priority="0" enabled="0"/>
+				</events>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000447</classId>
+				<position x="-2.16" y="9.15" z="-26.18" r="0.09"/>
+				<animation>1016</animation>
+				<talkFunctions>
+					<function name="processEvent000_13" questId="110001" />
+				</talkFunctions>
+				<events>
+					<talkDefault priority="4" enabled="1"/>
+					<noticeEvent priority="0" enabled="0"/>
+				</events>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000448</classId>
+				<position x="5.93" y="10.35" z="-25.09" r="-2.01"/>
+				<animation>1037</animation>
+				<talkFunctions>
+					<function name="processEvent000_14" questId="110001" />
+				</talkFunctions>
+				<events>
+					<talkDefault priority="4" enabled="1"/>
+					<noticeEvent priority="0" enabled="0"/>
+				</events>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000449</classId>
+				<position x="-1.92" y="9.15" z="-34.19" r="0.82"/>
+				<animation>1013</animation>
+				<talkFunctions>
+					<function name="processEvent000_15" questId="110001" />
+				</talkFunctions>
+				<events>
+					<talkDefault priority="4" enabled="1"/>
+					<noticeEvent priority="0" enabled="0"/>
+				</events>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000450</classId>
+				<position x="4.88" y="9.15" z="-29.5" r="0.65"/>
+				<animation>1271</animation>
+				<talkFunctions>
+					<function name="processEvent000_16" questId="110001" />
+				</talkFunctions>
+				<events>
+					<talkDefault priority="4" enabled="1"/>
+					<noticeEvent priority="0" enabled="0"/>
+				</events>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000451</classId>
+				<position x="-1.1" y="9.85" z="-33.62" r="-0.82"/>
+				<animation>1026</animation>
+				<talkFunctions>
+					<function name="processEvent000_17" questId="110001" />
+				</talkFunctions>
+				<events>
+					<talkDefault priority="4" enabled="1"/>
+					<noticeEvent priority="0" enabled="0"/>
+				</events>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1001652</classId>
+				<position x="-7.73" y="9.967" z="-27.44" r="1.6"/>
+				<animation>1041</animation>
+				<talkFunctions>
+					<function name="processTtrMini001" questId="110001" />
+				</talkFunctions>
+				<events>
+					<talkDefault priority="1" enabled="1"/>
+					<noticeEvent priority="1" enabled="1"/>
+					<pushDefault radius="3.0" silent="false" outwards="false"/>
+				</events>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1090025</classId>
+				<position x="0" y="10" z="-18" r="0"/>
+				<events>
+					<noticeEvent priority="0" enabled="0"/>
+					<pushDefault radius="2.0" silent="false" outwards="false"/>
+				</events>
+			</Populace>
+		</actors>
+	</Instance>
+	<Instance id="2" canAbandon="false" contentFunction="SimpleContent30002" description="Rhotano Sea - Linsa battle tutorial">
+		<startPoint zoneId="193" x="-5" y="16.35" z="6" r="0.5"  />
+		<actors>
+			<Monster family="fighter" className="FighterAllyOpeningHealer">
+				<classId>2290001</classId>
+				<position x="-8" y="16.35" z="6" r="0.5" />
+				<events>
+					<noticeEvent priority="0" enabled="1" silent="1" />
+				</events>
+			</Monster>
+			<Monster family="fighter" className="FighterAllyOpeningAttacker">
+				<classId>2290002</classId>
+				<position x="0" y="16.35" z="22" r="3" />
+				<events>
+					<noticeEvent priority="0" enabled="1" silent="1" />
+				</events>
+			</Monster>
+			<Monster family="jellyfish" className="JellyfishScenarioLimsaLv00">
+				<classId>2205403</classId>
+				<position x="-6.02" y="17.35" z="14.24" r="-2.81" />
+				<events>
+					<noticeEvent priority="0" enabled="1" silent="1" />
+				</events>
+			</Monster>
+			<Monster family="jellyfish" className="JellyfishScenarioLimsaLv00">
+				<classId>2205403</classId>
+				<position x="-3.02" y="17.35" z="14.24" r="-2.81" />
+				<events>
+					<noticeEvent priority="0" enabled="1" silent="1" />
+				</events>
+			</Monster>
+			<Monster family="jellyfish" className="JellyfishScenarioLimsaLv00">
+				<classId>2205403</classId>
+				<position x="-0.02" y="17.35" z="14.24" r="-2.81" />
+				<events>
+					<noticeEvent priority="0" enabled="1" silent="1" />
+				</events>
+			</Monster>
+		</actors>
+	</Instance>
+	<Instance id="3" canAbandon="false" description="Limsa - docks">
+		<startPoint zoneId="230" x="-826.86" y="6" z="192.74" r="-0.0083" />		
+		<actors>
+			<Populace className="PopulaceStandard">
+				<classId>1000444</classId>
+				<position x="-832.36" y="6" z="209.44" r="-0.35" />
+				<animation>1041</animation>
+				<talkFunctions>
+					<function name="processEvent020_5" questId="110001" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000438</classId>
+				<position x="-831.73" y="6" z="196.77" r="0.86" />
+				<animation>1035</animation>
+				<talkFunctions>
+					<function name="processEvent020_7" questId="110001" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000447</classId>
+				<position x="-863.34" y="4" z="236.13" r="0.93" />
+				<animation>1016</animation>
+				<talkFunctions>
+					<function name="processEvent020_6" questId="110001" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000450</classId>
+				<position x="-855.68" y="3.1" z="258.51" r="-1.56" />
+				<animation>1015</animation>
+				<talkFunctions>
+					<function name="processEvent020_8" questId="110001" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000151</classId>
+				<position x="-834.77" y="6" z="241.55" r="-2.79" />
+				<animation>1041</animation>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000260</classId>
+				<position x="-823.86" y="6" z="198.95" r="0.13" />
+				<animation>1070</animation>
+				<talkFunctions>
+					<function name="processEvent020_3" questId="110001" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000264</classId>
+				<position x="-829.72" y="6" z="260.6" r="-1.07" />
+				<animation>1058</animation>
+				<talkFunctions>
+					<function name="processEvent020_4" questId="110001" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000261</classId>
+				<position x="-823.75" y="6" z="200.27" r="-2.7" />
+				<animation>1033</animation>
+				<talkFunctions>
+					<function name="processEvent020_2" questId="110001" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1500004</classId>
+				<position x="-809.15" y="8" z="230.88" r="0.4" />
+				<animation>1016</animation>
+				<talkFunctions>
+					<function name="processEvent020_10" questId="110001" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1500005</classId>
+				<position x="-809.19" y="8" z="244.86" r="-2.78" />
+				<animation>1017</animation>
+				<talkFunctions>
+					<function name="processEvent020_11" questId="110001" />
+				</talkFunctions>
+			</Populace>
+		</actors>
+	</Instance>
+	<Instance id="4" canAbandon="false" description="Limsa - Drowning Wrench">
+		<startPoint zoneId="133" x="-459.61" y="40.00" z="196.37" r="2.01" />
+		<exitTo zoneId="133" x="-444.266" y="39.518" z="191" r="1.9" />
+		<actors>
+			<Populace className="PopulaceStandard">
+				<classId>1000137</classId>
+				<position x="-430.844" y="40.2116" z="186.773" r="-1.30039" />
+				<animation>1060</animation>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000099</classId>
+				<position x="-442.743" y="39.5" z="185.32" r="-1.69155" />
+				<animation>1002</animation>
+				<talkFunctions>
+					<function name="processEvent010_3" questId="110002" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000098</classId>
+				<position x="-446.004" y="39.5" z="184.858" r="1.482" />
+				<animation>1002</animation>
+				<talkFunctions>
+					<function name="processEvent010_6" questId="110002" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000076</classId>
+				<position x="-442.31" y="39.5" z="193.317" r="0.581998" />
+				<animation>1019</animation>
+				<talkFunctions>
+					<function name="processEvent010_4" questId="110002" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000075</classId>
+				<position x="-450.865" y="39.5" z="194.59" r="1.538" />
+				<animation>1019</animation>
+				<talkFunctions>
+					<function name="processEvent010_7" questId="110002" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000100</classId>
+				<position x="-449.132" y="39.5" z="196.246" r="3.108" />
+				<animation>1003</animation>
+				<talkFunctions>
+					<function name="processEvent010_7" questId="110002" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000167</classId>
+				<position x="-435.2" y="40" z="207.07" r="-1.9" />
+				<talkFunctions>
+					<function name="processEvent010_7" questId="110002" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000077</classId>
+				<position x="-452.427" y="39.5" z="202.873" r="2.25598" />
+				<animation>1003</animation>
+				<talkFunctions>
+					<function name="processEvent010_5" questId="110002" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000001</classId>
+				<position x="-463.547" y="40" z="183.262" r="-1.3983" />
+				<talkFunctions>
+					<function name="processEvent010_8" questId="110002" />
+				</talkFunctions>
+				<events>
+					<talkDefault priority="1" enabled="1" />
+					<noticeEvent priority="1" enabled="1" />
+				</events>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1001643</classId>
+				<position x="-445.719" y="40" z="221.513" r="-1.59477" />
+				<talkFunctions>
+					<function name="processEtc001" questId="110002" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1001649</classId>
+				<position x="-473.359" y="40" z="207.664" r="2.742" />
+				<talkFunctions>
+					<function name="processEtc003" questId="110002" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1001650</classId>
+				<position x="-445.765" y="43" z="167.759" r="-1.59122" />
+				<talkFunctions>
+					<function name="processEtc002" questId="110002" />
+				</talkFunctions>
+			</Populace>
+			<Object className="PrivateAreaPastExit">
+				<classId>1290002</classId>
+				<position x="-450.8" y="39.8" z="195.1" r="1.5" />
+				<events>
+					<noticeEvent priority="1" enabled="1" />
+					<exit radius="30.0" silent="1" outwards="true" enabled="1" action="TurnBack:5" />
+					<caution radius="30.0" silent="1" outwards="true" enabled="1" />
+				</events>
+			</Object>
+		</actors>
+	</Instance>
+	
+	<Instance id="5" canAbandon="false" description="Central Shroud - Gridania start point">
+		<startPoint zoneId="166" x="369.5434" y="4.21" z="-706.1074" r="-1.26721"  />		
+		<actors>
+			<Populace className="PopulaceStandard">
+				<classId>1000009</classId>
+				<position x="353.37" y="3.80" z="-698.98" r="-2.6" />
+				<animation>1007</animation>
+				<talkFunctions>
+					<talkFunction name="processEvent000_1"  questId="110005" />
+				</talkFunctions>
+				<events>
+					<talkDefault priority="1" enabled="1" />
+					<noticeEvent priority="1" enabled="1" />
+					<pushDefault radius="3.0" silent="false" outwards="false" />
+				</events>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000010</classId>
+				<position x="353.37" y="3.75" z="-703.09" r="-2.6" />
+				<animation>1000</animation>
+				<talkFunctions>
+					<talkFunction name="processEvent000_2"  questId="110005" />
+				</talkFunctions>
+			</Populace>
+			<Object className="OpeningStoperF0B1">
+				<classId>1090384</classId>
+				<position x="356.09" y="3.74" z="-701.62" r="-1.41" />
+				<events>
+					<noticeEvent priority="1" enabled="1" />
+					<exit radius="40.0" silent="true" outwards="true" enabled="1" action="TurnBack:5" />
+					<caution radius="30.0" silent="true" outwards="true" enabled="1" action="SendTextLeaveInstance" />
+				</events>
+			</Object>
+		</actors>
+	</Instance>
+	<Instance id="6" canAbandon="false" contentFunction="SimpleContent30010" description="Central Shroud - Gridania battle tutorial">
+		<startPoint zoneId="166" x="364.0" y="3.9" z="-703.8" r="1.5" />		
+		<actors>
+			<Object className="OpeningStoperF0B1">
+				<classId>1090384</classId>
+				<position x="356.09" y="3.74" z="-701.62" r="-1.41" />
+				<events>
+					<noticeEvent priority="1" enabled="1" />
+					<exit radius="40.0" silent="true" outwards="true" enabled="1" action="TurnBack:5" />
+					<caution radius="30.0" silent="true" outwards="true" enabled="1" action="SendTextLeaveInstance" />
+				</events>
+			</Object>
+			<Monster family="fighter" className="FighterAllyOpeningHealer" immobile="true">
+				<classId>2290005</classId>
+				<position x="365.89" y="4.09" z="-706.72" r="-0.71" />
+				<events>
+					<noticeEvent priority="0" enabled="1" silent="1" />
+				</events>
+				<skills>
+					<skill name="cure" condition="hp lte 50%" target="ally" />
+				</skills>
+			</Monster>
+			<Monster family="fighter" className="FighterAllyOpeningAttacker" immobile="true" disableAutoAttack="true">
+				<classId>2290006</classId>
+				<position x="365.26" y="4.11" z="-700.73" r="1.56" />
+				<events>
+					<noticeEvent priority="0" enabled="1" silent="1" />
+				</events>
+			</Monster>
+			<Monster family="wolf" className="WolfScenarioGridaniaLv00">
+				<classId>2201407</classId>
+				<position x="374.42" y="4.4" z="-698.71" r="-1.94" />
+				<events>
+					<noticeEvent priority="0" enabled="1" silent="1" />
+				</events>
+			</Monster>
+			<Monster family="wolf" className="WolfScenarioGridaniaLv00">
+				<classId>2201407</classId>
+				<position x="375.37" y="4.4" z="-700.24" r="-1.99" />
+				<events>
+					<noticeEvent priority="0" enabled="1" silent="1" />
+				</events>
+			</Monster>
+			<Monster family="wolf" className="WolfScenarioGridaniaLv00">
+				<classId>2201407</classId>
+				<position x="375.12" y="4.4" z="-703.59" r="-1.54" />
+				<events>
+					<noticeEvent priority="0" enabled="1" silent="1" />
+				</events>
+			</Monster>
+		</actors>
+	</Instance>
+	<Instance id="7" canAbandon="false" description="Gridania - entrance">
+		<startPoint zoneId="155" x="175.7" y="-1.2" z="-1156.1" r="-2" />		
+		<actors>
+			<Populace className="PopulaceStandard">
+				<classId>1000951</classId>
+				<position x="107.96" y="9.4" z="-1211.89" r="0.3243" />
+				<animation>1031</animation>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000876</classId>
+				<position x="175.76" y="-1.25" z="-1151.11" r="-2.67" />
+				<animation>1015</animation>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000017</classId>
+				<position x="181.82" y="-1" z="-1154.03" r="-1.57" />
+				<animation>1017</animation>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000680</classId>
+				<position x="163.58" y="-1.44" z="-1153.96" r="2.23" />
+				<animation>1015</animation>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000683</classId>
+				<position x="161.5" y="-1.48" z="-1156.34" r="1.44" />
+				<animation>1016</animation>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000230</classId>
+				<position x="57.42" y="4" z="-1196.69" r="1.67" />
+				<animation>1060</animation>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1001062</classId>
+				<position x="67.4" y="4" z="-1208.22" r="-2.63" />
+				<animation>1005</animation>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1001057</classId>
+				<position x="64.89" y="4" z="-1209.33" r="1.74" />
+				<animation>1002</animation>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1001060</classId>
+				<position x="71.83" y="4" z="-1200.14" r="-0.88" />
+				<animation>1005</animation>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1001059</classId>
+				<position x="69.62" y="4" z="-1199.51" r="1.29" />
+				<animation>1005</animation>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1001058</classId>
+				<position x="66.26" y="4" z="-1199.79" r="-2.71" />
+				<animation>1005</animation>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000562</classId>
+				<position x="64.41" y="4" z="-1199.61" r="1.71" />
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000458</classId>
+				<position x="55.82" y="4" z="-1212.23" r="1.91" />
+			</Populace>
+			<MapObj className="DoorStandard" layoutId="321" objectId="2937">
+				<classId>5900004</classId>
+				<position x="185" y="-1" z="-1154" r="0" />
+				<events>
+					<noticeEvent priority="0" enabled="0" />
+				</events>
+			</MapObj>
+			<Populace className="PopulaceStandard">
+				<classId>1099047</classId>
+				<position x="105.945" y="10.851" z="-1217.8" r="0" />
+				<events>
+					<noticeEvent priority="0" enabled="0" />
+					<talkDefault priority="4" enabled="1" />
+					<pushDefault radius="6.0" silent="false" outwards="false" />
+				</events>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1099046</classId>
+				<position x="72.19" y="4" z="-1207.91" r="1.17" />
+				<events>
+					<noticeEvent priority="0" enabled="0" />
+					<pushDefault radius="6.0" silent="false" outwards="false" />
+				</events>
+			</Populace>
+		</actors>
+	</Instance>
+	<Instance id="8" canAbandon="false" description="Gridania - Carline Canopy">
+		<startPoint zoneId="155" x="65.3" y="4" z="-1204.8" r="-1.6" />
+		<exitTo zoneId="155" x="63.4" y="4" z="-1203.5" r="1.7" />
+		<actors>
+			<Populace className="PopulaceStandard">
+				<classId>1000951</classId>
+				<position x="107.96" y="9.4" z="-1211.89" r="0.3243" />
+				<animation>1031</animation>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000876</classId>
+				<position x="175.76" y="-1.25" z="-1151.11" r="-2.67" />
+				<animation>1015</animation>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000017</classId>
+				<position x="181.82" y="-1" z="-1154.03" r="-1.57" />
+				<animation>1017</animation>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000680</classId>
+				<position x="163.58" y="-1.44" z="-1153.96" r="2.23" />
+				<animation>1015</animation>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000683</classId>
+				<position x="161.5" y="-1.48" z="-1156.34" r="1.44" />
+				<animation>1016</animation>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000230</classId>
+				<position x="57.42" y="4" z="-1196.69" r="1.67" />
+				<animation>1060</animation>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1001062</classId>
+				<position x="67.4" y="4" z="-1208.22" r="-2.63" />
+				<animation>1005</animation>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1001057</classId>
+				<position x="64.89" y="4" z="-1209.33" r="1.74" />
+				<animation>1002</animation>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1001060</classId>
+				<position x="71.83" y="4" z="-1200.14" r="-0.88" />
+				<animation>1005</animation>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1001059</classId>
+				<position x="69.62" y="4" z="-1199.51" r="1.29" />
+				<animation>1005</animation>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1001058</classId>
+				<position x="66.26" y="4" z="-1199.79" r="-2.71" />
+				<animation>1005</animation>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000562</classId>
+				<position x="64.41" y="4" z="-1199.61" r="1.71" />
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000458</classId>
+				<position x="55.82" y="4" z="-1212.23" r="1.91" />
+			</Populace>
+			<MapObj className="DoorStandard">
+				<classId>5900004</classId>
+				<position x="185" y="-1" z="-1154" r="0" />
+				<events>
+					<noticeEvent priority="0" enabled="0" />
+				</events>
+			</MapObj>
+			<Populace className="PopulaceStandard">
+				<classId>1099047</classId>
+				<position x="105.945" y="10.851" z="-1217.8" r="0" />
+				<events>
+					<noticeEvent priority="0" enabled="0" />
+					<pushDefault radius="6.0" silent="false" outwards="false" />
+				</events>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1001648</classId>
+				<position x="77.577" y="3.953" z="-1210.66" r="-0.518" />
+			</Populace>
+			<Object className="OpeningStoperF0B1">
+				<classId>1090384</classId>
+				<position x="62.6" y="4" z="-1209.4" r="-1.6" />
+				<events>
+					<noticeEvent priority="1" enabled="1" />
+					<exit radius="20.0" silent="true" outwards="true" enabled="1" action="SetPosition:6,65.3,4,-1204.8,-1.6,15" />
+					<caution radius="15.0" silent="true" outwards="true" enabled="1" action="SendTextLeaveInstance" />
+				</events>
+			</Object>
+			<Populace className="PopulaceStandard">
+				<classId>1099046</classId>
+				<position x="65.3" y="4" z="-1204.8" r="1.17" />
+				<events>
+					<noticeEvent priority="0" enabled="0" />
+					<pushDefault radius="6.0" silent="false" outwards="false" />
+				</events>
+			</Populace>
+		</actors>
+	</Instance>
+
+	<Instance id="9" canAbandon="false" description="Pearl Lane - Uldah start point">
+		<startPoint zoneId="184" x="7.39" y="196.0" z="139.07" r="-2.85" />
+		<actors>
+			<Populace className="PopulaceStandard">
+				<classId>1000042</classId>
+				<position x="-1.5" y="196" z="124.5" r="1.8" />
+				<talkFunctions>
+					<function name="processTtrMini001" questId="110009" />
+				</talkFunctions>
+				<events>
+					<talkDefault priority="1" enabled="1" />
+					<noticeEvent priority="1" enabled="1" />
+					<pushDefault radius="3.0" silent="false" outwards="false" />
+				</events>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000186</classId>
+				<position x="-0.2" y="196" z="123.26" r="-0.8" />
+				<talkFunctions>
+					<function name="processEvent000_3" questId="110009" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1001644</classId>
+				<position x="12.18" y="196" z="133.42" r="-1.26" />
+				<animation>1017</animation>
+				<talkFunctions>
+					<function name="processEvent000_6_2" questId="110009" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceChocoboLender">
+				<classId>1000840</classId>
+				<position x="9.07" y="196" z="126.69" r="-1.26" />
+				<animation>1017</animation>
+				<talkFunctions>
+					<function name="processEvent000_13" questId="110009" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1001490</classId>
+				<position x="-19.7" y="196" z="79.93" r="-0.38" />
+				<animation>1009</animation>
+				<talkFunctions>
+					<function name="processEvent000_6" questId="110009" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1001491</classId>
+				<position x="3.4" y="196" z="115.5" r="2.7" />
+				<animation>1021</animation>
+				<talkFunctions>
+					<function name="processTtrMini002" questId="110009" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1001492</classId>
+				<position x="0.8" y="196" z="103.18" r="-1.13" />
+				<animation>1015</animation>
+				<talkFunctions>
+					<function name="processEvent000_8" questId="110009" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1001493</classId>
+				<position x="-33.57" y="196" z="82.42" r="1.63" />
+				<animation>1013</animation>
+				<talkFunctions>
+					<function name="processEvent000_9" questId="110009" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1001494</classId>
+				<position x="-9.13" y="196" z="114.84" r="2.33" />
+				<animation>1031</animation>
+				<talkFunctions>
+					<function name="processEvent000_10" questId="110009" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1001495</classId>
+				<position x="-19.11" y="196" z="95.09" r="2.13" />
+				<animation>1037</animation>
+				<talkFunctions>
+					<function name="processTtrMini003" questId="110009" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1001496</classId>
+				<position x="-32.37" y="196" z="80.75" r="-0.74" />
+				<animation>1101</animation>
+				<talkFunctions>
+					<function name="processEvent000_12" questId="110009" />
+				</talkFunctions>
+			</Populace>
+			<MapObj className="DoorStandard" layoutId="421" objectId="2825">
+				<classId>5900004</classId>
+				<position x="-14" y="196" z="112" r="0" />
+				<events>
+					<noticeEvent priority="0" enabled="0" />
+				</events>
+			</MapObj>
+			<MapObj className="DoorStandard" layoutId="421" objectId="2829">
+				<classId>5900004</classId>
+				<position x="12" y="196" z="184" r="0" />
+				<events>
+					<noticeEvent priority="0" enabled="0" />
+				</events>
+			</MapObj>
+			<MapObj className="DoorStandard" layoutId="421" objectId="4040">
+				<classId>5900004</classId>
+				<position x="-44" y="196" z="68" r="0" />
+				<events>
+					<noticeEvent priority="0" enabled="0" />
+				</events>
+			</MapObj>
+			<Populace className="PopulaceStandard" comment="this is a stopper.">
+				<classId>1090372</classId>
+				<position x="-13" y="194.91" z="76.75" r="-2.72" />
+				<events>
+					<noticeEvent priority="0" enabled="0" />
+					<pushDefault radius="6.0" silent="false" outwards="false" />
+				</events>
+			</Populace>
+			<Object className="OpeningStoperW0B1">
+				<classId>1090373</classId>
+				<position x="16.1" y="195.3" z="129.9" r="-1.3" />
+				<events>
+					<noticeEvent priority="1" enabled="1" />
+					<exit radius="4.0" silent="true" outwards="false" enabled="1" action="TurnBack:2" />
+					<caution radius="5.0" silent="true" outwards="false" enabled="1" />
+				</events>
+			</Object>		
+		</actors>
+	</Instance>
+	<Instance id="10" canAbandon="false" contentFunction="SimpleContent30079" description="Pearl Lane - Uldah battle tutorial">
+		<startPoint zoneId="184" x="-21.4" y="192" z="36.3" r="1" />
+		<actors>
+			<Monster family="fighter" className="FighterAllyOpeningHealer">
+				<classId>2290003</classId>
+				<position x="-15.3" y="192" z="35.3" r="0.5" />
+				<events>
+					<noticeEvent priority="0" enabled="1" silent="1" />
+				</events>
+			</Monster>
+			<Monster family="fighter" className="FighterAllyOpeningAttacker">
+				<classId>2290004</classId>
+				<position x="-21" y="192" z="42.4" r="1.2" />
+				<events>
+					<noticeEvent priority="0" enabled="1" silent="1" />
+				</events>
+			</Monster>
+			<Monster family="goobbue" className="GoobbueLesserScenarioUldahLv00">
+				<classId>2203301</classId>
+				<position x="-4.4" y="192" z="49.3" r="-2.3" />
+				<events>
+					<noticeEvent priority="0" enabled="1" silent="1" />
+				</events>
+			</Monster>
+			<Object className="PrivateAreaPastExit">
+				<classId>1290002</classId>
+				<position x="-21.4" y="192" z="36.3" r="1.0" />
+				<events>
+					<noticeEvent priority="1" enabled="1" />
+					<exit radius="40.0" silent="true" outwards="true" enabled="1" action="TurnBack:5" />
+					<caution radius="30.0" silent="true" outwards="true" enabled="1" action="SendTextLeaveInstance" />
+				</events>
+			</Object>
+		</actors>
+	</Instance>
+	<Instance id="11" canAbandon="false" description="Peal Lane - after battle tutorial">
+		<startPoint zoneId="184" x="-20.9" y="196" z="87.4" r="-1.6"  />		
+		<actors>
+			<Populace className="DoorStandard">
+				<classId>5900004</classId>
+				<position x="14" y="196" z="174" r="0" />
+				<events>
+					<noticeEvent priority="0" enabled="0" />
+				</events>
+			</Populace>
+			<Populace className="DoorStandard">
+				<classId>5900004</classId>
+				<position x="12" y="196" z="184" r="0" />
+				<events>
+					<noticeEvent priority="0" enabled="0" />
+				</events>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1001042</classId>
+				<position x="-23.8" y="196" z="90.4" r="2.3" />
+				<talkFunctions>
+					<function name="processEvent020_3" questId="110009" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1001044</classId>
+				<position x="-23.92" y="196" z="76.73" r="-0.15" />
+				<talkFunctions>
+					<function name="processEvent020_4" questId="110009" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000840</classId>
+				<position x="-14.4" y="196" z="82.6" r="-2.3" />
+				<animation>1017</animation>
+				<talkFunctions>
+					<function name="processEvent020_7" questId="110009" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1001112</classId>
+				<position x="-15.5" y="196" z="91.9" r="-2.2" />
+				<talkFunctions>
+					<function name="processEvent000_14" questId="110009" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000992</classId>
+				<position x="-18.9" y="196" z="93.5" r="1.2" />
+				<talkFunctions>
+					<function name="processEvent020_6" questId="110009" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000401</classId>
+				<position x="-27.845" y="196" z="85.814" r="1.511" />
+				<talkFunctions>
+					<function name="processEvent020_2" questId="110009" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1500129</classId>
+				<position x="-27.31" y="196" z="87.25" r="1.91" />
+				<animation>1040</animation>
+				<talkFunctions>
+					<function name="processEvent020_8" questId="110009" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1099046</classId>
+				<position x="-48.704" y="196.097" z="67.102" r="0" />
+				<animation>0</animation>
+				<events>
+					<noticeEvent priority="0" enabled="0" />
+					<pushDefault radius="6.0" silent="false" outwards="false" />
+				</events>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1001646</classId>
+				<position x="-19.553" y="196" z="79.418" r="1.534" />
+				<talkFunctions>
+					<function name="processEtc001" questId="110009" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1001645</classId>
+				<position x="-17.625" y="196.072" z="79.49" r="-1.702" />
+				<talkFunctions>
+					<function name="processEtc003" questId="110009" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1001647</classId>
+				<position x="-11.7" y="196" z="92.6" r="-0.7" />
+				<talkFunctions>
+					<function name="processEtc002" questId="110009" />
+				</talkFunctions>
+			</Populace>
+			<Object className="PrivateAreaPastExit">
+				<classId>1290002</classId>
+				<position x="-28.4" y="196" z="80.2" r="-2.5" />
+				<events>
+					<noticeEvent priority="1" enabled="1" />
+					<exit radius="30.0" silent="true" outwards="true" enabled="1" action="TurnBack:5" />
+					<caution radius="25.0" silent="true" outwards="true" enabled="1" action="SendTextLeaveInstance" />
+				</events>
+			</Object>
+		</actors>
+	</Instance>
+	<Instance id="12" canAbandon="false" description="Uldah - Quicksand">
+		<startPoint zoneId="175" x="-75.4" y="195" z="74.8" r="0" />
+		<exitTo zoneId="175" x="-75.4" y="195" z="74.8" r="0" />
+		<actors>
+			<MapObj className="DoorStandard" layoutId="421" objectId="4040">
+				<classId>5900004</classId>
+				<position x="-47.99" y="196.11" z="67.29" r="0" />
+				<events>
+					<noticeEvent priority="0" enabled="0" />
+				</events>
+			</MapObj>
+			<MapObj className="DoorStandard" layoutId="421" objectId="4038">
+				<classId>5900004</classId>
+				<position x="-63.77" y="196.11" z="40.2" r="0" />
+				<events>
+					<noticeEvent priority="0" enabled="0" />
+				</events>
+			</MapObj>
+			<MapObj className="DoorStandard" layoutId="421" objectId="4039">
+				<classId>5900004</classId>
+				<position x="-91,13" y="196.11" z="55.6" r="0" />
+				<events>
+					<noticeEvent priority="0" enabled="0" />
+				</events>
+			</MapObj>	
+			<Populace className="PopulaceStandard">
+				<classId>1000941</classId>
+				<position x="-77.2" y="195.2" z="59.8" r="-1.8" />
+				<animation>1002</animation>
+				<talkFunctions>
+					<function name="processEvent000_2" questId="110010" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000936</classId>
+				<position x="-74.7" y="195.2" z="57.1" r="1.5" />
+				<animation>1003</animation>
+				<talkFunctions>
+					<function name="processEvent000_5" questId="110010" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000939</classId>
+				<position x="-71.3" y="195.2" z="57.3" r="-1.6" />
+				<animation>1024</animation>
+				<talkFunctions>
+					<function name="processEvent000_3" questId="110010" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000938</classId>
+				<position x="-66.3" y="196" z="48.8" r="2.9" />
+				<animation>1016</animation>
+				<talkFunctions>
+					<function name="processEvent000_6" questId="110010" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000937</classId>
+				<position x="-68.8" y="195.2" z="68" r="2.4" />
+				<animation>1002</animation>
+				<talkFunctions>
+					<function name="processEvent000_9" questId="110010" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000185</classId>
+				<position x="-62.1" y="195.2" z="66.2" r="2.6" />
+				<animation>1021</animation>
+				<talkFunctions>
+					<function name="processEvent000_10" questId="110010" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000864</classId>
+				<position x="-66.5" y="195.5" z="81.7" r="-3" />
+				<talkFunctions>
+					<function name="processEvent000_4" questId="110010" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000940</classId>
+				<position x="-82.8" y="195" z="75" r="-0.6" />
+				<animation>1002</animation>
+				<talkFunctions>
+					<function name="processEvent000_7" questId="110010" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000807</classId>
+				<position x="-50.2" y="196" z="61" r="-1.5" />
+				<talkFunctions>
+					<function name="processEvent000_8" questId="110010" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000841</classId>
+				<position x="-73.33" y="195" z="78.531" r="-1.404" />
+				<animation>1060</animation>
+			</Populace>
+		</actors>
+	</Instance>
+	
+	<Instance id="13" canAbandon="false" description="quest 110006">
+		<startPoint zoneId="206" x="-352.37" y="6.24" z="-1698.2" r="0.56" />
+		<exitTo zoneId="206" x="-352.15" y="6.22" z="-1694.61" r="0.24" />
+		<actors>
+			<Populace className="PopulaceStandard">
+				<classId>1000009</classId>
+				<position x="-350.5" y="6.24" z="-1693.2" r="-2.2" />
+				<talkFunctions>
+					<talkFunction name="processEvent130_4"  questId="110006" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000010</classId>
+				<position x="-351.5" y="6.24" z="-1692.6" r="-2.9" />
+				<talkFunctions>
+					<talkFunction name="processEvent130_5"  questId="110006" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000033</classId>
+				<position x="-351.5" y="6.24" z="-1694.2" r="0.2" />
+				<talkFunctions>
+					<talkFunction name="processEvent130_3"  questId="110006" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1700030</classId>
+				<position x="-330.92" y="8" z="-1682.7" r="0" />
+				<talkFunctions>
+					<talkFunction name="processEvent130_9"  questId="110006" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000460</classId>
+				<position x="-329" y="8" z="-1682.70" r="0" />
+				<talkFunctions>
+					<talkFunction name="processEvent130_10"  questId="110006" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000513</classId>
+				<position x="-355.5" y="6.82" z="-1686.3" r="2.8" />
+				<talkFunctions>
+					<talkFunction name="processEvent130_7"  questId="110006" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000737</classId>
+				<position x="-342.09" y="8" z="-1674.76" r="1.31" />
+				<talkFunctions>
+					<talkFunction name="processEvent130_8"  questId="110006" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000028</classId>
+				<position x="-352.5" y="6.24" z="-1694" r="1" />				
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000372</classId>
+				<position x="-333.3" y="8" z="-1669.6" r="2.99" />
+				<talkFunctions>
+					<talkFunction name="processEvent130_6"  questId="110006" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1001072</classId>
+				<position x="-325.62" y="8" z="-1676.6" r="-1.55" />
+				<talkFunctions>
+					<talkFunction name="processEvent130_2"  questId="110006" />
+				</talkFunctions>
+			</Populace>
+		</actors>
+	</Instance>
+	<Instance id="14" canAbandon="true" description="quest 110006">
+		<startPoint zoneId="206" x="-223.08" y="12" z="-1498.546" r="-1.64" />
+		<exitTo zoneId="206" x="-209.46" y="18.05" z="-1476.31" r="1.47" />
+		<actors>
+			<Object className="OpeningStoperF0B1">
+				<classId>1090384</classId>
+				<position x="-223.08" y="12" z="-1498.546" r="-1.64" />
+				<events>
+					<noticeEvent priority="1" enabled="1" />
+					<exit radius="20.0" silent="true" outwards="true" enabled="1" action="ExitInstance" />
+					<caution radius="10.0" silent="true" outwards="true" enabled="1" action="SendTextLeaveInstance" />
+				</events>
+			</Object>
+			<Populace className="PopulaceStandard">
+				<classId>1000237</classId>
+				<position x="-232.37" y="12" z="-1500.185" r="1.62" />
+				<talkFunctions>
+					<talkFunction name="processEvent140_10"  questId="110006" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000410</classId>
+				<position x="-217.52" y="12" z="-1497.75" r="-1.64" />
+				<talkFunctions>
+					<talkFunction name="processEvent141_1"  questId="110006" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000238</classId>
+				<position x="-219.80" y="12" z="-1495.325" r="-1.64" />
+				<talkFunctions>
+					<talkFunction name="processEvent141_2"  questId="110006" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000239</classId>
+				<position x="-219.90" y="12" z="-1496.951" r="-1.64" />
+				<talkFunctions>
+					<talkFunction name="processEvent141_3"  questId="110006" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000409</classId>
+				<position x="-220.12" y="12" z="-1492.87" r="-1.64" />
+				<talkFunctions>
+					<talkFunction name="processEvent141_4"  questId="110006" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000412</classId>
+				<position x="-219.90" y="12" z="-1499.36" r="-1.48" />
+				<talkFunctions>
+					<talkFunction name="processEvent141_5"  questId="110006" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000411</classId>
+				<position x="-215.96" y="12" z="-1491.787" r="-1.64" />
+				<talkFunctions>
+					<talkFunction name="processEvent141_6"  questId="110006" />
+				</talkFunctions>
+			</Populace>
+		</actors>		
+	</Instance>
+	<Instance id="15" canAbandon="true" description="quest 110006">
+		<startPoint zoneId="206" x="-227.84" y="12" z="-1502.2" r="0.51" />
+		<exitTo zoneId="206" x="-209.46" y="18.05" z="-1476.31" r="1.47" />
+		<actors>
+			<Object className="OpeningStoperF0B1">
+				<classId>1090384</classId>
+				<position x="-223.08" y="12" z="-1498.546" r="-1.64" />
+				<events>
+					<noticeEvent priority="1" enabled="1" />
+					<exit radius="20.0" silent="true" outwards="true" enabled="1" action="ExitInstance" />
+					<caution radius="10.0" silent="true" outwards="true" enabled="1" action="SendTextLeaveInstance" />
+				</events>
+			</Object>
+			<Populace className="PopulaceStandard">
+				<classId>1000237</classId>
+				<position x="-228.37" y="12" z="-1498.185" r="1.62" />
+				<talkFunctions>
+					<talkFunction name="processEvent150_2"  questId="110006" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000410</classId>
+				<position x="-215.52" y="12" z="-1493.75" r="-2.54" />
+				<talkFunctions>
+					<talkFunction name="processEvent141_1"  questId="110006" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000238</classId>
+				<position x="-217.96" y="12" z="-1493.50" r="2.7" />
+				<talkFunctions>
+					<talkFunction name="processEvent141_2"  questId="110006" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000239</classId>
+				<position x="-217.00" y="12" z="-1495.70" r="-0.5" />
+				<talkFunctions>
+					<talkFunction name="processEvent141_3"  questId="110006" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000409</classId>
+				<position x="-216.12" y="12" z="-1495.30" r="-1.64" />
+				<talkFunctions>
+					<talkFunction name="processEvent141_4"  questId="110006" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000412</classId>
+				<position x="-215.50" y="12" z="-1495.00" r="-1" />
+				<talkFunctions>
+					<talkFunction name="processEvent141_5"  questId="110006" />
+				</talkFunctions>
+			</Populace>
+			<Populace className="PopulaceStandard">
+				<classId>1000411</classId>
+				<position x="-216.96" y="12" z="-1492.90" r="-2.8" />
+				<talkFunctions>
+					<talkFunction name="processEvent141_6"  questId="110006" />
+				</talkFunctions>
+			</Populace>
+		</actors>
+	</Instance>
+</instances>

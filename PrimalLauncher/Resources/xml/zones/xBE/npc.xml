@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<chara>
+  <npc>
+    <ZoneSwitch>
+      <classId>1090372</classId>
+      <position x="914.6" y="32.3" z="-213.9" r="0" />
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+        <pushDefault enabled="1" radius="5" silent="true" outwards="false" action="153,-2687.2,-36.1,-382.8,1.0" />
+      </events>
+    </ZoneSwitch>
+     <ZoneSwitch>
+      <classId>1090372</classId>
+      <position x="160" y="44.1" z="-869.4" r="0" />
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+        <pushDefault enabled="1" radius="6" silent="true" outwards="false" action="147,26.3,133.7,2677.7,-2.6" />
+      </events>
+    </ZoneSwitch>
+    <ZoneSwitch>
+      <classId>1090372</classId>
+      <position x="-418.7" y="8" z="864.3" r="0" />
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+        <pushDefault enabled="1" radius="6" silent="true" outwards="false" action="173,-163.6,271.9,-2779.5,-0.7" />
+      </events>
+    </ZoneSwitch>
+      <PopulaceShopSalesman welcomeTalk="281" menuId="-8" shopType="Item" itemSet="4002">
+          <classId>1600098</classId>
+          <position x="484.64" y="18.69" z="684.2" r="-3.08" />
+      </PopulaceShopSalesman>
+      <PopulaceShopSalesman welcomeTalk="281" menuId="-8" shopType="Item" itemSet="4002">
+          <classId>1600112</classId>
+          <position x="-217.84" y="18.68" z="-658.75" r="3.09" />
+      </PopulaceShopSalesman>
+  </npc>
+</chara>

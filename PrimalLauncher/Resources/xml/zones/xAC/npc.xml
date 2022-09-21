@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<chara>
+  <npc>
+    <ZoneSwitch className="PopulaceStandard" comment="to central thanalan">
+      <classId>1090372</classId>
+      <position x="-604.3" y="121.5" z="-402.9" r="0" />
+      <events>
+        <noticeEvent priority="0" enabled="0" />
+        <pushDefault enabled="1" radius="6" silent="true" outwards="false" action="170" />
+      </events>
+    </ZoneSwitch>
+      
+      <Populace className="PopulaceStandard">
+          <classId>1001596</classId>
+          <position x="-1725.58" y="56.59" z="-316.77" r="0.44" />
+          <animation>1016</animation>
+      </Populace>
+      <Populace className="PopulaceStandard">
+          <classId>1001598</classId>
+          <position x="-1729.7" y="56.1" z="-311" r="0.82" />
+      </Populace>
+      <Populace className="PopulaceStandard">
+          <classId>1001597</classId>
+          <position x="-1740.2" y="55.78" z="-322.68" r="-1.24" />
+          <animation>1002</animation>
+          <talkFunctions>
+              <function name="defaultTalkWithHaipoeipo_001" />
+          </talkFunctions>
+      </Populace>
+      <Populace className="PopulaceStandard">
+          <classId>1001630</classId>
+          <position x="-1740.7" y="55.78" z="-324.5" r="-0.87" />
+      </Populace>
+      
+      <PopulaceShopSalesman welcomeTalk="281" menuId="-8" shopType="Item" itemSet="3008">
+          <classId>1600104</classId>
+          <position x="-1297.2" y="56.1" z="-139" r="-1.7" />
+      </PopulaceShopSalesman>
+      <PopulaceShopSalesman welcomeTalk="281" menuId="-8" shopType="Item" itemSet="3008">
+          <classId>1600108</classId>
+          <position x="-1716.3" y="55.62" z="-318.96" r="-1.24" />
+      </PopulaceShopSalesman>
+  </npc>
+</chara>

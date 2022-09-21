@@ -1,0 +1,567 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<chara>
+	<npc>
+		<Populace className="PopulaceStandard">
+			<classId>1000070</classId>
+			<position x="-169.63" y="188.6" z="100.93" r="2.37" />
+			<animation>2025</animation>
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1000374</classId>
+			<position x="28.93" y="192" z="109.69" r="1.84" />
+		</Populace>
+		<Populace className="PopulaceGuildShop">
+			<classId>1000632</classId>
+			<position x="-186.1" y="190.17" z="106.58" r="2.12" />
+			<animation>1041</animation>
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1000651</classId>
+			<position x="-175.1" y="188.6" z="96.47" r="2.37" />
+			<animation>2060</animation>
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1000658</classId>
+			<position x="17.31" y="196" z="164.36" r="-0.52" />
+			<animation>2055</animation>
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1000659</classId>
+			<position x="-0.01" y="196" z="148.85" r="0.77" />
+			<animation>2055</animation>
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1000666</classId>
+			<position x="-17.11" y="192.95" z="22.18" r="-1.25" />
+			<animation>2048</animation>
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1000780</classId>
+			<position x="-72.92" y="195.21" z="55.55" r="0.47" />
+			<animation>1026</animation>
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1000781</classId>
+			<position x="-80.13" y="195.21" z="60.5" r="2.34" />
+			<animation>1025</animation>
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1000782</classId>
+			<position x="-77.32" y="195.19" z="59.75" r="-1.84" />
+			<animation>1026</animation>
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1000783</classId>
+			<position x="-56.87" y="196" z="64.15" r="-1.66" />
+			<animation>1015</animation>
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1000784</classId>
+			<position x="-74.97" y="195.19" z="53.96" r="0.6" />
+			<animation>1017</animation>
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1000785</classId>
+			<position x="-69.86" y="195.2" z="67.71" r="2.5" />
+			<animation>1033</animation>
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1000786</classId>
+			<position x="-58.75" y="196" z="45.82" r="2.09" />
+			<animation>1017</animation>
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1000787</classId>
+			<position x="-71.24" y="195.2" z="57.32" r="-1.78" />
+			<animation>1025</animation>
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1000788</classId>
+			<position x="-83.19" y="195" z="74.14" r="0.06" />
+			<animation>1041</animation>
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1000789</classId>
+			<position x="-67.93" y="195.2" z="65.1" r="-0.45" />
+			<animation>1041</animation>
+		</Populace>
+		<Populace className="PopulaceChocoboLender">
+			<classId>1000840</classId>
+			<position x="-36.99" y="192.1" z="15.9" r="-0.56" />
+			<animation>1017</animation>
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1000841</classId>
+			<position x="-74.91" y="195.45" z="81.14" r="2.88" />
+			<animation>1060</animation>
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1000862</classId>
+			<position x="-184.94" y="190.55" z="108.87" r="1.49" />
+			<animation>1017</animation>
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1000864</classId>
+			<position x="-66.44" y="195.45" z="81.64" r="-3.07" />
+			<animation>1017</animation>
+		</Populace>
+		<Populace className="PopulaceRetainerManager">
+			<classId>1000865</classId>
+			<position x="-81.81" y="195" z="78.05" r="2.65" />
+			<animation>1041</animation>
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1000934</classId>
+			<position x="-170.63" y="190.01" z="117.15" r="-1.58" />
+			<animation>1041</animation>
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1000955</classId>
+			<position x="0.29" y="196.4" z="144.53" r="1.8" />
+			<animation>1002</animation>
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1001007</classId>
+			<position x="-160.78" y="188.7" z="117.31" r="-2.56" />
+			<animation>1015</animation>
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1001009</classId>
+			<position x="-171.69" y="190" z="123.84" r="-1.77" />
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1001012</classId>
+			<position x="-168.34" y="188.7" z="116.06" r="2.96" />
+			<animation>1015</animation>
+		</Populace>
+		<Populace className="PopulaceLinkshellManager">
+			<classId>1001182</classId>
+			<position x="-78.6" y="196" z="52.08" r="0.26" />
+			<animation>1041</animation>
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1001191</classId>
+			<position x="1.98" y="196" z="106.25" r="-1.23" />
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1001192</classId>
+			<position x="-227.51" y="192.1" z="78.92" r="0.56" />
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1001256</classId>
+			<position x="-173.16" y="188.7" z="106.58" r="0.92" />
+			<animation>1041</animation>
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1001257</classId>
+			<position x="-158.15" y="188.7" z="107.36" r="-0.45" />
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1001260</classId>
+			<position x="-145.89" y="185.45" z="122.34" r="-2.18" />
+		</Populace>
+		<Populace className="PopulaceGuildlevePublisher">
+			<classId>1001371</classId>
+			<position x="-54.07" y="196.47" z="52.49" r="-0.9" />
+			<animation>1041</animation>
+		</Populace>
+		<Populace className="PopulacePassiveGLPublisher">
+			<classId>1001372</classId>
+			<position x="-52.83" y="196.01" z="53.44" r="-0.34" />
+			<animation>1016</animation>
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1001424</classId>
+			<position x="-56.69" y="192" z="-6.59" r="2.89" />
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1001426</classId>
+			<position x="67.72" y="192" z="209.29" r="1.27" />
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1001427</classId>
+			<position x="70.42" y="191.98" z="199.33" r="1.27" />
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1001428</classId>
+			<position x="-218.1" y="190" z="23.69" r="0.65" />
+			<animation>1041</animation>
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1001429</classId>
+			<position x="-211.25" y="190" z="17.98" r="0.65" />
+			<animation>1056</animation>
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1001438</classId>
+			<position x="17.99" y="196.4" z="164.98" r="-0.99" />
+			<animation>1025</animation>
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1001439</classId>
+			<position x="3.52" y="196" z="110.96" r="-2.04" />
+			<animation>1015</animation>
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1001440</classId>
+			<position x="-34.43" y="196" z="82.32" r="-2.73" />
+			<animation>1017</animation>
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1001441</classId>
+			<position x="-1.54" y="196" z="101.74" r="1.27" />
+			<animation>1023</animation>
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1001442</classId>
+			<position x="19.93" y="196" z="182.33" r="-2.36" />
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1001443</classId>
+			<position x="-36.51" y="196" z="80.42" r="1.43" />
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1001444</classId>
+			<position x="-35.04" y="196" z="81.91" r="2.67" />
+			<animation>1015</animation>
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1001455</classId>
+			<position x="-182.02" y="193.45" z="85.12" r="-2.52" />
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1001462</classId>
+			<position x="-183.3" y="193" z="86.33" r="-2.48" />
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1001471</classId>
+			<position x="-226.15" y="190" z="46.2" r="2.45" />
+			<animation>1015</animation>
+			<talkFunctions>
+				<talkFunction name="downTownTalk" />
+			</talkFunctions>
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1001472</classId>
+			<position x="-232.39" y="190" z="40.56" r="1.94" />
+			<animation>1017</animation>
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1001726</classId>
+			<position x="-98.88" y="192.2" z="1.08" r="0.22" />
+			<animation>1015</animation>
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1001932</classId>
+			<position x="-138.11" y="196" z="67" r="3" />
+			<animation>1041</animation>
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1001953</classId>
+			<position x="-80.39" y="196" z="54.22" r="1.01" />
+			<animation>1044</animation>
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1002101</classId>
+			<position x="-131.03" y="193" z="29.41" r="-3" />
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1002110</classId>
+			<position x="-168.71" y="192" z="31.22" r="0.53" />
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1002111</classId>
+			<position x="-166.1" y="192" z="29.48" r="0.27" />
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1002112</classId>
+			<position x="-170.1" y="192" z="31.05" r="0.14" />
+		</Populace>
+		<Populace className="PopulaceSpecialEventCryer">
+			<classId>1002113</classId>
+			<position x="-164.29" y="192" z="28.6" r="0.42" />
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1090042</classId>
+			<position x="-183.53" y="193" z="82.76" r="0" />
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1090059</classId>
+			<position x="-183.92" y="190.5" z="99.04" r="0" />
+		</Populace>
+		<Populace className="ObjectEventDoor">
+			<classId>1090114</classId>
+			<position x="-153.9" y="185.65" z="128.15" r="0" />
+		</Populace>		
+		<Populace className="PopulaceStandard">
+			<classId>1090375</classId>
+			<position x="-66.1" y="196" z="48.94" r="-1.7" />
+		</Populace>
+		<Populace className="OpeningTownEventKeeper">
+			<classId>1090402</classId>
+			<position x="-22.81" y="196" z="87.82" r="0" />
+			<events>
+				<noticeEvent priority="1" enabled="1" />
+				<exit radius="40.0" silent="true" outwards="true" />
+				<caution radius="30.0" silent="true" outwards="true" />
+			</events>
+		</Populace>		
+		<Populace className="PopulaceStandard">
+			<classId>1200022</classId>
+			<position x="-39.26" y="192.1" z="13.97" r="-0.38" />
+			<events>
+				<noticeEvent priority="0" enabled="0" />
+			</events>
+		</Populace>
+		<RetainerFurniture>
+			<classId>1200027</classId>
+			<position x="-58.4" y="195" z="75.84" r="-0.89" />
+		</RetainerFurniture>
+		<RetainerFurniture>
+			<classId>1200027</classId>
+			<position x="27.35" y="192.1" z="109.02" r="3.13" />
+		</RetainerFurniture>
+		<Populace className="PopulaceStandard">
+			<classId>1200044</classId>
+			<position x="-41.24" y="192.1" z="12.87" r="0.1" />
+			<events>
+				<noticeEvent priority="0" enabled="0" />
+			</events>
+		</Populace>
+		<Populace className="TaskBoard">
+			<classId>1200194</classId>
+			<position x="-50.24" y="197.6" z="58.94" r="0" />
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1200210</classId>
+			<position x="-169.94" y="191.8" z="25.9" r="0.523" />
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1200288</classId>
+			<position x="-189.13" y="190" z="15.59" r="-1.04" />
+			<events>
+				<noticeEvent priority="0" enabled="0" />
+			</events>
+		</Populace>
+		<Object className="BgKeepout">
+			<classId>1290004</classId>
+			<position x="-239.02" y="190" z="55.67" r="0" />
+		</Object>
+		<Populace className="PopulaceItemRepairer">
+			<classId>1500116</classId>
+			<position x="-77.82" y="192.1" z="4.29" r="0.23" />
+			<animation>1040</animation>
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1500129</classId>
+			<position x="-27.31" y="196" z="87.25" r="1.91" />
+			<animation>1040</animation>
+		</Populace>
+		<Populace className="PopulaceNMReward">
+			<classId>1500182</classId>
+			<position x="-178.67" y="192.1" z="55.82" r="-2.39" />
+		</Populace>
+		<Populace className="PopulaceAchievement">
+			<classId>1500274</classId>
+			<position x="-153.91" y="192.1" z="13.35" r="0.07" />
+		</Populace>
+		<PopulaceShopSalesman welcomeTalk="96" menuId="-8" shopType="Item" itemSet="3009">
+			<classId>1600043</classId>
+			<position x="-109.62" y="198" z="80.59" r="-1.29" />
+			<animation>1041</animation>
+		</PopulaceShopSalesman>
+		<PopulaceShopSalesman welcomeTalk="97" menuId="-8" shopType="Item" itemSet="3010">
+			<classId>1600044</classId>
+			<position x="25.49" y="192" z="102.36" r="2.01" />
+			<animation>1041</animation>
+		</PopulaceShopSalesman>
+		<PopulaceShopSalesman welcomeTalk="98" menuId="-8" shopType="Item" itemSet="3011">
+			<classId>1600045</classId>
+			<position x="-112.39" y="197" z="71.19" r="-1.43" />
+			<animation>1041</animation>
+		</PopulaceShopSalesman>
+		<PopulaceShopSalesman welcomeTalk="99" menuId="-8" shopType="Item" itemSet="3012">
+			<classId>1600046</classId>
+			<position x="45.2" y="192" z="99.92" r="-1.13" />
+			<animation>1041</animation>
+		</PopulaceShopSalesman>
+		<PopulaceShopSalesman welcomeTalk="100" menuId="-8" shopType="Item" itemSet="3013">
+			<classId>1600047</classId>
+			<position x="26.57" y="192" z="67.47" r="-0.88" />
+			<animation>1041</animation>
+		</PopulaceShopSalesman>
+		<PopulaceShopSalesman welcomeTalk="101" menuId="-8" shopType="Item" itemSet="3014">
+			<classId>1600048</classId>
+			<position x="15.51" y="192.45" z="84.32" r="2.17" />
+			<animation>1041</animation>
+		</PopulaceShopSalesman>
+		<PopulaceShopSalesman welcomeTalk="102" menuId="-8" shopType="Item" itemSet="3016">
+			<classId>1600049</classId>
+			<position x="31.77" y="192" z="75.48" r="-0.99" />
+			<animation>1041</animation>
+		</PopulaceShopSalesman>
+		<PopulaceShopSalesman welcomeTalk="103" menuId="-8" shopType="Item" itemSet="3015">
+			<classId>1600050</classId>
+			<position x="41.18" y="192.45" z="91.8" r="-1.13" />
+			<animation>1041</animation>
+		</PopulaceShopSalesman>
+		<PopulaceShopSalesman welcomeTalk="104" menuId="-8" shopType="Item" itemSet="3017">
+			<classId>1600051</classId>
+			<position x="20.57" y="192" z="92.96" r="2.07" />
+			<animation>1041</animation>
+		</PopulaceShopSalesman>
+		<PopulaceShopSalesman welcomeTalk="105" menuId="-8" shopType="Item" itemSet="3004">
+			<classId>1600052</classId>
+			<position x="36.82" y="192" z="83.36" r="-1.08" />
+			<animation>1041</animation>
+		</PopulaceShopSalesman>
+		<PopulaceShopSalesman welcomeTalk="106" menuId="-8" shopType="Item" itemSet="3007">
+			<classId>1600053</classId>
+			<position x="-123.59" y="198" z="84.96" r="1.83" />
+			<animation>1041</animation>
+		</PopulaceShopSalesman>
+		<PopulaceShopSalesman welcomeTalk="107" menuId="-8" shopType="Item" itemSet="3018">
+			<classId>1600054</classId>
+			<position x="-127.5" y="197.1" z="75.21" r="1.83" />
+			<animation>1041</animation>
+		</PopulaceShopSalesman>
+		<PopulaceShopSalesman welcomeTalk="108" menuId="-8" shopType="Item" itemSet="3006">
+			<classId>1600055</classId>
+			<position x="-106.56" y="198" z="90.21" r="-1.28" />
+			<animation>1041</animation>
+		</PopulaceShopSalesman>
+		<PopulaceShopSalesman welcomeTalk="109" menuId="-8" shopType="Item" itemSet="3005">
+			<classId>1600056</classId>
+			<position x="-121.16" y="198" z="94.12" r="1.82" />
+			<animation>1041</animation>
+		</PopulaceShopSalesman>
+		<PopulaceShopSalesman welcomeTalk="112" menuId="-8" shopType="Item" itemSet="3001">
+			<classId>1600059</classId>
+			<position x="-163.44" y="192.59" z="52.55" r="-2.59" />
+			<animation>1015</animation>
+		</PopulaceShopSalesman>
+		<PopulaceShopSalesman welcomeTalk="237" menuId="-8" shopType="Item" itemSet="3023">
+			<classId>1600066</classId>
+			<position x="-105.68" y="198" z="95.23" r="-1.29" />
+		</PopulaceShopSalesman>
+		<PopulaceShopSalesman welcomeTalk="248" menuId="-8" shopType="Class" itemSet="5033">
+			<classId>1600077</classId>
+			<position x="-181.53" y="190" z="115.54" r="2.41" />
+		</PopulaceShopSalesman>
+		<PopulaceShopSalesman welcomeTalk="281" menuId="-1" shopType="Armor">
+			<classId>1600129</classId>
+			<position x="-76.95" y="195" z="80.8" r="2.88" />
+		</PopulaceShopSalesman>
+		<PopulaceShopSalesman welcomeTalk="281" menuId="-1" shopType="Weapon">
+			<classId>1600133</classId>
+			<position x="-72.84" y="195" z="81.96" r="3.02" />
+		</PopulaceShopSalesman>
+		<Populace className="PopulaceStandard">
+			<classId>1700039</classId>
+			<position x="33.77" y="192.1" z="129.97" r="2.57" />
+			<animation>1040</animation>
+		</Populace>
+		<MapObj className="DoorStandard" layoutId="421" objectId="4125">
+			<classId>5900001</classId>
+			<position x="-183" y="191" z="100" r="0" />
+			<events>
+				<noticeEvent priority="0" enabled="0" />
+			</events>
+		</MapObj>
+		<MapObj className="DoorStandard" layoutId="421" objectId="4039">
+			<classId>5900001</classId>
+			<position x="-91" y="196" z="56" r="0" />
+			<events>
+				<noticeEvent priority="0" enabled="0" />
+			</events>
+		</MapObj>
+		<MapObj className="DoorStandard" layoutId="421" objectId="4038">
+			<classId>5900001</classId>
+			<position x="-64" y="196" z="40" r="0" />
+			<events>
+				<noticeEvent priority="0" enabled="0" />
+			</events>
+		</MapObj>
+		<MapObj className="DoorStandard" layoutId="421" objectId="4040">
+			<classId>5900001</classId>
+			<position x="-48" y="196" z="67" r="0" />
+			<events>
+				<noticeEvent priority="0" enabled="0" />
+			</events>
+		</MapObj>
+		<Populace className="PopulaceStandard">
+			<classId>1200288</classId>
+			<position x="-151.2" y="198" z="160.5" r="0" />
+			<events>
+				<noticeEvent priority="0" enabled="0" />
+			</events>
+		</Populace>
+		<Populace className="PopulaceStandard">
+			<classId>1200288</classId>
+			<position x="-39" y="192.1" z="39.9" r="0" />
+			<events>
+				<noticeEvent priority="0" enabled="0" />
+			</events>
+		</Populace>
+		<ZoneSwitch className="PopulaceStandard" comment="to central thanalan north">
+			<classId>1090372</classId>
+			<position x="-38.6" y="184.4" z="-55.2" r="0" />
+			<events>
+				<noticeEvent priority="0" enabled="0" />
+				<pushDefault enabled="1" radius="11.0" silent="true" outwards="false" action="170" />
+			</events>
+		</ZoneSwitch>
+		<ZoneSwitch>
+			<classId>1090372</classId>
+			<position x="-232.7" y="197.4" z="116.8" r="0" />
+			<events>
+				<noticeEvent priority="0" enabled="0" />
+				<pushDefault enabled="1" radius="11.0" silent="true" outwards="false" action="209" />
+			</events>
+		</ZoneSwitch>
+		<ZoneSwitch>
+			<classId>1090372</classId>
+			<position x="-102.4" y="202" z="136.2" r="0" />
+			<events>
+				<noticeEvent priority="0" enabled="0" />
+				<pushDefault enabled="1" radius="11.0" silent="true" outwards="false" action="209" />
+			</events>
+		</ZoneSwitch>
+		<ZoneSwitch>
+			<classId>1090372</classId>
+			<position x="0.2" y="200" z="202.7" r="0" />
+			<events>
+				<noticeEvent priority="0" enabled="0" />
+				<pushDefault enabled="1" radius="6" silent="true" outwards="false" action="209" />
+			</events>
+		</ZoneSwitch>
+		<ZoneSwitch>
+			<classId>1090372</classId>
+			<position x="-31.7" y="195.9" z="122.6" r="0" />
+			<events>
+				<noticeEvent priority="0" enabled="0" />
+				<pushDefault enabled="1" radius="8" silent="true" outwards="false" action="209" />
+			</events>
+		</ZoneSwitch>
+		<ZoneSwitch>
+			<classId>1090372</classId>
+			<position x="117.3" y="184.9" z="217.2" r="0" />
+			<events>
+				<noticeEvent priority="0" enabled="0" />
+				<pushDefault enabled="1" radius="11" silent="true" outwards="false" action="170" />
+			</events>
+		</ZoneSwitch>
+        <ElevatorStandard floor="1">
+            <classId>1090460</classId>
+            <position x="-117.31" y="198.05" z="118.37" r="0" />
+            <destinations>
+                <destination option="1" position="209,-116.03,222,114.50,2.7,15" />
+                <destination option="2" position="209,-120.69,269.8,131.14,-0.23,15" />
+            </destinations>          
+        </ElevatorStandard>
+        <MarketEntrance>
+            <classId>1090264</classId>
+            <position x="-238.83" y="190" z="55.79" r="0" />
+        </MarketEntrance>
+	</npc>
+</chara>
