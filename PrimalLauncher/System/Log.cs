@@ -67,7 +67,7 @@ namespace PrimalLauncher
         public void Error(string msg)
         {
             SendMessage(_error, msg);
-            File.AppendAllText(Preferences.Instance.Options.UserFilesPath + Preferences.AppFolder + @"applog.txt", DateTime.Now.ToString("dd-MM-yyyy") + " " + msg);
+            File.AppendAllText(Preferences.Instance.AppFolder + @"error_log.txt", DateTime.Now.ToString("dd-MM-yyyy hh:mm:ss") + " " + msg + "\n");
         }
         public void Chat(string msg) => SendMessage(_chat, msg);
 

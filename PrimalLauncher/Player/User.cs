@@ -26,8 +26,6 @@ namespace PrimalLauncher
     [Serializable]
     public class User
     {
-        private const string UserFileName = @"user_data.dat";
-
         private static User _instance = null;
 
         #region User account data
@@ -103,11 +101,11 @@ namespace PrimalLauncher
 
         public static User Load(string uname, string pwd)
         {
-            if (File.Exists(Preferences.Instance.Options.UserFilesPath + Preferences.AppFolder + UserFileName))
+            if (File.Exists(Preferences.Instance.AppUserFile))
             {
                 try
                 {
-                    using (var fileStream = new FileStream(Preferences.Instance.Options.UserFilesPath + Preferences.AppFolder + UserFileName, FileMode.Open))
+                    using (var fileStream = new FileStream(Preferences.Instance.AppUserFile, FileMode.Open))
                     {
                         var bFormatter = new BinaryFormatter();
                         User user = (User)bFormatter.Deserialize(fileStream);
@@ -147,7 +145,7 @@ namespace PrimalLauncher
         {
             try //Create repository file with user list.
             {
-                using (var fileStream = new FileStream(Preferences.Instance.Options.UserFilesPath + Preferences.AppFolder + UserFileName, FileMode.Create))
+                using (var fileStream = new FileStream(Preferences.Instance.AppUserFile, FileMode.Create))
                 {
                     var bFormatter = new BinaryFormatter();
                     try

@@ -34,7 +34,7 @@ namespace PrimalLauncher
         {     
             ucUpdate.Instance.UpdateProgreeBar.Value = 0;
             ucUpdate.Instance.LblUpdate.Text = "Starting game update...";
-            string filesPath = Preferences.Instance.Options.UserFilesPath + Preferences.AppFolder + @"\";
+            string filesPath = Preferences.Instance.AppFolder + @"\";
 
             if (!GameInstallationChecker.HasWritePermission())
             {

@@ -15,7 +15,6 @@ namespace PrimalLauncher
 
         public override void ProcessIncoming()
         {
-            File.WriteAllBytes("request.txt", _connection.buffer);
             string request = Encoding.ASCII.GetString(_connection.buffer);
             byte[] response = HttpPacket.ErrorPage("Something went wrong. Here is the game client request:<br><br>" + request.Replace("\r\n", "<br>").Trim(new[] { '\0' }));
 

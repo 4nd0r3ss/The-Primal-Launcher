@@ -29,6 +29,7 @@ using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -60,20 +61,17 @@ namespace PrimalLauncher
         public MainWindow()
         {
             InitializeComponent();
-            Window = this;
+            Window = this;         
 
             lblSeparator1.BackColor = Color.FromArgb(64, 128, 128, 128);
             Preferences.Instance.LoadConfigFile();
-            Log.Instance.Info("Welcome to Primal Launcher!");
+            Log.Instance.Info("Welcome to Primal Launcher!");            
 
-            Task.Run(() => { try { LobbyServer.Instance.Initialize(); } catch (Exception ex) { throw ex; } });
-            Task.Run(() => { try { GameServer.Instance.Initialize(); } catch (Exception ex) { throw ex; } });
+            //if (File.Exists(Preferences.Instance.AppDataFile))
+            //    File.Delete(Preferences.Instance.AppDataFile);
 
-            //if (File.Exists(Preferences.Instance.Options.UserFilesPath + Preferences.AppFolder + @"app_data.dat"))
-            //    File.Delete(Preferences.Instance.Options.UserFilesPath + Preferences.AppFolder + @"app_data.dat");
-
-            //if (File.Exists(Preferences.Instance.Options.UserFilesPath + Preferences.AppFolder + @"user_data.dat"))
-            //    File.Delete(Preferences.Instance.Options.UserFilesPath + Preferences.AppFolder + @"user_data.dat");
+            //if (File.Exists(Preferences.Instance.AppUserFile))
+            //    File.Delete(Preferences.Instance.AppUserFile);
 
             //File.Delete("packet_output.txt");
 
@@ -92,10 +90,16 @@ namespace PrimalLauncher
 
         private void lblLog_Click(object sender, EventArgs e)
         {
+            if (!panelMain.Controls.Contains(ucLog.Instance))
+            {
+                panelMain.Controls.Add(ucLog.Instance);
+                ucLog.Instance.Dock = DockStyle.Fill;
+            }
+
             ucLog.Instance.BringToFront();
             ResetTabButtonColors();
             lblLog.ForeColor = Color.Moccasin;
-        }
+        }     
 
         private void lblOptions_Click(object sender, EventArgs e)
         {
@@ -108,32 +112,7 @@ namespace PrimalLauncher
             ucOptions.Instance.BringToFront();
             ResetTabButtonColors();
             lblOptions.ForeColor = Color.Moccasin;
-        }
-
-        //private void clock_ticker_Tick(object sender, EventArgs e)
-        //{
-        //    //update gui Eorzea clock
-        //    //lblClock.Text = "Eorzea time: " + Clock.Instance.StringTime;
-
-
-
-
-
-        //    //BattleManager.Instance.
-
-        //    //if (User.Instance.Character != null)
-        //    //{
-        //    //    Position pos = User.Instance.Character.Position;
-        //    //    lblLocation.Text = User.Instance.Character.GetCurrentZone().LocationName + " (" + pos.ZoneId.ToString() + ")";
-        //    //    lblx.Text = string.Format("{0:0.0}", pos.X);
-        //    //    lbly.Text = string.Format("{0:0.0}", pos.Y);
-        //    //    lblz.Text = string.Format("{0:0.0}", pos.Z);
-        //    //    lblr.Text = string.Format("{0:0.0}", pos.R);
-
-        //    //    //User.Instance.Character.UpdatePlayTime();
-        //    //    //lblPlaytime.Text = User.Instance.Character.TotalPlaytime.ToString();
-        //    //}
-        //}
+        }       
 
         private void btnLaunch_MouseHover(object sender, EventArgs e)
         {
@@ -173,11 +152,7 @@ namespace PrimalLauncher
             lblUpdate.ForeColor = Color.Moccasin;
         }
 
-        private void MainWindow_Load(object sender, EventArgs e)
-        {
-            IsInstallationOk = true;// GameInstallationChecker.Check();
-            ToggleTabSelector(IsInstallationOk);
-        }
+        
 
         private void ToggleTabSelector(bool enabled)
         {
@@ -185,28 +160,23 @@ namespace PrimalLauncher
             lblLog.Enabled = enabled;
             lblOptions.Enabled = enabled;
             lblUpdate.Enabled = !enabled;
+            var controls = panelMain.Controls;
+            UserControl control;
 
-            try
+            if (lblUpdate.Enabled)
             {
-                if (lblUpdate.Enabled)
-                {
-                    panelMain.Controls.Add(ucUpdate.Instance);
-                    ucUpdate.Instance.Dock = DockStyle.Fill;
-                    ucUpdate.Instance.BringToFront();
-                    lblUpdate.ForeColor = Color.Moccasin;
-                }
-                else
-                {
-
-                    panelMain.Controls.Add(ucLog.Instance);
-                    ucLog.Instance.Dock = DockStyle.Fill;
-                    ucLog.Instance.BringToFront();
-                    lblLog.ForeColor = Color.Moccasin;
-                }
-            }catch
+                control = ucUpdate.Instance;
+                lblUpdate.ForeColor = Color.Moccasin;
+            }
+            else
             {
+                control = ucLog.Instance;
+                lblLog.ForeColor = Color.Moccasin;
+            }
 
-            }            
+            control.Dock = DockStyle.Fill;
+            control.BringToFront();          
+            controls.Add(control);
         }
 
         private void LaunchGame(int sessionId)
@@ -266,6 +236,15 @@ namespace PrimalLauncher
             LobbyServer.Instance.ServerShutDown();
             GameServer.Instance.ServerShutDown();
 
+        }
+
+        private void MainWindow_Shown(object sender, EventArgs e)
+        {
+            IsInstallationOk = true;// GameInstallationChecker.Check();
+            ToggleTabSelector(IsInstallationOk);
+
+            Task.Run(() => { try { LobbyServer.Instance.Initialize(); } catch (Exception ex) { throw ex; } });
+            Task.Run(() => { try { GameServer.Instance.Initialize(); } catch (Exception ex) { throw ex; } });
         }
     }
 }

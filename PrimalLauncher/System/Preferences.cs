@@ -40,17 +40,22 @@ namespace PrimalLauncher
     }
 
     public class Preferences
-    {
-        #region Class fields
-        private static Preferences _instance = null;
-        private readonly string _configFile = @"app_data.dat";
-        public static string AppFolder = @"\Primal Launcher User Files\";
-        #endregion
-       
-        private Preferences()
+    {       
+        private static Preferences _instance = null;       
+        public string AppFolder
         {
-            Configure();
-        }      
+            get { return Options.UserFilesPath + @"\Primal Launcher User Files\"; }
+        }  
+        
+        public string AppDataFile
+        {
+            get { return AppFolder + "app.dat"; }
+        }
+
+        public string AppUserFile
+        {
+            get { return AppFolder + "user.dat"; }
+        }
 
         public static Preferences Instance
         {
@@ -63,7 +68,13 @@ namespace PrimalLauncher
                 return _instance;
             }
         }
-        public Options Options { get; set; }       
+
+        public Options Options { get; set; }
+
+        private Preferences()
+        {
+            Configure();
+        }           
 
         #region Search game installation path in registry
         public static string GetGameInstallPath()
@@ -86,9 +97,9 @@ namespace PrimalLauncher
         #region Load configuration file       
         public void LoadConfigFile()
         {               
-            if (File.Exists(Options.UserFilesPath + AppFolder + _configFile))
+            if (File.Exists(AppDataFile))
             {               
-                using (var fileStream = new FileStream(Options.UserFilesPath + AppFolder + _configFile, FileMode.Open))
+                using (var fileStream = new FileStream(AppDataFile, FileMode.Open))
                 {
                     var bFormatter = new BinaryFormatter();
 
@@ -114,9 +125,9 @@ namespace PrimalLauncher
         #region Save options object to configuration file
         public void SaveConfigFile()
         {
-            if (Directory.Exists(Options.UserFilesPath + AppFolder))
+            if (Directory.Exists(Options.UserFilesPath))
             {
-                using (var fileStream = new FileStream(Options.UserFilesPath + AppFolder + _configFile, FileMode.Create))
+                using (var fileStream = new FileStream(AppDataFile, FileMode.Create))
                 {
                     var bFormatter = new BinaryFormatter();
                     bFormatter.Serialize(fileStream, Options);
@@ -124,7 +135,7 @@ namespace PrimalLauncher
             }
             else
             {
-                Directory.CreateDirectory(Options.UserFilesPath + AppFolder);
+                Directory.CreateDirectory(Options.UserFilesPath);
                 SaveConfigFile();
             }   
 
@@ -144,7 +155,7 @@ namespace PrimalLauncher
                 ChooseGameAccount = true,
                 UserFilesPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
                 ServerRegion = "NA",
-                PrintPacketsToFile = true,
+                PrintPacketsToFile = false,
                 LobbyOption = 0
             };            
         }

@@ -37,6 +37,7 @@ namespace PrimalLauncher
             this.lblOptions = new PrimalLauncher.OutlinedFontLabel();
             this.lblLog = new PrimalLauncher.OutlinedFontLabel();
             this.btnLaunch = new System.Windows.Forms.Button();
+            this.panelMain.SuspendLayout();
             this.SuspendLayout();
             // 
             // lblSeparator1
@@ -153,7 +154,8 @@ namespace PrimalLauncher
             this.Name = "MainWindow";
             this.Text = "The Primal Launcher v1.0";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainWindow_FormClosing);
-            this.Load += new System.EventHandler(this.MainWindow_Load);
+            this.Shown += new System.EventHandler(this.MainWindow_Shown);
+            this.panelMain.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -167,6 +169,7 @@ namespace PrimalLauncher
         private OutlinedFontLabel lblUpdate;
         private OutlinedFontLabel lblClock;
         private System.Windows.Forms.Button btnLaunch;
+        private ucLog ucLog1;
     }
 }
 
