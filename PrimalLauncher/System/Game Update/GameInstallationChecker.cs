@@ -115,9 +115,9 @@ namespace PrimalLauncher
         /// <returns>True if game installation exists AND it is up-to-date.</returns>
         public static bool Check()
         {
-            string gameInstallPath = Preferences.Instance.Options.GameInstallPath;
+            string gameInstallPath = Preferences.GetGameInstallPath();
 
-            if (gameInstallPath.Equals("") || gameInstallPath == null) //if game installation was not found
+            if (string.IsNullOrEmpty(gameInstallPath)) //if game installation was not found
             {
                 MessageBox.Show("Could not find a FINAL FANTASY XIV 1.0 installation. Please install the game and try again.", "Primal Launcher");
                 Environment.Exit(0); //there is not much left to do, so terminate app.
@@ -126,34 +126,26 @@ namespace PrimalLauncher
             {
                 if (GameIsPatched())
                 {
-                    return true;//if game is patched, nothing to be done.
-                }
-                else if (GameIsUpdated())
-                {
-                    ucUpdate.Instance.ToggleDownload(false);
-                    ucUpdate.Instance.ToggleUpdate(false);                    
-                    ucUpdate.Instance.TogglePatching(true);
-                    return false;
-                }
-                else if (Downloader.Instance.CheckUpdateFiles())
-                {
-                    ucUpdate.Instance.ToggleDownload(false);
-                    ucUpdate.Instance.ToggleUpdate(true);                    
-                    ucUpdate.Instance.TogglePatching(false);
-                    return false;
+                    ucUpdate.Instance.ToggleUpdateSections(false, false, false);
+                    return true;
                 }
                 else
                 {
-                    ucUpdate.Instance.ToggleDownload(true);
-                    ucUpdate.Instance.ToggleUpdate(true);
-                    ucUpdate.Instance.TogglePatching(false);
-                    return false;
-                }
+                    if (GameIsUpdated())
+                        ucUpdate.Instance.ToggleUpdateSections(false, false, true);
+                    else if (Downloader.Instance.CheckUpdateFiles())
+                        ucUpdate.Instance.ToggleUpdateSections(false, true, false);
+                    else
+                        ucUpdate.Instance.ToggleUpdateSections(true, false, false);
 
+                    return false;
+                }      
             }
 
             return true; //game is updated      
         }
+
+        
 
         /// <summary>
         /// Checks if the game installation was patched with local IP addresses.
@@ -180,10 +172,10 @@ namespace PrimalLauncher
             {
                 string fileContents = File.ReadAllText(gameInstallPath + @"\" + fileName + ".ver");
 
-                if (fileContents.IndexOf(toSearch) >= 0)
-                    return true; //found
-                else
+                if (fileContents.IndexOf(toSearch) < 0)
                     return false;
+                else
+                    return true; //found
             }
             else
             {

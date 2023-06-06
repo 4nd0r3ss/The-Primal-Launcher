@@ -110,12 +110,12 @@ namespace PrimalLauncher
         {
             if (!_keepDownloading) return; //cancel button was clicked
 
-            string downloadPath = Preferences.Instance.Options.UserFilesPath + Preferences.Instance.AppFolder + _filesToDownload[_downloadIndex].Key.Substring(0, _filesToDownload[_downloadIndex].Key.LastIndexOf(@"/")).Replace(@"/", @"\") + @"\";
+            string downloadPath = Preferences.Instance.AppUserFolder + _filesToDownload[_downloadIndex].Key.Substring(0, _filesToDownload[_downloadIndex].Key.LastIndexOf(@"/")).Replace(@"/", @"\") + @"\";
 
             if (!Directory.Exists(downloadPath))
                 Directory.CreateDirectory(downloadPath);
 
-            if (!File.Exists(Preferences.Instance.AppFolder + _filesToDownload[_downloadIndex].Key.Replace(@"/", @"\")))
+            if (!File.Exists(Preferences.Instance.AppUserFolder + _filesToDownload[_downloadIndex].Key.Replace(@"/", @"\")))
             {
                 ucUpdate.Instance.LblDownloadStat.Text = "Downloading file " + (_downloadIndex + 1) + @"/" + _filesToDownload.Count + "  - " + _filesToDownload[_downloadIndex].Key;
 
@@ -123,7 +123,7 @@ namespace PrimalLauncher
                 {
                     _webClient.DownloadProgressChanged += ChangeProgressBarValue;
                     _webClient.DownloadFileCompleted += DownloadComplete;
-                    _webClient.DownloadFileAsync(new Uri(_downloadURL + _filesToDownload[_downloadIndex].Key), Preferences.Instance.AppFolder + _filesToDownload[_downloadIndex].Key.Replace(@"/", @"\"));
+                    _webClient.DownloadFileAsync(new Uri(_downloadURL + _filesToDownload[_downloadIndex].Key), Preferences.Instance.AppUserFolder + _filesToDownload[_downloadIndex].Key.Replace(@"/", @"\"));
                 }
             }
         }
@@ -158,7 +158,7 @@ namespace PrimalLauncher
 
             foreach (var file in _updateFiles)
             {
-                string filePath = Preferences.Instance.AppFolder + @"\" + file.Key;
+                string filePath = Preferences.Instance.AppUserFolder + @"\" + file.Key;
 
                 if (File.Exists(filePath)) //if file was already dowloaded
                 {

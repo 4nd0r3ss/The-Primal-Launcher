@@ -34,76 +34,62 @@ namespace PrimalLauncher
         {     
             ucUpdate.Instance.UpdateProgreeBar.Value = 0;
             ucUpdate.Instance.LblUpdate.Text = "Starting game update...";
-            string filesPath = Preferences.Instance.AppFolder + @"\";
+            string filesPath = Preferences.Instance.AppUserFolder + @"\";
 
             if (!GameInstallationChecker.HasWritePermission())
             {
                 GameInstallationChecker.AskForAdminPermissions();
                 return;
-            }                
+            }
 
             foreach (var file in Downloader.UpdateFiles)
             {
                 string currentFilePath = filesPath + file.Key.Replace('/', '\\');
-                ucUpdate.Instance.LblUpdate.Text = "Applying file " + file.Key.Replace('/', '\\');                
+                ucUpdate.Instance.LblUpdate.Text = "Applying file " + file.Key.Replace('/', '\\');
 
-                //try
-                //{
-                using (FileStream fs = File.Open(currentFilePath, FileMode.Open))
+                BinaryReader br = new BinaryReader(File.Open(currentFilePath, FileMode.Open));
+
+                //check file type
+                ulong fileType = br.ReadUInt64();
+
+                if (fileType != 0x4843544150495a91) //--> `ZIPATCH
+                    throw new Exception("Bad file header. Download update files again.");
+
+                //read remaining header bytes
+                br.ReadUInt64();
+
+                //process file
+                while (br.BaseStream.Position != br.BaseStream.Length)
                 {
-                    fs.Seek(0, SeekOrigin.Begin);
-                    byte[] buffer = new byte[0x10];
-                    fs.Read(buffer, 0, buffer.Length);
-                    string fileType = Encoding.ASCII.GetString(buffer);
+                    string operation = Encoding.ASCII.GetString(BitConverter.GetBytes(br.ReadUInt32()));
 
-                    if (fileType.IndexOf("ZIPATCH") < 0)
-                        throw new Exception("Bad file header. Download update files again.");
-
-                    fs.Seek(0x10, SeekOrigin.Begin);
-
-                    using (MemoryStream ms = new MemoryStream())
+                    switch (operation)
                     {
-                        fs.CopyTo(ms);
-                        ms.Seek(0, SeekOrigin.Begin);
-
-                        BinaryReader br = new BinaryReader(ms);
-
-                        //while there are bytes to read
-                        while (br.BaseStream.Position != br.BaseStream.Length)
-                        {
-                            string operation = Encoding.ASCII.GetString(BitConverter.GetBytes(br.ReadUInt32()));
-
-                            switch (operation)
-                            {
-                                case "ETRY":
-                                    ProcessETRY(ref br);
-                                    break;
-                                case "FHDR":
-                                    ProcessFHDR(ref br);
-                                    break;
-                                case "HIST":
-                                    ProcessHIST(ref br);
-                                    break;
-                                case "APLY":
-                                    ProcessAPLY(ref br);
-                                    break;
-                                case "ADIR":
-                                    ProcessADIR(ref br);
-                                    break;
-                                case "DIFF":
-                                    ProcessDIFF(ref br);
-                                    break;
-                                case "DELD":
-                                    ProcessDELD(ref br);
-                                    break;
-                            }
-                        }
-
-                        ucUpdate.Instance.UpdateProgreeBar.Increment(2);
+                        case "ETRY":
+                            ProcessETRY(ref br);
+                            break;
+                        case "FHDR":
+                            ProcessFHDR(ref br);
+                            break;
+                        case "HIST":
+                            ProcessHIST(ref br);
+                            break;
+                        case "APLY":
+                            ProcessAPLY(ref br);
+                            break;
+                        case "ADIR":
+                            ProcessADIR(ref br);
+                            break;
+                        case "DIFF":
+                            ProcessDIFF(ref br);
+                            break;
+                        case "DELD":
+                            ProcessDELD(ref br);
+                            break;
                     }
                 }
-                //break;
-                //}catch(Exception e){ throw e; }       
+
+                ucUpdate.Instance.UpdateProgreeBar.Increment(2);
             }
 
             ucUpdate.Instance.LblUpdate.Text = "Game is updated to version 1.23b.";

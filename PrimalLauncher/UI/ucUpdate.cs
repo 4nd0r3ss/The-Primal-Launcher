@@ -111,15 +111,18 @@ namespace PrimalLauncher
 
         public void TogglePatching(bool enable)
         {
-            btnPatch.Enabled = enable;
+            btnPatch.Enabled = enable;           
 
-            if (!enable)
+            if (!enable && GameInstallationChecker.GameIsPatched())
+            {                
                 lblPatch.Text = "Binaries are patched.";
+            }                
         }
 
         public void ToggleUpdate(bool enable)
         {
             btnGameUpdate.Enabled = enable;
+            chkKeepFiles.Enabled = enable;
 
             if (!enable)
                 LblUpdate.Text = "Game is updated.";
@@ -135,6 +138,13 @@ namespace PrimalLauncher
                 lblDownloadStat.Text = "All update files downloaded.";
                 btnDownloadCancel.Enabled = false;
             }                
+        }
+
+        public void ToggleUpdateSections(bool isDownloaded, bool isUpdated, bool isPatched)
+        {
+            Instance.ToggleDownload(isDownloaded);
+            Instance.ToggleUpdate(isUpdated);
+            Instance.TogglePatching(isPatched);
         }
 
         #region Button events

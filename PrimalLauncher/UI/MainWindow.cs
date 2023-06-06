@@ -61,7 +61,13 @@ namespace PrimalLauncher
         public MainWindow()
         {
             InitializeComponent();
-            Window = this;         
+            Window = this;
+
+            panelMain.Controls.Add(ucLog.Instance);
+            ucLog.Instance.Dock = DockStyle.Fill;
+            ucLog.Instance.BringToFront();
+            ResetTabButtonColors();
+            lblLog.ForeColor = Color.Moccasin;
 
             lblSeparator1.BackColor = Color.FromArgb(64, 128, 128, 128);
             Preferences.Instance.LoadConfigFile();
@@ -240,11 +246,17 @@ namespace PrimalLauncher
 
         private void MainWindow_Shown(object sender, EventArgs e)
         {
-            IsInstallationOk = true;// GameInstallationChecker.Check();
-            ToggleTabSelector(IsInstallationOk);
+            IsInstallationOk =  GameInstallationChecker.Check();
 
-            Task.Run(() => { try { LobbyServer.Instance.Initialize(); } catch (Exception ex) { throw ex; } });
-            Task.Run(() => { try { GameServer.Instance.Initialize(); } catch (Exception ex) { throw ex; } });
+            if(IsInstallationOk)
+            {
+                Task.Run(() => { try { LobbyServer.Instance.Initialize(); } catch (Exception ex) { throw ex; } });
+                Task.Run(() => { try { GameServer.Instance.Initialize(); } catch (Exception ex) { throw ex; } });
+            }
+            else
+            {
+                ToggleTabSelector(IsInstallationOk);
+            }          
         }
     }
 }

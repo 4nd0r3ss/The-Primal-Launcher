@@ -42,19 +42,19 @@ namespace PrimalLauncher
     public class Preferences
     {       
         private static Preferences _instance = null;       
-        public string AppFolder
+        public string AppUserFolder
         {
             get { return Options.UserFilesPath + @"\Primal Launcher User Files\"; }
         }  
         
         public string AppDataFile
         {
-            get { return AppFolder + "app.dat"; }
+            get { return AppUserFolder + "app.dat"; }
         }
 
         public string AppUserFile
         {
-            get { return AppFolder + "user.dat"; }
+            get { return AppUserFolder + "user.dat"; }
         }
 
         public static Preferences Instance
@@ -79,18 +79,15 @@ namespace PrimalLauncher
         #region Search game installation path in registry
         public static string GetGameInstallPath()
         {
+            string gameInstalPath = null;
             const string GAME_INSTALL_REGKEY = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{F2C4E6E0-EB78-4824-A212-6DF6AF0E8E82}";
             using (RegistryKey key = Registry.LocalMachine.OpenSubKey(GAME_INSTALL_REGKEY))
             {
-                if(key != null)
-                {
-                    return key.GetValue("InstallLocation").ToString() + @"\" + key.GetValue("DisplayName").ToString() + @"\";
-                }
-                else
-                {
-                   return null;
-                }                
-            }                       
+                if (key != null)                
+                     gameInstalPath = key.GetValue("InstallLocation").ToString() + @"\" + key.GetValue("DisplayName").ToString() + @"\";                                          
+            }
+           
+            return gameInstalPath;
         }
         #endregion
 
@@ -125,7 +122,7 @@ namespace PrimalLauncher
         #region Save options object to configuration file
         public void SaveConfigFile()
         {
-            if (Directory.Exists(Options.UserFilesPath))
+            if (Directory.Exists(AppUserFolder))
             {
                 using (var fileStream = new FileStream(AppDataFile, FileMode.Create))
                 {
@@ -135,7 +132,7 @@ namespace PrimalLauncher
             }
             else
             {
-                Directory.CreateDirectory(Options.UserFilesPath);
+                Directory.CreateDirectory(AppUserFolder);
                 SaveConfigFile();
             }   
 

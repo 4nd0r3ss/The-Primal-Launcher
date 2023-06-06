@@ -262,7 +262,7 @@ namespace PrimalLauncher
 
         public void OutputToFile()
         {
-            File.AppendAllText(Preferences.Instance.AppFolder + "packet_output.txt", Stringify());
+            File.AppendAllText(Preferences.Instance.AppUserFolder + "packet_output.txt", Stringify());
         }
     }
 }
