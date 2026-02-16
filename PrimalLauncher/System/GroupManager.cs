@@ -1,4 +1,20 @@
-﻿using System;
+﻿/* 
+Copyright (C) 2022 Andreus Faria
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,9 +26,9 @@ namespace PrimalLauncher
     {
         private static GroupManager _instance = null;
         private static readonly object _padlock = new object();
-        public GroupDuty DutyGroup { get; set; }
-        public GroupParty PartyGroup { get; set; }
-        public GroupMob MobGroup { get; set; }
+        public DutyGroup DutyGroup { get; set; }
+        public PartyGroup PartyGroup { get; set; }
+        public MonsterGroup MobGroup { get; set; }
 
         private Queue<Tuple<uint, string, int>> ActionQueue { get; set; }
 

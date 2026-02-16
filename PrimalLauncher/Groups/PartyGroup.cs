@@ -16,15 +16,23 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
 namespace PrimalLauncher
 {
     [Serializable]
-    public class GroupParty : GroupBase
+    public class PartyGroup : GroupBase
     {
-        public GroupParty() : base(0x01, GroupType.Party) { }
+        public bool IsEngaged { get; set; }
+        public PartyGroup() : base(GroupType.Party)
+        {
+            MemberList = new List<Actor>
+            {
+                User.Instance.Character
+            };
+        }
 
         public override void InitWork()
         {

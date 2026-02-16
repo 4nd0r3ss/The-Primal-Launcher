@@ -17,8 +17,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace PrimalLauncher
 {
@@ -62,11 +65,10 @@ namespace PrimalLauncher
                         SendMessage(MessageType.System, @"\setweather {weather name}");
                         SendMessage(MessageType.System, @"\setmusic {music id}");
                         SendMessage(MessageType.System, @"\setposition {x} {y} {z}");
-                        SendMessage(MessageType.System, @"\additem {item name}");
+                        SendMessage(MessageType.System, @"\additem {item_name}");
                         SendMessage(MessageType.System, @"\addgil {amount}");
                         SendMessage(MessageType.System, @"\forward {distance}");
                         break;
-
                     case @"\setweather":
                         string wheatherName = parameters[0].First().ToString().ToUpper() + parameters[0].Substring(1);
 
@@ -84,18 +86,16 @@ namespace PrimalLauncher
                         else
                             SendMessage(MessageType.System, "Requested weather not found.");
                         break;
-
                     case @"\setmusic":
                         if (byte.TryParse(parameters[0], out byte id))
                             World.Instance.SetMusic(id);
                         else
                             SendMessage(MessageType.System, "Invalid music id.");
                         break;
-
                     case @"\linkadd":
                         if (parameters.Count > 0)
                         {
-                            User.Instance.Character.Linkshell.NpcAddLinkpearl(Convert.ToInt32(parameters[0]));
+                            User.Instance.Character.Linkshell.AddLinkpearl(Convert.ToInt32(parameters[0]));
                         }
                         break;
                     case @"\linknew":
@@ -104,20 +104,18 @@ namespace PrimalLauncher
                             User.Instance.Character.Linkshell.NpcNewMessage(Convert.ToInt32(parameters[0]));
                         }
                         break;
-
                     case @"\resetlevel":
                         short level = 1;
 
                         if (hasParameters)
                             Int16.TryParse(parameters[0], out level);
 
-                        pc.LevelDown(level);
+                        pc.CharaWork.LevelDown(level);
                         break;
                     case @"\teleport":
                         if (parameters.Count > 0)
                             World.Instance.TeleportPlayer(Convert.ToUInt32(parameters[0]));
                         break;
-
                     case @"\setposition":
                         if (parameters.Count > 0)
                         {
@@ -158,11 +156,9 @@ namespace PrimalLauncher
                             npc.Spawn();
                         }
                         break;
-
                     case @"\addloot":
                         Inventory.AddLoot();
                         break;
-
                     case @"\additem":
                         pc.Inventory.AddItem(InventoryType.Bag,
                             parameters[0].Replace("_", " ").Replace("'", "''"),
@@ -171,19 +167,20 @@ namespace PrimalLauncher
                     case @"\addgil":
                         pc.Inventory.AddGil(Convert.ToInt32(parameters[0]));
                         break;
-
                     case @"\addkeyitem":
                         pc.Inventory.AddItem(InventoryType.KeyItems,
                             parameters[0].Replace("_", " ").Replace("'", "''"),
                             (parameters.Count > 2 ? Convert.ToInt32(parameters[1]) : 1) //TODO: should key items be always 1?
                             );
                         break;
-
                     case @"\addexp":
                         if (hasParameters)
-                            User.Instance.Character.AddExp(Convert.ToInt32(parameters[0]));
+                            User.Instance.Character.CharaWork.AddExp(Convert.ToInt32(parameters[0]));
                         break;
-
+                    case @"\addtp":
+                        if (hasParameters)
+                            User.Instance.Character.AddTp(Convert.ToUInt16(parameters[0]));
+                        break;
                     case @"\anim":
                         short animid = 0x29;
                         byte another = 0x04;
@@ -204,7 +201,6 @@ namespace PrimalLauncher
                             Data = anim
                         }).ToBytes());
                         break;
-
                     case @"\advancequest":
                         if (hasParameters)
                         {
@@ -217,22 +213,18 @@ namespace PrimalLauncher
                             World.SendTextSheet(25083, new object[] { Convert.ToInt32(parameters[0]) });
                         }
                         break;
-
                     case @"\forward":
                         if (hasParameters)
                             User.Instance.Character.GoForward(Convert.ToSingle(parameters[0]));
                         break;
-
                     case @"\turnback":
                         if (hasParameters)
                             User.Instance.Character.TurnBack(Convert.ToSingle(parameters[0]));
                         break;
-
                     case @"\target":
-                        User.Instance.Character.GetTargetData();
+                        User.Instance.Character.TargetGetData();
 
                         break;
-
                     case @"\despawn":
                         if (hasParameters)
                         {
@@ -245,7 +237,52 @@ namespace PrimalLauncher
                         }
 
                         break;
+                    case @"\cast":
+                        if (hasParameters)
+                        {
 
+                            User.Instance.Character.State.Type = 0;
+                            User.Instance.Character.SetMainState();
+                            //User.Instance.Character.SetCastBar((uint)27313, 3);// float.Parse());
+                            User.Instance.Character.SubState.Chant = byte.Parse(parameters[0]);// 0xF0; 
+                            User.Instance.Character.SubState.Waste = 0;
+
+                            User.Instance.Character.SetSubState();
+                            User.Instance.Character.SetSubState();
+
+                            //Thread.Sleep(Convert.ToInt32(3) * 1000);
+
+                            //User.Instance.Character.SetCastBar();
+                            //User.Instance.Character.SubState.Chant = 0;
+                            //User.Instance.Character.SetMainState();
+                            //User.Instance.Character.SetSubState();
+
+                        }
+                        break;
+                    case @"\reset":
+                        if (hasParameters)
+                        {
+
+                            //User.Instance.Character.State.Type = 0;
+                            //User.Instance.Character.SetMainState();
+                            ////User.Instance.Character.SetCastBar((uint)27313, 3);// float.Parse());
+                            //User.Instance.Character.SubState.Chant = byte.Parse(parameters[0]);// 0xF0; 
+                            //User.Instance.Character.SubState.Waste = 0;
+
+                            //User.Instance.Character.SetSubState();
+                            //User.Instance.Character.SetSubState();
+
+
+
+                            //Thread.Sleep(Convert.ToInt32(3) * 1000);
+
+                            //User.Instance.Character.SetCastBar();
+                            User.Instance.Character.SubState.Chant = 0;
+                            User.Instance.Character.SetMainState();
+                            User.Instance.Character.SetSubState();
+
+                        }
+                        break;
                     case @"\icon":
                         if (hasParameters)
                         {
@@ -257,20 +294,27 @@ namespace PrimalLauncher
                             User.Instance.Character.SetIcon();
                         }
                         break;
-
+                    case @"\die":
+                        User.Instance.Character.TakeDamage(User.Instance.Character, 1000);
+                        User.Instance.Character.Die();    
+                        break;
                     case @"\dialog":
                         if (hasParameters)
                         {
-                            World.Instance.ShowAttentionDialog(new object[] { Convert.ToInt32(parameters[0]), Convert.ToInt32(parameters[1]) });
+                            World.Instance.SendData(new object[] { 0x09 });
+                            //World.Instance.ShowSuccessDialog(new object[] { Convert.ToInt32(parameters[0]) });
+                            //World.Instance.ShowAttentionDialog(new object[] { Convert.ToInt32(parameters[0]), Convert.ToInt32(parameters[1]) });
                             //World.Instance.SendDialogData(new List<object> { "attention", Convert.ToUInt32(parameters[0]), "" }, new object[] { Convert.ToInt32(parameters[1]), Convert.ToInt32(parameters[2]) });
                         }
                         break;
-
+                    case @"\diagclose":
+                        World.Instance.CloseTutorialWidget();
+                        break;
                     case @"\achieve":
-                        //if (hasParameters)
-                        //{
-                        Achievements.UnlockedDialog(0x64);
-                        //}
+                        if (hasParameters)
+                        {
+                            User.Instance.Character.Achievements.Unlock(Convert.ToInt32(parameters[0])); //0x64
+                        }
                         break;
                     case @"\questicon":
                         if (hasParameters)
@@ -280,14 +324,12 @@ namespace PrimalLauncher
                             actor.SetQuestIcon();
                         }
                         break;
-
                     case @"\reloadphase":
                         if (hasParameters)
                         {
                             User.Instance.Character.Journal.ReloadQuestPhase(Convert.ToUInt32(parameters[0]), Convert.ToInt32(parameters[1]));
                         }
                         break;
-
                     case @"\reloadquest":
                         if (hasParameters)
                         {
@@ -304,7 +346,64 @@ namespace PrimalLauncher
                             }
                         }
                         break;
+                    case @"\questjournal":
+                        if (hasParameters)
+                        {
+                            User.Instance.Character.Journal.UpdateQuest(Convert.ToUInt32(parameters[0]), Convert.ToInt32(parameters[1]));
+                        }
+                        break;
+                    case @"\removequest":
+                        if (hasParameters)
+                        {
+                            var quest = User.Instance.Character.Journal.QuestsAvailable.FirstOrDefault(x => x.Id == Convert.ToInt32(parameters[0]));
+                            
+                            if(quest != null)                            
+                                User.Instance.Character.Journal.QuestsAvailable.Remove(quest);
+                            else
+                            {
+                                sbyte slotToRemove = -1;
 
+                                foreach (var slot in User.Instance.Character.Journal.Quests)
+                                {
+                                    if (slot.Value != null)
+                                    {                 
+                                        if (((Quest)slot.Value).Id == Convert.ToInt32(parameters[0]))
+                                            slotToRemove = slot.Key; 
+                                    }
+                                }
+
+                                if(slotToRemove >= 0)
+                                    User.Instance.Character.Journal.Quests[slotToRemove] = null;
+                            }
+
+                            User.Instance.Character.Journal.InitializeQuests();
+                        }
+                        break;
+                    case @"\listquests":
+
+                        SendMessage(MessageType.System, "Current quests:");
+                        foreach (var slot in User.Instance.Character.Journal.Quests)
+                        {
+                            if(slot.Value != null)
+                            {
+                                Quest q = (Quest)slot.Value;
+                                SendMessage(MessageType.System, q.Id.ToString() + " " + q.Name);
+                            }                            
+                        }
+
+                        SendMessage(MessageType.System, "Available quests:");
+                        foreach (var quest in User.Instance.Character.Journal.QuestsAvailable)
+                        {
+                            SendMessage(MessageType.System, quest.Id.ToString() + " " + quest.Name);
+                        }
+
+                        SendMessage(MessageType.System, "Finished quests:");
+                        foreach (var quest in User.Instance.Character.Journal.QuestsFinished)
+                        {
+                            SendMessage(MessageType.System, quest.ToString());
+                        }
+
+                        break;
                     case @"\reward":
                         //if (hasParameters)
                         //{
@@ -318,12 +417,10 @@ namespace PrimalLauncher
                         }).ToBytes());
                         //}
                         break;
-
                     case @"\pos":
                         Position mypos = User.Instance.Character.Position;
                         SendMessage(MessageType.System, mypos.X + ", " + mypos.Y + ", " + mypos.Z + ", " + mypos.R);
                         break;
-
                     case @"\posx":
                         Position myposx = User.Instance.Character.Position;
                         int xx = BitConverter.ToInt32(BitConverter.GetBytes(myposx.X), 0);
@@ -333,18 +430,16 @@ namespace PrimalLauncher
 
                         SendMessage(MessageType.System, "0x" + xx.ToString("X2") + ", 0x" + yy.ToString("X2") + ", 0x" + zz.ToString("X2") + ", 0x" + rr.ToString("X2"));
                         break;
-
                     case @"\spawn":
                         if (hasParameters)
                         {
-                            Actor actor = ActorRepository.CreateTestActor(Convert.ToUInt32(parameters[0]));
+                            Actor actor = ActorXmlLoader.CreateTestActor(Convert.ToUInt32(parameters[0]));
                             actor.Id = 4 << 28 | User.Instance.Character.Position.ZoneId << 19 | (uint)(User.Instance.Character.GetCurrentZone().Actors.Count + 1);
                             actor.Position = User.Instance.Character.Position;
                             actor.Spawn();
                             User.Instance.Character.GetCurrentZone().Actors.Add(actor);
                         }
                         break;
-
                     case @"\instance":
                         if (hasParameters)
                         {
@@ -380,14 +475,14 @@ namespace PrimalLauncher
                         SendMessage(MessageType.System, distance.ToString());
                         break;
                     case @"\come":
-                        ActorBattle bactor = (ActorBattle)User.Instance.Character.GetCurrentZone().GetActorById(User.Instance.Character.CurrentTargetId);
+                        ActorBattle bactor = (ActorBattle)User.Instance.Character.GetCurrentZone().GetActorById(User.Instance.Character.TargetId);
 
                         if (bactor != null)
                         {
                             bactor.MoveToTarget();
                             Position myposs = User.Instance.Character.Position;
-                            SendMessage(MessageType.System, "C: " + myposs.X + ", " + myposs.Z + ", " + myposs.R);
-                            SendMessage(MessageType.System, "M: " + bactor.Position.X + ", " + bactor.Position.Z + ", " + bactor.Position.R);
+                            SendMessage(MessageType.System, "Me: " + myposs.X + ", " + myposs.Z + ", " + myposs.R);
+                            SendMessage(MessageType.System, "Target: " + bactor.Position.X + ", " + bactor.Position.Z + ", " + bactor.Position.R);
                         }
                         else
                         {
@@ -396,13 +491,12 @@ namespace PrimalLauncher
 
                         break;
                     case @"\setr":
-                        ActorBattle bactors = (ActorBattle)User.Instance.Character.GetCurrentZone().GetActorById(User.Instance.Character.CurrentTargetId);
+                        ActorBattle bactors = (ActorBattle)User.Instance.Character.GetCurrentZone().GetActorById(User.Instance.Character.TargetId);
                         bactors.Position.R = (float)Convert.ToDouble(parameters[0]);
                         bactors.MoveToPosition(bactors.Position, 2);
 
                         SendMessage(MessageType.System, "M: " + bactors.Position.X + ", " + bactors.Position.Z + ", " + bactors.Position.R);
                         break;
-
                     case @"\setcr":
                         if (hasParameters)
                         {
@@ -444,6 +538,13 @@ namespace PrimalLauncher
                             o.Spawn();
                         }
                         break;
+                    case @"\objanimation":
+                        if (hasParameters)
+                        {
+                            MapObj o = (MapObj)User.Instance.Character.GetCurrentZone().GetActorByClassId(5900004);
+                            o.PlayAnimation(parameters[0]);
+                        }
+                        break;
                     case @"\objpos":
                         {
                             Actor npc = User.Instance.Character.GetCurrentZone().GetActorByClassId(5900001);
@@ -462,6 +563,52 @@ namespace PrimalLauncher
                         {
                             World.Instance.SendDialogData(new List<object> { "attention", World.Instance.Id, "" }, new object[] { "this is a test" });
                         }
+                        break;
+                    case @"\addgilitem":
+                        User.Instance.Character.Inventory.AddItem(InventoryType.Currency, "Gil", 0);
+                        break;
+                    case @"\pub":
+                        if (hasParameters)
+                        {
+                            var pub = (PopulaceGuildlevePublisher)User.Instance.Character.GetCurrentZone().Actors.FirstOrDefault(x => x.GetType().Name == "PopulaceGuildlevePublisher");
+                                                        
+                            if (pub != null)
+                            {
+                                //for setting packs
+                                //pub.StartPack.Id = Convert.ToInt32(parameters[0]);
+                                //pub.EndPack.Id = Convert.ToInt32(parameters[1]);
+
+                                //for setting leve details
+                                //pub.Pack1 = Convert.ToInt32(parameters[0]);
+                            }
+                        }
+                        break;
+                    case @"\raise":                      
+                        User.Instance.Character.TestRaiseCommand();                      
+                        break;
+                    case @"\cs":
+                        if (hasParameters)
+                        {
+                            var man = (PopulaceRetainerManager)User.Instance.Character.GetCurrentZone().Actors.FirstOrDefault(x => x.GetType().Name == "PopulaceRetainerManager");
+                            //var retainerGroup = User.Instance.Character.Groups.Where(x => x is GroupRetainer).FirstOrDefault();
+                            //retainerGroup.AddMembers();
+                            man.Cutscene = parameters[0];
+                        }
+                        break;
+                    case @"\addcmd":
+                        if (hasParameters)
+                        {
+                            User.Instance.Character.CharaWork.CurrentClass.Hotbar[0] = Convert.ToUInt16(parameters[0]);
+                            User.Instance.Character.CharaWork.UpdateHotbar();
+                        }
+                        break;
+                    case @"\reloadcmd":
+                        User.Instance.Character.CharaWork.CurrentClass.LoadActions();
+                        break;
+                    case @"\monstergroup":
+
+                        //var gp = new GroupMonster(User.Instance.Character.GetCurrentZone().Id);
+                        //gp.Send();
                         break;
                     default:
                         SendMessage(MessageType.System, "Unknown command.");

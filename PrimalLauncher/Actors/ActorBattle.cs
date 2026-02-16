@@ -17,6 +17,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Linq;
 using System.Threading;
 
@@ -27,8 +28,12 @@ namespace PrimalLauncher
     {
         public Dictionary<uint, short> EnmityTable { get; set; }
         public bool DisableAutoAttack { get; set; }
-        public bool Immobile { get; set; }
+        public bool Immobile { get; set; }        
+        public bool IsEngaged { get; set; }
+        public bool LockOnTarget { get; set; }       
 
+        public virtual GroupBase BattleGroup { get; set; } //did it like that so we can keep it generic, mobs will have a MonsterGroup or a DutyGroup, player will have a PartyGroup or a DutyGroup.
+       
         public ActorBattle()
         {
             EnmityTable = new Dictionary<uint, short>();
@@ -42,73 +47,60 @@ namespace PrimalLauncher
         {
             if (!DisableAutoAttack)
             {
-                ActorBattle target = ((ActorBattle)GetCurrentZone().GetActorById(CurrentTargetId));
+                var target = ((ActorBattle)base.GetCurrentZone().GetActorById(base.TargetId));
 
-                //if actor is close enough to target, attack.
-                if (CurrentTargetId > 0 && GetTargetDistance() <= CharaWork.CurrentJob.AutoAttackMaxDistance)
+                //need to check if actor is caster, is yes, can keep distance.
+                if (target != null && !(this is PlayerCharacter) && CharaWork.CurrentClass.GetCategory() != JobClassCategory.DoM)
                 {
-                    if (target != null && !target.IsDead() && !IsDead())
-                    {
-                        short damageDealt = (short)((this is PlayerCharacter) ? 100 : 10); //to be calculated
-                        uint effectId = 0x08000604; //also to be calculated
-
-                        Command command = (this is PlayerCharacter) ? Command.PlayerAutoAttack : Command.MonsterAutoAttack;
-                        uint animation = (uint)((this is PlayerCharacter) ? 0x19001000 : 0x11001000);
-
-                        //0x08000608 - normal hit
-                        //0x0800060C - strong hit
-                        //0x0800060F - critical hit (shows word critical)
-                        //0x0800064C - target has protect			
-
-                        CommandResult cr = new CommandResult
-                        {
-                            TargetId = target.Id,
-                            Amount = damageDealt,
-                            TextId = 0x765D, //always the same  so far
-                            EffectId = effectId, //target hit animation
-                            Direction = 1,
-                            HitSequence = 1
-                        };
-
-                        SendCommandResult(command, new List<CommandResult> { cr }, animation, senderId: Id);
-                        Thread.Sleep(500);
-                        AddTp(100);
-                        target.TakeDamage(this, damageDealt);
-
-                        //this should be in BM?
-                        //if (target.CharaWork.CurrentJob.Hp <= 0)
-                        //{
-                        //    SendCommandResult(0, new List<CommandResult> { new CommandResult(Id, 1, 0x847F, 0, 50, 1) }, 0);
-                        //    AddExp(target.Exp);
-                        //    Inventory.AddGil(target.Gil);
-                        //}            
-                    }
-                    else
-                    {
-                        //change target if current target is dead. if no more targets in enmity table, disengage.
-                        Disengage();
-                    }
-
-                    if (this is PlayerCharacter player && !player.IsTutorialComplete) BattleTutorial.Instance.NextTutorial("tp");
-                }
-                else
-                {
-                    //need to check if actor is caster, is yes, can keep distance.
-                    if (target != null && !(this is PlayerCharacter) && CharaWork.CurrentJob.GetCategory() != JobClassCategory.DoM)
-                    {
-                        MoveToActor(target);
-                    }
+                    MoveToActor(target);
                 }
             }            
         }
 
+
+        public Actor GetTargetActor()
+        {
+            return base.GetCurrentZone().GetActorById(base.TargetId);
+        }
+
+        public void ExecuteActionCommand(short commandId)
+        {
+            ActionCommand action = CharaWork.CurrentClass.Actions.Find(x => x.Id == (Command)commandId);
+
+            if (action != null)
+            {
+                if(action.CastTime > 0)
+                {
+                    SetCastBar((uint)commandId, action.CastTime);                    
+                    SubState.Chant = 0xF0;
+                    SetSubState();
+
+                    Thread.Sleep((int)((action.CastTime - 1) * 1000));
+
+                    SetCastBar();
+                    SubState.Chant = 0;
+                    SetSubState();
+                }                
+
+                action.Execute(this);
+            }
+            else
+            {
+                Log.Instance.Error("Command " + commandId + " not found.");
+            }
+        }
+
         public virtual void Die() { }
 
-        public virtual void AddTp(short amount)
-        {
-            CharaWork.CurrentJob.Tp += amount;
+        public virtual void AddTp(ushort amount)
+        {            
+            CharaWork.CurrentClass.Tp += (short)amount;
+
+            if (CharaWork.CurrentClass.Tp > 3000)
+                CharaWork.CurrentClass.Tp = 3000;
+
             WorkProperties prop = new WorkProperties(Id, "charaWork/stateAtQuicklyForAll");
-            prop.Add("charaWork.parameterTemp.tp", CharaWork.CurrentJob.Tp);
+            prop.Add("charaWork.parameterTemp.tp", CharaWork.CurrentClass.Tp);
             prop.FinishWritingAndSend(Id);
         }
 
@@ -116,22 +108,32 @@ namespace PrimalLauncher
         {
             AddEnmity(attacker);
 
-            CharaWork.CurrentJob.Hp -= amount;
-            CharaWork.CurrentJob.Hp = CharaWork.CurrentJob.Hp < 0 ? (short)0 : CharaWork.CurrentJob.Hp;
-            CharaWork.CurrentJob.Tp += 10;
+            CharaWork.CurrentClass.Hp -= amount;
+            CharaWork.CurrentClass.Hp = CharaWork.CurrentClass.Hp < 0 ? (short)0 : CharaWork.CurrentClass.Hp;
+            CharaWork.CurrentClass.Tp += 10;
 
             WorkProperties prop = new WorkProperties(Id, "charaWork/stateAtQuicklyForAll");
-            prop.Add("charaWork.parameterSave.hp[0]", CharaWork.CurrentJob.Hp);
-            prop.Add("charaWork.parameterTemp.tp", CharaWork.CurrentJob.Tp);
+            prop.Add("charaWork.parameterSave.hp[0]", CharaWork.CurrentClass.Hp);
+            prop.Add("charaWork.parameterTemp.tp", CharaWork.CurrentClass.Tp);
             prop.FinishWritingAndSend(Id);
 
-            if (CharaWork.CurrentJob.Hp <= 0) Die();
+            if (CharaWork.CurrentClass.Hp <= 0) Die();           
+        }
+
+        public (short damage, EffectId effectId) CalculateDamage(ActorBattle attacker, short attackDamage)
+        {
+            (short damage, EffectId effectId) result = ((short)((attacker is PlayerCharacter) ? 100 : 10), EffectId.HitNormal);
+            //temporary while I don't have damage calculations.
+            TargetId = attacker.Id;
+            LockOnTarget = true;
+
+            return result;
         }
 
         public void SetEnmity(short amount)
         {
             byte[] data = new byte[0x08];
-            if (amount > 0) Buffer.BlockCopy(BitConverter.GetBytes(CurrentTargetId), 0, data, 0, 4);
+            if (amount > 0) Buffer.BlockCopy(BitConverter.GetBytes(base.TargetId), 0, data, 0, 4);
             Buffer.BlockCopy(BitConverter.GetBytes(amount), 0, data, 0x04, 2);
             Packet.Send(ServerOpcode.SetEnmity, data, Id);
         }
@@ -162,7 +164,7 @@ namespace PrimalLauncher
                 }
                 else
                 {
-                    enmityAmount = attacker.CharaWork.CurrentJob.EnmityGenerated();
+                    enmityAmount = attacker.CharaWork.CurrentClass.EnmityGenerated();
                 }
 
                 //attacker is already in enmity table
@@ -175,7 +177,7 @@ namespace PrimalLauncher
                 uint highestEnmityId = EnmityTable.Aggregate((x, y) => x.Value > y.Value ? x : y).Key;
 
                 if (highestEnmityId != attacker.Id)
-                    CurrentTargetId = attacker.Id;
+                    base.TargetId = attacker.Id;
 
                 //update enmity indicator
                 //SetEnmity(EnmityTable[attacker.Id]); //this is crashing the game. maybe because the value being sent is too high?
@@ -188,9 +190,9 @@ namespace PrimalLauncher
         {
             if (!Immobile)
             {
-                ActorBattle target = ((ActorBattle)GetCurrentZone().GetActorById(CurrentTargetId));
+                var target = ((ActorBattle)GetCurrentZone().GetActorById(TargetId));
 
-                if (GetTargetDistance() <= CharaWork.CurrentJob.AutoAttackMaxDistance)
+                //if (GetTargetDistance() <= CharaWork.CurrentClass.AutoAttackMaxDistance)
                     MoveToActor(target);
             }                        
         }
@@ -204,9 +206,9 @@ namespace PrimalLauncher
         {
             float distance = 0;
 
-            if(CurrentTargetId > 0)
+            if(base.TargetId > 0)
             {                
-                distance = GetActorDistance(GetCurrentZone().GetActorById(CurrentTargetId));
+                distance = GetActorDistance(base.GetCurrentZone().GetActorById(base.TargetId));
             }  
             
             return distance;
@@ -233,10 +235,10 @@ namespace PrimalLauncher
                 {
                     float distance = GetActorDistance(actor);
 
-                    //move to target only if current ditance is greter than attack distance.
-                    if (distance > CharaWork.CurrentJob.AutoAttackMaxDistance)
+                    //move to target only if current ditance is greater than attack distance.
+                    if (distance > CharaWork.CurrentClass.AutoAttackMaxDistance)
                     {
-                        float t = (distance - CharaWork.CurrentJob.AutoAttackMaxDistance) / distance;
+                        float t = (distance - CharaWork.CurrentClass.AutoAttackMaxDistance) / distance;
 
                         Position.X = ((1 - t) * Position.X) + (t * actor.Position.X);
                         Position.Z = ((1 - t) * Position.Z) + (t * actor.Position.Z);
@@ -263,8 +265,19 @@ namespace PrimalLauncher
         private void TurnToAttacker()
         {
             byte[] data = new byte[0x08];
-            Buffer.BlockCopy(BitConverter.GetBytes(CurrentTargetId), 0, data, 0, 4);
+            Buffer.BlockCopy(BitConverter.GetBytes(base.TargetId), 0, data, 0, 4);
             Packet.Send(ServerOpcode.TurnToTarget, data, Id);
+        }
+
+        public void SetCastBar(uint commandId = 0, float castTime = 0)
+        {
+            WorkProperties properties = new WorkProperties(Id, @"playerWork/castState");
+
+            if (commandId > 0)            
+                properties.Add("playerWork.castEndClient", Server.GetTimeStamp(castTime));
+
+            properties.Add("playerWork.castCommandClient", commandId);    
+            properties.FinishWritingAndSend();
         }
     }
 }

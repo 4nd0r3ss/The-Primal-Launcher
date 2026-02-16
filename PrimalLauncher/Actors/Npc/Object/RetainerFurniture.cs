@@ -15,50 +15,28 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace PrimalLauncher
 {
-    public class ElevatorStandard : Object
+    public class RetainerFurniture : Object
     {
-        public int Floor { get; set; }
-        public Dictionary<int, string> Destinations { get; set; } = new Dictionary<int, string>();
-
-        private short PlaceDrivenCommand { get; set; }
-
-        public ElevatorStandard()
+        public RetainerFurniture()
         {
             Events = new List<Event>
             {
                 new Event { Opcode = ServerOpcode.TalkEvent, Name = "talkDefault", Priority = 0x04, Enabled = 1 },
-                new Event { Opcode = ServerOpcode.NoticeEvent, Name = "pushCommand", Priority = 0x04 },
+                new Event { Opcode = ServerOpcode.NoticeEvent, Name = "pushCommand", Priority = 0x04 },               
                 new Event { Opcode = ServerOpcode.PushEventCircle, Enabled = 1, Name = "pushCommandIn", ServerCodes = Id, Radius = 4.0f, Direction = 0x01, Silent = 0x01 },
                 new Event { Opcode = ServerOpcode.PushEventCircle, Enabled = 1, Name = "pushCommandOut", ServerCodes = Id, Radius = 4.0f, Direction = 0x11, Silent = 0x01 },
                 new Event { Opcode = ServerOpcode.NoticeEvent, Name = "noticeEvent", Silent = 1 }
             };
         }
-
         public override void Prepare()
         {
-            if (Position.ZoneId == 133)
-                PlaceDrivenCommand = 0x2716;
-            else
-                PlaceDrivenCommand = 0x271D;
-
-            ClassName = "Object";
-
-            LuaParameters = new LuaParameters
-            {
-                ActorName = GenerateName(),
-                ClassName = "ElevatorStandard",
-                ClassCode = ClassCode,
-                Parameters = new object[] { ClassPath + "ElevatorStandard", false, false, false, false, false, (int)ClassId, false, false, 0, 1 }
-            };
+            ClassName = GetType().Name;
+            base.Prepare();
         }
 
         public override void Init()
@@ -66,7 +44,7 @@ namespace PrimalLauncher
             WorkProperties property = new WorkProperties(Id, @"/_init");
             property.Add("charaWork.property[0]", true);
             property.Add("charaWork.property[1]", true);
-            property.Add("npcWork.pushCommand", PlaceDrivenCommand);
+            property.Add("npcWork.pushCommand", (short)0x2718);
             property.Add("npcWork.pushCommandPriority", (byte)0x08);
             property.FinishWritingAndSend(Id);
         }
@@ -81,43 +59,34 @@ namespace PrimalLauncher
             if (EventManager.Instance.CurrentEvent.IsQuestion)
             {
                 EventManager.Instance.CurrentEvent.GetQuestionSelection();
-                uint? selection = EventManager.Instance.CurrentEvent.Selection[0];
+                uint? selection = (uint?)EventManager.Instance.CurrentEvent.Selection[0];
 
-                if (selection.HasValue && selection != 3)
+                switch (selection)
                 {
-                    SendResponse((int)selection);                   
-                    EventManager.Instance.CurrentEvent.AddCutsceneTask("finished", "SetPlayerPosition", Destinations[(int)selection]);
+                    case 0:
+                        EventManager.Instance.CurrentEvent.SendTalkResponse("eventPushStepOpenRetainerMenu", new List<object>(), true);
+                        //SendResponse("eventRingBell");                                              
+                        break;
+                    case null:
+                        EventManager.Instance.CurrentEvent.Finish();
+                        break;
                 }
-                else
-                {
-                    EventManager.Instance.CurrentEvent.Finish();
-                }     
             }
             else
             {
-                SendResponse();
+                SendResponse("eventPushStepOpenRetainerMenu");   
                 EventManager.Instance.CurrentEvent.Callback = "talkDefault";
                 EventManager.Instance.CurrentEvent.IsQuestion = true;
             }
         }
 
-        private void SendResponse(int selection = 0)
-        {
-            string functionName = "elevatorAsk";
-
-            if (Position.ZoneId == 133)
-                functionName += "Limsa";
-            else
-                functionName += "Uldah";
-
-            functionName += Floor.ToString("D3");
-
+        private void SendResponse(string functionName, object[] parameters = null)
+        {   
             EventManager.Instance.CurrentEvent.Response(new object[]
                 {
                         (sbyte)1,
                         Encoding.ASCII.GetBytes("talkDefault"),
-                        Encoding.ASCII.GetBytes(functionName),
-                        selection
+                        Encoding.ASCII.GetBytes(functionName)
                 });
         }
     }

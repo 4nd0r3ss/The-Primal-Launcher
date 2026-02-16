@@ -48,9 +48,9 @@ namespace PrimalLauncher
         private World()
         {
             Id = 0x5ff80001;
-            Zones = ZoneRepository.GetZones();           
+            Zones = ZoneXmlLoader.GetZones();           
             Name = Encoding.ASCII.GetBytes("worldMaster");
-            Aetherytes = ActorRepository.GetAetherytes();
+            Aetherytes = ActorXmlLoader.GetAetherytes();
         }   
 
         public override void Spawn(ushort spawnType = 0, ushort isZoning = 0, int changingZone = 0)
@@ -80,7 +80,7 @@ namespace PrimalLauncher
         public void Initialize()
         {
             User.Instance.Character.GetGroups();
-            User.Instance.Character.InitializeOpening();
+            //User.Instance.Character.InitializeOpening();
             Zoning(0x01);
             User.Instance.Character.ToggleZoneActors();
         }
@@ -369,7 +369,7 @@ namespace PrimalLauncher
             if (ZoneInstance != null && ZoneInstance.Id == zoneId)
                 return ZoneInstance;
 
-            ZoneInstance = ZoneRepository.GetInstance(zoneId);    
+            ZoneInstance = ZoneXmlLoader.GetInstance(zoneId);    
             return ZoneInstance;
         }
 

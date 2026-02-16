@@ -26,19 +26,19 @@
           <position x="421.49" y="3.92" z="536.6" r="0.11" />
       </PopulaceShopSalesman>
 
-      <Populace className="PopulaceStandard">
+      <PopulaceStandard>
           <classId>1001613</classId>
           <position x="433.86" y="4.6" z="547.7" r="1.77" />
           <animation>1017</animation>
-      </Populace>
-      <Populace className="PopulaceStandard">
+      </PopulaceStandard>
+      <PopulaceStandard>
           <classId>1001610</classId>
           <position x="413.89" y="4" z="544.5" r="2.9" />        
-      </Populace>
-      <Populace className="PopulaceStandard">
+      </PopulaceStandard>
+      <PopulaceStandard>
           <classId>1001614</classId>
           <position x="415.57" y="3.94" z="538.6" r="-2.11" />
-      </Populace>
+      </PopulaceStandard>
       
   </npc>
 </chara>

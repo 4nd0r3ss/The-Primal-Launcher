@@ -15,13 +15,29 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-using System;
+
+using System.Collections.Generic;
+using System.Xml;
 
 namespace PrimalLauncher
 {
-    [Serializable]
-    public class GroupRetainer : GroupBase
+    public class GuildLevePack
     {
-        public GroupRetainer() : base(0x02, GroupType.Retainer) { }
+        public int Id { get; set; }
+        public int Level { get; set; }
+       
+        public List<GuildLeve> GuildLeves { get; set; }
+
+        public GuildLevePack(XmlNode node) 
+        { 
+            Id = node.GetAttributeAsInt("id");
+            Level = node.GetAttributeAsInt("level");
+            GuildLeves = new List<GuildLeve>();
+
+            foreach(XmlNode node2 in node.ChildNodes)
+            {
+                GuildLeves.Add(new GuildLeve(node2));
+            }
+        }      
     }
 }

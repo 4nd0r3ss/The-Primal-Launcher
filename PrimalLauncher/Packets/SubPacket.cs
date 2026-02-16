@@ -44,6 +44,8 @@ namespace PrimalLauncher
         public List<GamePacket> GamePacketList { get; set; } = new List<GamePacket>();
         #endregion
 
+        public int Opcode() => (Data[0x03]) >> 8 | (Data[0x02]);
+
         #region Constructors
         public SubPacket() { }
         public SubPacket(GamePacket gamePacket)
@@ -107,18 +109,15 @@ namespace PrimalLauncher
             return toBytes;
         }
 
-        public string Stringify(bool isFromClient)
-        {
-            string result = "";
+        //public string Stringify(bool isFromClient)
+        //{
+        //    string result = "";
 
-            foreach (GamePacket gp in GamePacketList)
-                result += gp.Stringify(isFromClient, SourceId, TargetId);
+        //    foreach (GamePacket gp in GamePacketList)
+        //        result += gp.Stringify(isFromClient, SourceId, TargetId);
 
-            return result;
-        }
-               
-        public int Opcode() => (Data[0x03]) >> 8 | (Data[0x02]);
-
+        //    return result;
+        //}
         #region Encoding
         public void Encrypt(Blowfish bf)
         {
@@ -132,5 +131,17 @@ namespace PrimalLauncher
             catch (Exception) { Log.Instance.Error("Error decrypting subpacket!"); }
         }
         #endregion
+
+        public string StringifyGamePackets(bool isFromClient)
+        {
+            string result = "";
+
+            foreach(GamePacket gamePacket in GamePacketList)
+            {
+                result += gamePacket.Stringify(isFromClient, SourceId, TargetId);
+            }
+
+            return result;
+        }
     }
 }

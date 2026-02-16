@@ -1,0 +1,234 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<MonsterGroups>
+    <GroupMonster>
+        <Monster family="Monkey" className="MonkeyLesserStandard">
+            <classId>2100516</classId>
+            <position x="-1026.34" y="22.524813" z="-1618.1516" r="-0.38909256" zoneId="152" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Monkey" className="MonkeyLesserStandard">
+            <classId>2100516</classId>
+            <position x="-1038.2366" y="21.773493" z="-1649.4915" r="-2.4322193" zoneId="152" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Monkey" className="MonkeyLesserStandard">
+            <classId>2100516</classId>
+            <position x="-1058.9052" y="21.014042" z="-1625.5603" r="-0.65155673" zoneId="152" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Monkey" className="MonkeyLesserStandard">
+            <classId>2100516</classId>
+            <position x="-1052.1235" y="21.02349" z="-1639.4507" r="-2.9377372" zoneId="152" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Lemming" className="HareStandard">
+            <classId>2104011</classId>
+            <position x="-1051.7651" y="21.66139" z="-1651.0997" r="-1.5495578" zoneId="152" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Monkey" className="MonkeyLesserStandard">
+            <classId>2100516</classId>
+            <position x="-1083.5413" y="22.729717" z="-1618.0562" r="-2.0644002" zoneId="152" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Bat" className="BatNormalStandard">
+            <classId>2104102</classId>
+            <position x="-1152.4218" y="8.50985" z="-1662.6483" r="3.015001" zoneId="152" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Bat" className="BatNormalStandard">
+            <classId>2104102</classId>
+            <position x="-1144.6627" y="7.691057" z="-1659.7919" r="-2.305267" zoneId="152" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Lemming" className="HareStandard">
+            <classId>2104022</classId>
+            <position x="-1213.3812" y="32.942837" z="-1786.0356" r="-0.6751167" zoneId="152" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Monkey" className="MonkeyLesserStandard">
+            <classId>2100516</classId>
+            <position x="-1216.4736" y="20.322968" z="-1664.7019" r="-1.676238" zoneId="152" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Lemming" className="HareStandard">
+            <classId>2104022</classId>
+            <position x="-1201.0555" y="33.232574" z="-1794.8597" r="1.0445223" zoneId="152" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Lemming" className="HareStandard">
+            <classId>2104011</classId>
+            <position x="-1268.0494" y="20.43844" z="-1737.7728" r="-2.208932" zoneId="152" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Funguar" className="FunguarLesserStandard">
+            <classId>2105916</classId>
+            <position x="-1278.648" y="33.148136" z="-1671.2491" r="0.21118861" zoneId="152" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Funguar" className="FunguarLesserStandard">
+            <classId>2105916</classId>
+            <position x="-1291.7095" y="32.497498" z="-1680.313" r="-0.686128" zoneId="152" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <MiningPoint>
+        <classId>1200052</classId>
+        <position x="-1307.11" y="33.5" z="-1800.26" r="0" zoneId="152" />
+        <animation>0</animation>
+    </MiningPoint>
+    <GroupMonster>
+        <Monster family="Lemming" className="HareStandard">
+            <classId>2104011</classId>
+            <position x="-1389.2378" y="21.549503" z="-1723.651" r="2.4189851" zoneId="152" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Bat" className="BatNormalStandard">
+            <classId>2104102</classId>
+            <position x="-1410.5447" y="8.543746" z="-1727.7405" r="0.6910164" zoneId="152" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Monkey" className="MonkeyLesserStandard">
+            <classId>2100517</classId>
+            <position x="-1437.2346" y="21.023487" z="-1765.9553" r="1.4524052" zoneId="152" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Monkey" className="MonkeyLesserStandard">
+            <classId>2100517</classId>
+            <position x="-1444.9838" y="21.014042" z="-1756.3378" r="-0.9317623" zoneId="152" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Monkey" className="MonkeyLesserStandard">
+            <classId>2100517</classId>
+            <position x="-1462.3977" y="21.388634" z="-1782.1747" r="-3.0096328" zoneId="152" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Lemming" className="HareStandard">
+            <classId>2104011</classId>
+            <position x="-1405.8512" y="32.632057" z="-1808.3251" r="2.9162602" zoneId="152" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Lemming" className="HareStandard">
+            <classId>2104022</classId>
+            <position x="-1405.9022" y="32.632057" z="-1810.9998" r="0.048236564" zoneId="152" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Lemming" className="HareStandard">
+            <classId>2104011</classId>
+            <position x="-1512.9235" y="19.429138" z="-1791.8806" r="-2.2110703" zoneId="152" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Monkey" className="MonkeyLesserStandard">
+            <classId>2100518</classId>
+            <position x="-1589.2406" y="21.534567" z="-1900.0598" r="2.9425735" zoneId="152" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Monkey" className="MonkeyLesserStandard">
+            <classId>2100518</classId>
+            <position x="-1581.0715" y="21.756128" z="-1906.4183" r="1.8827363" zoneId="152" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Monkey" className="MonkeyLesserStandard">
+            <classId>2100518</classId>
+            <position x="-1572.1266" y="21.251709" z="-1903.1068" r="1.1161406" zoneId="152" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    
+</MonsterGroups>

@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
+using System.Threading;
 
 namespace PrimalLauncher
 {
@@ -72,7 +73,7 @@ namespace PrimalLauncher
             {
                 {0x00, 0x01},
                 {0x09, (byte)GameAccounts.Count},
-                {0x0a, 0x02},
+                {0x0a, 0x02},//??
                 {0x0b, 0x99},
             });
 
@@ -113,7 +114,7 @@ namespace PrimalLauncher
                         return user;
                     }
                 }
-                catch (Exception e) { Log.Instance.Error("There is a problem with the user file. Please try again."); throw e; }
+                catch  { Log.Instance.Error("There is a problem with the user file. Please try again."); throw; }
             }
             else
             {
@@ -171,6 +172,7 @@ namespace PrimalLauncher
                 };
 
                 Packet characterListPacket = new Packet(characterList);
+                characterListPacket.OutputToFile();               
                 LobbyServer.Instance.Sender.Send(characterListPacket.ToBytes(blowfish));
             }
 
@@ -194,6 +196,7 @@ namespace PrimalLauncher
         public void SendAccountList()
         {
             Packet packet = new Packet(new GamePacket(0x0C, GetAccountListData()));
+            packet.OutputToFile();
             LobbyServer.Instance.Sender.Send(packet.ToBytes(LobbyServer.Instance.Blowfish));
             Log.Instance.Info("Account list sent.");
         }

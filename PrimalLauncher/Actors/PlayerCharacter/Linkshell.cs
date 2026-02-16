@@ -22,34 +22,34 @@ using System.Text;
 namespace PrimalLauncher
 {
     [Serializable]
-    public class Linkshell
+    public class NpcLinkshell
     {
-        public bool[] NpcExtra { get; set; }
-        public bool[] NpcCalling { get; set; }
+        public bool[] Extra { get; set; }
+        public bool[] IsCalling { get; set; }
 
-        public Linkshell()
+        public NpcLinkshell()
         {
-            NpcExtra = new bool[34];
-            NpcCalling = new bool[34];
+            Extra = new bool[34];
+            IsCalling = new bool[34];
         }
 
-        public void NpcAddLinkpearl(int id)
+        public void AddLinkpearl(int id)
         {
-            NpcExtra[id - 1] = true;
-            NpcLinkpearlUpdateWork(id, true, false);
+            Extra[id - 1] = true;
+            LinkpearlUpdateWork(id, true, false);
             World.SendTextSheet(0x621E, new object[] { id });
         }
 
         public void NpcNewMessage(int id)
         {
-            NpcLinkpearlUpdateWork(id, true, true);
+            LinkpearlUpdateWork(id, true, true);
             World.SendTextSheet(0x621F, new object[] { id });
         }
 
-        public void NpcHasMessage(int id) => NpcLinkpearlUpdateWork(id, false, true);
-        public void NpcNoMessage(int id) => NpcLinkpearlUpdateWork(id, true, false);
+        public void HasMessage(int id) => LinkpearlUpdateWork(id, false, true);
+        public void NoMessage(int id) => LinkpearlUpdateWork(id, true, false);
 
-        private void NpcLinkpearlUpdateWork(int id, bool owned, bool calling)
+        private void LinkpearlUpdateWork(int id, bool owned, bool calling)
         {
             WorkProperties work = new WorkProperties(User.Instance.Character.Id, @"playerWork/npcLinkshellChat");
             work.Add(string.Format("playerWork.npcLinkshellChatExtra[{0}]", (id - 1)), owned);
@@ -59,10 +59,10 @@ namespace PrimalLauncher
 
         public void AddToWork(ref WorkProperties work)
         {
-            for (int i = 0; i < NpcExtra.Length; i++)
+            for (int i = 0; i < Extra.Length; i++)
             {
-                work.Add(string.Format("playerWork.npcLinkshellChatCalling[{0}]", i), NpcExtra[i]);
-                work.Add(string.Format("playerWork.npcLinkshellChatExtra[{0}]", i), NpcCalling[i]);
+                work.Add(string.Format("playerWork.npcLinkshellChatCalling[{0}]", i), Extra[i]);
+                work.Add(string.Format("playerWork.npcLinkshellChatExtra[{0}]", i), IsCalling[i]);
             }
         }
 

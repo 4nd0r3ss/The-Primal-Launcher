@@ -115,7 +115,7 @@ namespace PrimalLauncher
 
         public abstract void ServerTransition();
 
-        public static int GetTimeStamp(int addSeconds = 0) => (int)((DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds + addSeconds);
+        public static int GetTimeStamp(float addSeconds = 0) => (int)((DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds + addSeconds);
 
         public static byte[] GetTimeStampHex(int addSeconds = 0) => BitConverter.GetBytes(GetTimeStamp(addSeconds));
 

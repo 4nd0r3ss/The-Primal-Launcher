@@ -21,12 +21,13 @@ using System.Linq;
 namespace PrimalLauncher
 {
     [Serializable]
-    public class Populace : Actor
+    public class PopulaceStandard : Actor
     {
-        public Populace()
+        public PopulaceStandard()
         {
             ClassPath = "/chara/npc/populace/";           
-            ClassCode = 0x30400000;           
+            ClassCode = 0x30400000;
+            ClassName = GetType().Name;
         }
 
         public override void Spawn(ushort spawnType = 0, ushort isZoning = 0, int changingZone = 0)
@@ -47,7 +48,7 @@ namespace PrimalLauncher
             SetEventStatus();
             SetQuestIcon();
             Spawned = true;
-        }               
+        }
 
         public override void Init()
         {
@@ -73,7 +74,7 @@ namespace PrimalLauncher
         {
             if (EventManager.Instance.CurrentEvent.IsQuestion)
             {
-                if (EventManager.Instance.CurrentEvent.Selection[0] == 1)
+                if ((uint?)EventManager.Instance.CurrentEvent.Selection[0] == 1)
                 {
                     World.Instance.TeleportPlayer(EntryPoints.GetInnExit(User.Instance.Character.InitialTown));
                 }
@@ -92,7 +93,7 @@ namespace PrimalLauncher
 
                 EventManager.Instance.CurrentEvent.IsQuestion = true;
                 EventManager.Instance.CurrentEvent.Callback = "defaultTalkWithInn_ExitDoor";
-                EventManager.Instance.CurrentEvent.DelegateEvent(GetTalkCode(regionName), TalkFunctions.FirstOrDefault(x => x.Key == 0).Value, null);
+                EventManager.Instance.CurrentEvent.DelegateEvent(GetTalkCode(regionName), TalkFunctions.FirstOrDefault(x => x.TalkCode == 0).FunctionName, null);
             }
         }
     }

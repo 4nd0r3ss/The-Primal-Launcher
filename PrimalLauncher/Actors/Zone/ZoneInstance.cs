@@ -24,6 +24,7 @@ namespace PrimalLauncher
         public Position StartPoint { get; set; }
         public Position ExitTo { get; set; }
         public uint ZoneId { get; set; }
+        
 
         public ZoneInstance(XmlNode node)
         {
@@ -46,6 +47,10 @@ namespace PrimalLauncher
             ContentFunction = node.GetAttributeAsString("contentFunction");
 
             LoadActors(node.SelectSingleNode("actors"));
+
+            DirectorType = node.GetAttributeAsString("director");
+
+           
         }
 
         private void LoadActors(XmlNode node)
@@ -54,7 +59,7 @@ namespace PrimalLauncher
 
             foreach (XmlNode item in node.ChildNodes)
             {
-                Actor actor = ActorRepository.LoadActor(item, Id);                
+                Actor actor = ActorXmlLoader.LoadActor(item, Id);                
 
                 if (actor != null)
                 {

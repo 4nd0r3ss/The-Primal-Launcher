@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<MonsterGroups>
+    <GroupMonster>
+        <Monster family="Serow" className="SerowFemaleStandard"  zoneId="145">
+            <classId>2100301</classId>
+            <position x="1869.6324" y="148.93416" z="1755.1196" r="0.23257506" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>    
+</MonsterGroups>

@@ -23,14 +23,28 @@ using System.Threading.Tasks;
 namespace PrimalLauncher
 {
     public class Monster : ActorBattle
-    {        
+    {
         public int RespawnDelay { get; set; }
+        public bool IsHostile { get; set; } //determine if monster will attack on sight.
 
         //rewards
-        public int Exp { get; set; }
-        public int Gil { get; set; }
+        //find a better place for this.
+        public int RewardExp { get; set; }
+        public int RewardGil { get; set; }
+        public int[] RewardItems { get; set; }
+        public MonsterGroup Group { get; set; }            
+        public Position SpawnPoint { get; set; }
 
-        public GroupBase Group { get; set; }
+        //from npc base class, only battle npcs will have values.
+        public int PartsName { get; set; } //still not clear what this does. maybe should match the number of parts enabled? always 1 so far.
+        public bool[] PartsExists { get; set; } = new bool[8]; //enables 
+        public int Aggro { get; set; } //it's a byte in lua script but passes an int in function call.
+        public int ParameterIndex { get; set; } //index used to unpack parameter lists. Alsways 0x0A for battle actors, 0 for everything else.
+        
+        //from chara base class
+        public bool EnableBattle { get; set; } //if true, intializes battle stuff for actor
+        public bool GameParameter { get; set; } //enable/disable common parameters sync and work sync
+        public int EventCommonParameter { get; set; } //this is present but its always 0 and never used. It's passed as a param to NpcBaseClass.initForEventCommon
 
         public Monster()
         {
@@ -41,13 +55,22 @@ namespace PrimalLauncher
             Speeds.Walking = ActorSpeed.Walking;
             Speeds.Running = ActorSpeed.Running;
             CharaWork.AddProperties(new byte[] { 0, 1, 2, 3 });
-            Exp = 49;            
+            RewardExp = 49;
+
+            //from base npc
+            PartsName = 1;
+            PartsExists[0] = true;
+            //from base chara
+            EnableBattle = true;
+            GameParameter = true;
+
+            SpawnPoint = Position;
         }
 
         public override void Prepare()
-        {           
+        {
             string actorName = GenerateName();
-            actorName = actorName.Substring(0, actorName.IndexOf("_") - 1) + actorName.Substring(actorName.IndexOf("_")); //dirty way of removing extra character...
+            actorName = actorName.Substring(0, actorName.IndexOf("_") - 1) + actorName.Substring(actorName.IndexOf("_")); //dirty way of removing extra character...           
 
             LuaParameters = new LuaParameters
             {
@@ -55,7 +78,7 @@ namespace PrimalLauncher
                 ClassName = ClassName,
                 ClassCode = ClassCode
             };
-            
+
             LuaParameters.AddRange(new object[]{
                 ClassPath + (!string.IsNullOrEmpty(Family) ? Family + "/" : "") + ClassName,
                 false,
@@ -64,25 +87,18 @@ namespace PrimalLauncher
                 false,
                 false,
                 (int)ClassId,
-                true,
-                true,
+                GameParameter,
+                EnableBattle,
                 (int)0x0A,
-                (int)0,
-                (int)0x01,
-                true,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                (int)0
-            });           
+                Aggro,
+                PartsName,
+                PartsExists,
+                EventCommonParameter
+            });
         }
 
         public override void Spawn(ushort spawnType = 0, ushort isZoning = 0, int changingZone = 0)
-        {           
+        {            
             Prepare();
             CreateActor(0x08);
             SetEventConditions();
@@ -99,80 +115,83 @@ namespace PrimalLauncher
             Init();
             SetEventStatus();
             Spawned = true;
-            CurrentTargetId = 0;
+            TargetId = 0;
         }
 
-               
 
-        //public override void AutoAttack()
-        //{
-        //    //if actor is close enough to target, attack.
-        //    if(CurrentTargetId > 0 && GetTargetDistance() <= CharaWork.CurrentJob.AutoAttackMaxDistance)
-        //    {
-        //        ActorBattle target = (ActorBattle)GetCurrentZone().GetActorById(CurrentTargetId);
 
-        //        if (target != null && !target.IsDead() && !IsDead())
-        //        {
-        //            short damageDealt = 10;
+        public override void AutoAttack()
+        {
+            //if actor is close enough to target, attack.
+            if (TargetId > 0 && GetTargetDistance() <= CharaWork.CurrentJob.AutoAttackMaxDistance)
+            {
+                ActorBattle target = (ActorBattle)GetCurrentZone().GetActorById(TargetId);
 
-        //            //0x08000608 - normal hit
-        //            //0x0800060C - strong hit
-        //            //0x0800060F - critical hit (shows word critical)
-        //            //0x0800064C - target has protect
+                if (target != null && !target.IsDead() && !IsDead())
+                {
+                    short damageDealt = 10;
 
-        //            CommandResult cr = new CommandResult
-        //            {
-        //                TargetId = target.Id,
-        //                Amount = damageDealt, //damage
-        //                TextId = 0x765D,
-        //                EffectId = 0x08000604,
-        //                Direction = 1,
-        //                HitSequence = 1
-        //            };
+                    //0x08000608 - normal hit
+                    //0x0800060C - strong hit
+                    //0x0800060F - critical hit (shows word critical)
+                    //0x0800064C - target has protect
 
-        //            SendCommandResult((Command)0x59DD, new List<CommandResult> { cr }, 0x11001000, senderId: Id);
-        //            Thread.Sleep(500);//added this here to wait for attack animation to finish before applying damage.
-        //            AddTp(100);
-        //            target.TakeDamage(this, damageDealt);                    
-        //        }
-        //        else
-        //        {
-        //            Disengage();
-        //        }
-        //    }
-        //    else
-        //    {
-        //        //need to check if actor is caster, is yes, can keep distance.
-        //        if(!(this is PlayerCharacter)
+                    CommandResult cr = new CommandResult
+                    {
+                        TargetId = target.Id,
+                        TotalPoints = damageDealt, //damage
+                        TextSheetId = 0x765D,
+                        EffectId = EffectId.HitNormal,
+                        HitPosition = 1,
+                        HitSequence = 1
+                    };
 
-        //    }
-        //}
+                    SendCommandResult((Command)0x59DD, new List<CommandResult> { cr }, 0x11001000, senderId: Id);
+                    Thread.Sleep(500);//added this here to wait for attack animation to finish before applying damage.
+                    AddTp(200);
+                    target.TakeDamage(this, damageDealt);
+                }
+                else
+                {
+                    Disengage();
+                }
+            }
+            else
+            {
+                //need to check if actor is caster, is yes, can keep distance.
+                //if (!(this is PlayerCharacter)
+
+            }
+        }
 
         public override void Die()
         {
             Thread.Sleep(500);
             SetSubState();
             State.Main = MainState.Dead2;
-            SetMainState();           
+            SetMainState();
             SetEnmity(-1);
 
             //this command result makes monster die instantly after killing blow.
             List<CommandResult> commandresults = new List<CommandResult>
             {
-                new CommandResult(Id, 0, 0, 0x08080604, 1, 1), //die animation
+                new CommandResult(Id, 0, 0, (EffectId)0x08080604, 1, 1), //die animation
                 new CommandResult(Id, 0, 0x75A4, 0, 0, 1), //enemy defeated message                
             };
 
             SendCommandResult(0, commandresults, 0x7C000062/*, senderId: attacker*/);
-            Disengage();
+            Disengage();           
 
-            if (RespawnDelay > 0) RespawnCountdown();
+            if (RespawnDelay > 0) Respawn();
         }
 
         public override void Engage(uint attacker)
         {
-            CurrentTargetId = attacker;
+            TargetId = attacker;
             IsEngaged = true;
+
+            if(Group != null)
+                Group.Send();
 
             SetHeadToAttacker();
             ToggleStance(Command.BattleStance);
@@ -182,30 +201,37 @@ namespace PrimalLauncher
 
         public override void Disengage()
         {
-            CurrentTargetId = 0;
+            //ToggleStance(Command.NormalStance);
+            TargetId = 0;
             IsEngaged = false;
         }
 
-        public void RespawnCountdown()
+        public void Respawn()
         {
-            Task.Run(() =>
+            if(RespawnDelay > 0)
             {
-                Thread.Sleep(RespawnDelay * 1000);
-                CharaWork.CurrentJob.Hp = 100;
-                Despawn();
-                State.Main = MainState.Passive;
-                Spawn();
-                return;
-            });
-        }        
+                Task.Run(() =>
+                {
+                    Thread.Sleep(RespawnDelay * 1000);
+                    CharaWork.CurrentClass.Hp = CharaWork.CurrentClass.MaxHp;
+                    CharaWork.CurrentClass.Mp = CharaWork.CurrentClass.MaxMp;
+                    Despawn();
+                    State.Main = MainState.Passive;
+                    Position = SpawnPoint.Clone();
+                    Spawn();
+                    return;
+                });
+            }
+            
+        }
 
         private void SetHeadToAttacker()
         {
             byte[] data = new byte[0x08];
-            Buffer.BlockCopy(BitConverter.GetBytes(CurrentTargetId), 0, data, 0, 4);
+            Buffer.BlockCopy(BitConverter.GetBytes(TargetId), 0, data, 0, 4);
             Buffer.BlockCopy(BitConverter.GetBytes(0x3F800000), 0, data, 0x04, 4); //0x3F800000 always the same number so far
             Packet.Send(ServerOpcode.SetHeadToActor, data, Id);
-        }        
+        }
 
         private void CastAbility(short id)
         {
@@ -218,15 +244,19 @@ namespace PrimalLauncher
                 Thread.Sleep(3000);
                 SubState.Chant = 0xF0;
                 SetSubState();
-                SendCommandResult((Command)id, new List<CommandResult> { new CommandResult(CurrentTargetId, 0, 0x75AE, 1, 0, 1) }, 0x6F00000B);
+                SendCommandResult((Command)id, new List<CommandResult> { new CommandResult(TargetId, 0, 0x75AE, EffectId.Default, 0, 1) }, 0x6F00000B);
                 Thread.Sleep(2000);
                 SubState.Chant = 0;
                 SetSubState();
-                SendCommandResult((Command)id, new List<CommandResult> { new CommandResult(CurrentTargetId, 0x31, 0x765D, 0x08001E0C, 0, 1) }, 0x21003000);
+                SendCommandResult((Command)id, new List<CommandResult> { new CommandResult(TargetId, 0x31, 0x765D, (EffectId)0x08001E0C, 0, 1) }, 0x21003000);
             });
-            
+
         }
 
-        
+        public Dictionary<uint, int> GetLoot()
+        {
+            //itemId, quantity
+            return new Dictionary<uint, int> { };
+        }
     }
 }

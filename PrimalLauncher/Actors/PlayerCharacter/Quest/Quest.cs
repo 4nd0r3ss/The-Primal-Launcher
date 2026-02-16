@@ -242,7 +242,7 @@ namespace PrimalLauncher
             {
                 foreach(XmlNode actorNode in actorsNode.ChildNodes)
                 {
-                    actors.Add(ActorRepository.CreateActorObj(actorNode));
+                    actors.Add(ActorXmlLoader.CreateActorObj(actorNode));
                 }
             }          
 
@@ -258,7 +258,7 @@ namespace PrimalLauncher
             {
                 foreach (XmlNode node in actorsNode.ChildNodes)
                 {
-                    result.Add(ActorRepository.CreateActorObj(node));
+                    result.Add(ActorXmlLoader.CreateActorObj(node));
                 }
             }
 

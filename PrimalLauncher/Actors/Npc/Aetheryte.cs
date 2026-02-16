@@ -188,11 +188,14 @@ namespace PrimalLauncher
 
             if (EventManager.Instance.CurrentEvent.IsQuestion)
             {
-                EventManager.Instance.CurrentEvent.GetQuestionSelection();
-                uint? selection = EventManager.Instance.CurrentEvent.Selection[0];
+                EventManager.Instance.CurrentEvent.GetQuestionSelection();                
 
-                if (selection.HasValue)
+                //check if it HAS a selection
+                if (EventManager.Instance.CurrentEvent.Selection != null && EventManager.Instance.CurrentEvent.Selection.Length > 0)
                 {
+
+                    uint? selection = (uint?)EventManager.Instance.CurrentEvent.Selection[0];
+
                     switch (selection)
                     {
                         case 0xFFFFFFFD:
@@ -204,6 +207,9 @@ namespace PrimalLauncher
                         case 0xFFFFFFFF:
                             InitiateLeve();
                             break;
+                        case null: //when you click 'leave' on the menu, the selection value is null.
+                            EventManager.Instance.CurrentEvent.Finish();
+                            break;
                         default:
                             TeleportToNode((uint)selection);
                             break;
@@ -211,7 +217,7 @@ namespace PrimalLauncher
                 }
                 else
                 {
-                    EventManager.Instance.CurrentEvent.Finish();
+                    EventManager.Instance.CurrentEvent.Finish(); //if no selection has been found, we finish the event.
                 }                
             }
             else

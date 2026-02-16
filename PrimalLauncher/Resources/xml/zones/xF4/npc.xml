@@ -35,30 +35,30 @@
       </events>
     </Object>
     
-    <Populace className="PopulaceCutScenePlayer">
+    <PopulaceStandard className="PopulaceCutScenePlayer">
       <classId>1080120</classId>
       <position x="159.84" y="0.7" z="167.17" r="-0.2" />
       <events>
         <talkDefault priority="1" enabled="1" />
         <noticeEvent priority="1" enabled="1" />
       </events>
-    </Populace>
-    <Populace className="PopulaceCutScenePlayer">
+    </PopulaceStandard>
+    <PopulaceStandard className="PopulaceCutScenePlayer">
       <classId>1080120</classId>
       <position x="-4" y="0.7" z="-0.03" r="0" />
       <events>
         <talkDefault priority="1" enabled="1" />
         <noticeEvent priority="1" enabled="1" />
       </events>
-    </Populace>
-    <Populace className="PopulaceCutScenePlayer">
+    </PopulaceStandard>
+    <PopulaceStandard className="PopulaceCutScenePlayer">
       <classId>1080120</classId>
       <position x="-161.5" y="0.7" z="-152.8" r="0" />
       <events>
         <talkDefault priority="1" enabled="1" />
         <noticeEvent priority="1" enabled="1" />
       </events>
-    </Populace>
+    </PopulaceStandard>
     
     <Object className="ObjectItemStorage">
       <classId>1200376</classId>
@@ -85,27 +85,27 @@
       </events>
     </Object>
     
-    <Populace className="PopulaceStandard">
+    <PopulaceStandard>
       <classId>1200335</classId>
       <position x="159.98" y="0.02" z="151.9" r="-0.44" />
       <talkFunctions>
         <function name="defaultTalkWithInn_ExitDoor" />
       </talkFunctions>
-    </Populace>   
-    <Populace className="PopulaceStandard">
+    </PopulaceStandard>   
+    <PopulaceStandard>
       <classId>1200336</classId>
       <position x="-0.02" y="0.02" z="-8.6" r="0" />
       <talkFunctions>
         <function name="defaultTalkWithInn_ExitDoor" />
       </talkFunctions>
-    </Populace>
-    <Populace className="PopulaceStandard">
+    </PopulaceStandard>
+    <PopulaceStandard>
       <classId>1200334</classId>
       <position x="-160.02" y="0.02" z="-168.4" r="0" />
       <talkFunctions>
         <function name="defaultTalkWithInn_ExitDoor" />
       </talkFunctions>
-    </Populace>
+    </PopulaceStandard>
     
     <Object className="ObjectInnDoor">
       <classId>1090548</classId>

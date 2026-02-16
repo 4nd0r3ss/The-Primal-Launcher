@@ -71,52 +71,57 @@ namespace PrimalLauncher
                 blowfish.Encipher(result, 0, result.Length);
 
             return result;
-        }  
-        
-        public string Stringify(bool isFromClient, uint sourceActor, uint targetActor)
+        }
+
+        public string Stringify(bool isFromClient, uint sourceId, uint targetId)
         {
             string result = "";
             int bytecount = 0;
             string byteString = "";
-            string charString = " ";            
+            string charString = " ";
 
-            if (
-                //data[0] == 0x14 &&
-                !(Opcode == 0x0ca && isFromClient) &&
-                Opcode != 0x01 &&
-                Opcode != 0xcf
-            //opcode != 0x018d &&
-            //opcode != 0x14b
-            )
+            int opcode = Opcode;
+
+            if (Data != null)
             {
-                result += "\r\nSource: " + (isFromClient ? "Client" : "Server") + "\r\n";
-                result += "0x" + sourceActor.ToString("X4") + " -> " + "0x" + targetActor.ToString("X4") + "\r\n";
-                result += "Timestamp: 0x" + Convert.ToInt32(TimeStamp).ToString("X4") + "\r\n";
-                result += GetOpcodeName(isFromClient);
-
-                int index = 0;
-
-                for (int i = index; i < Data.Length; i++)
+                if (
+               //data[0] == 0x14 &&
+               !(opcode == 0x0ca && isFromClient) &&
+               opcode != 0x01 &&
+               opcode != 0xcf
+           //opcode != 0x018d &&
+           //opcode != 0x14b
+           )
                 {
-                    byteString += Data[i].ToString("X2") + " ";
-                    char a = Convert.ToChar(Data[i]);
-                    a = (char.IsControl(a) || char.IsSeparator(a)) ? '.' : a;
-                    charString += a;
-                    if (bytecount == 0x0f)
+                    result += "\r\nSource: " + (isFromClient ? "Client" : "Server") + "\r\n";
+                    result += "0x" + sourceId.ToString("X4") + " -> " + "0x" + targetId.ToString("X4") + "\r\n";
+                    result += "Timestamp: " + DateTime.Now.ToString("dd-MM-yyyy hh:mm:ss.fff") + "\r\n";
+                    result += GetOpcodeName(isFromClient);
+
+                    int index = 0;
+
+                    for (int i = index; i < Data.Length; i++)
                     {
-                        result += byteString + charString + "\r\n";
-                        byteString = "";
-                        charString = " ";
-                        bytecount = -1;
+                        byteString += Data[i].ToString("X2") + " ";
+                        char a = Convert.ToChar(Data[i]);
+                        a = (char.IsControl(a) || char.IsSeparator(a)) ? '.' : a;
+                        charString += a;
+                        if (bytecount == 0x0f)
+                        {
+                            result += byteString + charString + "\r\n";
+                            byteString = "";
+                            charString = " ";
+                            bytecount = -1;
+                        }
+
+                        bytecount++;
                     }
 
-                    bytecount++;
-                }
-
-                if (byteString != "")
-                {
-                    while (byteString.Length < 0x10 * 3) byteString += "  ";
-                    result += byteString + charString + "\r\n";
+                    if (byteString != "")
+                    {
+                        while (byteString.Length < 0x10 * 3) byteString += "  ";
+                        result += byteString + charString + "\r\n";
+                    }
                 }
             }
 
@@ -126,19 +131,21 @@ namespace PrimalLauncher
         public string GetOpcodeName(bool isFromClient)
         {
             string result = "UNKNOWN";
+            int opcode = Opcode;
             var enumType = isFromClient ? typeof(ClientOpcode) : typeof(ServerOpcode);
-            bool opcodeExists = Enum.IsDefined(enumType, (int)Opcode);
+            bool opcodeExists = Enum.IsDefined(enumType, (int)opcode);
 
             if (opcodeExists)
             {
-                result = "0x" + Opcode.ToString("X3") + " - " + Enum.GetName(enumType, (int)Opcode) + "\r\n";
+                result = "0x" + opcode.ToString("X3") + " - " + Enum.GetName(enumType, (int)opcode) + "\r\n";
             }
             else
             {
-                result = "0x" + Opcode.ToString("X3") + " - " + result + "\r\n";
+                result = "0x" + opcode.ToString("X3") + " - " + result + "\r\n";
             }
 
             return result;
         }
+
     }
 }

@@ -20,8 +20,10 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Data;
 using System.IO;
-using System.Text;
 using System.Linq;
+using System.Numerics;
+using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -31,6 +33,7 @@ namespace PrimalLauncher
     public class PlayerCharacter : ActorBattle
     {
         public byte WorldId { get; set; }       
+        private int CurrentTitle { get; set; }
 
         #region Background
         public byte Tribe { get; set; }
@@ -67,16 +70,14 @@ namespace PrimalLauncher
 
         public Inventory Inventory { get; set; }
         public Journal Journal { get; set; }
-        public Linkshell Linkshell { get; set; }
-        public List<GroupBase> Groups { get; set; } = new List<GroupBase>();
-        public GroupRetainer RetainerGroup { get; set; }
-        public GroupParty PartyGroup { get; set; }
-        public Queue<byte[]> PacketQueue { get; set; }
+        public NpcLinkshell Linkshell { get; set; }
+        public List<GroupBase> Groups { get; set; } //= new List<GroupBase>();       
+        public Achievements Achievements { get; set; }
+
+        public override GroupBase BattleGroup { get => GetPartyGroup(); }
 
         public void Setup(byte[] data)
-        {
-            //Character ID
-            Id = NewId();
+        {            
             ClassPath = "/Chara/Player/Player_work";
             State.Type = MainStateType.Player;
 
@@ -120,13 +121,14 @@ namespace PrimalLauncher
 
             //Starting class
             CharaWork.CurrentClassId = data[0x2a];
-            CharaWork.CurrentJob.Level = 1; //having a class level > 0 makes it active.
-            CharaWork.CurrentJob.IsCurrent = true; //current class the player will start with.                        
+            CharaWork.CurrentClass.Level = 1; //having a class level > 0 makes it active.
+            CharaWork.CurrentClass.IsCurrent = true; //current class the player will start with.                        
             LoadInitialEquipment();
 
             //work
             Journal = new Journal(InitialTown);
-            Linkshell = new Linkshell();            
+            Linkshell = new NpcLinkshell();     
+            Achievements = new Achievements();
             
             //travel
             Anima = 100;
@@ -137,6 +139,11 @@ namespace PrimalLauncher
 
             //battle
             AutoAttackDelay = 4 * 1000; //4 seconds delay
+
+            //add fixed groups
+            Groups = new List<GroupBase>();
+            Groups.Add(new PartyGroup());
+            Groups.Add(new RetainerGroup());            
         }
 
         public void UpdatePlayTime()
@@ -153,6 +160,7 @@ namespace PrimalLauncher
 
         public override void Prepare(){}
 
+        //put this on job class
         private void LoadInitialEquipment()
         {
             int equipmentSetNumber = (Tribe * 100) + CharaWork.CurrentClassId;
@@ -164,30 +172,7 @@ namespace PrimalLauncher
             Appearance.SetToSlots(itemGraphicIds, underShirtId, underGarmentId);
             Inventory = new Inventory();
             Inventory.AddDefaultItems(itemGraphicIds, underShirtId, underGarmentId);
-        }
-
-        private void CommandSequence()
-        {
-            List<KeyValuePair<uint, string>> commands = new List<KeyValuePair<uint, string>>
-            {
-                new KeyValuePair<uint, string>(0x0b, "commandForced"),
-                new KeyValuePair<uint, string>(0x0a, "commandDefault"),
-                new KeyValuePair<uint, string>(0x06, "commandWeak"),
-                new KeyValuePair<uint, string>(0x04, "commandContent"),
-                new KeyValuePair<uint, string>(0x06, "commandJudgeMode"),
-                new KeyValuePair<uint, string>(0x100, "commandRequest"),
-                new KeyValuePair<uint, string>(0x100, "widgetCreate"),
-                new KeyValuePair<uint, string>(0x100, "macroRequest"),
-            };
-
-            foreach (var command in commands)
-            {
-                byte[] data = new byte[0x28];
-                data.Write(0, command.Key);
-                data.Write(0x02, command.Value);
-                Packet.Send(ServerOpcode.PlayerCommand, data);
-            }
-        }
+        }        
 
         public void SetUnendingJourney()
         {
@@ -229,23 +214,21 @@ namespace PrimalLauncher
 
         public void Spawn(ushort spawnType = 0x01, ushort isZoning = 0)
         {
-            PacketQueue = null;
+            SubState.Chant = 0;
+
+            CharaWork.PacketQueue = null;
             State.Main = MainState.Passive;
-            SpawnDistance = 50;
+            SpawnDistance = 40;
             //Icon = 0x00_02_00_00;
-            CurrentTargetId = 0;
-            CharaWork.CurrentJob.Tp = 0;
-            CharaWork.CurrentJob.Hp = 300;
-
-            //remove later
-            if (CharaWork == null)
-                CharaWork = new CharaWork();
-
+            TargetId = 0;
+            CharaWork.CurrentClass.Tp = 0;
+            CharaWork.CurrentClass.Hp = CharaWork.CurrentClass.MaxHp;
+                   
             //in case the player quit the game while monted.
             Speeds.SetUnmounted();
             Journal.InitializeQuests();
             CreateActor(0x08);
-            CommandSequence();
+            CharaWork.CommandSequence();
             SetSpeeds();
             GetPosition(spawnType, isZoning);
             SetAppearance();
@@ -256,15 +239,12 @@ namespace PrimalLauncher
             SetAllStatus();
             SetIcon();
             SetIsZoning();
-
             SetGrandCompany();
-            SetTitle();
+            SendTitle();
             SendCurrentJob();
-            SpecialEventWork();
+            SendSpecialEventWork();
             SetMounts();
-            AchievementPoints();
-            AchievementsLatest();
-            AchievementsCompleted();
+            Achievements.Send();
             LoadLuaParameters();
             SetLuaScript();           
             Inventory.Send();
@@ -294,9 +274,17 @@ namespace PrimalLauncher
             Packet.Send(ServerOpcode.SetGrandCompany, new byte[] { 0x03, 0x7f, 0x7f, 0x0b, 0x00, 0x00, 0x00, 0x00 });
         }
 
-        public void SetTitle()
+        public void SetTitle(byte[] data)
         {
-            Packet.Send(ServerOpcode.SetTitle, new byte[] { 0x8f, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
+            CurrentTitle = data.GetInt32(0x10);
+            SendTitle();
+        }
+
+        public void SendTitle()
+        {
+            byte[] data = new byte[0x08];
+            data.Write(0, CurrentTitle);
+            Packet.Send(ServerOpcode.SetTitle, data);
         }
 
         public void SetMounts()
@@ -317,15 +305,6 @@ namespace PrimalLauncher
         public static void Logout() => Packet.Send(ServerOpcode.Logout, new byte[0x08]);
 
         public static void ExitGame() => Packet.Send(ServerOpcode.ExitGame, new byte[0x08]);
-
-        public void InitializeOpening()
-        {
-            if (TotalPlaytime == 0)
-            {                
-                GetCurrentZone().Directors.Add(new OpeningDirector());                
-                GetCurrentZone().NpcFile = "opening.npc.xml";
-            }            
-        }   
 
         public void LoadLuaParameters(uint director = 0)
         {
@@ -368,244 +347,46 @@ namespace PrimalLauncher
         #region Group Methods
         public void GetGroups()
         {
-            if(PartyGroup == null)
-                PartyGroup = new GroupParty();
-
-            if(RetainerGroup == null)
-                RetainerGroup = new GroupRetainer();            
-
-            PartyGroup.SendPackets();
-            RetainerGroup.SendPackets();
-            ActiveLinkshell();
+            foreach (var group in Groups)
+            {
+                group.SendPackets();
+            }     
         }
 
-        
-
-        
-        #endregion
-
-        public void ActiveLinkshell()
+        public PartyGroup GetPartyGroup()
         {
-            byte[] data = new byte[0x78];
-
-            Buffer.BlockCopy(BitConverter.GetBytes(0x4e22), 0, data, 0x40, sizeof(ushort));           
-
-            Packet.Send(ServerOpcode.ActiveLinkshell, data);
+            return (PartyGroup)Groups.SingleOrDefault(x => x is PartyGroup);
         }
+        
+        #endregion      
 
-        private void SpecialEventWork()
+        private void SendSpecialEventWork()
         {
             byte[] data = new byte[0x18];
             data[0x02] = 0x12;
             Packet.Send(ServerOpcode.SetSpecialEventWork, data);
         }
-
-        #region Achievement Methods
-        private void AchievementPoints()
-        {
-            byte[] data = new byte[0x08];
-            Packet.Send(ServerOpcode.AchievementPoints, data);
-        }
-
-        private void AchievementsLatest()
-        {
-            byte[] data = new byte[0x20];
-            Packet.Send(ServerOpcode.AchievementsLatest, data);
-        }
-
-        private void AchievementsCompleted()
-        {
-            byte[] data = new byte[0x80];
-            Packet.Send(ServerOpcode.AchievementsCompeted, data);
-        }
-        #endregion
-
-        #region Work Methods
+       
         public void Work()
         {
-            WorkProperties property = new WorkProperties(Id, @"/_init");           
+            WorkProperties property = new WorkProperties(Id, @"/_init", true);            
 
-            property.Add("charaWork.eventSave.bazaarTax", (byte)5);
-            property.Add("charaWork.evsureentSave.bazaar", true);
-            property.Add("charaWork.battleSave.potencial", 6.6f);
-
-            for (int i = 0; i < 32; i++)
-                if (i < 5 && i != 3) property.Add(string.Format("charaWork.property[{0}]", i), (byte)1);
-                       
-            CharaWork.AddWorkClassParameters(ref property);
-            CharaWork.AddStatusShownTime(ref property);
-            CharaWork.AddGeneralParameters(ref property);
-
-            property.Add("charaWork.battleTemp.castGauge_speed[0]", 1.0f);
-            property.Add("charaWork.battleTemp.castGauge_speed[1]", 0.25f);
-            property.Add("charaWork.commandBorder", CharaWork.CommandBorder);
-            property.Add("charaWork.battleSave.negotiationFlag[0]", true);
-
-            CharaWork.AddWorkCommands(ref property);               
-
-            for (int i = 0; i < 64; i++)
-                property.Add(string.Format("charaWork.commandCategory[{0}]", i), (byte)1);
-
-            //for (int i = 0; i < 4096; i++)
-                property.Add(string.Format("charaWork.commandAcquired[{0}]", 1150), true);
-
-            //job abilities
-            for (int i = 0; i < 36; i++)
-                property.Add(string.Format("charaWork.additionalCommandAcquired[{0}]", i), true);
-
-            for (int i = 0; i < 40; i++)
-                property.Add(string.Format("charaWork.parameterSave.commandSlot_compatibility[{0}]", i), true);
-
-            CharaWork.AddWorkSystem(ref property);
-
+            CharaWork.AddToWork(ref property);
             Journal.AddToWork(ref property);            
-            Linkshell.AddToWork(ref property);
-
-            property.Add("playerWork.restBonusExpRate", 0f);
-            AddWorkCharacterBackground(ref property);            
-
+            Linkshell.AddToWork(ref property);            
+            AddPlayerWork(ref property);
             property.FinishWritingAndSend();
         }
 
-        private void AddWorkCharacterBackground(ref WorkProperties property)
-        {           
+        private void AddPlayerWork(ref WorkProperties property)
+        {
+            property.Add("playerWork.restBonusExpRate", 0f);
             property.Add("playerWork.tribe", Tribe);
             property.Add("playerWork.guardian", Guardian);
             property.Add("playerWork.birthdayMonth", BirthMonth);
             property.Add("playerWork.birthdayDay", BirthDay);
             property.Add("playerWork.initialTown", (byte)InitialTown);
-        }
-        #endregion Work Methods
-
-        #region Exp & Level Methods
-        public void UpdateExp()
-        {
-            WorkProperties prop = new WorkProperties(Id, "charaWork/battleStateForSelf");
-            prop.Add("charaWork.battleSave.skillPoint[" + (CharaWork.CurrentClassId - 1) + "]", (int)CharaWork.CurrentJob.TotalExp);
-            prop.FinishWritingAndSend();
-        }
-
-        public byte[] ClassExp()
-        {
-            if (PacketQueue == null || PacketQueue.Count == 0)
-            {
-                Inventory.Update();
-
-                Queue<short> jobLevel = new Queue<short>();
-                Queue<short> jobLevelCap = new Queue<short>();
-                int count = 0;
-
-                foreach (var item in CharaWork.Jobs)
-                {
-                    count++;
-                    if (count > 52)
-                        break;
-                    Job job = item.Value;
-                    jobLevel.Enqueue(job.Level);
-                    jobLevelCap.Enqueue(job.LevelCap);
-                }
-
-                WorkProperties property = new WorkProperties(Id, @"charaWork/exp");
-                property.Add("charaWork.battleSave.skillLevel", jobLevel);
-                property.Add("charaWork.battleSave.skillLevelCap", jobLevelCap, true);
-                PacketQueue = property.PacketQueue;
-            }
-
-            return PacketQueue.Dequeue();
-        }
-        
-        public void AddExp(int exp)
-        {
-            //we want to add exp only if level is below cap.
-            if (CharaWork.CurrentJob.Level < CharaWork.CurrentJob.LevelCap)
-            {
-                //add exp bonus multiplier TODO:put multiplier definition somewhere else (add as an option in UI?)
-                float expBonus = 1.2f;
-                CharaWork.CurrentJob.TotalExp += Convert.ToInt64(exp * expBonus);
-
-                //send add exp command result
-                SendCommandResult(0, new List<CommandResult> {
-                    new CommandResult
-                    {
-                        TargetId = Id,
-                        Amount = (short)(exp * expBonus),
-                        TextId = 33934,
-                        Direction = (byte)(expBonus > 1 ? ((expBonus -1) * 100) : 0)
-                    }
-                });
-
-                //calculate leveling
-                long totalExp = CharaWork.CurrentJob.TotalExp;
-                short currentLevel = CharaWork.CurrentJob.Level;
-                short levelsToUp = 0;
-
-                while (totalExp >= Job.ExpTable[currentLevel])
-                {
-                    totalExp -= Job.ExpTable[currentLevel];
-                    levelsToUp++;
-                }
-
-                if (levelsToUp > 0)
-                {
-                    CharaWork.CurrentJob.TotalExp = (currentLevel + levelsToUp) >= CharaWork.CurrentJob.LevelCap ? 0 : totalExp;
-                    LevelUp(levelsToUp);
-                }
-
-                //refresh exp values in game client UI.
-                UpdateExp();
-            }
-        }
-
-        private void LevelUp(short numLevels)
-        {
-            CharaWork.CurrentJob.Level += numLevels;
-
-            SendCommandResult(0, new List<CommandResult> {
-                new CommandResult
-                {
-                    TargetId = Id,
-                    Amount = CharaWork.CurrentJob.Level,
-                    TextId = 33909
-                }
-            });
-
-            UpdateLevel();
-            World.Instance.SetMusic(0x52, MusicMode.Layer);
-            Journal.InitializeQuests();
-        }
-
-        public void LevelDown(short toLevel)
-        {
-            if (toLevel > 0)
-            {
-                CharaWork.CurrentJob.Level = toLevel;
-                CharaWork.CurrentJob.TotalExp = 0;
-                UpdateLevel();
-                UpdateExp();
-            }
-        }
-
-        private void UpdateLevel()
-        {
-            WorkProperties property = new WorkProperties(Id, @"charaWork/stateForAll");
-            property.Add("charaWork.battleSave.skillLevel[" + (CharaWork.CurrentClassId - 1) + "]", CharaWork.CurrentJob.Level);
-            property.Add("charaWork.parameterSave.state_mainSkillLevel", CharaWork.CurrentJob.Level);
-            property.FinishWritingAndSend();
-        }
-
-        public int GetCurrentLevel()
-        {
-            return CharaWork.CurrentJob.Level;
-        }
-        #endregion
-
-        private void UpdateClass()
-        {
-            WorkProperties property = new WorkProperties(Id, @"charaWork/stateForAll");
-            property.Add("charaWork.parameterSave.state_mainSkill[0]", CharaWork.CurrentClassId);
-            property.Add("charaWork.parameterSave.state_mainSkillLevel", CharaWork.CurrentJob);
-            property.FinishWritingAndSend();
-        }
+        }        
 
         public void ToggleZoneActors()
         {
@@ -688,8 +469,8 @@ namespace PrimalLauncher
 
             //TODO: send command answer - this should probably be in event manager.
             data = new byte[0x28];
-            Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, data, 0, 4);
-            Buffer.BlockCopy(BitConverter.GetBytes(0x7c000062), 0, data, 0x4, 4);
+            data.Write(0, Id);
+            data.Write(0x4, 0x7c000062);           
             data[0x27] = 0x08; //8 animation slots to be played in sequence?
             Packet.Send(ServerOpcode.CommandResult, data);      
 
@@ -701,38 +482,27 @@ namespace PrimalLauncher
 
             //TODO: command result - this should probably be in event manager.
             data = new byte[0x38];
-            Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, data, 0, 4);
-            Buffer.BlockCopy(BitConverter.GetBytes(0x7c000062), 0, data, 0x4, 4);
-            Buffer.BlockCopy(BitConverter.GetBytes((uint)1), 0, data, 0x20, 4);
-            Buffer.BlockCopy(BitConverter.GetBytes((ushort)command), 0, data, 0x24, 2);
-            Buffer.BlockCopy(BitConverter.GetBytes((ushort)0x810), 0, data, 0x26, 2); //unknown
-            Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, data, 0x28, 4);
+            data.Write(0, Id);
+            data.Write(0x4, 0x7c000062);
+            data.Write(0x20, (uint)1);
+            data.Write(0x24, (ushort)command);
+            data.Write(0x26, (ushort)0x810);
+            data.Write(0x28, Id);
             data[0x30] = 1;
             data[0x36] = 1;
             Packet.Send(ServerOpcode.CommandResultX1, data);
         }
              
-        private byte GetClassJob()
+        public void AddLoot(Dictionary<uint, int> rewardList)
         {
-            byte jobIndex = 13;
 
-            if (CharaWork.CurrentClassId == 7 || CharaWork.CurrentClassId == 8)
-                jobIndex = 11;
-            else if (CharaWork.CurrentClassId == 22 || CharaWork.CurrentClassId == 23)
-                jobIndex = 4;
-
-            return (byte)(CharaWork.CurrentClassId + jobIndex);
         }
 
         public void EquipSoulStone(byte[] data)
         {
-            int classJob;
-
-            if (CharaWork.CurrentJob.Id == 0)
+            if (!CharaWork.CurrentClass.IsSoulStoneEquippped)
             {
-                CharaWork.CurrentJob.Id = GetClassJob();
-                SendCurrentJob();
-                PlayAnimationEffect(Job.AnimationEffectId(CharaWork.CurrentJob.Id));
+                CharaWork.CurrentClass.IsSoulStoneEquippped = true;                
 
                 //SetSubState(0x0c);
                 SetSpeeds();
@@ -743,51 +513,53 @@ namespace PrimalLauncher
                     new CommandResult
                     {
                         TargetId = Id,
-                        EffectId = 1,
+                        EffectId = EffectId.Default,
                         HitSequence = 1
                     }
-                }, 0x7c000062);
-
-                classJob = CharaWork.CurrentJob.Id;
+                }, 0x7c000062);               
             }
             else
             {
-                CharaWork.CurrentJob.Id = 0;
-                SendCurrentJob();
-                PlayAnimationEffect(AnimationEffect.ChangeClass);
-                classJob = CharaWork.CurrentClassId;
+                CharaWork.CurrentClass.IsSoulStoneEquippped = false;                          
             }
-
-            World.SendTextSheet(0x7597, new object[] { 0, 0, User.Instance.Character.Id, classJob }, User.Instance.Character.Id);
-            UpdateLevel();
-            UpdateClass();
-            UpdateExp();
+            
+            SendCurrentJob();
+            PlayAnimationEffect(Job.AnimationEffectId(CharaWork.CurrentJob.Id));
+           
+            CharaWork.UpdateLevel();
+            CharaWork.UpdateClass();
+            CharaWork.UpdateExp();
         }
 
         private void SendCurrentJob()
         {
             byte[] data = new byte[0x08];
-            data[0] = CharaWork.CurrentJob.Id;
+
+            if(CharaWork.CurrentJob.Id != CharaWork.CurrentClassId)
+                data[0] =  CharaWork.CurrentJob.Id;
+
             Packet.Send(ServerOpcode.SetCurrentJob, data);
         }
                
         public void ChangeEquipment(byte[] data)
         {
-            //we read the bytes in the index below to be able to differentiate equip/unequip packets. It's the fastest way I can think of.
-            uint pattern = (uint)(data[0x53] << 24 | data[0x52] << 16 | data[0x51] << 8 | data[0x50]);
-            bool isEquipping = pattern == 0x05050505 ? true : false;
-            byte gearSlot = 0;
-            uint itemUniqueId = (uint)(data[0x5e] << 24 | data[0x5f] << 16 | data[0x60] << 8 | data[0x61]);       
+            File.WriteAllBytes("equip.txt", data);
+            var luaParams = PrimalLauncher.LuaParameters.ReadParameters(data, 0x41);
+
+
+            bool isEquipping = luaParams[0] != null;
+            uint itemUniqueId = (uint)((long)luaParams[luaParams.Count - 1] & 0xFFFFFFFF);
+            byte gearSlot;
 
             if (isEquipping)
             {
                 gearSlot = (byte)(data[0x58] - 1);
                 Item itemToEquip = Inventory.GetBagItemByUniqueId(itemUniqueId);
-                World.SendTextSheet(0x7789, new object[] {/*quality?*/ 1, (int)itemToEquip.Id, 1, 0, 0, 1, 0 }, User.Instance.Character.Id);
+                World.SendTextSheet(0x7789, new object[] {/*quality?*/ 1, (int)itemToEquip.Id, 1, 0, 0, 1, 0 }, Id);
 
                 //if a weapon is being equipped
                 if (gearSlot == 0)
-                {                    
+                {
                     Item equippedWeapon = (Item)Inventory.Bag[Inventory.GearSlots[0]];
                     ushort equippedCategory = Convert.ToUInt16(equippedWeapon.Id.ToString().Substring(0, 3));
                     ushort toEquipCategory = Convert.ToUInt16(itemToEquip.Id.ToString().Substring(0, 3));
@@ -805,46 +577,44 @@ namespace PrimalLauncher
                         CharaWork.CurrentClassId = jobToChangeTo;
 
                         //for now, if the job is not activated, activate it.
-                        short level = CharaWork.CurrentJob.Level;
-                        CharaWork.CurrentJob.Level = level == 0 ? (short)1 : level;
+                        if (CharaWork.CurrentClass.Level == 0)
+                            CharaWork.CurrentClass.Level = 1;
+
 
                         //if a soul stone is equipped, remove it.
-                        if (CharaWork.CurrentJob.Id != 0)
-                        {
-                            CharaWork.CurrentJob.Id = 0;
-                            SendCurrentJob();
-                        }                                                   
+                        if (CharaWork.CurrentClass.IsSoulStoneEquippped)
+                            CharaWork.CurrentClass.IsSoulStoneEquippped = false;
+
+                        SendCurrentJob();
 
                         SendCommandResult(Command.ChangeEquipment, new List<CommandResult> {
                             new CommandResult
                             {
                                 TargetId = Id,
-                                EffectId = 1,
+                                EffectId = EffectId.Default,
                                 HitSequence = 1
                             }
                         }, 0x7c000062, 0x40000000);
 
-                        UpdateLevel();
-                        UpdateClass();
-                        UpdateExp();
+                        CharaWork.UpdateLevel();
+                        CharaWork.UpdateClass();
+                        CharaWork.UpdateExp();
+                        CharaWork.UpdateHotbar();
 
                         Inventory.ChangeGear(gearSlot, itemUniqueId);
 
-                        //check if character has soul of the current class                       
-                        DataTable jobsTable = GameData.Instance.GetGameData("xtx/text_jobName");
-                        DataRow[] selected = jobsTable.Select("ID = '" + GetClassJob() + "'");
-                        string jobName = (string)selected[0][1];
-                        jobName = jobName.Substring(0, jobName.Length - 1);
+                        ////check if character has soul of the current class                       
+                        //DataTable jobsTable = GameData.Instance.GetGameData("xtx/text_jobName");
+                        //DataRow[] selected = jobsTable.Select("ID = '" + CharaWork.GetClassJobId() + "'");
+                        //string jobName = (string)selected[0][1];
+                        //jobName = jobName.Substring(0, jobName.Length - 1);
 
-                        if (Inventory.HasKeyItem("soul of the " + jobName))
-                        {
+                        if (Inventory.HasKeyItem("soul of the " + CharaWork.CurrentJob.Name))
                             EquipSoulStone(null);
-                        }
                         else
-                        {
                             PlayAnimationEffect(AnimationEffect.ChangeClass);
-                            World.SendTextSheet(0x7597, new object[] { 0, 0, User.Instance.Character.Id, (int)CharaWork.CurrentClassId }, User.Instance.Character.Id);
-                        }
+
+                        World.SendTextSheet(0x7597, new object[] { 0, 0, Id, (int)CharaWork.CurrentJob.Id }, Id);
                     }
                 }
                 else
@@ -856,7 +626,7 @@ namespace PrimalLauncher
             {
                 gearSlot = (byte)(data[0x51] - 1);
                 Item itemToUnequip = Inventory.GetBagItemByGearSlot(gearSlot);
-                World.SendTextSheet(0x778A, new object[] {/*quality?*/ 1, (int)itemToUnequip.Id, 1, 0, 0, 1, 0 }, User.Instance.Character.Id);
+                World.SendTextSheet(0x778A, new object[] {/*quality?*/ 1, (int)itemToUnequip.Id, 1, 0, 0, 1, 0 }, Id);
                 Inventory.ChangeGear(gearSlot, itemUniqueId);
             }
         }
@@ -864,24 +634,24 @@ namespace PrimalLauncher
         public void ToggleUIControl(UIControl control, uint unknown = 0x02)
         {
             byte[] data = new byte[0x08];
-            Buffer.BlockCopy(BitConverter.GetBytes((uint)control), 0, data, 0, sizeof(uint)); // (0x02 & 0xff);           
-            Buffer.BlockCopy(BitConverter.GetBytes(unknown), 0, data, 0x04, sizeof(uint)); // (0x02 & 0xff);           
+            data.Write(0, (uint)control);// (0x02 & 0xff);
+            data.Write(0x04, unknown);// (0x02 & 0xff);                     
             Packet.Send(ServerOpcode.SetUIControl, data);
         }
 
         public void GetBlackList()
         {
             byte[] data = new byte[0x666];
-            Buffer.BlockCopy(BitConverter.GetBytes(1), 0, data, 0x04, sizeof(uint));         
-            Buffer.BlockCopy(Encoding.ASCII.GetBytes("Test2"), 0, data, 0x08, sizeof(uint));   
+            data.Write(0x04, 1);
+            data.Write(0x08, "Test2");            
             Packet.Send(ServerOpcode.SendBlackList, data);
         }
 
         public void GetFriendlist()
         {
             byte[] data = new byte[0x666];
-            Buffer.BlockCopy(BitConverter.GetBytes(1), 0, data, 0x04, sizeof(uint));
-            Buffer.BlockCopy(Encoding.ASCII.GetBytes("Test"), 0, data, 0x08, sizeof(uint));           
+            data.Write(0x04, 1);
+            data.Write(0x08, "Test");                     
             Packet.Send(ServerOpcode.SendFriendList, data);
         }
 
@@ -918,6 +688,11 @@ namespace PrimalLauncher
             SetPosition((uint)offset[0], offset[1], offset[2], offset[3], offset[4], (ushort)offset[5]);
         }
 
+        public void CancelAction()
+        {
+            //cancel action if player moves
+        }
+
         public void UpdatePosition(byte[] data)
         {        
             //position from packet
@@ -933,8 +708,14 @@ namespace PrimalLauncher
             Position.Z = z;
             Position.R = r;
             
-            if (positionChanged)            
+            if (positionChanged)
+            {
                 ToggleZoneActors();
+
+                if (SubState.Chant > 0)
+                    CancelAction();
+            }          
+                
 
             //this might be useful someday...
             //byte[] moveState = new byte[] { data[0x28], data[0x29] }; //unused so far. maybe part of mouse coords?
@@ -945,17 +726,11 @@ namespace PrimalLauncher
             User.Instance.SavePlayerCharacter(this);
         }     
         #endregion
-
-        public uint NewId()
-        {
-            Random rnd = new Random();   
-            return (uint)rnd.Next(0xff, 0xffff);
-        }
-
+               
         public void Unknown0x02()
         {
             byte[] data = new byte[0x10];
-            Buffer.BlockCopy(BitConverter.GetBytes(User.Instance.Character.Id), 0, data, 0x08, 0x04);
+            data.Write(0x08, Id);            
             Packet.Send(ServerOpcode.Unknown0x02, data);           
         } 
         
@@ -988,55 +763,56 @@ namespace PrimalLauncher
                 zone.Actors.Remove(this);
         }
 
-        #region Targeting
-        public void SelectTarget(byte[] srcData)
+        public bool CurrentZoneisInstance()
         {
-            uint targetId = (uint)(srcData[0x13] << 24 | srcData[0x12] << 16 | srcData[0x11] << 8 | srcData[0x10]);
-            //uint unknown = (uint)(srcData[0x17] << 24 | srcData[0x16] << 16 | srcData[0x15] << 8 | srcData[0x014]); //unused so far
-
-            ////previous target
-            //if (CurrentTargetId > 0 && CurrentTargetId != Id && !(GetCurrentZone().GetActorById(CurrentTargetId) is Monster))
-            //    GetCurrentZone().GetActorById(CurrentTargetId).ToggleHeadDirection();
-
-            CurrentTargetId = targetId != 0xC0000000 ? targetId : 0; //store target id
-
-            ////current target
-            //if (CurrentTargetId > 0 && CurrentTargetId != Id && !(GetCurrentZone().GetActorById(CurrentTargetId) is Monster))
-            //    GetCurrentZone().GetActorById(CurrentTargetId).ToggleHeadDirection(true);
-
-            if (CurrentTargetId == 0) ToggleHeadDirection();
-
-            //byte[] data = new byte[0x08];
-            //Buffer.BlockCopy(BitConverter.GetBytes(CurrentTargetId), 0, data, 0, sizeof(uint));
-            //Packet.Send(ServerOpcode.SetTarget, data);
+            return GetCurrentZone() is ZoneInstance;
         }
 
-        public void LockTarget(byte[] srcData)
+        #region Targeting
+        public void TargetSelect(byte[] data)
         {
-            uint targetId = (uint)(srcData[0x13] << 24 | srcData[0x12] << 16 | srcData[0x11] << 8 | srcData[0x10]);
-            //uint unknown = (uint)(srcData[0x17] << 24 | srcData[0x16] << 16 | srcData[0x15] << 8 | srcData[0x014]); //unused so far
+            uint targetId = data.GetUInt32(0x10);
+            uint unknown = data.GetUInt32(0x14);
 
-            if (targetId != 0xC0000000)
+            TargetLookAtPlayer(false);//release previous target 
+            TargetId = targetId != 0xC0000000 ? targetId : 0;
+            TargetLookAtPlayer(true);
+
+            byte[] response = new byte[0x08];
+            response.Write(0,TargetId);           
+            Packet.Send(ServerOpcode.SetTarget, data);
+        }
+
+        private void TargetLookAtPlayer(bool lookAtPlayer)
+        {
+            var previousTarget = GetCurrentZone().GetActorById(TargetId);
+
+            if (previousTarget != null && previousTarget != this && previousTarget is Monster)
+                previousTarget.ToggleHeadDirection(lookAtPlayer);
+        }
+
+        public void TargetLockOn(byte[] data)
+        {
+            uint targetId = data.GetUInt32(0x10);
+            uint unknown = data.GetUInt32(0x14); //unused so far
+
+            if (targetId != 0xC0000000 && State.Main == MainState.Active) //0xC0000000 = no target
             {
-                Actor actor = GetCurrentZone().GetActorById(CurrentTargetId);
-                if (actor != null && (actor is Monster monster) && ((Monster)actor).Family != "fighter")
-                {
-                    //Engage(CurrentTargetId);
-                    //monster.Engage(Id);
-                    BattleManager.Instance.Engage(this);
-                }
+                LockOnTarget = true;
+                AutoAttack();
             }
             else
             {
-                IsEngaged = false;
-            }
+                LockOnTarget = false;
+                IsEngaged = false;                
+            }                            
         }
 
-        public void GetTargetData()
+        public void TargetGetData()
         {
-            if (CurrentTargetId > 0)
+            if (TargetId > 0)
             {
-                Actor actor = User.Instance.Character.GetCurrentZone().Actors.Find(x => x.Id == CurrentTargetId);
+                Actor actor = User.Instance.Character.GetCurrentZone().Actors.Find(x => x.Id == TargetId);
 
                 if (actor != null)
                 {
@@ -1054,51 +830,67 @@ namespace PrimalLauncher
         #endregion
 
         #region Battle methods
-        //public override void AutoAttack()
-        //{
-        //    if(CurrentTargetId > 0 && GetTargetDistance() <= CharaWork.CurrentJob.AutoAttackMaxDistance)
-        //    {
-        //        ActorBattle target = ((ActorBattle)GetCurrentZone().GetActorById(CurrentTargetId));
+        public override void AutoAttack()
+        {
+            //check if there is a target selected and if it's in attack distance
+            if (LockOnTarget && TargetId > 0 && GetTargetDistance() <= CharaWork.CurrentJob.AutoAttackMaxDistance)
+            {
+                ActorBattle target = ((ActorBattle)GetCurrentZone().GetActorById(TargetId));
 
-        //        if (target != null && !target.IsDead() && !IsDead())
-        //        {
-        //            short damageDealt = 80; //to be calculated                
+                //chack if actor exists and it's not dead and if 
+                if (target != null && !target.IsDead() && !IsDead())
+                {
+                    short damageDealt = 100; //to be calculated
 
-        //            CommandResult cr = new CommandResult
-        //            {
-        //                TargetId = target.Id,
-        //                Amount = damageDealt,
-        //                TextId = 0x765D,
-        //                EffectId = 0x08000604, //target hit animation
-        //                Direction = 1,
-        //                HitSequence = 1
-        //            };
+                    if (!BattleManager.Instance.BattleEngaged)
+                        BattleManager.Instance.StartBattle(this);
 
-        //            SendCommandResult(Command.PlayerAutoAttack, new List<CommandResult> { cr }, 0x19001000);
-        //            Thread.Sleep(500);
-        //            AddTp(100);
-        //            target.TakeDamage(this, damageDealt);
+                    var (totalDamage, effectId) = target.CalculateDamage(this, damageDealt);
 
-        //            //this should be in BM?
-        //            //if (target.CharaWork.CurrentJob.Hp <= 0)
-        //            //{
-        //            //    SendCommandResult(0, new List<CommandResult> { new CommandResult(Id, 1, 0x847F, 0, 50, 1) }, 0);
-        //            //    AddExp(target.Exp);
-        //            //    Inventory.AddGil(target.Gil);
-        //            //}
+                    CommandResult cr = new CommandResult
+                    {
+                        TargetId = target.Id,
+                        TotalPoints = totalDamage,
+                        TextSheetId = 0x765D,
+                        EffectId = (EffectId)0x08000604, //target hit animation
+                        HitPosition = 1,
+                        HitSequence = 1
+                    };
 
-                    
-        //        }
+                    SendCommandResult(Command.PlayerAutoAttack, new List<CommandResult> { cr }, 0x19001000);
 
-        //        if (!IsTutorialComplete) BattleTutorial.Instance.NextTutorial("tp");
-        //    }            
-        //}
+                    Thread.Sleep(500);
+                    AddTp(100);
+
+                    target.TakeDamage(this, damageDealt);
+
+                    //this should be in BM?
+                    if (target.IsDead())
+                    {
+                        Monster monsterTarget = (Monster)target;
+
+                        TargetId = 0;
+                        LockOnTarget = false;
+
+                        SendCommandResult(0, new List<CommandResult> { new CommandResult(Id, 1, 0x847F, 0, 50, 1) }, 0);
+                        CharaWork.AddExp(monsterTarget.RewardExp);
+                        Inventory.AddGil(monsterTarget.RewardGil);
+                    }
+                }
+
+                Log.Instance.Info("Player auto-attack");
+
+                if (!IsTutorialComplete) BattleTutorial.Instance.NextTutorial("tp");
+            }
+        }
 
         public override void Engage(uint attacker)
         {
+            //TODO: find a better way to do this.
             IsEngaged = true;
-            AutoAttack(); //first hit happens instantly.
-            
+            BattleManager.Instance.BattleEngaged = true;
+
+            AutoAttack(); //first hit happens instantly.            
         }
 
         public override void Disengage()
@@ -1106,47 +898,25 @@ namespace PrimalLauncher
             IsEngaged = false;
             ToggleStance(Command.NormalStance);
         }
-
         #endregion
 
-        public override void AddTp(short amount)
+        public override void AddTp(ushort amount)
         {
-            base.AddTp(amount);
-            if (!IsTutorialComplete && CharaWork.CurrentJob.Tp >= 1000) BattleTutorial.Instance.NextTutorial("weaponskill");
-        }
-
-        public void SetCommandRecast(int recastTime)
-        {            
-            WorkProperties prop = new WorkProperties(Id, "charaWork/commandDetailForSelf");
-            prop.Add("charaWork.parameterTemp.maxCommandRecastTime[0]", (short)recastTime); 
-            prop.Add("charaWork.parameterSave.commandSlot_recastTime[0]", Server.GetTimeStampHex(recastTime)); //timestamp
-            prop.FinishWritingAndSend();
-        }
-
-        public void SetComboAction(short nextCommandId)
-        {
-            WorkProperties prop = new WorkProperties(Id, "playerWork/combo");
-            prop.Add("playerWork.comboNextCommandId[0]", nextCommandId);
-            prop.Add("playerWork.comboCostBonusRate", 0x3F800000); //float?
-            prop.FinishWritingAndSend();
-        }
-
-        public void ExecuteBattleCommand(int commandId)
-        {
-            AddTp(-1000);
-            SetCommandRecast(0x0A); //recast time should come from skill definition?
-            SetComboAction(0x6A37);
-            Thread.Sleep(2000);
-            if (!IsTutorialComplete) BattleTutorial.Instance.NextTutorial("weaponskillsuccess");
+            if(amount > 0)
+            {
+                base.AddTp(amount);
+                if (!IsTutorialComplete && CharaWork.CurrentClass.Tp >= 1000) BattleTutorial.Instance.NextTutorial("weaponskill");
+            }               
         }
 
         public override void Die()
         {
-            //Thread.Sleep(500);
-            //SetSubState();
-            //State.Main = MainState.Dead;
-            //SetMainState();
-            //SetEnmity(-1);
+            Thread.Sleep(500);
+            SetSubState();
+            State.Main = MainState.Dead;
+            State.Type = 0;
+            SetMainState();
+            SetEnmity(-1);
 
             //the command result is crashing the game. maybe the animation is wrong?
             ////this command result makes monster die instantly after killing blow.
@@ -1168,16 +938,16 @@ namespace PrimalLauncher
             byte[] characterData = new byte[0x1D0];
 
             Zone currentZone = GetCurrentZone();
-            uint zoneId = currentZone is ZoneInstance instance ? instance.ZoneId : currentZone.Id;   
+            uint zoneId = currentZone is ZoneInstance instance ? instance.ZoneId : currentZone.Id;
             byte[] name = Encoding.ASCII.GetBytes(Encoding.ASCII.GetString(Name).Trim(new[] { '\0' }));
             byte[] gearSet = Appearance.ToBytes();
             byte[] worldName = GameServer.GetNameBytes(WorldId); // WorldFactory.GetWorld(character.WorldId).Name);           
 
             Buffer.BlockCopy(BitConverter.GetBytes(zoneId), 0, characterData, 0xC, sizeof(uint));
-            Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, characterData, 0x04, 0x04);                 
+            Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, characterData, 0x04, 0x04);
             Buffer.BlockCopy(name, 0, characterData, 0x10, name.Length);
             Buffer.BlockCopy(worldName, 0, characterData, 0x30, worldName.Length);
-                        
+
             byte[] base64Info = new byte[0x100];
 
             using (MemoryStream ms = new MemoryStream(base64Info))
@@ -1200,8 +970,8 @@ namespace PrimalLauncher
                     bw.Write((ulong)0);
                     bw.Write((uint)0x01);
                     bw.Write((uint)0x01);
-                    bw.Write(CharaWork.CurrentJob.Id);
-                    bw.Write(CharaWork.CurrentJob.Level);
+                    bw.Write(CharaWork.CurrentClass.Id);
+                    bw.Write(CharaWork.CurrentClass.Level);
                     bw.Write(CharaWork.CurrentJob.Id);
                     bw.Write((ushort)0x01); //Job level?
                     bw.Write(Tribe);
@@ -1220,12 +990,24 @@ namespace PrimalLauncher
                     bw.Write(InitialTown);
                     bw.Write(InitialTown);
                 }
-              
-                base64Info = Encoding.ASCII.GetBytes(Convert.ToBase64String(base64Info).Replace('+', '-').Replace('/', '_'));                
+
+                base64Info = Encoding.ASCII.GetBytes(Convert.ToBase64String(base64Info).Replace('+', '-').Replace('/', '_'));
                 Buffer.BlockCopy(base64Info, 0, characterData, 0x40, base64Info.Length);
             }
 
             return characterData;
+        }
+
+        public void TestRaiseCommand()
+        {
+            WorkProperties work = new WorkProperties(User.Instance.Character.Id, "playerWork/confirmRaiseCommand");
+            
+
+            work.Add("variableCommandConfirmRaise", 1);
+            work.Add("variableCommandConfirmRaiseSender", Name.ToString());
+            work.Add("variableCommandConfirmRaiseSenderByID", Id);
+            work.Add("variableCommandConfirmRaiseSenderSex", 1);
+            work.SendUpdate();
         }
     }
 }

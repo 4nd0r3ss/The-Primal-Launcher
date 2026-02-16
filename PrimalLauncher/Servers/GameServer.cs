@@ -86,7 +86,7 @@ namespace PrimalLauncher
         public static string GetServerName(byte id)
         {
             XmlNodeList worldListXml = GetWorldListXml();
-            string worldName = "Primal Launcher";
+            string worldName = "The Primal Launcher";
 
             foreach (XmlNode node in worldListXml)
                 if (node.Attributes["id"].InnerText == id.ToString())
@@ -134,6 +134,8 @@ namespace PrimalLauncher
                     };
 
                     Packet worldListPacket = new Packet(worldList);
+
+                    worldListPacket.OutputToFile();
                     LobbyServer.Instance.Sender.Send(worldListPacket.ToBytes(blowfish));
                     Log.Instance.Info("World list sent.");
                 }
@@ -151,6 +153,7 @@ namespace PrimalLauncher
             while (_listening)
             {
                 MainWindow.Window.ClockTime = "Eorzea time: " + Clock.Instance.StringTime;
+                BattleManager.Instance.Tick();
 
                 if (_connection.bufferQueue.Count > 0)
                 {
@@ -165,7 +168,7 @@ namespace PrimalLauncher
 
                         packet.ProcessSubPackets(null); //no decrypting here
 
-                        if (Preferences.Instance.Options.PrintPacketsToFile)
+                        if (false)//(Preferences.Instance.Options.PrintPacketsToFile)
                             packet.OutputToFile();
 
                         while (packet.SubPacketQueue.Count > 0)
@@ -198,9 +201,10 @@ namespace PrimalLauncher
                             }
                         }
                     }
-                    catch (Exception e)
+                    catch //(Exception e)
                     {
-                        Log.Instance.Error("Game server exception: " + e.Message);
+                        throw;
+                        //Log.Instance.Error("Game server exception: " + e.Message);
                     }
                 }                
             }
@@ -213,99 +217,106 @@ namespace PrimalLauncher
         private void ProcessGamePacket(SubPacket subpacket)
         {
             //_world.Sender = _connection.socket;
-            ushort opcode = (ushort)(subpacket.Data[0x03] << 8 | subpacket.Data[0x02]);           
-
-            switch (opcode)
+            ushort opcode = subpacket.Data.GetUInt16(0x02); // (ushort)(subpacket.Data[0x03] << 8 | subpacket.Data[0x02]); 
+            
+            try
             {
-                case (ushort)ClientOpcode.Ping:
-                    Pong(subpacket);
-                    break;
+                switch (opcode)
+                {
+                    case (ushort)ClientOpcode.Ping:
+                        Pong(subpacket);
+                        break;
 
-                case (ushort)ClientOpcode.Unknown0x02:
-                    User.Instance.Character.Unknown0x02();
-                    break;
+                    case (ushort)ClientOpcode.Unknown0x02:
+                        User.Instance.Character.Unknown0x02();
+                        break;
 
-                case (ushort)ClientOpcode.ChatMessage:
-                    ChatProcessor.Incoming(subpacket.Data);
-                    break;
+                    case (ushort)ClientOpcode.ChatMessage:
+                        ChatProcessor.Incoming(subpacket.Data);
+                        break;
 
-                case (ushort)ClientOpcode.Initialize:
-                    Name = GetServerName(User.Instance.Character.WorldId);
-                    ChatProcessor.SendMessage(MessageType.GeneralInfo, "Welcome to " + Name + "!");
-                    ChatProcessor.SendMessage(MessageType.GeneralInfo, "Welcome to Eorzea!");
-                    ChatProcessor.SendMessage(MessageType.GeneralInfo, @"To get a list of custom commands, type \help in the chat window and hit enter.");
-                    World.Instance.Initialize();                   
-                    break;
+                    case (ushort)ClientOpcode.Initialize:
+                        Name = GetServerName(User.Instance.Character.WorldId);
+                        ChatProcessor.SendMessage(MessageType.GeneralInfo, "Welcome to " + Name + "!");
+                        ChatProcessor.SendMessage(MessageType.GeneralInfo, "Welcome to Eorzea!");
+                        //ChatProcessor.SendMessage(MessageType.GeneralInfo, @"To get a list of custom commands, type \help in the chat window and hit enter.");
+                        World.Instance.Initialize();
+                        break;
 
-                case (ushort)ClientOpcode.FriendListRequest:
-                    User.Instance.Character.GetFriendlist();
-                    break;
+                    case (ushort)ClientOpcode.FriendListRequest:
+                        User.Instance.Character.GetFriendlist();
+                        break;
 
-                case (ushort)ClientOpcode.BlacklistRequest:
-                    User.Instance.Character.GetBlackList();
-                    break;
+                    case (ushort)ClientOpcode.BlacklistRequest:
+                        User.Instance.Character.GetBlackList();
+                        break;
 
-                case (ushort)ClientOpcode.PlayerPosition:
-                    User.Instance.Character.UpdatePosition(subpacket.Data);
-                    break;
+                    case (ushort)ClientOpcode.PlayerPosition:
+                        User.Instance.Character.UpdatePosition(subpacket.Data);
+                        break;
 
-                case (ushort)ClientOpcode.Unknown0x07:
-                    //Log.Instance.Warning("Received command 0x07");                    
-                    break;
+                    case (ushort)ClientOpcode.Unknown0x07:
+                        //Log.Instance.Warning("Received command 0x07");                    
+                        break;
 
-                case (ushort)ClientOpcode.InitGroupWork:
-                    BattleManager.Instance.GetGroupInitWork(subpacket.Data);
-                    break;
+                    case (ushort)ClientOpcode.InitGroupWork:
+                        BattleManager.Instance.GetGroupInitWork(subpacket.Data);
+                        break;
 
-                case (ushort)ClientOpcode.EventRequest:                     
-                    EventManager.Instance.ProcessIncoming(subpacket.Data);
-                    break;
+                    case (ushort)ClientOpcode.EventRequest:
+                        EventManager.Instance.ProcessIncoming(subpacket.Data);
+                        break;
 
-                case (ushort)ClientOpcode.DataRequest:     //TODO: should be in event manager?                      
-                    string request = Encoding.ASCII.GetString(subpacket.Data).Substring(0x14, 0x20).Trim(new[] { '\0' }); 
+                    case (ushort)ClientOpcode.DataRequest:     //TODO: should be in event manager?                      
+                        string request = Encoding.ASCII.GetString(subpacket.Data).Substring(0x14, 0x20).Trim(new[] { '\0' });
 
-                    switch (request)
-                    {
-                        case "charaWork/exp":                           
-                            _connection.Send(User.Instance.Character.ClassExp());   
-                         break;
-                    }
-                    break;
+                        switch (request)
+                        {
+                            case "charaWork/exp":
+                                _connection.Send(User.Instance.Character.CharaWork.ClassExp());
+                                break;
+                        }
 
-                case (ushort)ClientOpcode.SelectTarget:
-                    User.Instance.Character.SelectTarget(subpacket.Data);
-                    break;
+                        Log.Instance.Info("Data request: " + request);
 
-                case (ushort)ClientOpcode.LockOnTarget:
-                    User.Instance.Character.LockTarget(subpacket.Data);
-                    break;
-
-                case (ushort)ClientOpcode.EventResult:
-                    EventManager.Instance.CurrentEvent.ProcessEventResult(subpacket.Data);                   
-                    break;
-
-                case (ushort)ClientOpcode.GMTicketActiveRequest:
-                    World.Instance.GMActiveRequest();
-                    break;
-
-                case (ushort)ClientOpcode.CutScene:
-                    CutsceneLog(subpacket.Data);
-                    break;
-                case (ushort)ClientOpcode.ItemSearchRequest:
-                    ItemSearch(subpacket.Data);
-                    break;
-                case (ushort)ClientOpcode.RetainerSearchRequest:
-                    RetainerSearch(subpacket.Data);
-                    break;
-                case (ushort)ClientOpcode.PurchaseHistoryRequest:
-                    PurchaseHistory(subpacket.Data);
-                    break;
-
-                default:
-                    Log.Instance.Error("[" + Name + "] Unknown command: 0x" + opcode.ToString("X"));
-                    File.WriteAllBytes("unknowncommand.txt", subpacket.Data);
-                    break;
+                        break;
+                    case (ushort)ClientOpcode.SelectTarget:
+                        User.Instance.Character.TargetSelect(subpacket.Data);
+                        break;
+                    case (ushort)ClientOpcode.LockOnTarget:
+                        User.Instance.Character.TargetLockOn(subpacket.Data);
+                        break;
+                    case (ushort)ClientOpcode.EventResult:
+                        EventManager.Instance.CurrentEvent.ProcessEventResult(subpacket.Data);
+                        break;
+                    case (ushort)ClientOpcode.GMTicketActiveRequest:
+                        World.Instance.GMActiveRequest();
+                        break;
+                    case (ushort)ClientOpcode.CutScene:
+                        CutsceneLog(subpacket.Data);
+                        break;
+                    case (ushort)ClientOpcode.ItemSearchRequest:
+                        ItemSearch(subpacket.Data);
+                        break;
+                    case (ushort)ClientOpcode.RetainerSearchRequest:
+                        RetainerSearch(subpacket.Data);
+                        break;
+                    case (ushort)ClientOpcode.PurchaseHistoryRequest:
+                        PurchaseHistory(subpacket.Data);
+                        break;
+                    case (ushort)ClientOpcode.SetPlayerTitle:
+                        User.Instance.Character.SetTitle(subpacket.Data);
+                        break;
+                    default:
+                        Log.Instance.Error("[" + Name + "] Unknown command: 0x" + opcode.ToString("X"));
+                        File.WriteAllBytes("unknowncommand.txt", subpacket.Data);
+                        break;
+                }
             }
+            catch
+            {
+                throw;
+            }            
         }
 
 
@@ -410,7 +421,7 @@ namespace PrimalLauncher
         }
 
         /// <summary>
-        /// Indicate is a cutscene is starting or finishing. Might be used in the future to fire events after cutscenes.
+        /// Indicate is a cutscene is starting or finishing.
         /// </summary>
         /// <param name="data"></param>
         private void CutsceneLog(byte[] data)
@@ -469,7 +480,7 @@ namespace PrimalLauncher
             Packet handshakePacket = new Packet(handshake);           
             _connection.Send(handshakePacket.ToBytes());
 
-            //login packet sequence from SU g_client0Log.Instancein2 byte array. It was originally compressed.
+            //login packet sequence from Seventh Umbral g_client0Log.Instancein2 byte array. It was originally compressed.
             byte[] data =  {
                 0x00, 0x00, 0x00, 0x00, 
                 0xc8, 0xd6, 0xaf, 0x2b, 
@@ -483,7 +494,8 @@ namespace PrimalLauncher
                 0x88, 0xaf, 0x5e, 0x26
             };
 
-            Buffer.BlockCopy(BitConverter.GetBytes(User.Instance.Character.Id), 0, data, 0, 0x04);
+            if(User.Instance.Character != null)
+                Buffer.BlockCopy(BitConverter.GetBytes(User.Instance.Character.Id), 0, data, 0, 0x04);
 
             SubPacket session = new SubPacket
             {

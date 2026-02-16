@@ -37,8 +37,8 @@ namespace PrimalLauncher
         {
             Log.Instance.Warning("commandDefault: 0x" + CommandId.ToString("X2") + ", " + CommandId);
 
-            
-            User.Instance.Character.ExecuteBattleCommand(CommandId);
+           
+            User.Instance.Character.ExecuteActionCommand(CommandId);
             Finish();
         }
     }

@@ -22,7 +22,7 @@ using System.Text;
 
 namespace PrimalLauncher
 {
-    class PopulaceShopSalesman : Populace
+    class PopulaceShopSalesman : PopulaceStandard
     {
         public int WelcomeTalk { get; set; }
         public ShopType ShopType { get; set; }
@@ -85,11 +85,11 @@ namespace PrimalLauncher
         {
             if (!EventManager.Instance.CurrentEvent.IsQuestion)
             {
-                SendTalkResponse("welcomeTalk", new List<object> { WelcomeTalk, User.Instance.Character.Id }, true);
+                EventManager.Instance.CurrentEvent.SendTalkResponse("welcomeTalk", new List<object> { WelcomeTalk, User.Instance.Character.Id }, true);
             }
             else
             {
-                uint? selection = EventManager.Instance.CurrentEvent.Selection[0];
+                uint? selection = (uint?)EventManager.Instance.CurrentEvent.Selection[0];
 
                 if (string.IsNullOrEmpty(CurrentMenu))
                 {
@@ -124,15 +124,9 @@ namespace PrimalLauncher
             }
         }
 
-        //Item = 0,
-        //Class = 1,
-        //Weapon = 2,
-        //Armor = 3,
-        //Hamlet = 4
-
         private void SelectShopOption()
         {
-            uint? selection = EventManager.Instance.CurrentEvent.Selection[0];
+            uint? selection = (uint?)EventManager.Instance.CurrentEvent.Selection[0];
 
             switch (ShopType)
             {
@@ -189,12 +183,12 @@ namespace PrimalLauncher
                 parameters.Add(MenuId);
 
             CurrentMenu = "shopMenu";
-            SendTalkResponse(functionName, parameters, true);
+            EventManager.Instance.CurrentEvent.SendTalkResponse(functionName, parameters, true);
         }
 
         private void Buy()
         {
-            uint? selection = EventManager.Instance.CurrentEvent.Selection[0];
+            uint? selection = (uint?)EventManager.Instance.CurrentEvent.Selection[0];
             List<object> parameters = new List<object> { User.Instance.Character.Id };
             string functionName = "";
 
@@ -233,7 +227,7 @@ namespace PrimalLauncher
                     //get requested item quantity and index
                     byte[] data = EventManager.Instance.CurrentEvent.Data;
                     int itemQuantity = data[0x27] << 24 | data[0x28] << 16 | data[0x29] << 8 | data[0x2A];
-                    uint itemIndex = (uint)(EventManager.Instance.CurrentEvent.Selection[0] - 1);       
+                    uint itemIndex = (uint)((uint?)EventManager.Instance.CurrentEvent.Selection[0] - 1);       
                     
                     //get item from shop item set
                     DataRow shopBaseRow = GameData.Instance.GetGameData("shopBase").Select("id = '" + CurrentItemSet + "'")[0];
@@ -264,12 +258,12 @@ namespace PrimalLauncher
                 }
             }            
 
-            SendTalkResponse(functionName, parameters, true);
+            EventManager.Instance.CurrentEvent.SendTalkResponse(functionName, parameters, true);
         }
 
         private void Sell()
         {
-            uint? selection = EventManager.Instance.CurrentEvent.Selection[0];
+            uint? selection = (uint?)EventManager.Instance.CurrentEvent.Selection[0];
             List<object> parameters = new List<object> { User.Instance.Character.Id };
             string functionName = "";
 
@@ -302,7 +296,7 @@ namespace PrimalLauncher
                 }
             }            
 
-            SendTalkResponse(functionName, parameters, true);
+            EventManager.Instance.CurrentEvent.SendTalkResponse(functionName, parameters, true);
         }
 
         private void UseFacility()
@@ -312,24 +306,7 @@ namespace PrimalLauncher
 
         private void ShopTutorial()
         {
-            SendTalkResponse("startTutorial", new List<object> { null, MenuId }, true);
-        }
-
-        private void SendTalkResponse(string functionName, List<object> parameters, bool isQuestion = false)
-        {
-            List<object> toSend = new List<object>
-            {
-                (sbyte)1,
-                Encoding.ASCII.GetBytes("talkDefault"),
-                Encoding.ASCII.GetBytes(functionName)
-            };
-
-            toSend.AddRange(parameters);
-
-            EventManager.Instance.CurrentEvent.RequestParameters = new LuaParameters() { Parameters = toSend.ToArray() };
-            EventManager.Instance.CurrentEvent.Response();
-            EventManager.Instance.CurrentEvent.Callback = "talkDefault";
-            EventManager.Instance.CurrentEvent.IsQuestion = isQuestion;
+            EventManager.Instance.CurrentEvent.SendTalkResponse("startTutorial", new List<object> { null, MenuId }, true);
         }
     }
 }

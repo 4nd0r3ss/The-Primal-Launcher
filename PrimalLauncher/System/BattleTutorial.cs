@@ -16,6 +16,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 
 namespace PrimalLauncher
@@ -52,45 +53,15 @@ namespace PrimalLauncher
         /// <param name="sender"></param>
         public void Start()
         {                   
-            uint openingStoperClassId = 0;           
-            List<uint> dutyActorsClassId = null;
-            uint instanceId = 0;
-
-            switch (User.Instance.Character.InitialTown)
-            {
-                case 1:
-                    instanceId = 2;
-                    dutyActorsClassId = new List<uint> { 2290001, 2290002, 2205403 };
-                    break;
-                case 2:       
-                    instanceId = 6;
-                    openingStoperClassId = 1090384;
-                    dutyActorsClassId = new List<uint> { 2290005, 2290006, 2201407 };
-                    break;
-                case 3:
-                    instanceId = 10;
-                    openingStoperClassId = 1090373;
-                    dutyActorsClassId = new List<uint> { 2290003, 2290004, 2203301 };
-                    break;
-            }
-
-            //if there is an opening stoper, we want to disable its events before antering battle.
-            //this is to fix the player being positioned in the wrong place in the battle tutorial.
-            if (openingStoperClassId > 0)
-            {
-                Actor openingStoper = User.Instance.Character.GetCurrentZone().GetActorByClassId(openingStoperClassId);
-
-                if (openingStoper != null)
-                {
-                    openingStoper.ToggleEvents(false);
-                    Thread.Sleep(1500);
-                }
-            }
-
+            uint instanceId = User.Instance.Character.InitialTown * 4 - 2;
             World.Instance.CreateInstance(instanceId);
-            World.Instance.ZoneInstance.Directors.Add(new OpeningDirector());           
             World.Instance.ToInstance(instanceId, 0x10);
-            BattleManager.Instance.AddDutyGroup(dutyActorsClassId, true);  
+
+            var members = User.Instance.Character.GetCurrentZone().Actors.Where(x => x is Monster).ToList();
+            members.Add((QuestDirector)User.Instance.Character.GetCurrentZone().GetDirector("Quest"));
+
+            World.Instance.SendData(new object[] { 0x09 });
+            BattleManager.Instance.StartDuty(members);  
 
             //Set allies to battle position before first attack
             List<Actor> fighters = User.Instance.Character.GetCurrentZone().GetActorsByFamily("fighter");
@@ -104,7 +75,7 @@ namespace PrimalLauncher
 
         public void NextTutorial(string tutorialName)
         {
-            JobClassCategory category = User.Instance.Character.CharaWork.CurrentJob.GetCategory();
+            JobClassCategory category = User.Instance.Character.CharaWork.CurrentClass.GetCategory();
 
             if(category == JobClassCategory.DoW)
             {
@@ -150,7 +121,7 @@ namespace PrimalLauncher
 
         public void Finish()
         {
-            JobClassCategory jobClassCategory = User.Instance.Character.CharaWork.CurrentJob.GetCategory();
+            JobClassCategory jobClassCategory = User.Instance.Character.CharaWork.CurrentClass.GetCategory();
 
             if (jobClassCategory == JobClassCategory.DoW || jobClassCategory == JobClassCategory.DoM)
             {

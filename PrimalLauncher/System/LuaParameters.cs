@@ -80,6 +80,11 @@ namespace PrimalLauncher
                 List.Add(new KeyValuePair<byte, object>(0x98, (sbyte)param));
             else if (param is byte[])
                 List.Add(new KeyValuePair<byte, object>(0x99, (byte[])param));
+            else if (param is bool[])
+            {
+                foreach (bool item in (bool[])param)
+                    Add(item);
+            }
            
         }
 
@@ -191,6 +196,16 @@ namespace PrimalLauncher
                                 break;
                             case 0x05:
                                 parameters.Add(null);
+                                break;
+                            case 0x07:
+                                parameters.Add(br.ReadUInt32());
+                                br.ReadByte();
+                                br.ReadByte();
+                                br.ReadByte();
+                                break;
+                            case 0x09:
+                                parameters.Add(br.ReadInt64BigEndian());
+                                br.ReadInt64BigEndian();
                                 break;
                             case 0x0C:
                                 parameters.Add(br.ReadByte());

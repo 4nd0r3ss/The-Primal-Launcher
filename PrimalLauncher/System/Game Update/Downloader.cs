@@ -36,7 +36,7 @@ namespace PrimalLauncher
             }
         }
 
-        private readonly string _downloadURL = "http://ffxivpatches.s3.amazonaws.com/";
+        private readonly string _downloadURL = "http://xivupdate.s3.amazonaws.com/";
         private int _downloadIndex = 0;
         private bool _keepDownloading = true;
         private WebClient _webClient;
@@ -109,6 +109,8 @@ namespace PrimalLauncher
         public void DownloadFile()
         {
             if (!_keepDownloading) return; //cancel button was clicked
+
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
             string downloadPath = Preferences.Instance.AppUserFolder + _filesToDownload[_downloadIndex].Key.Substring(0, _filesToDownload[_downloadIndex].Key.LastIndexOf(@"/")).Replace(@"/", @"\") + @"\";
 

@@ -24,17 +24,18 @@ using System.Text;
 namespace PrimalLauncher
 {
     [Serializable]
-    public class GroupDuty : GroupBase
+    public class DutyGroup : GroupBase
     {        
         public List<Director> DirectorList { get; set; }
-        public List<DutyMember> AllyList { get; set; }       
-        public List<DutyMember> EnemyList { get; set; }       
+        public List<BattleGroupMember> AllyList { get; set; }       
+        public List<BattleGroupMember> EnemyList { get; set; }       
 
-        public GroupDuty() : base(0x01, GroupType.Duty)
+        public DutyGroup() : base(GroupType.Duty)
         {
             _idMask = 0x3000000000000000;
-            AllyList = new List<DutyMember>();
-            EnemyList = new List<DutyMember>();
+            AllyList = new List<BattleGroupMember>();
+            EnemyList = new List<BattleGroupMember>();
+            DirectorList = new List<Director>();
         }
 
         protected override void Members()
@@ -46,9 +47,9 @@ namespace PrimalLauncher
             {
                 bw.Seek(0x10, SeekOrigin.Begin);
 
-                foreach (uint member in MemberList)
+                foreach (Actor member in MemberList)
                 {
-                    bw.Write(member);
+                    bw.Write(member.Id);
                     bw.Write(0x03E9);  //unknown
                     bw.Write(1);       //unknown
                 }
@@ -73,7 +74,7 @@ namespace PrimalLauncher
             attacker.AutoAttack();
 
             //engage allies
-            foreach(DutyMember member in AllyList)
+            foreach(BattleGroupMember member in AllyList)
             {
                 if(member.Actor != attacker)
                 {
@@ -81,45 +82,45 @@ namespace PrimalLauncher
                     //healers will target player for healing
                     //attackers will target player target. 
                     //for now I'm hardcoding so that all allies attack player target.
-                    member.Actor.Engage(attacker.CurrentTargetId);
+                    member.Actor.Engage(attacker.TargetId);
                 }
             }
 
             //engage enemies
-            foreach (DutyMember member in EnemyList)            
+            foreach (BattleGroupMember member in EnemyList)            
                 member.Actor.Engage(attacker.Id); 
 
             Log.Instance.Warning("Duty group engaged in battle.");
         }
 
-        public void BattleBeat()
+        public override void BattleBeat()
         {
             //Log.Instance.Info("GroupDuty.BattleBeat");
-            var mylist = EnemyList.Where(x => x.Actor.State.Main != MainState.Dead2);
-            bool enemiesDead = !mylist.Any();
+            var mylist = EnemyList.Where(x => x.Actor.State.Main != MainState.Dead2); //get all enemies who are not dead
+            bool enemiesDead = !mylist.Any(); //any that is not dead, if all dead it's true
 
             //if all objectives are dead, disengage immediately
             if (enemiesDead)
             {
                 BattleManager.Instance.Disengage();
 
-                foreach (DutyMember member in AllyList)
+                foreach (BattleGroupMember member in AllyList)
                     member.Actor.Disengage();
 
                 if (!User.Instance.Character.IsTutorialComplete) BattleTutorial.Instance.Finish();
-            }                
+            }
             else
             {
-                foreach(DutyMember member in AllyList)
+                foreach (BattleGroupMember member in AllyList)
                 {
-                    if(!member.Actor.IsDead())
+                    if (!member.Actor.IsDead())
                         member.UpdateActionTimer();
                 }
 
-                foreach (DutyMember member in EnemyList)
+                foreach (BattleGroupMember member in EnemyList)
                 {
                     if (!member.Actor.IsDead())
-                        member.UpdateActionTimer();   
+                        member.UpdateActionTimer();
                 }
             }
         }
@@ -171,18 +172,18 @@ namespace PrimalLauncher
         public override void AddMembers(List<Actor> membersToAdd)
         {
             //add player
-            MemberList.Add(User.Instance.Character.Id);
-            AllyList.Add(new DutyMember{ Actor = User.Instance.Character });
+            MemberList.Add(User.Instance.Character);
+            AllyList.Add(new BattleGroupMember{ Actor = User.Instance.Character });
 
             foreach (Actor a in membersToAdd)
             {
-                MemberList.Add(a.Id);
+                MemberList.Add(a);
 
                 if (a is Monster monster)
                 {
                     if(monster.Family != "fighter")
                     {
-                        EnemyList.Add(new DutyMember
+                        EnemyList.Add(new BattleGroupMember
                         {
                             Actor = monster,
                             IsObjective = true
@@ -191,7 +192,7 @@ namespace PrimalLauncher
                     else
                     {
                         //NPC allies are also monster actors(?)
-                        AllyList.Add(new DutyMember { Actor = monster });
+                        AllyList.Add(new BattleGroupMember { Actor = monster });
                     }
                 }
                 else if(a is Director director) //not sure if this will be useful...
@@ -200,29 +201,5 @@ namespace PrimalLauncher
                 }
             }
         }        
-    }
-
-    public class DutyMember
-    {
-        public ActorBattle Actor { get; set; }
-        public int ActionTimer { get; set; }
-        public bool IsObjective { get; set; }        
-
-        public void UpdateActionTimer()
-        {
-            if (!Actor.IsDead())
-            {
-                ActionTimer += 100;
-                Actor.MoveToTarget();
-
-                if (ActionTimer >= Actor.AutoAttackDelay)
-                {
-                    Log.Instance.Info("Actor: 0x" + Actor.Id.ToString("X2") + ", classid: " + Actor.ClassId + " attacks!");
-
-                    Actor.AutoAttack();
-                    ActionTimer = new Random().Next(0, 300); //TODO: need to calculate this based on [weapon delay] and [char attr speed] (?)
-                }
-            }                    
-        }
-    }
+    }    
 }

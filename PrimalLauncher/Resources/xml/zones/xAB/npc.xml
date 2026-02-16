@@ -33,28 +33,28 @@
         <pushDefault enabled="1" radius="6" silent="true" outwards="false" action="174" />
       </events>
     </ZoneSwitch>
-      <Populace className="PopulaceStandard">
+      <PopulaceStandard>
           <classId>1001599</classId>
           <position x="1349" y="256.66" z="-224.15" r="0.66" />
           <animation>1016</animation>
-      </Populace>
-      <Populace className="PopulaceStandard">
+      </PopulaceStandard>
+      <PopulaceStandard>
           <classId>1001600</classId>
           <position x="1357.8" y="255.5" z="-232.7" r="2.1" />
           <animation>1002</animation>
-      </Populace>
-      <Populace className="PopulaceStandard">
+      </PopulaceStandard>
+      <PopulaceStandard>
           <classId>1001602</classId>
           <position x="1336.86" y="256" z="-225.5" r="-1.62" />
           <animation>1017</animation>
           <talkFunctions>
               <function name="defaultTalkWithPyhajawantal_001" />
           </talkFunctions>
-      </Populace>
-      <Populace className="PopulaceStandard">
+      </PopulaceStandard>
+      <PopulaceStandard>
           <classId>1001601</classId>
           <position x="1371" y="256.1" z="-229.4" r="1.56" />         
-      </Populace>      
+      </PopulaceStandard>      
       
       <PopulaceShopSalesman welcomeTalk="281" menuId="-8" shopType="Item" itemSet="3008">
           <classId>1600122</classId>

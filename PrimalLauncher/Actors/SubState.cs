@@ -17,6 +17,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
 using System.IO;
+using System.Text;
 
 namespace PrimalLauncher
 {
@@ -54,6 +55,26 @@ namespace PrimalLauncher
             }
 
             return data;
+        }
+
+        public override string ToString()
+        {            
+            StringBuilder sb = new StringBuilder();
+
+            sb.Append("Breakage: ");
+            sb.Append(Breakage);
+            sb.Append(", \nChant: ");
+            sb.Append(Chant);
+            sb.Append(", \nModBoolsGuard: ");
+            sb.Append(ModBoolsGuard);
+            sb.Append(", \nWaste: ");
+            sb.Append(Waste);
+            sb.Append(", \nMode: ");
+            sb.Append(Mode);
+            sb.Append(", \nUnknown: ");
+            sb.Append(Unknown);
+
+           return sb.ToString();
         }
     }
 }

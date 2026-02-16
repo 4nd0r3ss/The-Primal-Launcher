@@ -21,5 +21,10 @@
           <classId>1600121</classId>
           <position x="-1055.7" y="20.6" z="-1777.8" r="0.3" />
       </PopulaceShopSalesman>
+      <PopulaceStandard zoneId="152">
+          <classId>1090076</classId>
+          <position x="-1067.16" y="20.25" z="-1764.7" r="0" />
+          <animation>0</animation>
+      </PopulaceStandard>
   </npc>
 </chara>

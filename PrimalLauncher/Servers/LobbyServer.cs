@@ -141,6 +141,7 @@ namespace PrimalLauncher
             byte[] responseData = new byte[0x50];
             byte command = subPacket.Data[0x21];
             byte worldId = subPacket.Data[0x22];
+            var gameAccount = User.Instance.GameAccount;            
 
             responseData.Write(new Dictionary<int, object>
             {
@@ -148,32 +149,23 @@ namespace PrimalLauncher
                 {0x08, (byte)1}, //unknown
                 {0x09, (byte)2}, //unknown
                 {0x0A, command},
-                {0x1C, (byte)1}, //ticket
+                {0x1C, (byte)1} //ticket              
             });
 
             switch (command)
             {
-                case 0x01: //Reserve name
-                    User.Instance.GameAccount.ReserveName(subPacket.Data, worldId);
+                case 0x01:
+                    ReserveName(subPacket, responseData);
                     break;
-
-                case 0x02: //Create character
-                    User.Instance.GameAccount.CreateCharacter(subPacket.Data);
-                    worldId = User.Instance.GameAccount.SelectedCharacter.WorldId;
-                    responseData.Write(0x14, User.Instance.GameAccount.SelectedCharacter.Id);   
+                case 0x02:
+                    CreateCharacter(subPacket.Data, responseData);                                     
                     break;
-
-                case 0x03: //Rename character
-                    User.Instance.GameAccount.RenameCharacter(subPacket.Data);                    
+                case 0x03:
+                    gameAccount.RenameCharacter(subPacket.Data);                    
                     break;
-
-                case 0x04: //Delete character                   
-                    File.WriteAllBytes("delete.txt", subPacket.Data);
-                    uint id = BitConverter.ToUInt32(subPacket.Data, 0x18);                                        
-                    worldId = User.Instance.GameAccount.GetCharacterById(id).WorldId;  
-                    User.Instance.GameAccount.DeleteCharacter(subPacket.Data[0x20]);                                        
+                case 0x04:
+                    DeleteCharacter(subPacket, responseData);                                        
                     break;
-
                 case 0x05: //Unknown
                     Log.Instance.Error("Unknown Modifycharacter() command: 0x05");
                     break;
@@ -183,18 +175,48 @@ namespace PrimalLauncher
                     break;
             }
 
-            responseData.Write(new Dictionary<int, object>
+                     
+        }
+
+        private void ReserveName(SubPacket subPacket, byte[] responseData)
+        {
+            var gameAccount = User.Instance.GameAccount;
+            byte worldId = subPacket.Data[0x22];
+            gameAccount.SelectedCharacterSlot = subPacket.Data[0x20];
+            byte[] newCharName = gameAccount.ReserveName(subPacket.Data, worldId);
+            responseData.Write(0x20, newCharName);
+
+            Packet packet = new Packet(new SubPacket(new GamePacket(0x0e, responseData))
             {
-                {0x40, GameServer.GetNameBytes(worldId)},
-                {0x20, User.Instance.GameAccount.SelectedCharacter.Name}
+                SourceId = gameAccount.SelectedCharacter.Id,
+                TargetId = gameAccount.SelectedCharacter.Id
             });
 
-            Packet packet = new Packet(new SubPacket(new GamePacket(0x0e, responseData)) 
-            { 
-                SourceId = User.Instance.GameAccount.SelectedCharacter.Id, 
-                TargetId = User.Instance.GameAccount.SelectedCharacter.Id 
-            });            
-            _connection.Send(packet.ToBytes(_blowfish));           
+            _connection.Send(packet.ToBytes(_blowfish));
+        }
+
+        public void CreateCharacter(byte[] characterData, byte[] responseData)
+        {
+            var gameAccount = User.Instance.GameAccount;
+            gameAccount.SelectedCharacter.Setup(characterData);
+            User.Instance.Save();
+
+            responseData.Write(new Dictionary<int, object>
+            {
+                {0x14, gameAccount.SelectedCharacter.Id},
+                {0x20, gameAccount.SelectedCharacter.Name},
+                {0x40, GameServer.GetNameBytes(gameAccount.SelectedCharacter.WorldId)}
+            });
+
+            Packet packet = new Packet(new SubPacket(new GamePacket(0x0e, responseData))
+            {
+                SourceId = gameAccount.SelectedCharacter.Id,
+                TargetId = gameAccount.SelectedCharacter.Id
+            });
+
+            _connection.Send(packet.ToBytes(_blowfish));
+
+            Log.Instance.Success("Character ID# 0x" + gameAccount.SelectedCharacter.Id.ToString("X") + " created!");
         }
 
         private void SelectCharacter(SubPacket subPacket)
@@ -216,6 +238,27 @@ namespace PrimalLauncher
             Packet characterSelectedPacket = new Packet(new GamePacket(0x0f, response));
             _connection.Send(characterSelectedPacket.ToBytes(_blowfish));
             Log.Instance.Info("Character selected.");
+        }
+
+        public void DeleteCharacter(SubPacket subPacket, byte[] responseData)
+        {
+            byte slot = subPacket.Data[0x20];
+            var gameAccount = User.Instance.GameAccount;
+            gameAccount.SelectedCharacterSlot = subPacket.Data[0x20];
+            uint id = BitConverter.ToUInt32(subPacket.Data, 0x18);
+            responseData.Write(0x40, GameServer.GetNameBytes(gameAccount.GetCharacterById(id).WorldId));
+
+            Packet packet = new Packet(new SubPacket(new GamePacket(0x0e, responseData))
+            {
+                SourceId = gameAccount.SelectedCharacter.Id,
+                TargetId = gameAccount.SelectedCharacter.Id
+            });
+
+            _connection.Send(packet.ToBytes(_blowfish));
+
+            gameAccount.Characters[slot] = null;
+            User.Instance.Save();
+            Log.Instance.Success("Character deleted.");
         }
 
         public override void ServerTransition()

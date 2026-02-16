@@ -23,9 +23,11 @@ namespace PrimalLauncher
     public class commandForced : EventRequest
     {
         public Command CommandId { get; set; }
+        public byte[] Data { get; set; }
 
         public commandForced(byte[] data) : base(data)
         {
+            Data = data;
             CommandId = (Command)(data[0x15] << 8 | data[0x14]);
             OwnerId = 0;
         }
@@ -47,10 +49,12 @@ namespace PrimalLauncher
                 case Command.BattleStance:
                 case Command.NormalStance:
                     User.Instance.Character.ToggleStance(CommandId);
-
                     break;
                 case Command.Mount:
                     User.Instance.Character.ToggleMount(Command.Mount, (RequestPacket[0x41] == 0x05 ? true : false));
+                    break;
+                case Command.ChangeHotbar:
+                    User.Instance.Character.CharaWork.CurrentClass.ChangeHotbar(Data);
                     break;
             }
 

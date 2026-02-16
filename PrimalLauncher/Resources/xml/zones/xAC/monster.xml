@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<MonsterGroups>
+    <GroupMonster>
+        <Monster family="Cactus" className="CactusLesserStandard">
+            <classId>2100915</classId>
+            <position x="-1053.7018" y="56.790398" z="59.52801" r="2.7040958" zoneId="172" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Ogre" className="OgreLesserStandard">
+            <classId>2102503</classId>
+            <position x="-1155.9829" y="70.82588" z="1.9117025" r="1.7850926" zoneId="172" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Orebeetle" className="OrebeetleLesserStandard">
+            <classId>2102103</classId>
+            <position x="-1158.4832" y="56.913757" z="222.02235" r="0.5421278" zoneId="172" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+</MonsterGroups>

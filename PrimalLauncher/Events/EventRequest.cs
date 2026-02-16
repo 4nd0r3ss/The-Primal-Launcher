@@ -49,7 +49,7 @@ namespace PrimalLauncher
         public string Callback { get; set; }
         public string Name { get; set; }
         public bool IsQuestion { get; set; }
-        public uint?[] Selection { get; set; }
+        public object[] Selection { get; set; }
         public QuestPhaseStep QuestStep { get; set; }
         public bool ReturnToOwner { get; set; }
         public byte[] Data { get; set; }
@@ -69,6 +69,12 @@ namespace PrimalLauncher
 
         private void ExecuteStepFunction(Actor eventOwner, uint questId)
         {
+            //if (User.Instance.Character.CurrentZoneisInstance())
+            //{
+            //    InvokeActorEvent(eventOwner);
+            //}
+
+
             Callback = QuestStep.Value ?? "";
             QuestId = QuestStep.QuestId > 0 ? QuestStep.QuestId : questId;
 
@@ -280,7 +286,7 @@ namespace PrimalLauncher
         public void GetQuestionSelection()
         {            
             var parameters = LuaParameters.ReadParameters(Data, 0x21);
-            List<uint?> result = new List<uint?>();            
+            List<object> result = new List<object>();            
 
             for (int i = 0; i < parameters.Count; i++)
             {
@@ -290,6 +296,8 @@ namespace PrimalLauncher
 
                 if (parameters[i] == null)
                     result.Add(null);
+                else if (parameters[i] is string)
+                    result.Add(parameters[i]);
                 else
                     result.Add(Convert.ToUInt32(parameters[i]));
             }
@@ -343,9 +351,27 @@ namespace PrimalLauncher
                 toExecute = OnCutsceneEnd;
 
             if (toExecute != null && toExecute.Count > 0)
-                QuestPhaseStep.ExecuteStaticTasks(toExecute);
+            {
+                foreach (KeyValuePair<string, string> task in toExecute)
+                    QuestPhaseStep.ExecuteStaticTasks(task);
+            }                
         }
 
-     
+        public void SendTalkResponse(string functionName, List<object> parameters, bool isQuestion = false)
+        {
+            List<object> toSend = new List<object>
+            {
+                (sbyte)1,
+                Encoding.ASCII.GetBytes("talkDefault"),
+                Encoding.ASCII.GetBytes(functionName)
+            };
+
+            toSend.AddRange(parameters);
+
+            RequestParameters = new LuaParameters() { Parameters = toSend.ToArray() };
+            Response();
+            Callback = "talkDefault";
+            IsQuestion = isQuestion;
+        }
     }
 }

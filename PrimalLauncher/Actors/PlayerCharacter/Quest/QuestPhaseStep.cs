@@ -58,8 +58,8 @@ namespace PrimalLauncher
 
         public bool ExecuteSelectedOption()
         {
-            uint? selection = EventManager.Instance.CurrentEvent.Selection[0];
-            uint?    subSelection = EventManager.Instance.CurrentEvent.Selection.Length > 1 ? EventManager.Instance.CurrentEvent.Selection[1] : 0;
+            uint? selection = (uint?)EventManager.Instance.CurrentEvent.Selection[0];
+            uint?    subSelection = EventManager.Instance.CurrentEvent.Selection.Length > 1 ? (uint?)EventManager.Instance.CurrentEvent.Selection[1] : 0;
             bool finishEvent = false;
             QuestionOption option = QuestionOptions.FirstOrDefault(x => x.Selection == selection && x.SubSelection == subSelection);
 
@@ -96,57 +96,58 @@ namespace PrimalLauncher
         {
             if (taskList.Count > 0)
             {
-                ExecuteInstanceTasks(taskList);
-                ExecuteStaticTasks(taskList, QuestId);
+                foreach(KeyValuePair<string,string> task in taskList)
+                {
+                    if (!string.IsNullOrEmpty(task.Key))
+                        Log.Instance.Warning("Executing task: " + task.Key + (!string.IsNullOrEmpty(task.Value) ? ", " + task.Value : ""));
+
+                    ExecuteInstanceTasks(task);
+                    ExecuteStaticTasks(task, QuestId);
+                }                
             }
         }
 
-        private void ExecuteInstanceTasks(List<KeyValuePair<string, string>> taskList)
+        private void ExecuteInstanceTasks(KeyValuePair<string, string> task)
         {
             Actor actorRef = ActorClassId > 0 ? User.Instance.Character.GetCurrentZone().GetActorByClassId(ActorClassId) : null;
 
-            foreach (var task in taskList)
+            switch (task.Key)
             {
-                if (!string.IsNullOrEmpty(task.Key))
-                    Log.Instance.Warning("Executing task: " + task.Key + (!string.IsNullOrEmpty(task.Value) ? ", " + task.Value : ""));
-
-                switch (task.Key)
-                {
-                    case "Enabled":
-                        typeof(Event).GetProperty(task.Key).SetValue(actorRef.Events.Find(x => x.Name == Event), Convert.ToByte(task.Value));
-                        actorRef.SetEventStatus();
-                        break;
-                    case "QuestIcon":
-                        actorRef.QuestIcon = Convert.ToInt32(task.Value);
-                        actorRef.SetQuestIcon();
-                        break;
-                    case "Sleep":
-                        Thread.Sleep((int)(1000 * Convert.ToDecimal(task.Value)));
-                        break;
-                    case "StepFunction": //execute function defined in the step 'value' attribute.
-                        EventManager.Instance.CurrentEvent.InitLuaParameters();
-                        EventManager.Instance.CurrentEvent.DelegateEvent(QuestId, Value, null);
-                        break;
-                    case "TalkDefault":
-                        EventManager.Instance.CurrentEvent.InitLuaParameters();
-                        EventManager.Instance.CurrentEvent.DelegateEvent(Actor.GetTalkCode(), actorRef.TalkFunctions[0], null);
-                        break;
-                    case "SpawnActor":
-                        //User.Instance.Character.Journal.GetQuestById(QuestId).CurrentPhase.SpawnActor(Convert.ToUInt32(task.Value), true);
-                        break;
-                    case "DelegateEvent":
-                        EventManager.Instance.CurrentEvent.InitLuaParameters();
-                        EventManager.Instance.CurrentEvent.DelegateEvent(QuestId, task.Value, new object[] { null, null, null, null });
-                        break;
-                    case "StartTalkEvent":
-                        EventManager.Instance.CurrentEvent.InitLuaParameters();
-                        actorRef.StartEvent("talkDefault");
-                        break;
-                    case "PhaseCounterIncrement":
-                        ExecuteTaskList(User.Instance.Character.Journal.GetQuestById(QuestId).CurrentPhase.CheckCounter());
-                        break;
-                }
+                case "Enabled":
+                    typeof(Event).GetProperty(task.Key).SetValue(actorRef.Events.Find(x => x.Name == Event), Convert.ToByte(task.Value));
+                    actorRef.SetEventStatus();
+                    break;
+                case "QuestIcon":
+                    actorRef.QuestIcon = Convert.ToInt32(task.Value);
+                    actorRef.SetQuestIcon();
+                    break;
+                case "Sleep":
+                    Thread.Sleep((int)(1000 * Convert.ToDecimal(task.Value)));
+                    break;
+                case "StepFunction": //execute function defined in the step 'value' attribute.
+                    EventManager.Instance.CurrentEvent.InitLuaParameters();
+                    EventManager.Instance.CurrentEvent.DelegateEvent(QuestId, Value, null);
+                    break;
+                case "TalkDefault":
+                    EventManager.Instance.CurrentEvent.InitLuaParameters();
+                    EventManager.Instance.CurrentEvent.DelegateEvent(Actor.GetTalkCode(), actorRef.TalkFunctions.FirstOrDefault(x => x.TalkCode == 0).FunctionName, null);
+                    break;
+                case "SpawnActor":
+                    //User.Instance.Character.Journal.GetQuestById(QuestId).CurrentPhase.SpawnActor(Convert.ToUInt32(task.Value), true);
+                    break;
+                case "DelegateEvent":
+                    EventManager.Instance.CurrentEvent.InitLuaParameters();
+                    EventManager.Instance.CurrentEvent.DelegateEvent(QuestId, task.Value, new object[] { null, null, null, null });
+                    break;
+                case "StartTalkEvent":
+                    EventManager.Instance.CurrentEvent.InitLuaParameters();
+                    actorRef.StartEvent("talkDefault");
+                    break;
+                case "PhaseCounterIncrement":
+                    ExecuteTaskList(User.Instance.Character.Journal.GetQuestById(QuestId).CurrentPhase.CheckCounter());
+                    break;
             }
+
         }
 
         /// <summary>
@@ -154,85 +155,102 @@ namespace PrimalLauncher
         /// </summary>
         /// <param name="taskList"></param>
         /// <param name="questId"></param>
-        public static void ExecuteStaticTasks(List<KeyValuePair<string, string>> taskList, uint questId = 0)
+        public static void ExecuteStaticTasks(KeyValuePair<string, string> task, uint questId = 0)
         {
-            foreach (var task in taskList)
+            switch (task.Key)
             {
-                if (!string.IsNullOrEmpty(task.Key))
-                    Log.Instance.Warning("Executing task: " + task.Key + (!string.IsNullOrEmpty(task.Value) ? ", " +  task.Value : ""));
+                case "AddKeyItem":
+                    User.Instance.Character.Inventory.AddKeyItem(task.Value);
+                    break;
+                case "FinishQuest":
+                    User.Instance.Character.Journal.FinishQuest(Convert.ToUInt32(task.Value));
+                    break;
+                case "AddQuest":
+                    User.Instance.Character.Journal.AddQuest(Convert.ToUInt32(task.Value));
+                    break;
+                case "GoToZone":
+                    World.Instance.ChangeZone(EntryPoints.Get(Convert.ToUInt32(task.Value)), 0x0F);
+                    break;
+                case "TurnBack":
+                    User.Instance.Character.TurnBack(Convert.ToSingle(task.Value));
+                    break;
+                case "NpcLSAdd":
+                    User.Instance.Character.Linkshell.AddLinkpearl(Convert.ToInt32(task.Value));
+                    break;
+                case "NpcLSMessage":
+                    User.Instance.Character.Linkshell.NpcNewMessage(Convert.ToInt32(task.Value));
+                    break;
+                case "SetPlayerPosition":
+                    User.Instance.Character.Position.Set(task.Value);
+                    break;
+                case "UpdateQuest":
+                    User.Instance.Character.Journal.UpdateQuest(questId, Convert.ToInt32(task.Value));
+                    break;
+                case "AcceptQuest":
+                    User.Instance.Character.Journal.AcceptQuest(questId);
+                    break;
+                case "CloseTutorialWidget":
+                    World.Instance.CloseTutorialWidget();
+                    break;
+                case "BattleTutorialStart":
+                    BattleTutorial.Instance.Start();
+                    break;
+                case "EndPhase":
+                    User.Instance.Character.Journal.GetQuestById(questId).EndPhase();
+                    break;
+                case "AddExp":
+                    User.Instance.Character.CharaWork.AddExp(Convert.ToInt32(task.Value));
+                    break;
+                case "AddGil":
+                    User.Instance.Character.Inventory.AddGil(Convert.ToInt32(task.Value));
+                    break;
+                case "RemoveActor":
+                    User.Instance.Character.Journal.GetQuestById(questId).CurrentPhase.RemoveActor(Convert.ToUInt32(task.Value));
+                    break;
+                case "ToInstance":
+                    World.Instance.ToInstance(Convert.ToUInt32(task.Value));
+                    break;
+                case "ExitInstance":
+                    World.Instance.ZoneInstance.Exit();
+                    break;
+                case "DisableStep":
+                    User.Instance.Character.Journal.GetQuestById(questId).CurrentPhase.Steps[Convert.ToInt32(task.Value)].Done = true;
+                    break;
+                case "EnableStep":
+                    User.Instance.Character.Journal.GetQuestById(questId).CurrentPhase.Steps[Convert.ToInt32(task.Value)].Done = false;
+                    break;
+                case "NoMapMarker":
+                    User.Instance.Character.Journal.GetQuestById(questId).NoMapMarker = Convert.ToBoolean(task.Value);
+                    break;
+                case "TextSheet":
+                    World.SendTextSheet(task.Value);
+                    break;
+                case "StartQuestDirectorNotice":
+                    string functionName;
+                    int delay = 0;
 
-                switch (task.Key)
-                {
-                    case "AddKeyItem":
-                        User.Instance.Character.Inventory.AddKeyItem(task.Value);
-                        break;
-                    case "FinishQuest":
-                        User.Instance.Character.Journal.FinishQuest(Convert.ToUInt32(task.Value));
-                        break;
-                    case "AddQuest":
-                        User.Instance.Character.Journal.AddQuest(Convert.ToUInt32(task.Value));
-                        break;
-                    case "GoToZone":
-                        World.Instance.ChangeZone(EntryPoints.Get(Convert.ToUInt32(task.Value)), 0x0F);
-                        break;
-                    case "TurnBack":
-                        User.Instance.Character.TurnBack(Convert.ToSingle(task.Value));
-                        break;
-                    case "NpcLSAdd":
-                        User.Instance.Character.Linkshell.NpcAddLinkpearl(Convert.ToInt32(task.Value));
-                        break;
-                    case "NpcLSMessage":
-                        User.Instance.Character.Linkshell.NpcNewMessage(Convert.ToInt32(task.Value));
-                        break;
-                    case "SetPlayerPosition":
-                        User.Instance.Character.Position.Set(task.Value);
-                        break;
-                    case "UpdateQuest":
-                        User.Instance.Character.Journal.UpdateQuest(questId, Convert.ToInt32(task.Value));
-                        break;
-                    case "AcceptQuest":
-                        User.Instance.Character.Journal.AcceptQuest(questId);
-                        break;
-                    case "CloseTutorialWidget":
-                        World.Instance.CloseTutorialWidget();
-                        break;
-                    case "BattleTutorialStart":
-                        BattleTutorial.Instance.Start();
-                        break;
-                    case "EndPhase":
-                        User.Instance.Character.Journal.GetQuestById(questId).EndPhase();
-                        break;
-                    case "AddExp":
-                        User.Instance.Character.AddExp(Convert.ToInt32(task.Value));
-                        break;
-                    case "AddGil":
-                        User.Instance.Character.Inventory.AddGil(Convert.ToInt32(task.Value));
-                        break;
-                    case "RemoveActor":
-                        User.Instance.Character.Journal.GetQuestById(questId).CurrentPhase.RemoveActor(Convert.ToUInt32(task.Value));
-                        break;
-                    case "ToInstance":
-                        World.Instance.ToInstance(Convert.ToUInt32(task.Value));
-                        break;
-                    case "ExitInstance":
-                        World.Instance.ZoneInstance.Exit();
-                        break;
-                    case "DisableStep":
-                        User.Instance.Character.Journal.GetQuestById(questId).CurrentPhase.Steps[Convert.ToInt32(task.Value)].Done = true;
-                        break;
-                    case "EnableStep":
-                        User.Instance.Character.Journal.GetQuestById(questId).CurrentPhase.Steps[Convert.ToInt32(task.Value)].Done = false;
-                        break;
-                    case "NoMapMarker":
-                        User.Instance.Character.Journal.GetQuestById(questId).NoMapMarker = Convert.ToBoolean(task.Value);
-                        break;
-                    case "TextSheet":
-                        World.SendTextSheet(task.Value);
-                        break;
-                    case "StartQuestDirectorNotice":
-                        ((QuestDirector)User.Instance.Character.GetCurrentZone().GetDirector("Quest")).StartEvent("noticeEvent", task.Value);
-                        break;
-                }
+                    if(task.Value.IndexOf(',') >= 0)
+                    {
+                        string[] split = task.Value.Split(',');
+                        functionName = split[0];
+                        delay = (int)(double.Parse(split[1]) * 1000);
+                    }
+                    else
+                    {
+                        functionName = task.Value;
+                    }
+                    
+                    ((QuestDirector)User.Instance.Character.GetCurrentZone().GetDirector("Quest")).StartEvent("noticeEvent", functionName, delay);
+                    break;
+                case "MapObjAction":
+                    var values = task.Value.Split(',');
+                    var obj = User.Instance.Character.GetCurrentZone().MapObjects.FirstOrDefault(x => x.ObjectId == Convert.ToInt32(values[0]));
+
+                    if (obj != null)
+                    {
+                        obj.PlayAnimation(values[1]);
+                    }
+                    break;
             }
         }
     }

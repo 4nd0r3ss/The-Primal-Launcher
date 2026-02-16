@@ -21,7 +21,7 @@ using System.Xml;
 
 namespace PrimalLauncher
 {
-    public static class QuestRepository
+    public static class QuestXmlLoader
     {
         public static Quest GetFirstQuest(uint initialTown)
         {
@@ -78,7 +78,7 @@ namespace PrimalLauncher
         //TODO: temporary
         public static List<Quest> GetAvailableQuests(string fileName)
         {
-            int currentLevel = User.Instance.Character.GetCurrentLevel();
+            int currentLevel = User.Instance.Character.CharaWork.GetCurrentLevel();
 
             List<Quest> quests = new List<Quest>();
             XmlDocument questXml = new XmlDocument();

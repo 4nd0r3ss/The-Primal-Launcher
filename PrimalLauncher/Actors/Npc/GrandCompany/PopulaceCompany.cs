@@ -23,7 +23,7 @@ using System.Threading.Tasks;
 
 namespace PrimalLauncher
 {
-    public class PopulaceCompany : Populace
+    public class PopulaceCompany : PopulaceStandard
     {
         protected int CompanyId { get; set; }
         protected int StepCount { get; set; }

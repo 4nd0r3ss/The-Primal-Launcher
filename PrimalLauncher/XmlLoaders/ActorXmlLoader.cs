@@ -18,11 +18,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
+using System.Security.Policy;
 using System.Xml;
+using System.Xml.Linq;
 
 namespace PrimalLauncher
 {
-    public class ActorRepository
+    public class ActorXmlLoader
     {
         public static List<Aetheryte> GetAetherytes()
         {
@@ -51,6 +54,7 @@ namespace PrimalLauncher
 
         public static List<Actor> GetZoneNpcs(uint zoneId, string fileName = "npc.xml")
         {
+            //in case file name is passed null or empty for some reason.
             if (string.IsNullOrEmpty(fileName))
                 fileName = "npc.xml";
 
@@ -119,8 +123,8 @@ namespace PrimalLauncher
         }
 
         public static Actor LoadActor(XmlNode node, uint zoneId = 0)
-        {
-            Type type = Type.GetType("PrimalLauncher." + node.Name);
+        {         
+            Type type = Type.GetType("PrimalLauncher." + node.Name);            
 
             string className = node.Attributes["className"] != null ? node.Attributes["className"].Value : "";
 
@@ -148,19 +152,19 @@ namespace PrimalLauncher
                 type.Name == "PopulaceCompanyGLPublisher"
                 )
             )
-            {               
+            {
                 uint classId = Convert.ToUInt32(node.SelectSingleNode("classId").InnerText);
                 uint state = node.GetNodeAsUint("state"); //TODO: fix this as it is 2 bytes. so far it's alaways 0 so it's ok.
                 ushort animation = node.GetNodeAsUshort("animation");
                 int questIcon = node.GetNodeAsInt("questIcon", -1);
-                ActorData.Instance.LoadActorData(classId);
+                ActorGameFilesData.Instance.LoadActorData(classId);
      
                 Actor actor = (Actor)Activator.CreateInstance(type);
                 actor.Family = node.GetAttributeAsString("family");
                 actor.ClassId = classId;
                 actor.ClassName = node.GetAttributeAsString("className", actor.ClassName);
-                actor.NameId = ActorData.Instance.NameId;
-                actor.Appearance = new Appearance(ActorData.Instance.Graphics);
+                actor.NameId = ActorGameFilesData.Instance.NameId;
+                actor.Appearance = new Appearance(ActorGameFilesData.Instance.Graphics);
                 actor.Position = new Position(node.SelectSingleNode("position"), zoneId);
                 actor.QuestIcon = questIcon;
                 actor.SubState = new SubState { MotionPack = animation };
@@ -174,13 +178,21 @@ namespace PrimalLauncher
                     case "MapObj":
                         return LoadMapObj(actor, node);
                     case "Monster":
-                        return LoadMonster(actor, node);
+                        return LoadMonster(actor, node, zoneId);
                     case "ElevatorStandard":
                         return LoadElevatorStandard(actor, node);
                     case "RetainerFurniture":
                         return (RetainerFurniture)actor;
                     case "PopulaceFlyingShip":
                         return (PopulaceFlyingShip)actor;
+                    case "PopulaceLinkshellManager":
+                        return (PopulaceLinkshellManager)actor;
+                    case "PopulaceGuildlevePublisher":
+                        PopulaceGuildlevePublisher publisher = (PopulaceGuildlevePublisher)actor;
+                        publisher.GuildLevePackSet = GuildLeveXmlLoader.GetGuildLevePackSet(21);
+                        return publisher;
+                    case "PopulaceRetainerManager":
+                        return (PopulaceRetainerManager)actor;
                     default:
                         return actor;                       
                 }   
@@ -204,13 +216,13 @@ namespace PrimalLauncher
             return elevator;
         }
 
-        private static Monster LoadMonster(Actor actor, XmlNode node)
+        private static Monster LoadMonster(Actor actor, XmlNode node, uint zoneId)
         {
             Monster monster = (Monster)actor;
             monster.RespawnDelay = node.GetAttributeAsInt("respawnDelay");
             monster.Immobile = node.GetAttributeAsBool("immobile");
             monster.DisableAutoAttack = node.GetAttributeAsBool("disableAutoAttack");
-
+            monster.SpawnPoint = new Position(node.SelectSingleNode("position"), zoneId);
             return monster;
         }
 
@@ -230,61 +242,61 @@ namespace PrimalLauncher
             shopSalesman.WelcomeTalk = node.GetAttributeAsInt("welcomeTalk");
             shopSalesman.MenuId = node.GetAttributeAsInt("menuId");
             shopSalesman.ShopType = node.Attributes["shopType"] != null ? (ShopType)Enum.Parse(typeof(ShopType), node.Attributes["shopType"].Value) : 0;
-            shopSalesman.ItemSet = node.GetAttributeAsInt("itemSet");// node.GetAttributeAsIntArray("itemSet",',');
+            shopSalesman.ItemSet = node.GetAttributeAsInt("itemSet");
             return shopSalesman;
         }
 
-        private static KeyValuePair<uint, string> GenerateDefaultTalkFunction(uint classId)
+        private static TalkFunction? GenerateDefaultTalkFunction(uint classId)
         {                      
-            if (classId < 3000000 && ActorData.Instance.NameId > 0) //< 3000000 is NPC. > is monster.
+            if (classId < 3000000 && ActorGameFilesData.Instance.NameId > 0) //< 3000000 is NPC. > is monster.
             {
-                string displayName = ActorData.Instance.Name;
+                string displayName = ActorGameFilesData.Instance.Name;
                 displayName = char.ToUpper(displayName[0]) + displayName.Substring(1, displayName.Length - 1);
 
                 displayName = displayName.Replace(" ", "")
                     .Replace("`", "")
                     .Replace("\0", "")
                     .Replace("'", "");
-               
-                return new KeyValuePair<uint, string>(
-                    0,
-                    "defaultTalkWith" + displayName + "_001"
-                );
+
+                return new TalkFunction(0,"defaultTalkWith" + displayName + "_001", "");               
             }
             else
             {
-                return new KeyValuePair<uint, string>();
+                return null; 
             }
         }
 
-        private static Dictionary<uint, string> GetTalkFunctions(uint classId, XmlNode talkFunctionsNode)
+        private static List<TalkFunction> GetTalkFunctions(uint classId, XmlNode talkFunctionsNode)
         {
-            Dictionary<uint, string> functions = new Dictionary<uint, string>();
+            List<TalkFunction> functions = new List<TalkFunction>();
+            TalkFunction? defaultTalkFunction = GenerateDefaultTalkFunction(classId);
 
-            //try to generate a default talk function for the actor. If successful, add to the list of talk functions.
-            KeyValuePair<uint, string> defaultFunction = GenerateDefaultTalkFunction(classId);
+            //if it was able to generate a default talk functions, add it.
+            if (defaultTalkFunction != null)
+                functions.Add((TalkFunction)defaultTalkFunction);
 
-            if (!string.IsNullOrEmpty(defaultFunction.Value))
-                functions.Add(defaultFunction.Key, defaultFunction.Value);
-
-            //get additional talk functions from the xml file.
+            //get talk functions from xml file
             if (talkFunctionsNode != null && talkFunctionsNode.ChildNodes != null && talkFunctionsNode.ChildNodes.Count > 0)
             {
                 foreach (XmlNode node in talkFunctionsNode.ChildNodes)
-                {                    
+                {
+                    TalkFunction function = new TalkFunction(0, node.GetAttributeAsString("name"), node.GetAttributeAsString("parameters"));
+                    
+                    //I don't think this will ever return anything. need to check.
                     uint questId = node.GetAttributeAsUint("questId");
-                    string function = node.GetAttributeAsString("name");
 
-                    //if there is already a default talk function, replace the one generated above, if any.
-                    if (functions.ContainsKey(0) && questId == 0)
-                    {
-                        functions[0] = function;
-                        continue;
+                    //here we check if the function in the xml is a replacement for the default talk function
+                    //created by the GenerateDefaultTalkFunction method. It's useful in cases where the actual
+                    //default talk function for an actor in the lua script has a different naming scheme or when 
+                    //the default function name has a typo (there is a bunch of them).
+                    if (functions.Any(x => x.TalkCode == 0) && questId == 0)
+                    {                      
+                        functions.Remove((TalkFunction)defaultTalkFunction);                        
                     }
 
-                    functions.Add(questId, function);                        
+                    functions.Add(function);
                 }
-            }            
+            }
 
             return functions;
         }
@@ -368,48 +380,51 @@ namespace PrimalLauncher
         {
             return new Actor
             {
+                ClassName = "PopulaceStandard",
                 ClassId = classId,
                 Position = User.Instance.Character.Position
             };
         }
 
-        private class ActorData
+        public static List<Actor> GetZoneMonsters(uint zoneId)
         {
-            private static ActorData _instance { get; set; }
-            public readonly DataTable _actorsGraphics = GameData.Instance.GetGameData("actorclass_graphic");
-            public readonly DataTable _actorsNameIds = GameData.Instance.GetGameData("actorclass");
-            public readonly DataTable _actorsNames = GameData.Instance.GetGameData("xtx/displayName");
+            XmlDocument monsterFile = new XmlDocument();
+            List<Actor> monsters = new List<Actor>();
+            string zoneDir = @"" + zoneId.ToString("X");
+            string fileNamePath = zoneDir + ".monster.xml";
+            monsterFile.LoadFromResource("zones.x" + fileNamePath);
 
-            public DataRow Graphics { get; set; }
-            public int NameId { get; set; }
-            public string Name { get; set; }
-
-            public static ActorData Instance
+            if (monsterFile.HasChildNodes)
             {
-                get
+                try
                 {
-                    if(_instance == null)
-                        _instance = new ActorData();
+                    XmlElement root = monsterFile.DocumentElement;
 
-                    return _instance;
+                    foreach(XmlNode groupNode in root.ChildNodes)
+                    {
+                        MonsterGroup group = new MonsterGroup(zoneId);
+
+                        foreach(XmlNode monsterNode in groupNode.ChildNodes)
+                        {
+                            Actor actor = LoadActor(monsterNode, zoneId);                            
+
+                            if (actor != null)
+                            {
+                                //crappy modeling just for now until I think of a better solution.
+                                ((Monster)actor).BattleGroup = group;                               
+                                group.MemberList.Add((Monster)actor);
+                                monsters.Add(actor);
+                            }                                
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    Log.Instance.Warning(e.Message);
                 }
             }
 
-            private ActorData(){}
-
-            public void LoadActorData(uint classId)
-            {
-                DataRow[] actorsGraphicsSelect = _actorsGraphics.Select("id = '" + classId + "'");
-                Graphics = actorsGraphicsSelect != null && actorsGraphicsSelect.Length > 0 ? actorsGraphicsSelect[0] : null;
-
-                DataRow[] actorsNameIdsSelect = _actorsNameIds.Select("id = '" + classId + "'");
-                DataRow actorNameId = actorsNameIdsSelect != null && actorsNameIdsSelect.Length > 0 ? actorsNameIdsSelect[0] : null;
-                NameId = actorNameId != null ? Convert.ToInt32(actorNameId.ItemArray[1]) : 0;
-
-                DataRow[] actorsNameSelect = _actorsNames.Select("id = '" + NameId + "'");
-                DataRow actorNames = actorsNameSelect != null && actorsNameSelect.Length > 0 ? actorsNameSelect[0] : null;
-                Name = (actorNames.ItemArray[1] + "");
-            }
-        }
+            return monsters;
+        }    
     }
 }

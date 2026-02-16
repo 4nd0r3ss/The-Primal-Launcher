@@ -45,18 +45,19 @@ namespace PrimalLauncher
              
         public void ProcessIncoming(byte[] data)
         {
-            try
+            string eventName = GetEventType(data);
+            Type type = Type.GetType(eventName);
+
+            if (type != null)
             {
-                string eventName = GetEventType(data);
-                Type type = Type.GetType(eventName);
                 CurrentEvent = (EventRequest)Activator.CreateInstance(type, data);
                 CurrentEvent.Execute();
-            }catch(Exception e)
+            }
+            else
             {
-                Log.Instance.Error("EventManager.ProcessIncoming: " + e.Message);
-                File.WriteAllBytes("errorOutput.txt", data);
-                //throw e;
-            }                             
+                File.WriteAllBytes("event_manager_error"+DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".txt", data);
+                Log.Instance.Error("EventManager: Event type '" + eventName + "' not found.");
+            }                                    
         }    
         
         private string GetEventType(byte[] data)

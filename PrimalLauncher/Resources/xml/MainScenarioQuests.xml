@@ -22,7 +22,7 @@
 		</phase>
 		<phase>
 			<step director="opening" event="noticeEvent" value="processTtrBtl001" />
-			<step event="commandForced" value="noticeEvent" onFinish="Sleep:1.5;StartQuestDirectorNotice:noticeEvent" />
+			<step event="commandForced" value="noticeEvent" onFinish="StartQuestDirectorNotice:noticeEvent,1" />
 			<step director="quest" event="noticeEvent" value="processTtrBtl002" onDelegate="Sleep:2" />
 			<step director="quest" event="noticeEvent" value="processEvent000_3" onExecute="AddKeyItem:balloonfish" onFinish="Sleep:5;ToInstance:3" />
 		</phase>
@@ -33,16 +33,12 @@
 				<option selection="2" onExecute="FinishEvent" />
 			</step>
 		</phase>
-	</quest>
-	
+	</quest>	
 	<quest id="110002" name="Man0l1" level="1" autoAccept="true" director="01">
 		<phase>			
 			<step actorClassId="1000137" questIcon="2" event="talkDefault" value="processEvent020" onExecute="QuestIcon:0" endPhase="true" onFinish="QuestIcon:0;ExitInstance;NpcLSAdd:1;UpdateQuest:5" />
 		</phase>
-	</quest>
-	
-	
-	
+	</quest>	
 	
 	<quest id="110005" name="Man0g0" level="1" startRegion="5" autoAccept="true" director="01">
 		<phase>
@@ -52,23 +48,14 @@
 			<step actorClassId="1000009" questIcon="2" event="pushDefault" value="processTtrNomal002" onExecute="Enabled:0" />
 			<step actorClassId="1000009" event="talkDefault" value="processTtrNomal003" onExecute="QuestIcon:0" />
 		</phase>
-		<phase>
-			<step actorClassId="1000009" questIcon="2" event="talkDefault" value="processEvent000_1" onExecute="QuestIcon:0" />
-			<step actorClassId="1000010" questIcon="2" event="talkDefault" value="processEvent000_2" onExecute="QuestIcon:0" />
-		</phase>
-		<phase>
-			<step actorClassId="1000009" questIcon="2" event="talkDefault" value="processEvent000_3" onExecute="QuestIcon:0;" />
-		</phase>
-		<phase>
-			<step actorClassId="1000010" questIcon="2" event="talkDefault" value="processEvent000_4" onExecute="QuestIcon:0" />
-		</phase>		
+		
 		<phase>
 			<step actorClassId="1000009" questIcon="2" event="talkDefault" onExecute="QuestIcon:0" onFinish="BattleTutorialStart;UpdateQuest:5" />
 		</phase>
 		<phase>
 			<step director="opening" event="noticeEvent" value="processTtrBtl001" />
-			<step event="commandForced" onFinish="Sleep:1.5;StartQuestDirectorNotice:noticeEvent" />
-			<step director="quest" event="noticeEvent" value="processTtrBtl002" onDelegate="Sleep:2" />			
+			<step event="commandForced" onFinish="StartQuestDirectorNotice:noticeEvent,1" />
+			<step director="quest" event="noticeEvent" value="processTtrBtl002" onDelegate="Sleep:3" />			
 			<step director="quest" event="noticeEvent" value="processEvent020_1" onExecute="AddKeyItem:treant vine" onFinish="Sleep:5;ToInstance:7;UpdateQuest:10" />
 		</phase>
 		<phase>			
@@ -91,7 +78,7 @@
 			<step actorClassId="1001059" event="talkDefault" value="processEvent100_7" repeatable="true" />
 			<step actorClassId="1000562" event="talkDefault" value="processEvent100_8" repeatable="true" />
 			<step actorClassId="1001648" event="talkDefault" value="processEvent100_9" repeatable="true" />
-			<step actorClassId="1000230" event="talkDefault" value="processEvent110" questIcon="2" endPhase="true" onFinish="QuestIcon:0;ExitInstance;NpcLSAdd:1;UpdateQuest:5" />
+			<step actorClassId="1000230" event="talkDefault" value="processEvent110" questIcon="2" endPhase="true" onFinish="QuestIcon:0;MapObjAction:2937,open;ExitInstance;NpcLSAdd:1;UpdateQuest:5" />
 		</phase>
 		<phase>			
 			<step actorClassId="1000230" event="talkDefault" value="processEvent110_2" repeatable="true" />
@@ -110,7 +97,7 @@
 		</phase>
 		<phase>
 			<actors>
-				<Populace className="PopulaceStandard">
+				<PopulaceStandard>
 					<questIcon>3</questIcon>
 					<classId>1099046</classId>
 					<position zoneId="206" x="-340.62" y="8.09" z="-1684.69" r="1.17" />
@@ -118,7 +105,7 @@
 						<noticeEvent priority="0" enabled="0" />
 						<pushDefault enabled="1" radius="3.0" silent="false" outwards="false" />
 					</events>
-				</Populace>
+				</PopulaceStandard>
 			</actors>					
 			<step actorClassId="1099046" event="pushDefault" value="processEvent130" onFinish="ToInstance:13" />			
 		</phase>
@@ -180,7 +167,7 @@
 		</phase>
 		<phase>
 			<step director="opening" event="noticeEvent" value="processTtrBtl001" />
-			<step event="commandForced" onFinish="Sleep:1.5;StartQuestDirectorNotice:noticeEvent" />
+			<step event="commandForced" onFinish="StartQuestDirectorNotice:noticeEvent,1" />
 			<step director="quest" event="noticeEvent" value="processTtrBtl002" onDelegate="Sleep:2" />
 			<step director="quest" event="noticeEvent" value="processEvent020" onExecute="AddKeyItem:velodyna cosmos" onFinish="Sleep:5;ToInstance:11" />
 		</phase>
@@ -190,7 +177,7 @@
 	</quest>
 	<quest id="110010" name="Man0u1" level="1" startRegion="175" autoAccept="true" director="01">
 		<phase>			
-			<step actorClassId="1000841" questIcon="2" event="talkDefault" value="processEvent010" onExecute="QuestIcon:0" endPhase="true" onFinish="ExitInstance;NpcLSAdd:1" />
+			<step actorClassId="1000841" questIcon="2" event="talkDefault" value="processEvent010" onExecute="QuestIcon:0" endPhase="true" onFinish="ExitInstance;NpcLSAdd:1;MapObjAction:4040,open;MapObjAction:4038,open;MapObjAction:4039,open;UpdateQuest:5;" />
 		</phase>
 	</quest>
 </quests>

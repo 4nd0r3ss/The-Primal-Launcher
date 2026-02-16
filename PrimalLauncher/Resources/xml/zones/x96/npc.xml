@@ -1,20 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <chara>
-	<npc>
-		<Monster family="Lemming" className="HareStandard" respawnDelay="30">
-			<classId>2104028</classId>	
-			<position x="333.2" y="5.84" z="-943" r="-1.94" />
-			<events>
-				<noticeEvent priority="0" enabled="1" silent="1" />
-			</events>
-		</Monster>
-		<Monster family="Funguar" className="FunguarLesserStandard" respawnDelay="30">
-			<classId>2105901</classId>
-			<position x="335.2" y="5.84" z="-940" r="-1.94" />
-			<events>
-				<noticeEvent priority="0" enabled="1" silent="1" />
-			</events>
-		</Monster>
+	<npc>		
 		<ZoneSwitch>
 			<classId>1090372</classId>
 			<position x="320.1" y="6.5" z="-1025.9" r="0" />
@@ -67,5 +53,30 @@
             <classId>1600061</classId>
             <position x="292.1" y="5.1" z="-519.5" r="-3" />
         </PopulaceShopSalesman>
+        <PopulaceStandard zoneId="150">
+            <classId>1090273</classId>
+            <position x="394.23" y="4.97" z="-782.4" r="0" />
+            <animation>0</animation>
+        </PopulaceStandard>
+        <PopulaceStandard>
+            <classId>1090067</classId>
+            <position x="-642.01" y="20.07" z="-1060.05" r="-1.88" zoneId="150" />
+            <animation>0</animation>
+        </PopulaceStandard>
+        <PopulaceStandard>
+            <classId>1090066</classId>
+            <position x="-639.87" y="22.97" z="-1086.22" r="-2.62" zoneId="150" />
+            <animation>0</animation>
+        </PopulaceStandard>       
+        <PopulaceStandard>
+            <classId>1080076</classId>
+            <position x="55.13" y="21.3" z="-708.95" r="2" zoneId="150" />
+            <animation>0</animation>
+        </PopulaceStandard>
+        <PopulaceStandard>
+            <classId>1090408</classId>
+            <position x="328.62" y="4.34" z="-646.33" r="2.05" zoneId="150" />
+            <animation>0</animation>
+        </PopulaceStandard>
 	</npc>
 </chara>

@@ -21,7 +21,7 @@ using System.Xml;
 
 namespace PrimalLauncher
 {
-    public static class ZoneRepository
+    public static class ZoneXmlLoader
     {
         public static List<Zone> GetZones()
         {

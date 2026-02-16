@@ -28,8 +28,7 @@ namespace PrimalLauncher
     public class Actor
     {
         public CharaWork CharaWork { get; set; }
-        public uint CurrentTargetId { get; set; }
-        public bool IsEngaged { get; set; }
+        
 
         public uint Id { get; set; }
         public byte[] Name { get; set; } = new byte[0x20];
@@ -44,7 +43,7 @@ namespace PrimalLauncher
         public uint Icon { get; set; }
         public bool CanSpawn { get; set; } //spawn lock to be used by quest actors.
         public int AutoAttackDelay { get; set; }
-        public Dictionary<uint, string> TalkFunctions { get; set; }
+        public List<TalkFunction> TalkFunctions { get; set; }
 
         #region States
         public State State { get; set; } = new State();
@@ -55,13 +54,13 @@ namespace PrimalLauncher
         public Position Position { get; set; } = new Position();
         public LuaParameters LuaParameters { get; set; }
         public List<Event> Events { get; set; } = new List<Event>();
-        public Speeds Speeds { get; set; } = new Speeds();        
-        
+        public Speeds Speeds { get; set; } = new Speeds();
+
+        public uint TargetId { get; set; }
 
         public Actor()
         {
-            CharaWork = new CharaWork();
-            CharaWork.AddNpcJob();
+            CharaWork = new CharaWork(this);            
         }
 
         public virtual void Spawn(ushort spawnType = 0, ushort isZoning = 0, int changingZone = 0)
@@ -128,14 +127,14 @@ namespace PrimalLauncher
             property.Add("charaWork.property[4]", true);
 
 
-            property.Add("charaWork.parameterSave.hp[0]", CharaWork.CurrentJob.Hp);
-            property.Add("charaWork.parameterSave.hpMax[0]", CharaWork.CurrentJob.MaxHp);
-            property.Add("charaWork.parameterSave.mp", CharaWork.CurrentJob.Mp);
-            property.Add("charaWork.parameterSave.mpMax", CharaWork.CurrentJob.MaxMp);
-            property.Add("charaWork.parameterTemp.tp", CharaWork.CurrentJob.Tp);
-            property.Add("charaWork.parameterSave.state_mainSkill[0]", CharaWork.CurrentJob.Id);
-            property.Add("charaWork.parameterSave.state_mainSkill[2]", CharaWork.CurrentJob.Id);
-            property.Add("charaWork.parameterSave.state_mainSkillLevel", CharaWork.CurrentJob.Level);
+            property.Add("charaWork.parameterSave.hp[0]", CharaWork.CurrentClass.Hp);
+            property.Add("charaWork.parameterSave.hpMax[0]", CharaWork.CurrentClass.MaxHp);
+            property.Add("charaWork.parameterSave.mp", CharaWork.CurrentClass.Mp);
+            property.Add("charaWork.parameterSave.mpMax", CharaWork.CurrentClass.MaxMp);
+            property.Add("charaWork.parameterTemp.tp", CharaWork.CurrentClass.Tp);
+            property.Add("charaWork.parameterSave.state_mainSkill[0]", CharaWork.CurrentClass.Id);
+            property.Add("charaWork.parameterSave.state_mainSkill[2]", CharaWork.CurrentClass.Id);
+            property.Add("charaWork.parameterSave.state_mainSkillLevel", CharaWork.CurrentClass.Level);
             property.Add("npcWork.hateType", (byte)0x01);
             property.FinishWritingAndSend(Id);
         }
@@ -175,9 +174,17 @@ namespace PrimalLauncher
             Packet.Send(ServerOpcode.SetAllStatus, data, Id);
         }
 
-        public void SetSubState() => Packet.Send(ServerOpcode.SetSubState, SubState.ToBytes(), Id);       
+        public void SetSubState()
+        {
+            Packet.Send(ServerOpcode.SetSubState, SubState.ToBytes(), Id);
+            //Log.Instance.Info(SubState.ToString());
+        }
 
-        public void SetMainState() => Packet.Send(ServerOpcode.SetMainState, State.ToBytes(), Id);        
+        public void SetMainState()
+        {
+            Packet.Send(ServerOpcode.SetMainState, State.ToBytes(), Id);
+            //Log.Instance.Info(State.ToString());
+        }
 
         public void CreateActor(byte code = 0)
         {
@@ -207,26 +214,32 @@ namespace PrimalLauncher
             if (isPlayer)
                 idToPrint = -1;
 
-            Buffer.BlockCopy(BitConverter.GetBytes(idToPrint), 0, data, 0x04, sizeof(uint));
-            Buffer.BlockCopy(BitConverter.GetBytes(Position.X), 0, data, 0x08, sizeof(int));
-            Buffer.BlockCopy(BitConverter.GetBytes(Position.Y), 0, data, 0x0c, sizeof(int));
-            Buffer.BlockCopy(BitConverter.GetBytes(Position.Z), 0, data, 0x10, sizeof(int));
-            Buffer.BlockCopy(BitConverter.GetBytes(Position.R), 0, data, 0x14, sizeof(int));
-            Buffer.BlockCopy(BitConverter.GetBytes(Position.FloatingHeight), 0, data, 0x1c, sizeof(int));
-            Buffer.BlockCopy(BitConverter.GetBytes(spawnType), 0, data, 0x24, sizeof(ushort));
-            Buffer.BlockCopy(BitConverter.GetBytes(isZonning), 0, data, 0x26, sizeof(ushort));
+            data.Write(new DataList()
+            {
+                { 0x04, idToPrint },
+                { 0x08, Position.X },
+                { 0x0c, Position.Y },
+                { 0x10, Position.Z },
+                { 0x14, Position.R },
+                { 0x1c, Position.FloatingHeight },
+                { 0x24, spawnType },
+                { 0x26, isZonning },
+            });            
 
             Packet.Send(ServerOpcode.SetPosition, data, Id);           
         }
         public void MoveToPosition(Position position, int moveState)
         {            
-            byte[] data = new byte[0x30];   
-            Buffer.BlockCopy(BitConverter.GetBytes(position.X), 0, data, 0x08, sizeof(int));
-            Buffer.BlockCopy(BitConverter.GetBytes(position.Y), 0, data, 0x0c, sizeof(int));
-            Buffer.BlockCopy(BitConverter.GetBytes(position.Z), 0, data, 0x10, sizeof(int));
-            Buffer.BlockCopy(BitConverter.GetBytes(position.R), 0, data, 0x14, sizeof(int));
-            Buffer.BlockCopy(BitConverter.GetBytes(moveState), 0, data, 0x18, sizeof(int));
-            Buffer.BlockCopy(BitConverter.GetBytes(position.FloatingHeight), 0, data, 0x24, sizeof(int));           
+            byte[] data = new byte[0x30];
+            data.Write(new DataList()
+            {
+                { 0x08, position.X },
+                { 0x0c, position.Y },
+                { 0x10, position.Z },
+                { 0x14, position.R },
+                { 0x18, moveState },
+                { 0x24, position.FloatingHeight},
+            });                 
 
             Packet.Send(ServerOpcode.MoveToPosition, data, Id);
         }
@@ -244,7 +257,7 @@ namespace PrimalLauncher
         public void DoEmote(byte emoteId)
         {
             byte[] data = new byte[0x10];            
-            uint targetId = CurrentTargetId > 0 ? CurrentTargetId : Id;
+            uint targetId = TargetId > 0 ? TargetId : Id;
             uint animation = 0;
             int textSheet;
 
@@ -280,28 +293,32 @@ namespace PrimalLauncher
                 animation = 0x05000000 | specialAnimations[emoteId];
             }
 
-            if (CurrentTargetId == 0)
+            if (TargetId == 0)
                 textSheet++;
 
-            Buffer.BlockCopy(BitConverter.GetBytes(animation), 0, data, 0, 4);
-            Buffer.BlockCopy(BitConverter.GetBytes(targetId), 0, data, 0x04, 4);
-            Buffer.BlockCopy(BitConverter.GetBytes(textSheet), 0, data, 0x08, 4);
+            data.Write(new DataList()
+            {
+                { 0, animation},
+                { 0x04, targetId},
+                { 0x08, textSheet},
+            });
+           
             Packet.Send(ServerOpcode.DoEmote, data, Id, targetId);
         }
 
         public void ToggleHeadDirection(bool lookAtTarget = false)
         {
-            //byte[] data = new byte[0x08];
+            byte[] data = new byte[0x08];
 
-            //if (lookAtTarget)
-            //{
-            //    Buffer.BlockCopy(BitConverter.GetBytes(User.Instance.Character.Id), 0, data, 0, 4);
-            //    Packet.Send(ServerOpcode.SetHeadToTarget, data, Id);
-            //}
-            //else
-            //{
-            //    Packet.Send(ServerOpcode.ResetHead, data, Id);
-            //}
+            if (lookAtTarget)
+            {
+                Buffer.BlockCopy(BitConverter.GetBytes(User.Instance.Character.Id), 0, data, 0, 4);
+                Packet.Send(ServerOpcode.SetHeadToTarget, data, Id);
+            }
+            else
+            {
+                Packet.Send(ServerOpcode.ResetHead, data, Id);
+            }
         }
 
         #region Event virtual methods   
@@ -343,34 +360,42 @@ namespace PrimalLauncher
             SendTalk();            
         }
 
-        public void SendTalk(string function = null)
+        public void SendTalk(string functionName = null)
         {
-            KeyValuePair<uint, string> talkFunction;
-            uint talkCode = 0;
+            TalkFunction talkFunction;           
 
-            if (!string.IsNullOrEmpty(function))            
-                talkFunction = new KeyValuePair<uint, string>(GetTalkCode(), function);           
-            else      
-                talkFunction = TalkFunctions.FirstOrDefault(x => x.Key > 0);//if there is a function for a specific quest, execute it. (used for opening mostly)        
-
-            talkCode = talkFunction.Key;
+            if (!string.IsNullOrEmpty(functionName))
+                talkFunction = new TalkFunction(GetTalkCode(), functionName);
+            else
+                talkFunction = TalkFunctions.FirstOrDefault(x => x.TalkCode > 0);//if there is a function for a specific quest, execute it. (used for opening mostly)        
 
             //if not, we try to get the default function
-            if (talkCode == 0) //zero key means nothing returned.
-            {                
-                talkFunction = TalkFunctions.FirstOrDefault(x => x.Key == 0);
+            if (talkFunction.TalkCode == 0) //zero key means nothing returned.
+            {
+                talkFunction = TalkFunctions.FirstOrDefault(x => x.TalkCode == 0);
 
-                //if the actor has the method, just call it.
-                if (talkFunction.Value != null && GetType().GetMethod(talkFunction.Value) != null)
+                //if the actor has the method, call it.
+                if (!string.IsNullOrEmpty(talkFunction.FunctionName) && GetType().GetMethod(talkFunction.FunctionName) != null)
                 {
-                    InvokeMethod(talkFunction.Value, new object[] {});
+                    InvokeMethod(talkFunction.FunctionName, new object[] { });
                     return;
                 }
 
-                talkCode = GetTalkCode();
+                talkFunction.TalkCode = GetTalkCode();
             }
 
-            EventManager.Instance.CurrentEvent.DelegateEvent(talkCode, talkFunction.Value, null);
+            object[] parameters;
+
+            if(!string.IsNullOrEmpty(talkFunction.Parameters))
+            {
+                parameters = new object[] { null };
+            }
+            else
+            {
+                parameters = null;
+            }
+
+            EventManager.Instance.CurrentEvent.DelegateEvent(talkFunction.TalkCode, talkFunction.FunctionName, null);
         }        
 
         public static uint GetTalkCode(string regionName = null)
@@ -475,10 +500,15 @@ namespace PrimalLauncher
 
         protected string MinifyClassName()
         {
-            return ClassName.Replace("Populace", "ppl")
+            if (!string.IsNullOrEmpty(ClassName))
+            {
+                return ClassName
+                //.Replace("Populace", "ppl")
+                .Replace("PopulaceStandard", "ppl")
                 .Replace("Monster", "Mon")
                 .Replace("RetainerFurniture", "rtnFurnitu")
                 .Replace("MarketEntrance", "marketEntr")
+                .Replace("PopulaceLinkshellManager", "pplLsManag")
                 .Replace("Crowd", "Crd")
                 .Replace("MapObj", "Map")
                 .Replace("Object", "Obj")
@@ -486,6 +516,12 @@ namespace PrimalLauncher
                 .Replace("Director", "Dire")
                 .Replace("Standard", "Std")
                 .Replace("Opening", "opening");
+            }
+            else
+            {
+                return "";
+            }
+            
         }
 
         protected int GetEventCode(string eventName)
@@ -536,13 +572,16 @@ namespace PrimalLauncher
                 resultBytes = CommandResult.ToBytes(resultList);
             }
 
-            Buffer.BlockCopy(BitConverter.GetBytes(senderId > 0 ? senderId : Id), 0, data, 0, sizeof(uint));
-            Buffer.BlockCopy(BitConverter.GetBytes(animationId), 0, data, 0x04, sizeof(uint));
-            Buffer.BlockCopy(BitConverter.GetBytes(resultList.Count), 0, data, 0x20, sizeof(int)); //#results
-            Buffer.BlockCopy(BitConverter.GetBytes((short)command), 0, data, 0x24, sizeof(short));
-            Buffer.BlockCopy(BitConverter.GetBytes((unknown > 0 ? unknown : 0x0810)), 0, data, 0x26, sizeof(ushort)); //unknown
-
-            Buffer.BlockCopy(resultBytes, 0, data, 0x28, resultBytes.Length); //unknown
+            data.Write(new DataList()
+            {
+                { 0, (senderId > 0 ? senderId : Id)},
+                { 0x04, animationId},
+                { 0x20, resultList.Count},
+                { 0x24, (short)command},
+                { 0x26, (unknown > 0 ? unknown : 0x0810)},
+                { 0x28, resultBytes}
+            });
+            
             Packet.Send(opcode, data, senderId > 0 ? senderId : Id);
         }
 
@@ -556,7 +595,7 @@ namespace PrimalLauncher
             CommandResult cr = new CommandResult
             {
                 TargetId = Id,
-                EffectId = 1,
+                EffectId = EffectId.Default,
                 HitSequence = 1
             };
 
@@ -567,7 +606,7 @@ namespace PrimalLauncher
         public void PlayAnimationEffect(AnimationEffect animation)
         {
             byte[] data = new byte[0x08];
-            Buffer.BlockCopy(BitConverter.GetBytes((ushort)animation), 0, data, 0, sizeof(ushort));
+            data.Write(0, (ushort)animation);           
             data[0x03] = 0x04;
             Thread.Sleep(500);
             Packet.Send(ServerOpcode.PlayAnimationEffect, data, Id);
@@ -575,7 +614,7 @@ namespace PrimalLauncher
 
         public virtual Zone GetCurrentZone() => World.Instance.GetZone(Position.ZoneId);
 
-        public void StartEvent(string eventName, string functionName = null)
+        public void StartEvent(string eventName, string functionName = null, int delay = 0)
         {
             if (!string.IsNullOrEmpty(eventName))
             {
@@ -585,10 +624,14 @@ namespace PrimalLauncher
                 uint characterId = User.Instance.Character.Id;
                 uint serverCode = 0x75dc1700 + (uint)GetEventCode(eventName);
 
-                Buffer.BlockCopy(BitConverter.GetBytes(characterId), 0, data, 0, 4);
-                Buffer.BlockCopy(BitConverter.GetBytes(Id), 0, data, 0x04, 4);
-                Buffer.BlockCopy(BitConverter.GetBytes(serverCode), 0, data, 0x08, 4);
-                Buffer.BlockCopy(BitConverter.GetBytes(ClassCode), 0, data, 0x0c, 4);
+                data.Write(new DataList()
+                {
+                    { 0, characterId},
+                    { 0x04, Id},
+                    { 0x08, serverCode},
+                    { 0x0c, ClassCode},
+                });                
+
                 LuaParameters parameters = new LuaParameters();
                 parameters.Add(Encoding.ASCII.GetBytes(eventName));
 
@@ -598,8 +641,37 @@ namespace PrimalLauncher
                     parameters.Add(functionName);
 
                 LuaParameters.WriteParameters(ref data, parameters, 0x10);
-                Packet.Send(ServerOpcode.StartEvent, data, sourceId: characterId);
+
+                Packet.Send(ServerOpcode.StartEvent, data, sourceId: characterId, delay: delay);
             }            
         }
+    }
+
+    /// <summary>
+    /// Created to improve readability of talkDefault function.
+    /// </summary>
+    [Serializable]
+    public struct TalkFunction
+    {
+        public uint TalkCode;
+        public readonly string FunctionName;
+        public readonly string InvokeMethod;
+        public readonly string Parameters;
+
+        public TalkFunction(uint talkCode, string functionName, string parameters, string evokeMethod = "")
+        {
+            TalkCode = talkCode;
+            FunctionName = functionName;
+            InvokeMethod = evokeMethod;
+            Parameters = parameters;
+        }
+
+        public TalkFunction(uint talkCode, string functionName)
+        {
+            TalkCode = talkCode;
+            FunctionName = functionName;
+            InvokeMethod = "";
+            Parameters = "";
+        }      
     }
 }

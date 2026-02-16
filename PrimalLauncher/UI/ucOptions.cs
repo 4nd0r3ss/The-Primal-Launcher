@@ -84,13 +84,13 @@ namespace PrimalLauncher
 
         private void PopulateLobbyComboBox()
         {
-            var lobbyOptions = Enum.GetValues(typeof(LobbyOptions));
+            var lobbyOptions = Enum.GetValues(typeof(LobbyOption));
             int selectedIndex = 0;
             
             foreach(var option in lobbyOptions)
             {
                 string name = option.GetType().GetMember(option.ToString()).First().GetCustomAttribute<DisplayAttribute>().Name;
-                int value = (int)Enum.Parse(typeof(LobbyOptions), option.ToString());  
+                int value = (int)Enum.Parse(typeof(LobbyOption), option.ToString());  
                 
                 if((byte)value == Preferences.Instance.Options.LobbyOption)
                     selectedIndex = Array.IndexOf(lobbyOptions, option);

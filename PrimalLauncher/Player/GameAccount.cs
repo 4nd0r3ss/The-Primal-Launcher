@@ -17,8 +17,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.IO;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 
 namespace PrimalLauncher
@@ -45,40 +47,51 @@ namespace PrimalLauncher
         }
         
         public GameAccount()
-        {
-            //so far only 2 char slots allowed.
-            Characters = new Dictionary<byte, object>
+        {            
+            Characters = new Dictionary<byte, object> 
             {
                 {0, null},
-                {1, null}
+                {1, null},
+                {2, null},
+                {3, null},
+                {4, null},
+                {5, null},
+                {6, null},
+                {7, null},
             };
         }
 
-        public void ReserveName(byte[] data, byte worldId)
+        private byte[] GetCharacterListSlot(byte slotNum)
         {
-            SelectedCharacterSlot = data[0x20];
+            var character = Characters[slotNum];
+            byte[] characterData = new byte[0x1D0];
 
-            Characters[SelectedCharacterSlot] = new PlayerCharacter
-            {
+            if (character != null)
+                characterData = ((PlayerCharacter)Characters[slotNum]).ToLobbyData();
+
+            characterData.Write(new Dictionary<int, object>
+                {
+                    {0x08, slotNum},
+                    {0x09, Preferences.Instance.Options.LobbyOption}
+                });
+
+            return characterData;
+        }
+
+        public byte[] ReserveName(byte[] data, byte worldId)
+        {            
+            PlayerCharacter newChar = new PlayerCharacter
+            {                
+                Id = NewCharacterId(),
                 Name = data.GetSubset(0x24, 0x20),
                 WorldId = worldId
             };
 
+            Characters[SelectedCharacterSlot] = newChar;
+
             Log.Instance.Success("Character name reserved.");
-        }
 
-        public void CreateCharacter(byte[] characterData)
-        {
-            SelectedCharacter.Setup(characterData);            
-            User.Instance.Save();
-            Log.Instance.Success("Character ID# 0x" + SelectedCharacter.Id.ToString("X") + " created!");
-        }
-
-        public void DeleteCharacter(byte slot)
-        {            
-            Characters[slot] = null;
-            User.Instance.Save();
-            Log.Instance.Success("Character deleted.");
+            return newChar.Name;
         }
 
         public void RenameCharacter(byte[] data)
@@ -95,43 +108,39 @@ namespace PrimalLauncher
         }
 
         public List<byte[]> GetCharacters()
-        {            
-            List<byte[]> packetList = new List<byte[]>();
-            byte[] packetBytes = new byte[0x3B0];
-            byte packetSequence = 0;
+        {
+            List<byte[]> result = new List<byte[]>();
+            int numChars = 8;
+            decimal charMod = numChars % 2;
+            int numPackets = (int)(numChars == 0 ? 1 : numChars / 2 + charMod);
+            //byte charsInPacket = (byte)(charMod > 0 ? 1 : 2); //leaving this here as a reminder for future improvements if we want to make the number of char slots dynamic.
+            int slotIndex = -1;
 
-            foreach(var slot in Characters)
+            for (int i = 0; i < numPackets; i++)
             {
-                byte[] characterData = new byte[0x1D0];
+                byte[] packetData = new byte[0x3B0];
+                int packetIndex = i * 4;
 
-                if (slot.Value != null)
-                    characterData = ((PlayerCharacter)slot.Value).ToLobbyData();
-             
-                characterData.Write(new Dictionary<int, object>
-                {
-                    {0x08, slot.Key},
-                    {0x09, Preferences.Instance.Options.LobbyOption}  
-                });
+                if (i == numPackets - 1) packetIndex++;
 
-                if (slot.Key > 0 && slot.Key % 2 != 0)
+                packetData.Write(new Dictionary<int, object>
                 {
-                    packetBytes.Write(0x01E0, characterData);
-                    packetSequence++;
-                    packetBytes.Write(new Dictionary<int, object>
-                    {
-                        {0x08, packetSequence},
-                        {0x09, Characters.Count}
-                    });
-                    packetList.Add(packetBytes);
-                    packetBytes = new byte[0x3B0];
-                }
-                else
-                {
-                    packetBytes.Write(0x10, characterData);
-                }
-            }      
+                    {0x08, (byte)packetIndex},
+                    {0x09, 2}, //as we are opening all slots from the beginning, we will always have 2 slots per packet.
+                    {0x10, GetCharacterListSlot((byte)++slotIndex) },
+                    {0x01E0, GetCharacterListSlot((byte)++slotIndex) }
+                });      
 
-            return packetList;
+                result.Add(packetData);
+            }
+
+            return result;
+        }
+
+        public uint NewCharacterId()
+        {
+            Random rnd = new Random();
+            return (uint)rnd.Next(0xff, 0xffff);
         }
     }
 }

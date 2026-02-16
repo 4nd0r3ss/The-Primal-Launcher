@@ -22,7 +22,7 @@ namespace PrimalLauncher
     /// <summary>
     /// 
     /// </summary>
-    class ZoneSwitch : Populace
+    class ZoneSwitch : PopulaceStandard
     {
         public ZoneSwitch()
         {

@@ -1,0 +1,130 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<GuildLevePackSets>
+    <GuildLevePackSet id="1">
+        <GuildLevePack id="0" level="1">
+
+        </GuildLevePack>
+        <GuildLevePack id="1" level="1">
+
+        </GuildLevePack>
+        <GuildLevePack id="2" level="10">
+
+        </GuildLevePack>
+        <GuildLevePack id="3" level="20">
+
+        </GuildLevePack>
+        <GuildLevePack id="4" level="30">
+
+        </GuildLevePack>
+        <GuildLevePack id="5" level="30">
+
+        </GuildLevePack>
+        <GuildLevePack id="6" level="40">
+
+        </GuildLevePack>
+        <GuildLevePack id="7" level="40">
+
+        </GuildLevePack>
+    </GuildLevePackSet>
+    <GuildLevePackSet id="11">
+        <GuildLevePack id="100"	level="1">
+
+        </GuildLevePack>
+        <GuildLevePack id="101"	level="1">
+
+        </GuildLevePack>
+        <GuildLevePack id="102"	level="10">
+
+        </GuildLevePack>
+        <GuildLevePack id="103"	level="20">
+
+        </GuildLevePack>
+        <GuildLevePack id="104"	level="30">
+
+        </GuildLevePack>
+        <GuildLevePack id="105"	level="30">
+
+        </GuildLevePack>
+        <GuildLevePack id="106"	level="40">
+
+        </GuildLevePack>
+        <GuildLevePack id="107"	level="40">
+
+        </GuildLevePack>
+    </GuildLevePackSet>
+    <GuildLevePackSet id="21">
+        <GuildLevePack id="200"	level="1">
+            <GuildLeve id="12401" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="12421" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="12422" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="12426" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="12427" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="12428" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="12423" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="12424" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+        </GuildLevePack>
+        <GuildLevePack id="201"	level="1">
+            <GuildLeve id="12425" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+        </GuildLevePack>
+        <GuildLevePack id="202"	level="10">
+            <GuildLeve id="12441" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="12442" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="12443" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="12444" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="12445" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="12447" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="12448" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="12446" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+        </GuildLevePack>
+        <GuildLevePack id="203"	level="20">
+            <GuildLeve id="12461" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="12462" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="12464" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="12463" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="12465" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="12466" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="12467" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="12468" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+        </GuildLevePack>
+        <GuildLevePack id="204"	level="30">
+            <GuildLeve id="12481" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="12482" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="12483" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="12484" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="12485" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="12486" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="12487" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="12488" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+        </GuildLevePack>
+        <GuildLevePack id="205"	level="30">
+            <GuildLeve id="13021" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="13023" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="13024" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="13025" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="13026" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="13027" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="13028" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="13022" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+        </GuildLevePack>
+        <GuildLevePack id="206"	level="40">
+            <GuildLeve id="12501" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="12502" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="12503" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="12504" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="12505" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="12507" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="12508" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="12506" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+        </GuildLevePack>
+        <GuildLevePack id="207"	level="40">
+            <GuildLeve id="12521" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="12522" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="12523" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="12524" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="12527" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="12528" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="12525" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="12526" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+        </GuildLevePack>
+    </GuildLevePackSet>
+</GuildLevePackSets>

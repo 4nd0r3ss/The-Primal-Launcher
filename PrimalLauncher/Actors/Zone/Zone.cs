@@ -22,8 +22,7 @@ namespace PrimalLauncher
 {
     [Serializable]
     public class Zone : Actor
-    {
-        public string NpcFile { get; set; } = "";
+    {        
         public uint RegionId { get; set; }
         public string MapName { get; set; }
         public string LocationName { get; set; }
@@ -39,6 +38,7 @@ namespace PrimalLauncher
 
         public int ActorIndex { get; set; }
 
+        public string DirectorType { get; set; } //added this because adding director anywehere else throws an overflow for no reason.
 
         public override void Prepare()
         {
@@ -63,6 +63,9 @@ namespace PrimalLauncher
 
         public override void Spawn(ushort spawnType = 0, ushort isZoning = 0, int changingZone = 0)
         {
+            if (DirectorType == "opening")
+                Directors.Add(new OpeningDirector());
+
             Prepare();
             CreateActor();
             SetSpeeds();
@@ -89,11 +92,11 @@ namespace PrimalLauncher
             if (Actors == null || Actors.Count == 0)
             {       
                 Actors = new List<Actor>();
-                List<Actor> actors = ActorRepository.GetZoneNpcs(Id, NpcFile);
+                List<Actor> actors = ActorXmlLoader.GetZoneNpcs(Id);
                 actors.AddRange(World.Instance.Aetherytes.FindAll(x => x.Position.ZoneId == Id));
-                actors.AddRange(ActorRepository.GetCompanyWarp(Id));
-                ActorIndex = 1;
-                NpcFile = "";
+                actors.AddRange(ActorXmlLoader.GetCompanyWarp(Id));
+                actors.AddRange(ActorXmlLoader.GetZoneMonsters(Id));
+                ActorIndex = 1;               
 
                 foreach (Actor actor in actors)
                 {

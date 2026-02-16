@@ -44,7 +44,7 @@ namespace PrimalLauncher
         private static Preferences _instance = null;       
         public string AppUserFolder
         {
-            get { return Options.UserFilesPath + @"\Primal Launcher User Files\"; }
+            get { return Options.UserFilesPath + @"\The Primal Launcher User Files\"; }
         }  
         
         public string AppDataFile
@@ -95,20 +95,21 @@ namespace PrimalLauncher
         public void LoadConfigFile()
         {               
             if (File.Exists(AppDataFile))
-            {               
+            {
                 using (var fileStream = new FileStream(AppDataFile, FileMode.Open))
                 {
                     var bFormatter = new BinaryFormatter();
 
                     try
-                    {
-                        Options = (Options)bFormatter.Deserialize(fileStream);
-                    }
-                    catch
-                    {
-                        Log.Instance.Error("Options file deserialization error. Delete the file and try again.");
-                    }
-                    
+                {
+                    //string json = File.ReadAllText(AppDataFile);
+                    Options = (Options)bFormatter.Deserialize(fileStream);
+                }
+                catch
+                {
+                    Log.Instance.Error("Options file deserialization error. Delete the file and try again.");
+                }
+
                 }
             }
             else //there is no config file
@@ -129,6 +130,9 @@ namespace PrimalLauncher
                     var bFormatter = new BinaryFormatter();
                     bFormatter.Serialize(fileStream, Options);
                 }
+                //string json = JsonConvert.SerializeObject(Options, Formatting.Indented);
+                //File.WriteAllText(AppDataFile, json);
+
             }
             else
             {

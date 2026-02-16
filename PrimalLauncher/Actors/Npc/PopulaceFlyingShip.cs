@@ -23,7 +23,7 @@ using System.Threading.Tasks;
 
 namespace PrimalLauncher
 {
-    public class PopulaceFlyingShip : Populace
+    public class PopulaceFlyingShip : PopulaceStandard
     {
         public bool IsDepartureAttandant { get; set; } //if it's departure side or arrivals side attendant.
         

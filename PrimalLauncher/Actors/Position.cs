@@ -59,6 +59,20 @@ namespace PrimalLauncher
             }            
         }
 
+        public Position Clone()
+        {
+            return new Position()
+            {
+                ZoneId = ZoneId,
+                X = X,
+                Y = Y,
+                Z = Z,
+                R = R,
+                FloatingHeight = FloatingHeight,
+                SpawnType = SpawnType                
+            };
+        }
+
         public byte[] ToBytes(bool isPlayer, uint actorId = 0)
         {
             byte[] toBytes = new byte[0x28];

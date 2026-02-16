@@ -46,6 +46,11 @@ namespace PrimalLauncher
             return node != null && node.Attributes[attributeName] != null ? Convert.ToInt32(node.Attributes[attributeName].Value) : defaultValue;
         }
 
+        public static ushort GetAttributeAsUshort(this XmlNode node, string attributeName, ushort defaultValue = 0)
+        {
+            return node != null && node.Attributes[attributeName] != null ? Convert.ToUInt16(node.Attributes[attributeName].Value) : defaultValue;
+        }
+
         public static uint GetNodeAsUint(this XmlNode node, string attributeName, uint defaultValue = 0)
         {
             return node != null && node.SelectSingleNode(attributeName) != null ? Convert.ToUInt32(node.SelectSingleNode(attributeName).InnerText) : defaultValue;
@@ -97,6 +102,11 @@ namespace PrimalLauncher
 
         #endregion
 
+        public static void WriteBytes(this byte[] data, int index)
+        {
+
+        }
+
         public static string ReadNullTerminatedString(this BinaryReader reader)
         {
             string str = "";
@@ -116,6 +126,11 @@ namespace PrimalLauncher
         public static int ReadInt32BigEndian(this BinaryReader reader)
         {
             return BitConverter.ToInt32(reader.ReadBytes(sizeof(int)).Reverse().ToArray(), 0);
+        }
+
+        public static long ReadInt64BigEndian(this BinaryReader reader)
+        {
+            return BitConverter.ToInt64(reader.ReadBytes(sizeof(long)).Reverse().ToArray(), 0);
         }
 
         public static uint IntToUint32(this int n)
@@ -158,6 +173,14 @@ namespace PrimalLauncher
         public static void Write(this byte[] dstArr, Dictionary<int, object> toWrite)
         {
             foreach(var item in toWrite)
+            {
+                dstArr.Write(item.Key, item.Value);
+            }
+        }
+
+        public static void Write(this byte[] dstArr, DataList toWrite)
+        {
+            foreach (var item in toWrite)
             {
                 dstArr.Write(item.Key, item.Value);
             }
@@ -208,6 +231,10 @@ namespace PrimalLauncher
             {
                 dstArr[startIndex] = @byte;
             }
+            else if (toWrite is float @float)
+            {
+                Buffer.BlockCopy(@float.GetBytes(), 0, dstArr, startIndex, sizeof(float));
+            }
         }
 
         public static byte[] GetSubset(this byte[] array, int startIndex, int length)
@@ -222,34 +249,39 @@ namespace PrimalLauncher
             return Encoding.ASCII.GetBytes(stringVar);
         }
 
-        public static byte[] GetBytes(this int intVar)
+        public static byte[] GetBytes(this int value)
         {
-            return BitConverter.GetBytes(intVar);
+            return BitConverter.GetBytes(value);
         }
 
-        public static byte[] GetBytes(this uint intVar)
+        public static byte[] GetBytes(this uint value)
         {
-            return BitConverter.GetBytes(intVar);
+            return BitConverter.GetBytes(value);
         }
 
-        public static byte[] GetBytes(this short intVar)
+        public static byte[] GetBytes(this short value)
         {
-            return BitConverter.GetBytes(intVar);
+            return BitConverter.GetBytes(value);
         }
 
-        public static byte[] GetBytes(this ushort intVar)
+        public static byte[] GetBytes(this ushort value)
         {
-            return BitConverter.GetBytes(intVar);
+            return BitConverter.GetBytes(value);
         }
 
-        public static byte[] GetBytes(this long intVar)
+        public static byte[] GetBytes(this long value)
         {
-            return BitConverter.GetBytes(intVar);
+            return BitConverter.GetBytes(value);
         }
 
-        public static byte[] GetBytes(this ulong intVar)
+        public static byte[] GetBytes(this ulong value)
         {
-            return BitConverter.GetBytes(intVar);
+            return BitConverter.GetBytes(value);
+        }
+
+        public static byte[] GetBytes(this float value)
+        {
+            return BitConverter.GetBytes(value);
         }
 
         public static string GetString(this byte[] array)
@@ -301,9 +333,35 @@ namespace PrimalLauncher
             return array.GetSubset(startIndex, sizeof(long));
         }
 
+        public static int IndexOf(this byte[] source, byte[] pattern)
+        {
+            if (pattern.Length == 0 || source.Length < pattern.Length)
+                return -1;
 
+            for (int i = 0; i <= source.Length - pattern.Length; i++)
+            {
+                bool match = true;
 
+                for (int j = 0; j < pattern.Length; j++)
+                {
+                    if (source[i + j] != pattern[j])
+                    {
+                        match = false;
+                        break;
+                    }
+                }
 
+                if (match)
+                    return i; // start index of match
+            }
+
+            return -1; // not found
+        }
+
+        public static int IndexOfString(this byte[] source, string toSearch)
+        {
+            return source.IndexOf(toSearch.GetBytes());
+        }
 
         /// <summary>
         /// Parses a formatted string parameter list into proper types with values.        /// 
@@ -347,7 +405,7 @@ namespace PrimalLauncher
         public static string GetFileBytes(string folder, string fileName)
         {
             string result = string.Empty;
-            Stream stream = typeof(ActorRepository).Assembly.GetManifestResourceStream("PrimalLauncher.Resources." + folder + "." + fileName);
+            Stream stream = typeof(ActorXmlLoader).Assembly.GetManifestResourceStream("PrimalLauncher.Resources." + folder + "." + fileName);
 
             if (stream != null)
                 using (stream)

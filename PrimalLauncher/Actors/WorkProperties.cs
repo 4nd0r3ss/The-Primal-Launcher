@@ -30,18 +30,20 @@ namespace PrimalLauncher
         private ushort _index;
         private bool _writeMore = true;
         private uint _actorId;
+        private bool Isplayer;
         
         private readonly byte _maxBytes = 0x7d;
 
         public byte[] Command { get; set; }
         public Queue<byte[]> PacketQueue { get; set; }
 
-        public WorkProperties(uint actorId, string command)
+        public WorkProperties(uint actorId, string command, bool isplayer = false)
         {            
             _actorId = actorId;
             PacketQueue = new Queue<byte[]>();
 
             Command = Encoding.ASCII.GetBytes(command);
+            Isplayer = isplayer;
 
             InitWrite(1);
         }
@@ -57,14 +59,14 @@ namespace PrimalLauncher
 
         public void Add(object key, object value, bool isLastItem = false)
         {
-            int hashedId = 0;
+            uint hashedId = 0;
 
-            //This is for writing unknown work values from packet traces while I don't get a working reverse murmur function. 
+            //This is for writing unknown work values from packet traces. 
             //if key is a int we just bypass the murmur hashing.
-            if (key is string)
-                hashedId = (int)MurmurHash2((string)key, 0);
+            if (key is string)            
+                hashedId = (uint)MurmurHash2((string)key, 0);  
             else
-                hashedId = (int)key;
+                hashedId = (uint)key;
 
             if (value is bool)
             {
@@ -213,21 +215,21 @@ namespace PrimalLauncher
             }
         }
 
-        public void FinishWritingAndSend(uint sourceActorId = 0)
+        public void FinishWritingAndSend(uint sourceActorId = 0, ServerOpcode opcode = ServerOpcode.ActorInit)
         {
             _writeMore = false;
             SendPacket(sourceActorId: sourceActorId);
         }
 
-        public void SendUpdate()
+        public void SendUpdate(byte wrapper = 0x94)
         {
             _writeMore = false;
-            _bw.Write((byte) 0x94);
+            _bw.Write((byte)wrapper);
             _index += 1;
             SendPacket(wrapByte: false);
         }
 
-        private void SendPacket(string key = null, object value = null, bool wrapByte = true, uint sourceActorId = 0)
+        private void SendPacket(string key = null, object value = null, bool wrapByte = true, uint sourceActorId = 0, ServerOpcode opcode = ServerOpcode.ActorInit)
         {
             if (wrapByte)
             {
@@ -241,7 +243,7 @@ namespace PrimalLauncher
             _bw.Seek(0, SeekOrigin.Begin);
             _bw.Write((byte)_index);
 
-            Packet.Send(ServerOpcode.ActorInit, _buffer, sourceActorId);            
+            Packet.Send(opcode, _buffer, sourceActorId);            
 
             _bw.Dispose();
             _ms.Dispose();

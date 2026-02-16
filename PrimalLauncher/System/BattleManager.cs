@@ -18,6 +18,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Threading;
 
 namespace PrimalLauncher
 {
@@ -25,13 +27,12 @@ namespace PrimalLauncher
     {
         private static BattleManager _instance = null;
         private static readonly object _padlock = new object();
-        public GroupDuty DutyGroup { get; set; }
-        public GroupParty PartyGroup { get; set; }
-        public GroupMob MobGroup { get;set; }
+        private long LastTickStamp = Environment.TickCount;       
+        private float DeltaTime = 0.005f;
+        public int TickIntervalSeconds { get; private set; } = 1000;
+        private List<GroupBase> Groups { get; set; } = new List<GroupBase>();
 
-        private Queue<Tuple<uint, string, int>> ActionQueue { get; set; }
-
-        public bool IsEngaged { get; set; }
+        public bool BattleEngaged { get; set; }
 
         public static BattleManager Instance
         {
@@ -45,75 +46,86 @@ namespace PrimalLauncher
                     return _instance;
                 }
             }
+        }      
+
+        public void Tick()
+        {
+            var currentTickStamp = Environment.TickCount;
+
+            //we only tick once every second.
+            if (currentTickStamp - LastTickStamp >= TickIntervalSeconds)
+            {
+                LastTickStamp = currentTickStamp;
+                Process();
+            }
+
+            DeltaTime = currentTickStamp - LastTickStamp;
         }
 
-        public void Process()
+        private float GetDeltaTime()
         {
-            if (IsEngaged)
+            return (DeltaTime / 1000.0f);
+        }
+
+        private void Process()
+        {
+            if (BattleEngaged)
             {
-                if (!User.Instance.Character.IsTutorialComplete)
-                {
-
-                }
-                else { }
-
-
-                    if (DutyGroup != null)
-                {
-                    DutyGroup.BattleBeat();
-                }
-                else
-                {
-                    //what to do when it's party group vs mob group
-
-                    
-                }
-                    
+                if (Groups.Count > 0)
+                    foreach (var group in Groups)
+                        group.BattleBeat();
             }
+            else
+            {
+                Groups.Clear();
+            }                        
         } 
 
-        public void Engage(ActorBattle attacker)
+        public void StartBattle(ActorBattle attacker)
+        {            
+            var attackerGroup = attacker.BattleGroup;
+            var targetGroup = ((ActorBattle)attacker.GetTargetActor()).BattleGroup;
+
+            EngageGroupMembers(attackerGroup);
+            EngageGroupMembers(targetGroup); 
+
+            User.Instance.Character.GetCurrentZone().ToggleBattleMusic();
+
+            Groups.Add(attackerGroup);
+            Groups.Add(targetGroup);
+
+            BattleEngaged = true;
+        }
+
+        public void StartDuty(List<Actor> members)
         {
-            if (!IsEngaged)
-            {
-                IsEngaged = true;
+            DutyGroup dutyGroup = new DutyGroup();
 
-                //if we are in tutorial, do not change BGM.
-                if (!User.Instance.Character.IsTutorialComplete)
-                {
-                    Zone zone = World.Instance.GetZone(attacker.Position.ZoneId);
-                    zone.ToggleBattleMusic();
-                }                
+            dutyGroup.AddMembers(members);
+            dutyGroup.InitializeGroup();
+            dutyGroup.SendPackets();
 
-                if (DutyGroup != null)
-                {
-                    DutyGroup.Engage(attacker);
-                }
-                else
-                {
-                    //if it's not a duty group
-                    Instance.AddDutyGroup(new List<uint>(), false);
-                }
-            }            
+            Groups.Add(dutyGroup);
+            EngageGroupMembers(dutyGroup);  
+            BattleEngaged = true;
+        }
+
+        private void EngageGroupMembers(GroupBase group)
+        {
+            foreach (Actor member in group.MemberList)
+                if(member is ActorBattle actorBattle)
+                    actorBattle.Engage(0);
         }
 
         public void Disengage()
         {
-            IsEngaged = false;
+            BattleEngaged = false;       
             Log.Instance.Warning("Battle manager disengaged battle.");
         }
 
         public void AddDutyGroup(List<uint> membersClassId, bool addQuestDirector = false)
         {
-            DutyGroup = new GroupDuty();
-
-            if (addQuestDirector)
-                DutyGroup.MemberList.Add(((QuestDirector)User.Instance.Character.GetCurrentZone().GetDirector("Quest")).Id);
-
-            DutyGroup.AddMembers(User.Instance.Character.GetCurrentZone().GetActorsByClassId(membersClassId));
-            DutyGroup.InitializeGroup();
-            DutyGroup.SendPackets();           
-            World.Instance.SendData(new object[] { 0x09 });
+            
         }
 
         public void GetGroupInitWork(byte[] data)
@@ -128,14 +140,17 @@ namespace PrimalLauncher
                 groupId = br.ReadUInt64();
             }
 
-            if (DutyGroup != null && DutyGroup.Id != groupId)
-                DutyGroup.InitWork();
-            else if (User.Instance.Character.PartyGroup.Id == groupId)
-                User.Instance.Character.PartyGroup.InitWork();
-            else if (User.Instance.Character.RetainerGroup.Id == groupId)
-                User.Instance.Character.RetainerGroup.InitWork();
+            var group = User.Instance.Character.Groups.FirstOrDefault(x => x.Id == groupId);
 
-
+            if (group != null)
+            {
+                group.InitWork();
+            }
+            else
+            {
+                //if (DutyGroup != null && DutyGroup.Id != groupId)
+                //    DutyGroup.InitWork();
+            }           
         }
     }
 }

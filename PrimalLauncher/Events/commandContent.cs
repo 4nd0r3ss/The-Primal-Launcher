@@ -15,6 +15,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -76,8 +77,9 @@ namespace PrimalLauncher
             if (IsQuestion)
             {
                 Finish();
+                int selection = Convert.ToInt32(Selection[0]);
 
-                if (Selection[0] == 1)
+                if (selection == 1)
                 {
                     byte subSelection = RequestPacket[0x26];
                     World.SendTextSheet(0x8539);
@@ -120,9 +122,11 @@ namespace PrimalLauncher
         {
             if (IsQuestion)
             {
-                if (Selection[0] == 1)
+                int selection = Convert.ToInt32(Selection[0]);
+
+                if (selection == 1)
                     PlayerCharacter.ExitGame();
-                else if (Selection[0] == 2)
+                else if (selection == 2)
                     PlayerCharacter.Logout();
                 else
                     Finish();
@@ -138,8 +142,9 @@ namespace PrimalLauncher
         public void Teleport()
         {            
             GetQuestionSelection();
+            //int selection = Convert.ToInt32(Selection[0]);
 
-            if (!Selection[0].HasValue)
+            if (!((uint?)Selection[0]).HasValue)
             {
                 if (MenuPage == 2) //from aetheryte selection back to region selection
                     MenuPage = 0;
@@ -164,10 +169,10 @@ namespace PrimalLauncher
                     PageId = (uint)Selection[0];
                     List<object> parameters = new List<object>();
                     parameters.Add("eventAetheryte");
-                    parameters.Add((int)Selection[0]);
+                    parameters.Add(Convert.ToInt32(Selection[0]));
 
                     var regionAetherytes = from a in World.Instance.Aetherytes
-                                           where a.TeleportMenuPageId == Selection[0]
+                                           where a.TeleportMenuPageId == (uint)Selection[0]
                                            orderby a.TeleportMenuId ascending
                                            select a;
 
@@ -182,7 +187,7 @@ namespace PrimalLauncher
                     DelegateCommand(new object[] { "eventConfirm", false, false, 0x13883f }); //TODO: 0x13883f is the favored aetheryte classid
                     break;
                 case 3:
-                    if (Selection[0] == 1)
+                    if ((uint)Selection[0] == 1)
                     {
                         User.Instance.Character.PlayAnimationEffect(AnimationEffect.Teleport);
                         Packet.Send(ServerOpcode.SetUIControl, new byte[] { 0x14, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00 });

@@ -16,6 +16,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 using System;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.ProgressBar;
+using System.Text;
 
 namespace PrimalLauncher
 {
@@ -32,6 +34,18 @@ namespace PrimalLauncher
             data[1] = (byte)Type;
 
             return data;
+        }
+
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+
+            sb.Append("Main: ");
+            sb.Append(Main);
+            sb.Append(", \nType: ");
+            sb.Append(Type);            
+
+            return sb.ToString();
         }
     }
 }

@@ -21,6 +21,8 @@ namespace PrimalLauncher
 {
     public class OpeningDirector : Director
     {
+        public OpeningDirector() { }
+
         public override void Prepare()
         {
             Zone zone = World.Instance.GetZone(User.Instance.Character.Position.ZoneId);

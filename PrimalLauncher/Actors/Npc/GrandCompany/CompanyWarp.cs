@@ -21,7 +21,7 @@ using System.Xml;
 
 namespace PrimalLauncher
 {
-    class CompanyWarp : Populace
+    class CompanyWarp : PopulaceStandard
     {
         public uint Region { get; set; }
         public uint Zone { get; set; }

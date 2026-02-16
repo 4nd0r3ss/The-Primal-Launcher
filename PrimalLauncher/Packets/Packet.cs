@@ -20,6 +20,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace PrimalLauncher
 {
@@ -213,7 +215,7 @@ namespace PrimalLauncher
             RawData = result;
         }
 
-        public static void Send(ServerOpcode opcode, byte[] data, uint sourceId = 0, uint targetId = 0)
+        public static void Send(ServerOpcode opcode, byte[] data, uint sourceId = 0, uint targetId = 0, int delay = 0)
         {
             try
             {
@@ -230,12 +232,18 @@ namespace PrimalLauncher
                     targetId = User.Instance.Character.Id;
 
                 Packet packet = new Packet(new SubPacket(gamePacket) { SourceId = sourceId, TargetId = targetId });
-                
-                //TODO: for some reason the socket randomly comes null. It happens rarely, so shelving for later
-                if(GameServer.Instance.Sender != null)
-                    GameServer.Instance.Sender.Send(packet.ToBytes());
 
-            }catch(Exception e)
+                //TODO: for some reason the socket randomly comes null. It happens rarely, so shelving for later
+                if (delay > 0)
+                    Thread.Sleep(delay);
+
+                GameServer.Instance.Sender?.Send(packet.ToBytes());
+
+                if(false)//(Preferences.Instance.Options.PrintPacketsToFile)
+                    packet.OutputToFile();
+
+            }
+            catch(Exception e)
             {
                 GameServer.Instance.ClientIsConnected = false;
                 Log.Instance.Error("Packet missed. Opcode: " + opcode.ToString() + ". Exception: " + e.Message);
@@ -249,12 +257,12 @@ namespace PrimalLauncher
             if (IsFromClient)
             {
                 foreach (SubPacket sp in SubPacketQueue)
-                    result += sp.Stringify(IsFromClient);
+                    result += sp.StringifyGamePackets(IsFromClient);
             }
             else
             {
                 foreach (SubPacket sp in SubPacketList)
-                    result += sp.Stringify(IsFromClient);
+                    result += sp.StringifyGamePackets(IsFromClient);
             }            
 
             return result;
@@ -263,6 +271,6 @@ namespace PrimalLauncher
         public void OutputToFile()
         {
             File.AppendAllText(Preferences.Instance.AppUserFolder + "packet_output.txt", Stringify());
-        }
+        }       
     }
 }

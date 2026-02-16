@@ -15,10 +15,21 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+using System.Security.Cryptography.X509Certificates;
+
 namespace PrimalLauncher
 {
-    class Retainer
+    public class Retainer 
     {
-       
+        public string Name { get; set; }
+
+        public Inventory inventory { get; set; }
+
+       public Retainer()
+       {
+          
+       }
+
+
     }
 }

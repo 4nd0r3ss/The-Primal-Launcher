@@ -40,6 +40,7 @@ namespace PrimalLauncher
         BlacklistRequest = 0x1cb,
         Initialize = 0x06,
         InitGroupWork = 0x133,
+        SetPlayerTitle = 0x134,
         CutScene = 0x0ce,
         ItemSearchRequest = 0x1DF,
         RetainerSearchRequest = 0x1D9,
@@ -147,7 +148,7 @@ namespace PrimalLauncher
         //specific to player character
         SetGrandCompany = 0x194,
         SetEnmity = 0x195,
-        SetTitle = 0x19A,
+        SetTitle = 0x19D,
         SetCurrentJob = 0x1A4,
         SetSpecialEventWork = 0x196,
         SetChocoboName = 0x198,
@@ -198,6 +199,7 @@ namespace PrimalLauncher
         GMTicketActiveRequest = 0x1d3,
 
         //Groups
+        GroupLinkshellWork = 0x017a,
         GroupHeader = 0x017c,
         GroupBegin = 0x017d,
         GroupEnd = 0x017e,
@@ -234,6 +236,7 @@ namespace PrimalLauncher
     public enum Command
     {
         ChangeEquipment     = 0x2EE9,
+        ChangeHotbar        = 0x2EEA,
         Mount               = 0x2EEE,
         Umount              = 0x2EEF,
         EquipSoulStone      = 0x2EF1,
@@ -404,9 +407,10 @@ namespace PrimalLauncher
         None        = 0,
         Retainer    = 0x013881,
         Party       = 0x002711,
+        Monster     = 0x002712,
         Linkshell   = 0x004E22,
-        Duty        = 0x007536,
-        Monster     = 0x0
+        Duty        = 0x007536,        
+        Levequest   = 0x007531
     }
 
     /// <summary>
@@ -533,7 +537,7 @@ namespace PrimalLauncher
         Healer = 3
     }
 
-    public enum LobbyOptions
+    public enum LobbyOption
     {
         [Display(Name = "None")]
         Default,
@@ -543,5 +547,15 @@ namespace PrimalLauncher
         Rename,       
         [Display(Name = "Legacy account")]
         Legacy = 0x08
+    }
+
+    public enum EffectId
+    {
+        Default = 0x01,
+        HitChain1 = 0x08000604,
+        HitNormal = 0x08000608,
+        HitStrong = 0x0800060C,
+        HitCritical = 0x0800060F,
+        HitProtect = 0x0800064C
     }
 }

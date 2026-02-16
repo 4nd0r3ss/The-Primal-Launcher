@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <chara>
   <npc>
-    <Populace className="MiningPoint">
+    <PopulaceStandard className="MiningPoint">
       <classId>1200052</classId>
       <position x="-8.48" y="45.36" z="139.5" r="0" />
       <events>
@@ -11,6 +11,6 @@
         <pushCommandIn radiud="4.0" silent="true" outwards="false" />
         <pushCommandOut radius="4.0" silent="true" outwards="true" />
       </events>
-    </Populace>
+    </PopulaceStandard>
   </npc>
 </chara>

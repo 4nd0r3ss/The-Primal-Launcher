@@ -10,27 +10,27 @@
       </events>
     </ZoneSwitch>
       
-      <Populace className="PopulaceStandard">
+      <PopulaceStandard>
           <classId>1001596</classId>
           <position x="-1725.58" y="56.59" z="-316.77" r="0.44" />
           <animation>1016</animation>
-      </Populace>
-      <Populace className="PopulaceStandard">
+      </PopulaceStandard>
+      <PopulaceStandard>
           <classId>1001598</classId>
           <position x="-1729.7" y="56.1" z="-311" r="0.82" />
-      </Populace>
-      <Populace className="PopulaceStandard">
+      </PopulaceStandard>
+      <PopulaceStandard>
           <classId>1001597</classId>
           <position x="-1740.2" y="55.78" z="-322.68" r="-1.24" />
           <animation>1002</animation>
           <talkFunctions>
               <function name="defaultTalkWithHaipoeipo_001" />
           </talkFunctions>
-      </Populace>
-      <Populace className="PopulaceStandard">
+      </PopulaceStandard>
+      <PopulaceStandard>
           <classId>1001630</classId>
           <position x="-1740.7" y="55.78" z="-324.5" r="-0.87" />
-      </Populace>
+      </PopulaceStandard>
       
       <PopulaceShopSalesman welcomeTalk="281" menuId="-8" shopType="Item" itemSet="3008">
           <classId>1600104</classId>

@@ -135,8 +135,8 @@ namespace PrimalLauncher
         private static void WritePatchMessages()
         {
             //all update files were processed
-            File.AppendAllText(Preferences.Instance.Options.GameInstallPath + "/game.ver", " [Patched by Primal Launcher]");
-            File.AppendAllText(Preferences.Instance.Options.GameInstallPath + "/boot.ver", " [Patched by Primal Launcher]");
+            File.AppendAllText(Preferences.Instance.Options.GameInstallPath + "/game.ver", " [Patched by The Primal Launcher]");
+            File.AppendAllText(Preferences.Instance.Options.GameInstallPath + "/boot.ver", " [Patched by The Primal Launcher]");
         }
 
         /// <summary>
@@ -153,8 +153,8 @@ namespace PrimalLauncher
 
                 if (GameInstallationChecker.GameIsPatched())
                 {
-                    ucUpdate.Instance.TogglePatching(false);
-                }
+                    ucUpdate.Instance.TogglePatching(false);                  
+                }               
             }
             else
             {

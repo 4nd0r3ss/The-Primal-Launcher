@@ -33,25 +33,23 @@ namespace PrimalLauncher
         protected byte IsOnline { get; set; } = 1;
         protected byte Flag { get; set; } //try changing values to see what happens. 
         protected GroupType Type { get; set; }
-        public List<uint> MemberList { get; set; }  
-        
+        public List<Actor> MemberList { get; set; }
+        public string Name { get; set; } = "";
+
         public ulong Id
         {
-            get { return _idMask + Sequence; }
+            get { return _idMask + IdNum; }
         }
         protected ulong TimeStamp { get; set; }
-        protected byte Sequence { get; set; }
+        protected byte IdNum { get; set; }
         //private uint[] PacketInitialBytes { get; set; } // need a better name for this...
         
 
-        public GroupBase(byte id, GroupType type)
+        public GroupBase(GroupType type)
         {
-            Sequence = id;
+            IdNum = GetNewId();
             Type = type;            
-            MemberList = new List<uint>
-            {
-                User.Instance.Character.Id
-            };            
+            MemberList = new List<Actor>();            
         }
         
         protected byte[] GetPrepByteArray(int size)
@@ -84,11 +82,13 @@ namespace PrimalLauncher
                 bw.Write((ulong)Type);
                 bw.Write((ulong)0);
                 bw.Write(-1);
+                bw.Write(Name.GetBytes());
+                bw.Write(Name.GetBytes());
                 bw.Seek(0x60, SeekOrigin.Begin);
                 bw.Write(0);
 
                 for (int i = 0; i < 4; i++)
-                    bw.Write((uint)0x6d);
+                    bw.Write((uint)0x44020000);
 
                 bw.Write((byte)(MemberList.Count));
             }
@@ -154,10 +154,15 @@ namespace PrimalLauncher
         {
             foreach (Actor a in membersToAdd)
             {
-                MemberList.Add(a.Id);
-
-            }
-                
+                MemberList.Add(a);
+            }                
         }
+
+        public virtual void BattleBeat()
+        {
+
+        }
+
+        private byte GetNewId() => (byte)(User.Instance.Character.Groups.Count + 1);
     }        
 }

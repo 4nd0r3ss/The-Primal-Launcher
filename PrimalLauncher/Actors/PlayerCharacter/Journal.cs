@@ -43,7 +43,7 @@ namespace PrimalLauncher
             GuildLevesChecked = new List<uint>();
 
             //get initial quest
-            Quests[0] = QuestRepository.GetFirstQuest(initialTown);
+            Quests[0] = QuestXmlLoader.GetFirstQuest(initialTown);
         }
 
         public void AddToWork(ref WorkProperties work)
@@ -51,21 +51,20 @@ namespace PrimalLauncher
             for (sbyte i = 0; i < 0x10; i++)   
                 if(Quests[i] != null)
                     work.Add(string.Format("playerWork.questScenario[{0}]", i), 0xA0F00000 | ((Quest)Quests[i]).Id);
-            
-                
 
-            //GuildLevesLocal[0] = 120242;
-            //GuildLevesLocal[1] = 12483;
-            //GuildLevesLocal[2] = 12484;
-
+            //debug stuff.
+            GuildLevesLocal = new List<uint>();
+            GuildLevesRegional = new List<uint>();
+            GuildLevesDone = new List<uint>();
+            GuildLevesChecked = new List<uint>();
+            //GuildLevesLocal.Add(10922);
             //GuildLevesRegional.Add(10922);
             //GuildLevesDone.Add(10923);
             //GuildLevesChecked.Add(10924);
 
-
             //GuildLeve - local
             for (int i = 0; i < GuildLevesLocal.Count; i++)
-                work.Add(string.Format("playerWork.questGuildleve[{0}]", i), GuildLevesLocal[i]);
+                work.Add(string.Format("playerWork.questGuildleve[{0}]", i), 0xA0F00000 | (int)GuildLevesLocal[i]);
 
             //GuildLeve - regional
             for (int i = 0; i < GuildLevesRegional.Count; i++)
@@ -75,8 +74,10 @@ namespace PrimalLauncher
                 work.Add(string.Format("work.guildleveDone[{0}]", i), GuildLevesDone[i]);
 
             for (int i = 0; i < GuildLevesChecked.Count; i++)
-                work.Add(string.Format("work.guildleveChecked[{0}]", i), GuildLevesChecked[i]);
+                work.Add(string.Format("work.guildleveChecked[{0}]", i), GuildLevesChecked[i]);  
             
+
+
         }
 
         private void QuestsAddEmptySlots()
@@ -159,6 +160,22 @@ namespace PrimalLauncher
             return false;
         }
 
+        public bool HasAvailableQuest(uint questId)
+        {
+            if (QuestsAvailable.FirstOrDefault(x => x.Id == questId) != null)
+                return true;
+            else
+                return false;
+        }
+
+        public bool HasFinishedQuest(uint questId)
+        {
+            if (QuestsFinished.FirstOrDefault(x => x == questId) > 0) //found in finished quests
+                return true;
+            else
+                return false;
+        }
+
         public void AcceptQuest(uint id)
         {
             Quest quest = QuestsAvailable.FirstOrDefault(x => x.Id == id);
@@ -172,7 +189,7 @@ namespace PrimalLauncher
         
         public void AddQuest(uint id)
         {
-            Quest quest = QuestRepository.GetMainScenarioQuest(id);
+            Quest quest = QuestXmlLoader.GetMainScenarioQuest(id);
             Quests[GetFirstEmptySlot()] = quest;
 
             AddQuestUpdate(id);
@@ -263,8 +280,8 @@ namespace PrimalLauncher
 
         public void InitializeQuests()
         {        
-            QuestsAvailable.AddRange(QuestRepository.GetAvailableQuests("MainScenarioQuests.xml"));
-            QuestsAvailable.AddRange(QuestRepository.GetAvailableQuests("SideQuests.xml"));
+            QuestsAvailable.AddRange(QuestXmlLoader.GetAvailableQuests("MainScenarioQuests.xml"));
+            QuestsAvailable.AddRange(QuestXmlLoader.GetAvailableQuests("SideQuests.xml"));
 
             foreach (var item in Quests)            
                 InitializeQuest((Quest)item.Value);
@@ -292,9 +309,16 @@ namespace PrimalLauncher
         }
         #endregion
 
-        public void LocalGuidleveAdd(uint id)
+        public int AddLocalGuidleve(uint id)
         {
-            GuildLevesLocal.Add(id);
+            if (GuildLevesLocal.Count == 8)
+                return 1;
+            else if(GuildLevesLocal.Contains(id))
+                return 2;
+            else
+                GuildLevesLocal.Add(id);   
+
+            return 0;            
         }
 
         public void LocalGuildleveDone(uint id)
@@ -325,6 +349,17 @@ namespace PrimalLauncher
             Packet.Send(ServerOpcode.GeneralData, data);
         }
 
+        public void AddLocalLeveUpdate(uint id, bool isFinished = false)
+        {
+            WorkProperties work = new WorkProperties(User.Instance.Character.Id, "work/guildleve");
+            int slot = GetLocalLeveSlot(id);        
+            //work.Add(string.Format("playerWork.questGuildleve[{0}]", slot), 0xA0F00000 | GuildLevesLocal[slot]); //this doesn't work, need to find out the real one
+            work.Add(0x19030954, (short)id);
+            work.SendUpdate(0x90);
+        }
+
+        private int GetLocalLeveSlot(uint id) => GuildLevesLocal.IndexOf(id);   
+
         #region Debug functions
         public void ResetQuestHistory(uint questId)
         {
@@ -339,10 +374,10 @@ namespace PrimalLauncher
 
             if (playerQuest != null)
             {
-                Quest quest = QuestRepository.GetQuest("MainScenarioQuests.xml", questId);
+                Quest quest = QuestXmlLoader.GetQuest("MainScenarioQuests.xml", questId);
 
                 if (quest == null)
-                    quest = QuestRepository.GetQuest("SideQuests.xml", questId);
+                    quest = QuestXmlLoader.GetQuest("SideQuests.xml", questId);
 
                 QuestPhase phase = (QuestPhase)quest.Phases[playerQuest.PhaseIndex - previous];                
 
@@ -358,11 +393,11 @@ namespace PrimalLauncher
 
             if (playerQuest != null)
             {
-                Quest quest = QuestRepository.GetQuest("MainScenarioQuests.xml", questId);
+                Quest quest = QuestXmlLoader.GetQuest("MainScenarioQuests.xml", questId);
                 sbyte slot = GetQuestSlot(questId);
 
                 if (quest == null)
-                    quest = QuestRepository.GetQuest("SideQuests.xml", questId);
+                    quest = QuestXmlLoader.GetQuest("SideQuests.xml", questId);
 
                 User.Instance.Character.Journal.Quests[slot] = quest;               
                 InitializeQuests();

@@ -119,7 +119,7 @@ namespace PrimalLauncher
 
             if (string.IsNullOrEmpty(gameInstallPath)) //if game installation was not found
             {
-                MessageBox.Show("Could not find a FINAL FANTASY XIV 1.0 installation. Please install the game and try again.", "Primal Launcher");
+                MessageBox.Show("Could not find a FFXIV 1.0 installation. Please install the game and try again.", "The Primal Launcher");
                 Environment.Exit(0); //there is not much left to do, so terminate app.
             }
             else
@@ -151,7 +151,7 @@ namespace PrimalLauncher
         /// Checks if the game installation was patched with local IP addresses.
         /// </summary>
         /// <returns></returns>
-        public static bool GameIsPatched() => VersionFilesContainText("game", "[Patched by Primal Launcher]");
+        public static bool GameIsPatched() => VersionFilesContainText("game", "[Patched by The Primal Launcher]");
 
         /// <summary>
         /// 
@@ -208,7 +208,7 @@ namespace PrimalLauncher
 
         public static void AskForAdminPermissions()
         {
-            //run as admin code from: https://stackoverflow.com/questions/6412896/giving-application-elevated-uac
+            //run as admin snippet from: https://stackoverflow.com/questions/6412896/giving-application-elevated-uac
             WindowsPrincipal pricipal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
             bool hasAdministrativeRight = pricipal.IsInRole(WindowsBuiltInRole.Administrator);
 

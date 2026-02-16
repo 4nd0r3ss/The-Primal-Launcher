@@ -27,6 +27,8 @@ namespace PrimalLauncher
         public readonly uint DepictionJudge = 0xA0F50911;
         public readonly byte CommandBorder = 0x20;
 
+        public Queue<byte[]> PacketQueue { get; set; } //TODO: try to get rid of this.
+
         public bool[] Property { get; set; } = new bool[0x20];       
         public uint[] StatusShownTime { get; set; }
 
@@ -40,7 +42,7 @@ namespace PrimalLauncher
         public Dictionary<byte, Job> Jobs { get; set; }
         public byte CurrentClassId { get; set; }
 
-        public Job CurrentJob
+        public Job CurrentClass
         {
             get
             {
@@ -48,7 +50,25 @@ namespace PrimalLauncher
             }
         }
 
-        public CharaWork()
+        public Job CurrentJob
+        {
+            get
+            {
+                Job charClass = Jobs[CurrentClassId];
+
+                if (charClass.IsSoulStoneEquippped)
+                {
+
+                    return Jobs[GetClassJobId()];
+                }
+                else
+                {
+                    return charClass;
+                }
+            }
+        }
+
+        public CharaWork(Actor actor)
         {
             //descriptions from game data file. 
             Command[0x00] = 21001; //active mode
@@ -66,16 +86,18 @@ namespace PrimalLauncher
             Command[0x0C] = 22012; //Bazaar
             Command[0x0D] = 22013; //Repair
             Command[0x0E] = 29497; //Engage in competitive discourse to win what you seek.
-            Command[0x0F] = 22015; //[no description] 
-        }
+            Command[0x0F] = 22015; //[no description]            
 
-        public void AddNpcJob()
-        {
-            Jobs = new Dictionary<byte, Job>();
-            Job npcJob = Job.NpcJob();
-            CurrentClassId = npcJob.Id;
-            Jobs.Add(npcJob.Id, npcJob);
-        }
+            if (actor is PlayerCharacter)
+            {
+                Jobs = Job.LoadAll();
+            }
+            else
+            {
+                Jobs = Job.LoadNpcJob();
+                CurrentClassId = 0x03;
+            }
+        }      
 
         public void AddProperties(byte[] indexes)
         {
@@ -85,67 +107,78 @@ namespace PrimalLauncher
             }
         }
 
-        public void AddStatusShownTime(ref WorkProperties property)
+        private void SetStatusShownTime(ref WorkProperties property)
         {
             //status buff/ailment timer? database.cs ln 892
             //property.Add(string.Format("charaWork.statusShownTime[{0}]", i), );
         }
 
-        public void AddGeneralParameters(ref WorkProperties property)
+        private void SetCommands(ref WorkProperties property)
         {
-            //Write character's parameters
-            for (int i = 0; i < GeneralParameters.Count; i++)
-            {
-                if ((ushort)GeneralParameters[i] > 0)
-                    property.Add(string.Format("charaWork.battleTemp.generalParameter[{0}]", i), GeneralParameters[i]);
-            }
-        }
+            property.Add("charaWork.commandBorder", CommandBorder);
 
-        public void AddWorkCommands(ref WorkProperties property)
-        {
+            for (int i = 0; i < 64; i++)
+                property.Add(string.Format("charaWork.commandCategory[{0}]", i), (byte)1);
+
+            for (int i = 0; i < 4096; i++)
+            property.Add(string.Format("charaWork.commandAcquired[{0}]", i), false);
+
+            //job abilities
+            for (int i = 0; i < 36; i++)
+                property.Add(string.Format("charaWork.additionalCommandAcquired[{0}]", i), true);
+
+            //default internal commands
             for (int i = 0; i < CommandBorder; i++)
                 if (Command[i] != 0)
                     property.Add(string.Format("charaWork.command[{0}]", i), 0xA0F00000 | Command[i]);
 
-            AddHotbar(ref property);            
+            SetHotbar(ref property);
         }
 
-        private void AddHotbar(ref WorkProperties property)
-        {
-            CurrentJob.Hotbar[1] = 27181;
-            CurrentJob.Hotbar[2] = 27193;
-            CurrentJob.Hotbar[3] = 27182;
-            CurrentJob.Hotbar[4] = 27191;
-
-            //hotbar
-            // for(int i = CharaWork.CommandBorder; i < (CharaWork.CommandBorder + CurrentJob.Hotbar.Length); i++)
-            for (int i = 0; i < CurrentJob.Hotbar.Length; i++)
+        public void SetHotbar(ref WorkProperties property)
+        {                        
+            for (int i = 0; i < CurrentClass.Hotbar.Length; i++)
             {
-                if (CurrentJob.Hotbar[i] != 0)
-                    property.Add(string.Format("charaWork.command[{0}]", CommandBorder + i), 0xA0F00000 | CurrentJob.Hotbar[i]);
-            }
-            //add hotbar here
-            //if (i >= commandBorder)
-            //{
-            //    property.Add(string.Format("charaWork.parameterTemp.maxCommandRecastTime[{0}]", i - commandBorder), (ushort)5);
-            //    property.Add(string.Format("charaWork.parameterSave.commandSlot_recastTime[{0}]", i - commandBorder), (uint)(Server.GetTimeStamp() + 5));
-            //}
+                if (CurrentClass.Hotbar[i] != 0)
+                    property.Add(string.Format("charaWork.command[{0}]", CommandBorder + i), 0xA0F00000 | CurrentClass.Hotbar[i]);                            
+            }           
+        }
+        public void UpdateHotbar()
+        {
+            WorkProperties property = new WorkProperties(User.Instance.Character.Id, @"charaWork/command");
+            SetHotbar(ref property);
+            for (int i = 0; i < 64; i++)
+                property.Add(string.Format("charaWork.commandCategory[{0}]", i), (byte)1);
+
+            property.FinishWritingAndSend();
         }
 
-        public void AddWorkClassParameters(ref WorkProperties property)
+        public void RemoveFromHotbar(int slot)
         {
-            property.Add("charaWork.parameterSave.hp[0]", CurrentJob.Hp);
-            property.Add("charaWork.parameterSave.hpMax[0]", CurrentJob.MaxHp);
-            property.Add("charaWork.parameterSave.mp", CurrentJob.Mp);
-            property.Add("charaWork.parameterSave.mpMax", CurrentJob.MaxMp);
-            property.Add("charaWork.parameterTemp.tp", CurrentJob.Tp);
-            property.Add("charaWork.parameterSave.state_mainSkill[0]", CurrentJob.Id);
-            property.Add("charaWork.parameterSave.state_mainSkillLevel", CurrentJob.Level);
-            property.Add("charaWork.battleSave.skillPoint[" + (CurrentClassId - 1) + "]", (int)CurrentJob.TotalExp);
+            WorkProperties property = new WorkProperties(User.Instance.Character.Id, @"charaWork/command");
+            property.Add(string.Format("charaWork.command[{0}]", CommandBorder + slot), 0);
+            property.Add(string.Format("charaWork.commandCategory[{0}]", CommandBorder + slot), (byte)1);
+            property.FinishWritingAndSend();
         }
 
-        public void AddWorkSystem(ref WorkProperties property)
+        private void SetParameterSave(ref WorkProperties property)
         {
+            for (int i = 0; i < 40; i++)
+                property.Add(string.Format("charaWork.parameterSave.commandSlot_compatibility[{0}]", i), true);
+
+            property.Add("charaWork.parameterSave.hp[0]", CurrentClass.Hp);
+            property.Add("charaWork.parameterSave.hpMax[0]", CurrentClass.MaxHp);
+            property.Add("charaWork.parameterSave.mp", CurrentClass.Mp);
+            property.Add("charaWork.parameterSave.mpMax", CurrentClass.MaxMp);
+            
+            property.Add("charaWork.parameterSave.state_mainSkill[0]", CurrentClass.Id);
+            property.Add("charaWork.parameterSave.state_mainSkillLevel", CurrentClass.Level);
+            property.Add("charaWork.battleSave.skillPoint[" + (CurrentClassId - 1) + "]", (int)CurrentClass.TotalExp);
+        }
+
+        private void SetParameterTemp(ref WorkProperties property)
+        {
+            property.Add("charaWork.parameterTemp.tp", CurrentClass.Tp);
             property.Add("charaWork.parameterTemp.forceControl_float_forClientSelf[0]", 1.0f);
             property.Add("charaWork.parameterTemp.forceControl_float_forClientSelf[1]", 1.0f);
             property.Add("charaWork.parameterTemp.forceControl_int16_forClientSelf[0]", (short)-1);
@@ -156,6 +189,230 @@ namespace PrimalLauncher
             property.Add("charaWork.depictionJudge", DepictionJudge);
         }
 
-       
+        private void SetBattleTemp(ref WorkProperties property)
+        {
+            //Write character's parameters
+            for (int i = 0; i < GeneralParameters.Count; i++)
+            {
+                if ((ushort)GeneralParameters[i] > 0)
+                    property.Add(string.Format("charaWork.battleTemp.generalParameter[{0}]", i), GeneralParameters[i]);
+            }
+
+            property.Add("charaWork.battleTemp.castGauge_speed[0]", 1.0f);
+            property.Add("charaWork.battleTemp.castGauge_speed[1]", 0.25f);
+        }
+
+        private void SetBattleSave(ref WorkProperties property)
+        {
+            property.Add("charaWork.battleSave.potencial", 6.6f);
+            property.Add("charaWork.battleSave.negotiationFlag[0]", true);
+        }
+
+        private void SetProperties(ref WorkProperties property)
+        {
+            for (int i = 0; i < 32; i++)
+                if (i < 5 && i != 3) property.Add(string.Format("charaWork.property[{0}]", i), (byte)1);
+        }
+
+        private void SetEventSave(ref WorkProperties property)
+        {
+            property.Add("charaWork.eventSave.bazaarTax", (byte)5);
+            property.Add("charaWork.eventSave.bazaar", true);
+        }
+
+        public void AddToWork(ref WorkProperties property)
+        {
+            SetStatusShownTime(ref property);
+            SetCommands(ref property);
+            SetHotbar(ref property);
+            SetParameterSave(ref  property);
+            SetParameterTemp(ref  property);
+            SetBattleTemp(ref  property);
+            SetBattleSave(ref  property);
+            SetProperties(ref property);
+            SetEventSave(ref property);
+        }
+
+        public void AddExp(int exp)
+        {
+            //we want to add exp only if level is below cap.
+            if (CurrentClass.Level < CurrentClass.LevelCap)
+            {
+                //add exp bonus multiplier TODO:put multiplier definition somewhere else (add as an option in UI?)
+                float expBonus = 1.2f;
+                CurrentClass.TotalExp += Convert.ToInt64(exp * expBonus);
+
+                //send add exp command result
+                User.Instance.Character.SendCommandResult(0, new List<CommandResult> {
+                    new CommandResult
+                    {
+                        TargetId = User.Instance.Character.Id,
+                        TotalPoints = (short)(exp * expBonus),
+                        TextSheetId = 33934,
+                        HitPosition = (byte)(expBonus > 1 ? ((expBonus -1) * 100) : 0)
+                    }
+                });
+
+                //calculate leveling
+                long totalExp = CurrentClass.TotalExp;
+                short currentLevel = CurrentClass.Level;
+                short levelsToUp = 0;
+
+                while (totalExp >= Job.ExpTable[currentLevel])
+                {
+                    totalExp -= Job.ExpTable[currentLevel];
+                    levelsToUp++;
+                }
+
+                if (levelsToUp > 0)
+                {
+                    CurrentClass.TotalExp = (currentLevel + levelsToUp) >= CurrentClass.LevelCap ? 0 : totalExp;
+                    LevelUp(levelsToUp);
+                }
+
+                //refresh exp values in game client UI.
+                UpdateExp();
+            }
+        }
+
+        public void UpdateExp()
+        {
+            WorkProperties prop = new WorkProperties(User.Instance.Character.Id, "charaWork/battleStateForSelf");
+            prop.Add("charaWork.battleSave.skillPoint[" + (CurrentClassId - 1) + "]", (int)CurrentClass.TotalExp);
+            prop.FinishWritingAndSend();
+        }
+
+        private void LevelUp(short numLevels)
+        {
+            CurrentClass.Level += numLevels;
+
+            User.Instance.Character.SendCommandResult(0, new List<CommandResult> {
+                new CommandResult
+                {
+                    TargetId = User.Instance.Character.Id,
+                    TotalPoints = CurrentClass.Level,
+                    TextSheetId = 33909
+                }
+            });
+
+            UpdateLevel();
+            World.Instance.SetMusic(0x52, MusicMode.Layer);
+            User.Instance.Character.Journal.InitializeQuests();
+            CurrentClass.AddLevelActionsToHotbar();
+            UpdateHotbar();
+        }
+
+        public void LevelDown(short toLevel)
+        {
+            if (toLevel > 0)
+            {
+                CurrentClass.Level = toLevel;
+                CurrentClass.TotalExp = 0;
+                UpdateLevel();
+                UpdateExp();
+            }
+        }
+
+        public void UpdateLevel()
+        {
+            WorkProperties property = new WorkProperties(User.Instance.Character.Id, @"charaWork/stateForAll");
+            property.Add("charaWork.battleSave.skillLevel[" + (CurrentClassId - 1) + "]", CurrentClass.Level);
+            property.Add("charaWork.parameterSave.state_mainSkillLevel", CurrentClass.Level);
+            property.FinishWritingAndSend();
+        }        
+
+        public int GetCurrentLevel()
+        {
+            return CurrentClass.Level;
+        }
+
+        public void UpdateClass()
+        {
+            WorkProperties property = new WorkProperties(User.Instance.Character.Id, @"charaWork/stateForAll");
+            property.Add("charaWork.parameterSave.state_mainSkill[0]", CurrentClassId);
+            property.Add("charaWork.parameterSave.state_mainSkillLevel", CurrentClass);
+            property.FinishWritingAndSend();
+        }
+
+        public byte[] ClassExp()
+        {
+            if (PacketQueue == null || PacketQueue.Count == 0)
+            {
+                User.Instance.Character.Inventory.Update();
+
+                Queue<short> jobLevel = new Queue<short>();
+                Queue<short> jobLevelCap = new Queue<short>();
+                int count = 0;
+
+                foreach (var item in Jobs)
+                {
+                    count++;
+                    if (count > 52)
+                        break;
+                    Job job = item.Value;
+                    jobLevel.Enqueue(job.Level);
+                    jobLevelCap.Enqueue(job.LevelCap);
+                }
+
+                WorkProperties property = new WorkProperties(User.Instance.Character.Id, @"charaWork/exp");
+                property.Add("charaWork.battleSave.skillLevel", jobLevel);
+                property.Add("charaWork.battleSave.skillLevelCap", jobLevelCap, true);
+                PacketQueue = property.PacketQueue;
+            }
+
+            return PacketQueue.Dequeue();
+        }
+
+        public static void CommandSequence()
+        {
+            List<KeyValuePair<uint, string>> commands = new List<KeyValuePair<uint, string>>
+            {
+                new KeyValuePair<uint, string>(0x0b, "commandForced"),
+                new KeyValuePair<uint, string>(0x0a, "commandDefault"),
+                new KeyValuePair<uint, string>(0x06, "commandWeak"),
+                new KeyValuePair<uint, string>(0x04, "commandContent"),
+                new KeyValuePair<uint, string>(0x06, "commandJudgeMode"),
+                new KeyValuePair<uint, string>(0x100, "commandRequest"),
+                new KeyValuePair<uint, string>(0x100, "widgetCreate"),
+                new KeyValuePair<uint, string>(0x100, "macroRequest"),
+            };
+
+            foreach (var command in commands)
+            {
+                byte[] data = new byte[0x28];
+                data.Write(0, command.Key);
+                data.Write(0x02, command.Value);
+                Packet.Send(ServerOpcode.PlayerCommand, data);
+            }
+        }
+
+        public byte GetClassJobId()
+        {
+            byte jobIndex = 13;
+
+            if (CurrentClassId == 7 || CurrentClassId == 8)
+                jobIndex = 11;
+            else if (CurrentClassId == 22 || CurrentClassId == 23)
+                jobIndex = 4;
+
+            return (byte)(CurrentClassId + jobIndex);
+        }
+
+        public void SetCommandRecast(uint actorId, float recastTime)
+        {
+            int slotIndex = CommandBorder + 1;
+            WorkProperties prop = new WorkProperties(actorId, "charaWork/commandDetailForSelf");
+            prop.Add("charaWork.parameterTemp.maxCommandRecastTime[" + slotIndex + "]", recastTime);
+            prop.Add("charaWork.parameterSave.commandSlot_recastTime[" + slotIndex + "]", Server.GetTimeStamp(recastTime));
+            prop.FinishWritingAndSend();
+        }
+
+        public void SetComboAction(uint actorId, uint nextCommandId)
+        {
+            WorkProperties prop = new WorkProperties(actorId, "playerWork/combo");
+            prop.Add("playerWork.comboNextCommandId[0]", (short)nextCommandId);
+            prop.Add("playerWork.comboCostBonusRate", 0x3F800000); //float?
+            prop.FinishWritingAndSend();
+        }
     }   
 }

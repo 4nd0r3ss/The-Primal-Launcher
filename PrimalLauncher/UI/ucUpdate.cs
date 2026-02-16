@@ -158,6 +158,10 @@ namespace PrimalLauncher
         private void btnPatch_Click(object sender, EventArgs e)
         {
             Patcher.PatchBinaries();
+            MessageBox.Show("The game has been successfully updated and patched. Enjoy! =)", "The Primal Launcher");
+            var main = FindForm() as MainWindow;
+            main?.EnableLaunchGameBtn();
+            main?.FocusLogWindow();
         }
 
         private void btnGameUpdate_Click(object sender, EventArgs e)

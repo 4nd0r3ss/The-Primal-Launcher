@@ -1,14 +1,4 @@
-﻿// Copyright (C) 2022 Andreus Faria
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY
-
-/* 
+﻿/* 
 Copyright (C) 2022 Andreus Faria
 
 This program is free software: you can redistribute it and/or modify
@@ -26,23 +16,21 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml;
 
 namespace PrimalLauncher
 {
     public partial class MainWindow : Form
     {
-        [DllImport("kernel32.dll")]
-        public static extern UInt64 GetTickCount64();
-
-        [DllImport("kernel32.dll")]
-        public static extern uint GetTickCount();
-
         public static MainWindow Window = null;
         private bool IsInstallationOk { get; set; }
 
@@ -71,8 +59,10 @@ namespace PrimalLauncher
 
             lblSeparator1.BackColor = Color.FromArgb(64, 128, 128, 128);
             Preferences.Instance.LoadConfigFile();
-            Log.Instance.Info("Welcome to Primal Launcher!");            
+            Log.Instance.Info("Welcome to The Primal Launcher!");
 
+
+            /* debug stuff */
             //if (File.Exists(Preferences.Instance.AppDataFile))
             //    File.Delete(Preferences.Instance.AppDataFile);
 
@@ -81,10 +71,18 @@ namespace PrimalLauncher
 
             //File.Delete("packet_output.txt");
 
-            //List<Actor> acto = ActorRepository.GetZoneNpcs(0xce);            
+            //List<Actor> acto = ActorXmlLoader.GetZoneNpcs(0x9b);            
             //var z = ZoneRepository.GetInstance("man0g1_1");
             //var z =ZoneRepository.GetZones();
-            //ZoneInstance z = ZoneRepository.GetInstance(12);           
+            //ZoneInstance z = ZoneXmlLoader.GetInstance(8);
+            //
+            //var i = GuildLeveRepository.GetGuildLevePackSet(21);
+            //List<Actor> acto = ActorXmlLoader.GetZoneMonsters(0x96);
+            //World.Instance.CreateInstance(6);
+            ////var i = World.Instance.Debug;
+            ///
+
+            //var i = new OpeningDirector();
         }
 
         private void ResetTabButtonColors()
@@ -134,9 +132,10 @@ namespace PrimalLauncher
 
         private void btnLaunch_Click(object sender, EventArgs e)
         {
-            if (false)
+            //in the future, this if statement will check for the user config to skip updater and login.
+            if (true)
             {
-                LaunchGame(1);
+                Launcher.Launch("1");
             }
             else
             {
@@ -157,8 +156,6 @@ namespace PrimalLauncher
             ResetTabButtonColors();
             lblUpdate.ForeColor = Color.Moccasin;
         }
-
-        
 
         private void ToggleTabSelector(bool enabled)
         {
@@ -185,58 +182,6 @@ namespace PrimalLauncher
             controls.Add(control);
         }
 
-        private void LaunchGame(int sessionId)
-        {
-            //generate encryption key and initialize blowfish
-            uint tickcount = (uint)Environment.TickCount;
-            string encryptionKeyStr = string.Format("{0}", (tickcount & ~0xFFFF).ToString("X2")).ToLower();
-            byte[] encryptionKey = new byte[encryptionKeyStr.Length];
-
-            for (int i = 0; i < encryptionKeyStr.Length; i++)
-                encryptionKey[i] = (byte)encryptionKeyStr[i];
-
-            Blowfish bf = new Blowfish(encryptionKey);
-
-            //get command line arguments chars/bytes
-            string commandLineStr = string.Format(" T ={0} /LANG =en-us /REGION =2 /SERVER_UTC =1356916742 /SESSION_ID ={1}", tickcount, sessionId);
-            char[] commandLineC = new char[commandLineStr.Length];
-            byte[] commandLine = new byte[commandLineStr.Length];
-
-            for (int i = 0; i < commandLineStr.Length; i++)
-            {
-                commandLine[i] = (byte)commandLineStr[i];
-                commandLineC[i] = commandLineStr[i];
-            }
-
-            //encrypt command line arguments
-            int commandLineSize = commandLine.Length + 1;
-
-            for (int i = 0; i < (commandLineSize & ~0x7); i += 8)
-            {
-                uint xl = BitConverter.ToUInt32(commandLine, i);
-                uint xr = BitConverter.ToUInt32(commandLine, i + 4);
-
-                bf.BlowfishEncipher(ref xl, ref xr);
-
-                Buffer.BlockCopy(BitConverter.GetBytes(xl), 0, commandLine, i, sizeof(uint));
-                Buffer.BlockCopy(BitConverter.GetBytes(xr), 0, commandLine, i + 4, sizeof(uint));
-            }
-
-            //base 64 encode command line encrypted arguments        
-            string encodedCommandLine = Convert.ToBase64String(commandLine);
-            encodedCommandLine = encodedCommandLine.Replace("+", "-").Replace("/", "_");
-
-            //format command line and arguments
-            string completeCommandLine = string.Format("{0}\\ffxivgame.exe", Preferences.Instance.Options.GameInstallPath);
-            string arguments = string.Format("sqex0002{0}!////", encodedCommandLine);
-
-            //open game
-            Process p = new Process();
-            p.StartInfo.FileName = completeCommandLine;
-            p.StartInfo.Arguments = arguments;
-            p.Start();
-        }
-
         private void MainWindow_FormClosing(object sender, FormClosingEventArgs e)
         {
             LobbyServer.Instance.ServerShutDown();
@@ -256,7 +201,25 @@ namespace PrimalLauncher
             else
             {
                 ToggleTabSelector(IsInstallationOk);
+                lblUpdate_Click(lblUpdate, EventArgs.Empty);
             }          
+        }
+
+        public void EnableLaunchGameBtn()
+        {
+            btnLaunch.Enabled = true;
+        }
+
+        public void FocusLogWindow()
+        {
+            ToggleTabSelector(true);
+            lblUpdate.Enabled = true;
+            lblLog_Click(lblUpdate, EventArgs.Empty);
+        }
+
+        private void MainWindow_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }

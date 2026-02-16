@@ -60,7 +60,7 @@ namespace PrimalLauncher
             if (EventManager.Instance.CurrentEvent.IsQuestion)
             {
                 EventManager.Instance.CurrentEvent.GetQuestionSelection();
-                uint? selection = EventManager.Instance.CurrentEvent.Selection[0];
+                uint? selection = (uint?)EventManager.Instance.CurrentEvent.Selection[0];
 
                 if (selection.HasValue)
                 {                    

@@ -1,0 +1,321 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<MonsterGroups>
+    <GroupMonster>
+        <Monster family="Lemming" className="HareStandard" respawnDelay="30">
+            <classId>2104028</classId>
+            <position x="333.2" y="5.84" z="-943" r="-1.94" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+        
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Funguar" className="FunguarLesserStandard" respawnDelay="30">
+            <classId>2105901</classId>
+            <position x="335.2" y="5.84" z="-940" r="-1.94" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+
+
+    <GroupMonster>
+        <Monster family="Lemming" className="HareStandard">
+            <classId>2104028</classId>
+            <position x="321.6962" y="5.2763157" z="-507.5099" r="1.0741522" zoneId="150" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Lemming" className="HareStandard">
+            <classId>2104009</classId>
+            <position x="406.10522" y="5.564886" z="-393.05072" r="2.340096" zoneId="150" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Lemming" className="HareStandard">
+            <classId>2104028</classId>
+            <position x="346.31174" y="5.017292" z="-512.49854" r="2.3489838" zoneId="150" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Lemming" className="HareStandard">
+            <classId>2104028</classId>
+            <position x="338.1643" y="5.4692974" z="-509.11252" r="-1.2352693" zoneId="150" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Funguar" className="FunguarLesserStandard">
+            <classId>2105901</classId>
+            <position x="369.13205" y="5.6096773" z="-720.55585" r="1.8378136" zoneId="150" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Funguar" className="FunguarLesserStandard">
+            <classId>2105901</classId>
+            <position x="369.52853" y="5.60468" z="-692.1943" r="-1.7104676" zoneId="150" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Lemming" className="HareStandard">
+            <classId>2104028</classId>
+            <position x="239.89421" y="5.6543636" z="-699.9972" r="-1.8597335" zoneId="150" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Lemming" className="HareStandard">
+            <classId>2104028</classId>
+            <position x="239.23605" y="5.6543636" z="-696.1517" r="0.7790186" zoneId="150" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Lemming" className="HareStandard">
+            <classId>2104028</classId>
+            <position x="214.06165" y="4.608714" z="-710.6949" r="-2.167452" zoneId="150" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Lemming" className="HareStandard">
+            <classId>2104028</classId>
+            <position x="169.00183" y="4.4516687" z="-695.0913" r="0.67862964" zoneId="150" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Chigoe" className="ChigoeLesserStandard">
+            <classId>2105612</classId>
+            <position x="36.068314" y="21.047338" z="-741.48175" r="-1.0907693" zoneId="150" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Chigoe" className="ChigoeLesserStandard">
+            <classId>2105612</classId>
+            <position x="56.701714" y="24.128277" z="-763.1922" r="2.6051903" zoneId="150" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Funguar" className="FunguarLesserStandard">
+            <classId>2105901</classId>
+            <position x="39.780865" y="22.055023" z="-762.6138" r="2.9080608" zoneId="150" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Lemming" className="HareStandard">
+            <classId>2104009</classId>
+            <position x="-97.04693" y="4.5611563" z="-769.4307" r="-2.6598415" zoneId="150" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Funguar" className="FunguarLesserStandard">
+            <classId>2105901</classId>
+            <position x="-208.7285" y="5.369256" z="-806.73645" r="-1.7175107" zoneId="150" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Mole" className="MoleMoleStandard">
+            <classId>2105705</classId>
+            <position x="-240.53389" y="-8.121736" z="-772.35913" r="2.6789424" zoneId="150" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Firefly" className="FireflyNormalStandard">
+            <classId>2105802</classId>
+            <position x="-248.28748" y="-8.085419" z="-760.01855" r="-1.1423659" zoneId="150" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Funguar" className="FunguarLesserStandard">
+            <classId>2105901</classId>
+            <position x="-219.99348" y="5.9391575" z="-824.8266" r="-3.0413704" zoneId="150" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Lemming" className="HareStandard">
+            <classId>2104009</classId>
+            <position x="-273.76163" y="5.4840536" z="-835.0484" r="1.9230723" zoneId="150" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Petitghost" className="PetitghostLesserStandard">
+            <classId>2104324</classId>
+            <position x="-252.20369" y="0.6787591" z="-918.5972" r="0.29409766" zoneId="150" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Chigoe" className="ChigoeLesserStandard">
+            <classId>2105612</classId>
+            <position x="-376.17062" y="6.6077423" z="-847.6637" r="-0.4535804" zoneId="150" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Monkey" className="MonkeyLesserStandard">
+            <classId>2100501</classId>
+            <position x="-375.9774" y="5.942857" z="-862.9999" r="2.1204035" zoneId="150" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Funguar" className="FunguarLesserStandard">
+            <classId>2105917</classId>
+            <position x="-524.37067" y="5.6678066" z="-938.5802" r="2.6069858" zoneId="150" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Funguar" className="FunguarLesserStandard">
+            <classId>2105917</classId>
+            <position x="-539.476" y="5.257783" z="-912.5131" r="-2.125176" zoneId="150" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Funguar" className="FunguarLesserStandard">
+            <classId>2105917</classId>
+            <position x="-547.72174" y="6.340724" z="-957.4985" r="-3.1027756" zoneId="150" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Funguar" className="FunguarLesserStandard">
+            <classId>2105917</classId>
+            <position x="-548.9577" y="6.340724" z="-958.03186" r="-2.4172425" zoneId="150" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Funguar" className="FunguarLesserStandard">
+            <classId>2105901</classId>
+            <position x="-711.7316" y="23.629751" z="-1084.857" r="1.5596149" zoneId="150" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Funguar" className="FunguarLesserStandard">
+            <classId>2105901</classId>
+            <position x="-703.96063" y="26.142506" z="-1099.0293" r="-1.4853581" zoneId="150" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Funguar" className="FunguarLesserStandard">
+            <classId>2105902</classId>
+            <position x="-716.4211" y="23.552761" z="-1083.3031" r="1.4973723" zoneId="150" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Monkey" className="MonkeyLesserStandard">
+            <classId>2100501</classId>
+            <position x="-703.93756" y="20.792128" z="-1165.3387" r="1.7402558" zoneId="150" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Lemming" className="HareStandard">
+            <classId>2104009</classId>
+            <position x="-730.09796" y="20.88591" z="-1281.6183" r="-0.7170377" zoneId="150" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Lemming" className="HareStandard">
+            <classId>2104009</classId>
+            <position x="-758.4209" y="22.083668" z="-1269.2776" r="0.8271498" zoneId="150" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Funguar" className="FunguarLesserStandard">
+            <classId>2105901</classId>
+            <position x="-822.4095" y="24.183496" z="-1286.2125" r="1.7119795" zoneId="150" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+</MonsterGroups>

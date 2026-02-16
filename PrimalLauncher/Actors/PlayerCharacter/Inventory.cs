@@ -43,7 +43,9 @@ namespace PrimalLauncher
             AddEmptySlots(ref KeyItems, InventoryMaxSlots.KeyItems);
             AddEmptySlots(ref Loot, InventoryMaxSlots.Loot);
             AddEmptySlots(ref MeldRequest, InventoryMaxSlots.MeldRequest);
-            AddEmptySlots(ref Bazaar, InventoryMaxSlots.Bazaar);                      
+            AddEmptySlots(ref Bazaar, InventoryMaxSlots.Bazaar);
+
+            AddItem(InventoryType.Currency, "Gil", 0); //need to add gil 'item' to currency inventory on initialization so we can add gil amounts to it.
         }
 
         #region Packet Handling
@@ -83,6 +85,22 @@ namespace PrimalLauncher
                 if (slot.Value == null) return slot.Key;
 
             return 0; //inventory is full
+        }
+
+        private Item FindBagItem(uint itemId)
+        {         
+            foreach (var slot in Bag)
+            {
+                if (slot.Value != null)
+                {
+                    Item item = (Item)slot.Value;
+
+                    if (item.Id == itemId)
+                        return item;
+                }
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -158,21 +176,36 @@ namespace PrimalLauncher
 
             //if max stack is > 1, we change the quantity bytes to the quantity the user requested. 
             if (itemMaxStack > 1)
-            {
-                //if the requested quantity is greater than the max stack, we limit it to the max stack.
-                int itemQuantity = quantity > itemMaxStack ? itemMaxStack : quantity;
-                ushort slotToAddTo = GetFirstEmptySlot(inventory);
+            {                
+                Item item = FindBagItem(itemId);
 
-                Item item = new Item
+                //if item exists and is stackable
+                if(item != null && itemMaxStack > 0)
                 {
-                    Id = itemId,
-                    ItemKind = (uint)itemKind,
-                    InventorySlot = slotToAddTo,
-                    Quantity = itemQuantity,
-                    MaxQuantity = (uint)itemMaxStack
-                };
+                    item.Quantity += quantity;
 
-                inventory[slotToAddTo] = item;               
+                    //check if item quantity has surpassed the max stack
+                    if (item.Quantity > itemMaxStack)
+                        item.Quantity = itemMaxStack;
+                }
+                else //
+                {
+                    //if the requested quantity is greater than the max stack, we limit it to the max stack.
+                    int addQuantity = quantity > itemMaxStack ? itemMaxStack : quantity;
+                    ushort slotToAddTo = GetFirstEmptySlot(inventory);
+
+                    item = new Item
+                    {
+                        Id = itemId,
+                        ItemKind = (uint)itemKind,
+                        InventorySlot = slotToAddTo,
+                        Quantity = addQuantity,
+                        MaxQuantity = (uint)itemMaxStack
+                    };
+
+                    inventory[slotToAddTo] = item;
+                }   
+
                 SendItem(type, maxSlots, item.ToBytes());
             }
             else
@@ -233,35 +266,33 @@ namespace PrimalLauncher
             AddEquipmentPiece(ItemGraphics.Hands, 13, graphicId: graphId[11]);
             AddEquipmentPiece(ItemGraphics.Feet, 14, graphicId: graphId[12]);
             AddEquipmentPiece(ItemGraphics.Waist, 15, graphicId: graphId[13]);
-
-            // giveaway on me =)
-            //AddItem(InventoryType.Bag, "Potion", 10);             
-            //AddItem(InventoryType.Currency, "Gil", 200);           
         }
 
         public void AddGil(int quantity)
         {
-            if(quantity > 0)
+            
+            foreach (var slot in Currency)
             {
-                foreach (var slot in Currency)
+                if (slot.Value != null)
                 {
-                    if (slot.Value != null)
-                    {
-                        Item item = (Item)slot.Value;
+                    Item item = (Item)slot.Value;
 
-                        if (item.Id == 1000001)
-                        {
-                            //we do it like this because quantity can be negative, meaning we are taking Gil.
-                            item.Quantity += quantity;
-                            SendItem(InventoryType.Currency, InventoryMaxSlots.Currency, item.ToBytes());
-                        }
-                        else
-                        {
-                            continue;
-                        }
+                    if (item.Id == 1000001)
+                    {
+                        //we do it like this because quantity can be negative, meaning we are taking Gil.
+                        item.Quantity += quantity;
+                        SendItem(InventoryType.Currency, InventoryMaxSlots.Currency, item.ToBytes());
+                    }
+                    else
+                    {
+                        continue;
                     }
                 }
+            }
 
+            //if quantity is less than zero we are spending gil, and the caption is handled by the spend type textsheet.
+            if (quantity > 0)
+            {
                 World.SendTextSheet(0x61C7, new object[] { quantity });
             }            
         }

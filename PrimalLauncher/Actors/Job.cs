@@ -18,7 +18,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Xml;
 
 namespace PrimalLauncher
 {
@@ -28,6 +32,7 @@ namespace PrimalLauncher
         public byte Id { get; set; }
         public string Name { get; set; }       
         public bool IsCurrent { get; set; } //the class the player is using 
+        public bool IsSoulStoneEquippped { get; set; }
 
         public short Level { get; set; } 
         public short LevelCap { get; set; }         
@@ -44,6 +49,8 @@ namespace PrimalLauncher
         public int AutoAttackMaxDistance { get; set; }
 
         public ushort[] Hotbar { get; set; }
+
+        public List<ActionCommand> Actions { get; set; }
                
         public Job(byte id, string name, short maxLevel)
         {
@@ -56,7 +63,7 @@ namespace PrimalLauncher
            
             MaxHp = 300;
             MaxMp = 200;
-            MaxTp = 3000; //this was the default max TP value for 1.x
+            MaxTp = 3000;
 
             //can use these fields to start the character with less HP, MP or TP.
             Hp = MaxHp;
@@ -65,15 +72,23 @@ namespace PrimalLauncher
 
             AutoAttackMaxDistance = 4;
 
-            Hotbar = new ushort[0x1d];
-            Hotbar[0] = 27190; //remove later
-            Hotbar[1] = 27181;
-            Hotbar[2] = 27193;
-            Hotbar[3] = 27182;
-            Hotbar[4] = 27191;
+            Hotbar = new ushort[30];  
+            Actions = new List<ActionCommand>();
         }
 
-        public static Job NpcJob()
+        private void AddToHotbarEmptySlot(ushort actionId)
+        {
+            for (int i = 0; i < Hotbar.Length; i++)
+            {
+                if (Hotbar[i] == 0)
+                {
+                    Hotbar[i] = actionId; 
+                    break;
+                }                    
+            }
+        }
+
+        public static Dictionary<byte, Job> LoadNpcJob()
         {
             Job job = new Job(0x03, "Npc", 99)
             {
@@ -85,7 +100,16 @@ namespace PrimalLauncher
                 Level = 2
             };
 
-            return job;
+            ActionCommand action = new ActionCommand
+            {
+                Id = Command.MonsterAutoAttack,
+                AnimationId = 0x11001000,
+                TextSheet = 0x765D
+            };
+
+            job.Actions.Add(action);
+
+            return new Dictionary<byte, Job> {{ 0x03, job }};
         }
 
         public JobClassCategory GetCategory()
@@ -132,34 +156,76 @@ namespace PrimalLauncher
 
         public static Dictionary<byte, Job> LoadAll()
         {
-            Dictionary<byte, Job> jobs = new Dictionary<byte, Job>();
+            Dictionary<byte, Job> jobs = new Dictionary<byte, Job>();            
 
             try
             {
                 //get job info from game data
-                DataTable jobsTable = GameData.Instance.GetGameData("xtx/text_jobName");                
+                DataTable jobsTable = GameData.Instance.GetGameData("xtx/text_jobName"); 
 
                 //couldn't find a way in the game's files to say which ones of the jobs/classes are disabled, so using this for now
                 List<uint> disabledJobs = new List<uint>
                 {
-                    1, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 24, 25, 26, 27, 28, 37, 38, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58
-                };
+                    1, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 24, 25, 26, 27, 28, 37, 
+                    38, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58
+                };                
 
                 foreach (DataRow row in jobsTable.Rows)
                 {
                     uint jobId = (uint)row.ItemArray[0];
                     short maxLevel = (short)(disabledJobs.Any(x => x == jobId) ? 255 : 50);
                     string jobName = (string)row.ItemArray[1];
-                    jobs.Add((byte)jobId, new Job((byte)jobId, jobName, maxLevel));
+                    Job job = new Job((byte)jobId, jobName, maxLevel);
+                    job.LoadActions();    
+                    jobs.Add((byte)jobId, job);
                 }
             }
             catch (Exception e)
             {
-                Log.Instance.Error(e.Message);                
+                Log.Instance.Error(e.Message);
             }
 
             return jobs;
-        }       
+        }  
+        
+        public void LoadActions()
+        {
+            DataTable jobActionsTable = GameData.Instance.GetGameData("gameCommandBasic");
+            XmlDocument jobActionList = new XmlDocument();
+            jobActionList.LoadFromResource("JobActionList.xml");
+            XmlNodeList jobActions = jobActionList.SelectNodes("//JobAction[@class=" + Id + "]");
+
+            //add auto-attack action
+            Actions.Add(new ActionCommand
+            {
+                Id = Command.PlayerAutoAttack,
+                AnimationId = 0x19001000,
+                TextSheet = 0x765D
+            });
+
+            //add actions from xml
+            foreach (XmlNode node in jobActions)
+            {
+                uint actionId = node.GetAttributeAsUint("id");
+                DataRow[] jobActionSearch = jobActionsTable.Select("id = '" + actionId + "'");
+                DataRow jobActionData = jobActionSearch != null && jobActionSearch.Length > 0 ? jobActionSearch[0] : null;
+                Actions.Add(new ActionCommand(node, jobActionData));
+
+                //if action required level is 1, we add it to the hotbar.
+                if (jobActionData.ItemArray[3].ToString() == "1")
+                    AddToHotbarEmptySlot(Convert.ToUInt16(jobActionData.ItemArray[0]));
+            }
+        }
+
+        public void AddLevelActionsToHotbar()
+        {
+            List<ActionCommand> actions = Actions.Where(x => x.LevelRequired == Level).ToList();
+
+            foreach (ActionCommand action in actions)
+            {
+                AddToHotbarEmptySlot((ushort)action.Id);
+            }            
+        }
 
         public static long[] ExpTable = {
                 0, 570, 700, 880, 1100, 1500, 1800, 2300, 3200, 4300, 5000,
@@ -221,6 +287,41 @@ namespace PrimalLauncher
                     return AnimationEffect.ChangeTo_WHM;
                 default:
                     return 0;
+            }
+        }
+
+        public void ChangeHotbar(byte[] data)
+        {            
+            int paramsIndex = data.IndexOfString("commandForced") + 0x20;
+            var parameters = LuaParameters.ReadParameters(data, paramsIndex);
+            int slot = ((int)parameters[0]) - 1;
+            
+            if(slot < 0) //additional action item clicked
+            {
+                 
+            }
+            else 
+            {
+                ushort commandId = (ushort)(int)parameters[1];
+                Hotbar[slot] = commandId;
+
+                //00-09 hotbar 1
+                //10-19 hotbar 2
+                //20-29 hotbar 3
+
+                if (commandId == 0) //double-clicked hotbar item to remove it
+                {
+                    User.Instance.Character.CharaWork.RemoveFromHotbar(slot);
+                }                 
+                else
+                {
+                    int oldSlot = Array.IndexOf(Hotbar, commandId);
+
+                    if (oldSlot >= 0)
+                        Hotbar[oldSlot] = 0;
+
+                    User.Instance.Character.CharaWork.UpdateHotbar();
+                }
             }
         }
     }

@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<MonsterGroups>
+    <GroupMonster>
+        <Monster family="Bug" className="LadybugStandard">
+            <classId>2103905</classId>
+            <position x="48.286285" y="16.963482" z="-393.86533" r="-0.5836581" zoneId="162" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Lemming" className="NuteaterStandard">
+            <classId>2104007</classId>
+            <position x="37.920906" y="17.013208" z="-385.55667" r="-0.9884646" zoneId="162" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Bug" className="LadybugStandard">
+            <classId>2103905</classId>
+            <position x="194.00171" y="16.792519" z="-419.2471" r="-3.0255795" zoneId="162" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Lemming" className="GlirulusStandard">
+            <classId>2104017</classId>
+            <position x="97.22847" y="16.590546" z="-505.87775" r="-0.05820366" zoneId="162" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Flower" className="FlowerStandard">
+            <classId>2102708</classId>
+            <position x="139.30753" y="16.80289" z="-527.0385" r="0.6077102" zoneId="162" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Flower" className="FlowerStandard">
+            <classId>2102708</classId>
+            <position x="4.984064" y="15.946375" z="-509.0391" r="0.52698743" zoneId="162" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Yak" className="YakMaleStandard">
+            <classId>2202301</classId>
+            <position x="56.386856" y="16.406033" z="-529.0963" r="-0.3115902" zoneId="162" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+    <GroupMonster>
+        <Monster family="Crab" className="CrabLesserStandard">
+            <classId>2107606</classId>
+            <position x="-125.93647" y="4.6305885" z="-618.49994" r="-3.0949264" zoneId="162" />
+            <events>
+                <noticeEvent priority="0" enabled="1" silent="1" />
+            </events>
+        </Monster>
+    </GroupMonster>
+</MonsterGroups>
