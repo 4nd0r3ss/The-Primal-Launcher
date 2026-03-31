@@ -19,7 +19,9 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Linq;
+using System.Numerics;
 using System.Threading;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 
 namespace PrimalLauncher
 {
@@ -57,7 +59,6 @@ namespace PrimalLauncher
             }            
         }
 
-
         public Actor GetTargetActor()
         {
             return base.GetCurrentZone().GetActorById(base.TargetId);
@@ -66,28 +67,43 @@ namespace PrimalLauncher
         public void ExecuteActionCommand(short commandId)
         {
             ActionCommand action = CharaWork.CurrentClass.Actions.Find(x => x.Id == (Command)commandId);
+            int slot = CharaWork.GetHotbarSlot((ushort)commandId);
 
             if (action != null)
-            {
-                if(action.CastTime > 0)
+            {                 
+                if (action.CastTime > 0)
                 {
-                    SetCastBar((uint)commandId, action.CastTime);                    
-                    SubState.Chant = 0xF0;
-                    SetSubState();
+                    //TODO: add owner property to ActionCommand and move cast functions to it.
+                    //ActionCommand will be added to TimerManager queue and methods will be called from there.
+                    //add logic to cancel casting if actor moves.
+                    CastStart(action, commandId);
+                    Thread.Sleep((int)((action.CastTime) * 1000));
+                    CastEnd(action);
+                }                   
 
-                    Thread.Sleep((int)((action.CastTime - 1) * 1000));
+                action.Execute(this, slot);
+            }         
+            else SetCastBar();
+            Log.Instance.Error("Command " + commandId + " not found.");           
+        }
 
-                    SetCastBar();
-                    SubState.Chant = 0;
-                    SetSubState();
-                }                
+        private void CastStart(ActionCommand action, short commandId)
+        {
+            uint castEffect = 0x6f000002; //THM/BLM effect
 
-                action.Execute(this);
-            }
-            else
-            {
-                Log.Instance.Error("Command " + commandId + " not found.");
-            }
+            if (CharaWork.CurrentClass.Id == 23) castEffect++;
+
+            SetCastBar((uint)commandId, action.CastTime);
+            SubState.Chant = 0xF0;
+            SetSubState();
+            SendCommandResult(action.Id, new List<CommandResult> { new CommandResult { TargetId = Id } }, castEffect, senderId: Id);
+        }
+
+        private void CastEnd(ActionCommand action)
+        {            
+            SubState.Chant = 0;
+            SetSubState();
+            SetCastBar();
         }
 
         public virtual void Die() { }
@@ -120,14 +136,29 @@ namespace PrimalLauncher
             if (CharaWork.CurrentClass.Hp <= 0) Die();           
         }
 
-        public (short damage, EffectId effectId) CalculateDamage(ActorBattle attacker, short attackDamage)
+        public void AddMp(short amount)
         {
-            (short damage, EffectId effectId) result = ((short)((attacker is PlayerCharacter) ? 100 : 10), EffectId.HitNormal);
+            CharaWork.CurrentClass.Mp += amount;
+            if (CharaWork.CurrentClass.Mp > CharaWork.CurrentClass.MaxMp)
+                CharaWork.CurrentClass.Mp = CharaWork.CurrentClass.MaxMp;
+            WorkProperties prop = new WorkProperties(Id, "charaWork/stateAtQuicklyForAll");
+            prop.Add("charaWork.parameterSave.mp[0]", CharaWork.CurrentClass.Mp);
+            prop.FinishWritingAndSend(Id);
+        }
+
+        public (short damage, EffectId effectId) CalculateDamageTaken(ActorBattle attacker, short attackDamage)
+        {
+            (short damage, EffectId effectId) result = ((short)((attacker is PlayerCharacter) ? attackDamage : 10), EffectId.HitNormal);
             //temporary while I don't have damage calculations.
             TargetId = attacker.Id;
             LockOnTarget = true;
 
             return result;
+        }
+
+        public short CalculateDamageInflicted()
+        {
+            return 10;
         }
 
         public void SetEnmity(short amount)
@@ -188,18 +219,8 @@ namespace PrimalLauncher
 
         public void MoveToTarget()
         {
-            if (!Immobile)
-            {
-                var target = ((ActorBattle)GetCurrentZone().GetActorById(TargetId));
-
-                //if (GetTargetDistance() <= CharaWork.CurrentClass.AutoAttackMaxDistance)
-                    MoveToActor(target);
-            }                        
-        }
-
-        public void FaceTarget()
-        {
-
+            var target = ((ActorBattle)GetCurrentZone().GetActorById(TargetId));
+            MoveToActor(target);
         }
 
         public float GetTargetDistance()
@@ -229,25 +250,25 @@ namespace PrimalLauncher
         /// <param name="actor"></param>
         public void MoveToActor(Actor actor)
         {
-            if (actor != null)
+            if (actor != null && !Immobile)
             {
-                if (!Immobile)
+                float distance = GetActorDistance(actor);
+
+                //move to target only if current ditance is greater than attack distance.
+                if (distance > CharaWork.CurrentClass.AutoAttackMaxDistance)
                 {
-                    float distance = GetActorDistance(actor);
+                    float t = (distance - CharaWork.CurrentClass.AutoAttackMaxDistance) / distance;
 
-                    //move to target only if current ditance is greater than attack distance.
-                    if (distance > CharaWork.CurrentClass.AutoAttackMaxDistance)
-                    {
-                        float t = (distance - CharaWork.CurrentClass.AutoAttackMaxDistance) / distance;
-
-                        Position.X = ((1 - t) * Position.X) + (t * actor.Position.X);
-                        Position.Z = ((1 - t) * Position.Z) + (t * actor.Position.Z);
-                    }
-                }               
-
-                //rotation has to be calculated regardless of movement.
-                Position.R = CalculateRotation(actor.Position);
-                MoveToPosition(Position, 2);
+                    Position.X = ((1 - t) * Position.X) + (t * actor.Position.X);
+                    Position.Z = ((1 - t) * Position.Z) + (t * actor.Position.Z);
+                    Position.R = CalculateRotation(actor.Position);
+                    MoveToPosition(Position, MoveState.Running);
+                }
+                else
+                {
+                    Position.R = CalculateRotation(actor.Position);
+                    MoveToPosition(Position,MoveState.Standing);
+                }     
             }           
         }
 
@@ -262,10 +283,10 @@ namespace PrimalLauncher
             return rotation;
         }
 
-        private void TurnToAttacker()
+        public void TurnToTarget()
         {
             byte[] data = new byte[0x08];
-            Buffer.BlockCopy(BitConverter.GetBytes(base.TargetId), 0, data, 0, 4);
+            data.Write(0, TargetId);            
             Packet.Send(ServerOpcode.TurnToTarget, data, Id);
         }
 
@@ -278,6 +299,28 @@ namespace PrimalLauncher
 
             properties.Add("playerWork.castCommandClient", commandId);    
             properties.FinishWritingAndSend();
+        }
+
+        public void GetHitPosition(ActorBattle target)
+        {
+            Vector3 actorPosition = new Vector3(Position.X, Position.Y, Position.Z);            
+            Vector3 targetPosition = new Vector3(target.Position.X, target.Position.Y, target.Position.Z);
+
+            float rad = target.Position.R * (float)Math.PI / 180f;
+            Vector3 forward = new Vector3((float)Math.Cos(rad)*-1,0,(float)Math.Sin(rad));
+            Vector3 toPlayer = Vector3.Normalize(actorPosition - targetPosition);
+
+            float dot = Vector3.Dot(forward, toPlayer);
+            string result = "";
+
+            if (dot > 0.7f)
+                result = "Front " + dot.ToString();
+            else if (dot < -0.7f)
+                result = "Back " + dot.ToString();
+            else
+                result = "Flank " + dot.ToString();
+
+            ChatProcessor.SendMessage(MessageType.System, result);
         }
     }
 }

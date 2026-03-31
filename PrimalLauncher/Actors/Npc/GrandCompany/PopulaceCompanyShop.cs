@@ -20,50 +20,41 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static System.Collections.Specialized.BitVector32;
 
 namespace PrimalLauncher
 {
-    public class PopulaceCompanyGuide : PopulaceCompany
+    public class PopulaceCompanyShop : PopulaceCompany
     {
-        public PopulaceCompanyGuide() 
+        public PopulaceCompanyShop()
         {
             ClassName = GetType().Name;
         }
 
         public override void talkDefault()
         {
-            //eventTalkWelcome - joined
-            //eventTalkProvisional - no company
-            //eventTalkExclusive - from anothe company
-            //eventTalkComMember - arguments are character id, npc id, festival flag
+            //eventTalkStepCantUse
+            //eventTalkPreJoin
+            //eventTalkPreJoinQuest
+            //eventTalkJoined
+            //eventTalkFestival
+            //eventTalkFestival2
+            //eventTalkMainMenu - info and open store option
+            //eventShopMenuOpen - no params, nothing happens. maybe player or world need to have some value set? check Ask/GrandCompanyShopWidget
+            //eventShopMenuAsk - nothing happens
+            //eventShopMenuClose
+            //eventGuideChocoboWhistle - get chocobo directions -- quest phase?
+            //eventGuideTownTransport - city travel points aetherte shards, needs an item to use.
+            //eventAskChocoboCustomize - buy something chocobo related for 2 seals
+            //eventChocoboCustomize - points player to stables to customize chocobo
 
             if (!EventManager.Instance.CurrentEvent.IsQuestion)
             {
-                int companyId = User.Instance.Character.CompanyId;
-                int companytRank = User.Instance.Character.CompanyRank;
-
-                if (companyId == 0) //not enlisted
-                {
-                    SendTalk("eventTalkProvisional", new List<object> { User.Instance.Character.Id });                   
-                }
-                else if (companyId == CompanyId && companytRank == 0) //not ranked
-                {
-                    SendTalk("eventTalkProvisional", new List<object> { User.Instance.Character.Id });                   
-                }
-                else if (companyId == CompanyId && companytRank > 0) //has rank
-                {
-                    SendTalk("eventTalkComMember", new List<object> { User.Instance.Character.Id, Id, true });
-                }
-                else //not your company
-                {
-                    SendTalk("eventTalkExclusive", new List<object> { User.Instance.Character.Id });
-                }                
+                SendTalk("eventTalkStepCantUse", new List<object> {  });
             }
             else
             {
                 uint? selection = (uint?)EventManager.Instance.CurrentEvent.Selection[0];
-                //ChatProcessor.SendMessage(MessageType.System, ClassName + " not implemented. ");                
+                ChatProcessor.SendMessage(MessageType.System, ClassName + " not implemented. ");
                 EndTalk();
             }
         }

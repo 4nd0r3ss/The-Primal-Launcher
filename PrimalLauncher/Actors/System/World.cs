@@ -53,6 +53,11 @@ namespace PrimalLauncher
             Aetherytes = ActorXmlLoader.GetAetherytes();
         }   
 
+        public static void Reset()
+        {
+            _instance = new World();
+        }
+
         public override void Spawn(ushort spawnType = 0, ushort isZoning = 0, int changingZone = 0)
         {
             Prepare();

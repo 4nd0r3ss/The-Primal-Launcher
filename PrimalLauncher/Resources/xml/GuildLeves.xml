@@ -117,7 +117,11 @@
             <GuildLeve id="12506" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
         </GuildLevePack>
         <GuildLevePack id="207"	level="40">
-            <GuildLeve id="12521" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
+            <GuildLeve id="12521" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0">
+                <Rewards>
+                    <Reward id="1000001" quantityMax="200" quantityMin="20" />
+                </Rewards>                
+            </GuildLeve>
             <GuildLeve id="12522" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
             <GuildLeve id="12523" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />
             <GuildLeve id="12524" reward1="0" reward1Qty="0" reward2="0" reward2Qty="0" />

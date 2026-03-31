@@ -117,9 +117,20 @@ namespace PrimalLauncher
                     actorBattle.Engage(0);
         }
 
+        private void DisengageGroupMembers(GroupBase group)
+        {
+            foreach (Actor member in group.MemberList)
+                if (member is ActorBattle actorBattle)
+                    actorBattle.Disengage();
+        }
+
         public void Disengage()
         {
-            BattleEngaged = false;       
+            BattleEngaged = false;
+
+            foreach (var group in Groups)
+                DisengageGroupMembers(group);
+
             Log.Instance.Warning("Battle manager disengaged battle.");
         }
 

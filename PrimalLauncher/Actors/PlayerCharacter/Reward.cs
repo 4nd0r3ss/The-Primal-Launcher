@@ -24,21 +24,40 @@ using System.Xml;
 
 namespace PrimalLauncher
 {
-    public class GuildLeve
+    [Serializable]
+    public class Reward
     {
-        public int Id { get; set; }
-        public int Reward1 { get; set; }
-        public int Reward1Qty { get; set; }
-        public int Reward2 { get; set; }
-        public int Reward2Qty { get; set; }
+        public uint ItemId { get; set; }
 
-        public GuildLeve(XmlNode node)
+        public int Quantity
         {
-            Id = node.GetAttributeAsInt("id");
-            Reward1 = node.GetAttributeAsInt("reward1");
-            Reward1Qty = node.GetAttributeAsInt("reward1Qty");
-            Reward2 = node.GetAttributeAsInt("reward2");
-            Reward2Qty = node.GetAttributeAsInt("reward2Qty");
+            get
+            {
+                return GetRewardQuantity();
+            }
+        }
+        private int QuantityMax { get; set; }
+        private int QuantityMin { get; set; }
+
+        public Reward(XmlNode node)
+        {
+
+        }
+
+        private int GetRewardQuantity()
+        {
+            if(ItemId == 1000001)
+            {
+                int avg = (QuantityMax + QuantityMin) / 2;
+                int range = QuantityMax - QuantityMin;
+                int result = avg + (int)(new Random().NextDouble() * range - range / 2);
+
+                return result;
+            }
+            else
+            {
+                return QuantityMax;
+            }            
         }
     }
 }

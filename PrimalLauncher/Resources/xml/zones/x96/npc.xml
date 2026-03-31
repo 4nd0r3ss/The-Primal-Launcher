@@ -78,5 +78,15 @@
             <position x="328.62" y="4.34" z="-646.33" r="2.05" zoneId="150" />
             <animation>0</animation>
         </PopulaceStandard>
+        <PopulaceCampMaster>
+            <classId>1500068</classId>
+            <position x="275.6957" y="4.600124" z="-531.4082" r="1.678409" zoneId="150" />
+            <animation>0</animation>
+        </PopulaceCampMaster>
+        <PopulaceCampSubMaster>
+            <classId>1500094</classId>
+            <position x="277.0097" y="4.594763" z="-535.5871" r="1.586983" zoneId="150" />
+            <animation>0</animation>
+        </PopulaceCampSubMaster>
 	</npc>
 </chara>

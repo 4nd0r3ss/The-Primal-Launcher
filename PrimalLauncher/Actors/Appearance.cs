@@ -126,9 +126,9 @@ namespace PrimalLauncher
             //Pack = graphicId[6]; //this breaks the game
             Pouch = graphicId[7];
             Head = graphicId[8];
-            Undershirt = ItemGraphics.Body.First(x => x.Key == underShirtId).Value;
+            Undershirt = ItemGraphics.Instance.Body.First(x => x.Key == underShirtId).Value;
             Body = graphicId[9];
-            Undergarment = ItemGraphics.Legs.First(x => x.Key == underGarmentId).Value;
+            Undergarment = ItemGraphics.Instance.Legs.First(x => x.Key == underGarmentId).Value;
             Legs = graphicId[10];
             Hands = graphicId[11];
             Feet = graphicId[12];
@@ -189,10 +189,10 @@ namespace PrimalLauncher
             switch (gearSlot)
             {
                 case 0:
-                    MainWeapon = ItemGraphics.Weapon.First(x => x.Key == equipId).Value;
+                    MainWeapon = ItemGraphics.Instance.Weapon.First(x => x.Key == equipId).Value;
                     break;
                 case 1:
-                    SecondaryWeapon = ItemGraphics.Weapon.First(x => x.Key == equipId).Value;
+                    SecondaryWeapon = ItemGraphics.Instance.Weapon.First(x => x.Key == equipId).Value;
                     break;
                 case 2:
 
@@ -201,7 +201,7 @@ namespace PrimalLauncher
 
                     break;
                 case 4:
-                    Throwing = ItemGraphics.Throwing.First(x => x.Key == equipId).Value;
+                    Throwing = ItemGraphics.Instance.Throwing.First(x => x.Key == equipId).Value;
                     break;
                 case 5:
                     
@@ -213,40 +213,40 @@ namespace PrimalLauncher
 
                     break;
                 case 8:
-                    Head = ItemGraphics.Head.First(x => x.Key == equipId).Value;
+                    Head = ItemGraphics.Instance.Head.First(x => x.Key == equipId).Value;
                     break;
                 case 9:
-                    Undershirt = ItemGraphics.Body.First(x => x.Key == equipId).Value;
+                    Undershirt = ItemGraphics.Instance.Body.First(x => x.Key == equipId).Value;
                     break;
                 case 10:
                     if (equipId == 0)
                         Body = Undershirt;
                     else
-                        Body = ItemGraphics.Body.First(x => x.Key == equipId).Value;
+                        Body = ItemGraphics.Instance.Body.First(x => x.Key == equipId).Value;
                     break;
                 case 11:
-                    Undergarment = ItemGraphics.Legs.First(x => x.Key == equipId).Value;
+                    Undergarment = ItemGraphics.Instance.Legs.First(x => x.Key == equipId).Value;
                     break;
                 case 12:
                     if (equipId == 0)
                         Legs = Undergarment;
                     else
-                        Legs = ItemGraphics.Legs.First(x => x.Key == equipId).Value;
+                        Legs = ItemGraphics.Instance.Legs.First(x => x.Key == equipId).Value;
                     break;
                 case 13:
-                    Hands = ItemGraphics.Hands.First(x => x.Key == equipId).Value;
+                    Hands = ItemGraphics.Instance.Hands.First(x => x.Key == equipId).Value;
                     break;
                 case 14:
-                    Feet = ItemGraphics.Feet.First(x => x.Key == equipId).Value;
+                    Feet = ItemGraphics.Instance.Feet.First(x => x.Key == equipId).Value;
                     break;
                 case 15:
-                    Waist = ItemGraphics.Waist.First(x => x.Key == equipId).Value;
+                    Waist = ItemGraphics.Instance.Waist.First(x => x.Key == equipId).Value;
                     break;
                 case 16:
-                    Neck = ItemGraphics.Neck.First(x => x.Key == equipId).Value;
+                    Neck = ItemGraphics.Instance.Neck.First(x => x.Key == equipId).Value;
                     break;
                 case 17:                   
-                    uint graphId = ItemGraphics.Ears.First(x => x.Key == equipId).Value;
+                    uint graphId = ItemGraphics.Instance.Ears.First(x => x.Key == equipId).Value;
                     LeftEar = graphId;
                     RightEar = graphId;
                     break;
@@ -254,16 +254,16 @@ namespace PrimalLauncher
                     
                     break;
                 case 19:                   
-                    Wrists = ItemGraphics.Wrist.First(x => x.Key == equipId).Value;
+                    Wrists = ItemGraphics.Instance.Wrist.First(x => x.Key == equipId).Value;
                     break;
                 case 20:
 
                     break;
                 case 21:
-                    RightFinger = ItemGraphics.Finger.First(x => x.Key == equipId).Value;
+                    RightFinger = ItemGraphics.Instance.Finger.First(x => x.Key == equipId).Value;
                     break;
                 case 22:
-                    LeftFinger = ItemGraphics.Finger.First(x => x.Key == equipId).Value;
+                    LeftFinger = ItemGraphics.Instance.Finger.First(x => x.Key == equipId).Value;
                     break;
             }
         }

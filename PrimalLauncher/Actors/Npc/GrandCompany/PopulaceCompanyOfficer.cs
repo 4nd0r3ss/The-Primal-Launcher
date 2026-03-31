@@ -18,58 +18,51 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using static System.Collections.Specialized.BitVector32;
 
 namespace PrimalLauncher
 {
-    public class PopulaceCompanyGuide : PopulaceCompany
+    public class PopulaceCompanyOfficer : PopulaceCompany
     {
-        public PopulaceCompanyGuide() 
+        public PopulaceCompanyOfficer()
         {
             ClassName = GetType().Name;
         }
-
         public override void talkDefault()
         {
-            //eventTalkWelcome - joined
-            //eventTalkProvisional - no company
-            //eventTalkExclusive - from anothe company
-            //eventTalkComMember - arguments are character id, npc id, festival flag
+            //eventTalkWelcome
+            //eventTalkWelcomeQuest
+            //eventTalkPreJoin
+            //eventTalkExclusive
+            //eventTalkJoinedOnly
+            //eventTalkJoined
+            //eventInformationRankUp
+            //eventRankUpChoice
+            //eventDoRankUp
+            //eventRankUpDone
+            //eventRankCategoryUpBefore
+            //eventRankCategoryUpAfter
+            //eventTalkQuestUncomplete
+            //eventTalkFestival
+            //eventTalkFestival2
+            //eventTalkFestival2012
 
             if (!EventManager.Instance.CurrentEvent.IsQuestion)
             {
-                int companyId = User.Instance.Character.CompanyId;
-                int companytRank = User.Instance.Character.CompanyRank;
-
-                if (companyId == 0) //not enlisted
-                {
-                    SendTalk("eventTalkProvisional", new List<object> { User.Instance.Character.Id });                   
-                }
-                else if (companyId == CompanyId && companytRank == 0) //not ranked
-                {
-                    SendTalk("eventTalkProvisional", new List<object> { User.Instance.Character.Id });                   
-                }
-                else if (companyId == CompanyId && companytRank > 0) //has rank
-                {
-                    SendTalk("eventTalkComMember", new List<object> { User.Instance.Character.Id, Id, true });
-                }
-                else //not your company
-                {
-                    SendTalk("eventTalkExclusive", new List<object> { User.Instance.Character.Id });
-                }                
+                SendTalk("eventTalkExclusive", new List<object> { User.Instance.Character.Id });
             }
             else
             {
                 uint? selection = (uint?)EventManager.Instance.CurrentEvent.Selection[0];
-                //ChatProcessor.SendMessage(MessageType.System, ClassName + " not implemented. ");                
+                ChatProcessor.SendMessage(MessageType.System, ClassName + " not implemented. ");
                 EndTalk();
             }
         }
 
         private void EndTalk()
-        {
+        {                        
             EventManager.Instance.CurrentEvent.SendTalkResponse("eventTalkStepBreak", new List<object> { }, false);
             EventManager.Instance.CurrentEvent.Finish();
         }

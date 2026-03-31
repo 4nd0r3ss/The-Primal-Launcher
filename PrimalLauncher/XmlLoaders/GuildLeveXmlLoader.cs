@@ -44,7 +44,7 @@ namespace PrimalLauncher
                     {
                         if (node.GetAttributeAsInt("id") == id)
                             return new GuildLevePackSet(node);
-                    }                       
+                    }
                 }
                 catch (Exception e)
                 {
@@ -53,6 +53,42 @@ namespace PrimalLauncher
             }
 
             return null;
+        }
+
+        public static List<PassiveGL> GetPassiveGLs(uint region)
+        {
+            XmlDocument passiveGls = new XmlDocument();
+            passiveGls.LoadFromResource("PassiveGLs.xml");
+            List<PassiveGL> result = new List<PassiveGL>();
+
+            if (passiveGls.HasChildNodes)
+            {
+                try
+                {
+                    XmlElement root = passiveGls.DocumentElement;
+                    XmlNode list = root;
+                    foreach (XmlNode node in list.ChildNodes)
+                    {
+                        uint nodeRegion = (uint)node.GetAttributeAsInt("region");
+
+                        if (nodeRegion == region)
+                        {
+                            result.Add(new PassiveGL
+                            {
+                                Id = (uint)node.GetAttributeAsInt("id"),
+                                Class = node.GetAttributeAsInt("class"),
+                                Level = node.GetAttributeAsInt("level"),
+                                Region = nodeRegion
+                            });
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    Log.Instance.Warning(e.Message);
+                }
+            }
+            return result;
         }
     }
 }

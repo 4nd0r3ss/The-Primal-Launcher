@@ -86,5 +86,18 @@ namespace PrimalLauncher
 
             return result;
         }
+
+        public GuildLeve GetSelectedGuildleveById(int packId, int guildLeveId)
+        {            
+            GuildLevePack pack = GuildLevePacks.FirstOrDefault(x => x.Id == packId);        
+            return pack.GuildLeves.FirstOrDefault(x => x.Id == guildLeveId);
+        }
+
+        public GuildLeve GetSelectedGuildleveByIndex(int packId, int selectedIndex)
+        {
+            GuildLevePack pack = GuildLevePacks.FirstOrDefault(x => x.Id == packId);
+            int leveId = (int)GetGuildLevesFromPack(packId)[selectedIndex];
+            return pack.GuildLeves.FirstOrDefault(x => x.Id == leveId);
+        }
     }
 }

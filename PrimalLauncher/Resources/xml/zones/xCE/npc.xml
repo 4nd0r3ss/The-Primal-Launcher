@@ -401,10 +401,10 @@
 			<classId>1001583</classId>
 			<position x="22.84" y="10.9" z="-1306.83" r="1.06" />
 		</PopulaceStandard>
-		<PopulaceStandard className="PopulaceBlackMarketeer">
+        <PopulaceBlackMarketeer>
 			<classId>1500294</classId>
 			<position x="198.6" y="25.21" z="-1341.66" r="2.79" />
-		</PopulaceStandard>
+		</PopulaceBlackMarketeer>
 		<PopulaceStandard>
 			<classId>1001396</classId>
 			<position x="180.42" y="25.82" z="-1400.37" r="2.87" />

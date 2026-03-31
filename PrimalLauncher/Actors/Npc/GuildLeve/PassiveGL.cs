@@ -24,29 +24,14 @@ using System.Threading.Tasks;
 namespace PrimalLauncher
 {
     [Serializable]
-    public class BattleGroupMember
+
+    public class PassiveGL //: GuildLeve
     {
-        public ActorBattle Actor { get; set; }
-        public int ActionTimer { get; set; }
-        public bool IsObjective { get; set; }
+        public uint Id { get; set; }
+        public int Class { get; set; }
+        public int Level { get; set; }
+        public uint Region { get; set; }
 
-        public void UpdateActionTimer()
-        {
-            if (!Actor.IsDead())
-            {
-                //Actor.TurnToTarget();
-
-                ActionTimer += BattleManager.Instance.TickIntervalSeconds;
-
-                if (!(Actor is PlayerCharacter)) //and actor is not ranged               
-                    Actor.MoveToTarget();
-
-                if (ActionTimer >= Actor.AutoAttackDelay)
-                {
-                    Actor.AutoAttack();
-                    ActionTimer = new Random().Next(0, 300); //TODO: need to calculate this based on [weapon delay] and [char attr speed] (?)
-                }
-            }
-        }
+        public PassiveGL() { }
     }
 }

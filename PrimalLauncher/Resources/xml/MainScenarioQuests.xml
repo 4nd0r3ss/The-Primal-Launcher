@@ -54,8 +54,8 @@
 		</phase>
 		<phase>
 			<step director="opening" event="noticeEvent" value="processTtrBtl001" />
-			<step event="commandForced" onFinish="StartQuestDirectorNotice:noticeEvent,1" />
-			<step director="quest" event="noticeEvent" value="processTtrBtl002" onDelegate="Sleep:3" />			
+			<step event="commandForced" onFinish="StartQuestDirectorNotice:noticeEvent,3" />
+			<step director="quest" event="noticeEvent" value="processTtrBtl002" onDelegate="Sleep:4" />			
 			<step director="quest" event="noticeEvent" value="processEvent020_1" onExecute="AddKeyItem:treant vine" onFinish="Sleep:5;ToInstance:7;UpdateQuest:10" />
 		</phase>
 		<phase>			

@@ -45,7 +45,7 @@ namespace PrimalLauncher
                     User.Instance.Character.Journal.GetQuestData(RequestPacket, ref _requestParameters);
                     break;
                 case Command.GuildleveData:
-                    User.Instance.Character.Journal.GetGuildleveData(ref _requestParameters);
+                    User.Instance.Character.Journal.GetGuildleveData(ref _requestParameters, RequestPacket);
                     break;
                 case Command.Umount:
                     User.Instance.Character.ToggleMount(Command.Umount, false);
@@ -69,6 +69,9 @@ namespace PrimalLauncher
                 case Command.PlaceDriven: //for iteraction menu   
                     if (eventOwner != null)
                         eventOwner.GetType().GetMethod("PlaceDriven").Invoke(eventOwner, new object[] {});
+                    break;
+                case Command.AbandonQuestLeve:
+                    User.Instance.Character.Journal.AbandonQuestLeve(RequestPacket);
                     break;
             }
 

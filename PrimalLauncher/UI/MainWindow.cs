@@ -17,9 +17,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Threading;
@@ -61,28 +63,17 @@ namespace PrimalLauncher
             Preferences.Instance.LoadConfigFile();
             Log.Instance.Info("Welcome to The Primal Launcher!");
 
-
             /* debug stuff */
-            //if (File.Exists(Preferences.Instance.AppDataFile))
-            //    File.Delete(Preferences.Instance.AppDataFile);
-
-            //if (File.Exists(Preferences.Instance.AppUserFile))
-            //    File.Delete(Preferences.Instance.AppUserFile);
-
-            //File.Delete("packet_output.txt");
-
-            //List<Actor> acto = ActorXmlLoader.GetZoneNpcs(0x9b);            
-            //var z = ZoneRepository.GetInstance("man0g1_1");
-            //var z =ZoneRepository.GetZones();
-            //ZoneInstance z = ZoneXmlLoader.GetInstance(8);
-            //
-            //var i = GuildLeveRepository.GetGuildLevePackSet(21);
-            //List<Actor> acto = ActorXmlLoader.GetZoneMonsters(0x96);
-            //World.Instance.CreateInstance(6);
-            ////var i = World.Instance.Debug;
-            ///
-
-            //var i = new OpeningDirector();
+            //var actors = ActorXmlLoader.GetZoneNpcs(0x9b);  
+            //var zones = ZoneRepository.GetZones();
+            //var instance = ZoneXmlLoader.GetInstance(8);           
+            //var i = GuildLeveXmlLoader.GetGuildLevePackSet(21);
+            //var monsters = ActorXmlLoader.GetZoneMonsters(0x96);
+            //var instance = World.Instance.CreateInstance(6);
+            //ItemGraphics.Instance.Load();
+            //var gls = GuildLeveXmlLoader.GetPassiveGLs(155);   
+            //var job = new Job(4, "testjob", 50);
+            //job.LoadActions();
         }
 
         private void ResetTabButtonColors()
@@ -132,15 +123,17 @@ namespace PrimalLauncher
 
         private void btnLaunch_Click(object sender, EventArgs e)
         {
-            //in the future, this if statement will check for the user config to skip updater and login.
-            if (true)
+
+
+            
+            if (Preferences.Instance.Options.ShowLoginPage)
             {
-                Launcher.Launch("1");
+                Task.Run(() => { new UpdateServer(); });
+                Task.Run(() => { new HttpServer(); });                
             }
             else
             {
-                Task.Run(() => { new UpdateServer(); });
-                Task.Run(() => { new HttpServer(); });
+                Launcher.Launch("1");
             }
         }
 
@@ -194,7 +187,7 @@ namespace PrimalLauncher
             IsInstallationOk =  GameInstallationChecker.Check();
 
             if(IsInstallationOk)
-            {
+            {               
                 Task.Run(() => { try { LobbyServer.Instance.Initialize(); } catch (Exception ex) { throw ex; } });
                 Task.Run(() => { try { GameServer.Instance.Initialize(); } catch (Exception ex) { throw ex; } });
             }

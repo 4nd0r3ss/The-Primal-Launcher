@@ -93,6 +93,11 @@ namespace PrimalLauncher
             return toBytes;
         }
 
+        public override string ToString()
+        {
+            return $"{X},   {Y},   {Z},   {R}";
+        }
+
         public void Set(string coords)
         {
             string[] split = coords.Split(new char[] { ',' });

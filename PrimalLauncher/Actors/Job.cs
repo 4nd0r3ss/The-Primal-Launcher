@@ -190,20 +190,41 @@ namespace PrimalLauncher
         
         public void LoadActions()
         {
-            DataTable jobActionsTable = GameData.Instance.GetGameData("gameCommandBasic");
+            Actions = new List<ActionCommand>();
             XmlDocument jobActionList = new XmlDocument();
-            jobActionList.LoadFromResource("JobActionList.xml");
-            XmlNodeList jobActions = jobActionList.SelectNodes("//JobAction[@class=" + Id + "]");
+            jobActionList.LoadFromResource("JobActionList.xml");            
+            JobClassCategory category = GetCategory();
+            byte classId = Id;
+            
+            if (category == JobClassCategory.DoW || category == JobClassCategory.DoM)
+            {      
+                //add auto-attack action
+                Actions.Add(new ActionCommand
+                {
+                    Id = Command.PlayerAutoAttack,
+                    AnimationId = 0x19001000,
+                    TextSheet = 0x765D
+                });
+            }
 
-            //add auto-attack action
-            Actions.Add(new ActionCommand
+            if(category == JobClassCategory.DoL || category == JobClassCategory.DoH)
+            {                
+                AddJobAction(jobActionList.SelectNodes("//JobAction[@class=" + 99 + "]")); //stone throw + wrist flick
+            }
+
+            if(category == JobClassCategory.DoL)
             {
-                Id = Command.PlayerAutoAttack,
-                AnimationId = 0x19001000,
-                TextSheet = 0x765D
-            });
+                AddJobAction(jobActionList.SelectNodes("//JobAction[@class=" + 98 + "]")); //stealth
+            }
 
-            //add actions from xml
+            XmlNodeList jobActions = jobActionList.SelectNodes("//JobAction[@class=" + classId + "]");
+            AddJobAction(jobActions);
+        }
+
+        private void AddJobAction(XmlNodeList jobActions)
+        {
+            DataTable jobActionsTable = GameData.Instance.GetGameData("gameCommandBasic");
+
             foreach (XmlNode node in jobActions)
             {
                 uint actionId = node.GetAttributeAsUint("id");
@@ -290,6 +311,11 @@ namespace PrimalLauncher
             }
         }
 
+        private ActionCommand GetActionCommandById(ushort id)
+        {
+            return Actions.FirstOrDefault(x => x.Id == (Command)id);
+        }
+
         public void ChangeHotbar(byte[] data)
         {            
             int paramsIndex = data.IndexOfString("commandForced") + 0x20;
@@ -302,8 +328,8 @@ namespace PrimalLauncher
             }
             else 
             {
-                ushort commandId = (ushort)(int)parameters[1];
-                Hotbar[slot] = commandId;
+                //add command to slot
+                ushort commandId = (ushort)(int)parameters[1];                
 
                 //00-09 hotbar 1
                 //10-19 hotbar 2
@@ -311,18 +337,32 @@ namespace PrimalLauncher
 
                 if (commandId == 0) //double-clicked hotbar item to remove it
                 {
-                    User.Instance.Character.CharaWork.RemoveFromHotbar(slot);
-                }                 
-                else
+                    ActionCommand action = GetActionCommandById(Hotbar[slot]);
+
+                    if (action.Class == Id || action.Class == 99 || action.Class == 98)
+                    {
+                        //World.SendTextSheet(30732, new object[] { 0xA0F00000 | (int)action.Id });
+                        World.SendTextSheet(30745);
+                    }
+                    else
+                    {
+                        Hotbar[slot] = commandId;
+                        User.Instance.Character.CharaWork.RemoveFromHotbar(slot);
+                        User.Instance.Character.CharaWork.UpdateHotbar();
+                    }                        
+                }
+                else //if the command added to the hotbar is already in another slot, remove it from there
                 {
+                    
                     int oldSlot = Array.IndexOf(Hotbar, commandId);
 
                     if (oldSlot >= 0)
                         Hotbar[oldSlot] = 0;
 
+                    Hotbar[slot] = commandId;
                     User.Instance.Character.CharaWork.UpdateHotbar();
                 }
-            }
+            }            
         }
     }
 }

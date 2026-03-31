@@ -75,8 +75,8 @@ namespace PrimalLauncher
                 index += sp.Size;
             }
 
-            if (Preferences.Instance.Options.PrintPacketsToFile)
-                OutputToFile();
+            //if (Preferences.Instance.Options.PrintPacketsToFile)
+                //OutputToFile();
 
             return result;
         }
@@ -239,8 +239,8 @@ namespace PrimalLauncher
 
                 GameServer.Instance.Sender?.Send(packet.ToBytes());
 
-                if(false)//(Preferences.Instance.Options.PrintPacketsToFile)
-                    packet.OutputToFile();
+                //if(false)//(Preferences.Instance.Options.PrintPacketsToFile)
+                    //packet.OutputToFile();
 
             }
             catch(Exception e)

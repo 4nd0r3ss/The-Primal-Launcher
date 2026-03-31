@@ -107,7 +107,10 @@ namespace PrimalLauncher
         public void ServerShutDown()
         {
             _listening = false;
-            _socket.Close();
+
+            if(_socket.Connected)
+                _socket.Close();
+
             ServerTransition();
         }       
 

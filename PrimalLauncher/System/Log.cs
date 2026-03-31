@@ -55,25 +55,24 @@ namespace PrimalLauncher
         
         private Log() { }
 
-        private void SendMessage(string type, string msg)
+        private void SendToLogWindow(string type, string msg)
         {
            ucLog.Instance.WriteLogMessage(type + " " + msg);
         }
 
         #region Message types
-        public void Info(string msg) => SendMessage(_info, msg);
-        public void Success(string msg) => SendMessage(_success, msg);
-        public void Warning(string msg) => SendMessage(_warning, msg);
+        public void Info(string msg) => SendToLogWindow(_info, msg);
+        public void Success(string msg) => SendToLogWindow(_success, msg);
+        public void Warning(string msg) => SendToLogWindow(_warning, msg);
         public void Error(string msg)
         {
-            SendMessage(_error, msg);
-            File.AppendAllText(Preferences.Instance.AppUserFolder + @"error_log.txt", DateTime.Now.ToString("dd-MM-yyyy hh:mm:ss") + " " + msg + "\n");
+            SendToLogWindow(_error, msg);
         }
-        public void Chat(string msg) => SendMessage(_chat, msg);
+        public void Chat(string msg) => SendToLogWindow(_chat, msg);
 
-        public void Blank() => SendMessage("","");
+        public void Blank() => SendToLogWindow("","");
 
-        public void Separator() => SendMessage("", _separator);
+        public void Separator() => SendToLogWindow("", _separator);
         #endregion       
         
         public Color GetMessageColor(string str)

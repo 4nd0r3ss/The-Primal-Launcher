@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace PrimalLauncher
@@ -25,13 +26,15 @@ namespace PrimalLauncher
     [Serializable]
     public class PartyGroup : GroupBase
     {
-        public bool IsEngaged { get; set; }
+        public List<BattleGroupMember> BattleGroupMembers { get; set; }
         public PartyGroup() : base(GroupType.Party)
         {
             MemberList = new List<Actor>
             {
                 User.Instance.Character
             };
+
+            BattleGroupMembers = new List<BattleGroupMember>();
         }
 
         public override void InitWork()
@@ -54,6 +57,42 @@ namespace PrimalLauncher
 
             Packet.Send(ServerOpcode.GroupInitWork, data);
         }
+
+        public void LoadBattleMembers()
+        {
+            foreach (ActorBattle member in MemberList)
+            {
+                BattleGroupMembers.Add(new BattleGroupMember { Actor = member });
+            }
+        }
+
+        public override void BattleBeat()
+        {
+            if(BattleGroupMembers == null)
+                BattleGroupMembers = new List<BattleGroupMember>();
+
+            if (BattleGroupMembers.Count == 0)
+                LoadBattleMembers();
+
+            //Log.Instance.Info("GroupDuty.BattleBeat");
+            var mylist = BattleGroupMembers.Where(x => x.Actor.State.Main != MainState.Dead2); //get all members who are not dead
+
+            //if all members are dead, disengage immediately
+            if (!mylist.Any())
+            {
+                BattleManager.Instance.Disengage();
+            }
+            else
+            {
+                foreach (BattleGroupMember member in BattleGroupMembers)
+                {
+                    if (!member.Actor.IsDead())
+                        member.UpdateActionTimer();
+                }
+            }
+        }
+
+
 
     }
 }

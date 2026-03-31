@@ -39,7 +39,7 @@ namespace PrimalLauncher
         public int PartsName { get; set; } //still not clear what this does. maybe should match the number of parts enabled? always 1 so far.
         public bool[] PartsExists { get; set; } = new bool[8]; //enables 
         public int Aggro { get; set; } //it's a byte in lua script but passes an int in function call.
-        public int ParameterIndex { get; set; } //index used to unpack parameter lists. Alsways 0x0A for battle actors, 0 for everything else.
+        public int ParameterIndex { get; set; } //index used to unpack parameter lists. Always 0x0A for battle actors, 0 for everything else.
         
         //from chara base class
         public bool EnableBattle { get; set; } //if true, intializes battle stuff for actor
@@ -129,6 +129,8 @@ namespace PrimalLauncher
 
                 if (target != null && !target.IsDead() && !IsDead())
                 {
+                    TurnToTarget();
+
                     short damageDealt = 10;
 
                     //0x08000608 - normal hit

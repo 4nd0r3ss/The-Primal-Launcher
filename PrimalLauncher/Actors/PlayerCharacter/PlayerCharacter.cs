@@ -34,6 +34,7 @@ namespace PrimalLauncher
     {
         public byte WorldId { get; set; }       
         private int CurrentTitle { get; set; }
+        public int LeveAllowances { get; set; }
 
         #region Background
         public byte Tribe { get; set; }
@@ -167,12 +168,12 @@ namespace PrimalLauncher
             uint underShirtId = (uint)8040000 + Tribe;
             uint underGarmentId = (uint)8060000 + Tribe;
             DataTable defaultSet = GameData.Instance.GetGameData("boot_skillequip");
-            uint[] itemGraphicIds = defaultSet.Select("id = '" + equipmentSetNumber + "'")[0].ItemArray.Select(Convert.ToUInt32).ToArray();   
-            
+            uint[] itemGraphicIds = defaultSet.Select("id = '" + equipmentSetNumber + "'")[0].ItemArray.Select(Convert.ToUInt32).ToArray();            
+
             Appearance.SetToSlots(itemGraphicIds, underShirtId, underGarmentId);
             Inventory = new Inventory();
             Inventory.AddDefaultItems(itemGraphicIds, underShirtId, underGarmentId);
-        }        
+        }
 
         public void SetUnendingJourney()
         {
@@ -215,15 +216,24 @@ namespace PrimalLauncher
         public void Spawn(ushort spawnType = 0x01, ushort isZoning = 0)
         {
             SubState.Chant = 0;
+            //IsTutorialComplete = true;
 
             CharaWork.PacketQueue = null;
             State.Main = MainState.Passive;
             SpawnDistance = 40;
             //Icon = 0x00_02_00_00;
             TargetId = 0;
-            CharaWork.CurrentClass.Tp = 0;
+            //CharaWork.CurrentClass.Tp = 3000;
             CharaWork.CurrentClass.Hp = CharaWork.CurrentClass.MaxHp;
-                   
+            CharaWork.CurrentClass.Mp = CharaWork.CurrentClass.MaxMp;
+
+            SubState.Waste = 0x0c;
+
+            LeveAllowances = 10;
+
+            CompanyId = 2;
+            CompanyRank = 1;
+
             //in case the player quit the game while monted.
             Speeds.SetUnmounted();
             Journal.InitializeQuests();
@@ -271,7 +281,7 @@ namespace PrimalLauncher
 
         public void SetGrandCompany()
         {           
-            Packet.Send(ServerOpcode.SetGrandCompany, new byte[] { 0x03, 0x7f, 0x7f, 0x0b, 0x00, 0x00, 0x00, 0x00 });
+            Packet.Send(ServerOpcode.SetGrandCompany, new byte[] { 0x02, 0x7f, 0x0b, 0x7f, 0x00, 0x00, 0x00, 0x00 });
         }
 
         public void SetTitle(byte[] data)
@@ -542,13 +552,12 @@ namespace PrimalLauncher
         }
                
         public void ChangeEquipment(byte[] data)
-        {
-            File.WriteAllBytes("equip.txt", data);
+        {           
             var luaParams = PrimalLauncher.LuaParameters.ReadParameters(data, 0x41);
-
+            var longParam = Convert.ToUInt64(luaParams[luaParams.Count - 1]);
 
             bool isEquipping = luaParams[0] != null;
-            uint itemUniqueId = (uint)((long)luaParams[luaParams.Count - 1] & 0xFFFFFFFF);
+            uint itemUniqueId = Convert.ToUInt32(longParam & 0xFFFFFFFF);
             byte gearSlot;
 
             if (isEquipping)
@@ -579,7 +588,6 @@ namespace PrimalLauncher
                         //for now, if the job is not activated, activate it.
                         if (CharaWork.CurrentClass.Level == 0)
                             CharaWork.CurrentClass.Level = 1;
-
 
                         //if a soul stone is equipped, remove it.
                         if (CharaWork.CurrentClass.IsSoulStoneEquippped)
@@ -625,8 +633,7 @@ namespace PrimalLauncher
             else //unequip
             {
                 gearSlot = (byte)(data[0x51] - 1);
-                Item itemToUnequip = Inventory.GetBagItemByGearSlot(gearSlot);
-                World.SendTextSheet(0x778A, new object[] {/*quality?*/ 1, (int)itemToUnequip.Id, 1, 0, 0, 1, 0 }, Id);
+                Item itemToUnequip = Inventory.GetBagItemByGearSlot(gearSlot);                
                 Inventory.ChangeGear(gearSlot, itemUniqueId);
             }
         }
@@ -714,8 +721,18 @@ namespace PrimalLauncher
 
                 if (SubState.Chant > 0)
                     CancelAction();
-            }          
-                
+            }
+
+            //if (TargetId > 0)
+            //{
+            //    ActorBattle target = (ActorBattle)GetTargetActor();
+            //    if (target != null)
+            //    {
+            //        GetHitPosition(target);
+            //        ChatProcessor.SendMessage(MessageType.System, target.Position.ToString());
+            //    }
+            //}
+
 
             //this might be useful someday...
             //byte[] moveState = new byte[] { data[0x28], data[0x29] }; //unused so far. maybe part of mouse coords?
@@ -820,6 +837,7 @@ namespace PrimalLauncher
                     ChatProcessor.SendMessage(MessageType.System, "ClassId: " + actor.ClassId);
                     ChatProcessor.SendMessage(MessageType.System, "ClassName: " + actor.ClassName);
                     ChatProcessor.SendMessage(MessageType.System, "Animation: " + actor.SubState.MotionPack);
+                    ChatProcessor.SendMessage(MessageType.System, "Talk: " + actor.TalkFunctions[0].FunctionName);
                 }
             }
             else
@@ -833,19 +851,26 @@ namespace PrimalLauncher
         public override void AutoAttack()
         {
             //check if there is a target selected and if it's in attack distance
-            if (LockOnTarget && TargetId > 0 && GetTargetDistance() <= CharaWork.CurrentJob.AutoAttackMaxDistance)
+            if (LockOnTarget && //target is locked on
+                TargetId > 0 && //target actor was found
+                GetTargetDistance() <= CharaWork.CurrentJob.AutoAttackMaxDistance && //target is in attack range
+                SubState.Chant ==0 && //player is not casting
+                State.Main == MainState.Active //player is in actve mode
+            )
             {
                 ActorBattle target = ((ActorBattle)GetCurrentZone().GetActorById(TargetId));
 
                 //chack if actor exists and it's not dead and if 
                 if (target != null && !target.IsDead() && !IsDead())
                 {
-                    short damageDealt = 100; //to be calculated
+                    short damageDealt = 150; //to be calculated
 
                     if (!BattleManager.Instance.BattleEngaged)
                         BattleManager.Instance.StartBattle(this);
 
-                    var (totalDamage, effectId) = target.CalculateDamage(this, damageDealt);
+                    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+                    var (totalDamage, effectId) = target.CalculateDamageTaken(this, damageDealt);
 
                     CommandResult cr = new CommandResult
                     {
@@ -862,7 +887,7 @@ namespace PrimalLauncher
                     Thread.Sleep(500);
                     AddTp(100);
 
-                    target.TakeDamage(this, damageDealt);
+                    target.TakeDamage(this, totalDamage);
 
                     //this should be in BM?
                     if (target.IsDead())
@@ -878,8 +903,6 @@ namespace PrimalLauncher
                     }
                 }
 
-                Log.Instance.Info("Player auto-attack");
-
                 if (!IsTutorialComplete) BattleTutorial.Instance.NextTutorial("tp");
             }
         }
@@ -890,7 +913,7 @@ namespace PrimalLauncher
             IsEngaged = true;
             BattleManager.Instance.BattleEngaged = true;
 
-            AutoAttack(); //first hit happens instantly.            
+            //AutoAttack(); //first hit happens instantly.            
         }
 
         public override void Disengage()
@@ -911,24 +934,11 @@ namespace PrimalLauncher
 
         public override void Die()
         {
-            Thread.Sleep(500);
-            SetSubState();
+            Disengage();          
             State.Main = MainState.Dead;
-            State.Type = 0;
+            State.Type = MainStateType.Player;
             SetMainState();
-            SetEnmity(-1);
-
-            //the command result is crashing the game. maybe the animation is wrong?
-            ////this command result makes monster die instantly after killing blow.
-            //List<CommandResult> commandresults = new List<CommandResult>
-            //{
-            //    new CommandResult(Id, 0, 0, 0x08080604, 1, 1), //die animation
-            //    new CommandResult(Id, 0, 0xC755, 0, 0, 1), //enemy defeated message                
-            //};
-
-            //SendCommandResult(0, commandresults, 0x7C000062/*, senderId: attacker*/);
-
-            //Disengage();
+            SendCommandResult(0, animationId: 0x7C000062, senderId: Id);           
         }
 
         public override void AddEnmity(ActorBattle attacker){}

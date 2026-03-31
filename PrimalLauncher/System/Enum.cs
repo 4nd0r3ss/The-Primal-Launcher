@@ -253,7 +253,12 @@ namespace PrimalLauncher
         NormalStance        = 0x520A,
         
         PlayerAutoAttack    = 0x5658,
-        MonsterAutoAttack   = 0x59DD
+        MonsterAutoAttack   = 0x59DD,
+
+        AttributePoints     = 0x2EE5,
+        AbandonQuestLeve    = 0x5EB1,
+
+        Craft               = 0x55F1
     }
        
     /// <summary>
@@ -345,8 +350,7 @@ namespace PrimalLauncher
     /// The different types of actor events.
     /// </summary>
     public enum EventType
-    {
-        //0 (CommandContent), 1 (TalkEvent), 2 (PushDefault), 3 (EmoteDefault1), 5 (NoticeEvent).
+    {        
         commandContent = 0,
         talkDefault = 1,
         pushDefault = 2,
@@ -556,6 +560,14 @@ namespace PrimalLauncher
         HitNormal = 0x08000608,
         HitStrong = 0x0800060C,
         HitCritical = 0x0800060F,
-        HitProtect = 0x0800064C
+        HitProtect = 0x0800064C,
+        HitMiss = 0x08000004
+    }
+
+    public enum MoveState
+    {
+        Standing,
+        Walking,
+        Running
     }
 }

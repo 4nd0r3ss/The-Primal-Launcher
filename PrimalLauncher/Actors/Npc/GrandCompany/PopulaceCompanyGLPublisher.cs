@@ -23,53 +23,84 @@ using System.Threading.Tasks;
 
 namespace PrimalLauncher
 {
-    internal class PopulaceCompanyGLPublisher : PopulaceCompany
+    public class PopulaceCompanyGLPublisher : PopulaceCompany
     {
+        private int MenuNav { get; set; }
+        public PopulaceCompanyGLPublisher()
+        {
+            ClassName = GetType().Name;
+        }
+
         public override void talkDefault()
         {
+            //talkOutsider
+            //talkOfferWelcome
+            //askCompanyLeve - noparams show box with choose leve and briefing on leves
+            //askLeveDetail - seems to be like the leve details function from normal GL publisher
+            //eventGLDifficulty - shows dialig with difficulty options
+            //eventGLStart - has 3 unknown params
+            //talkAfterOffer
+            //talkOfferLimit
+            //eventGLPlay - this seems to be the main leve selection window
+            //eventGLShinpu
+            //eventGLThanks
+            //eventGLReward
 
-            if (EventManager.Instance.CurrentEvent.IsQuestion)
+            if (!EventManager.Instance.CurrentEvent.IsQuestion)
             {
-                EventManager.Instance.CurrentEvent.GetQuestionSelection();
-                uint? selection = (uint?)EventManager.Instance.CurrentEvent.Selection[0];
+                int companyId = User.Instance.Character.CompanyId;
+                int companytRank = User.Instance.Character.CompanyRank;
 
-                if (selection.HasValue)
+                if (companyId == 0) //not enlisted
                 {
-                    if (selection == 0)
-                        EndTalkEvent();
-                    else
-                        SendTalkResponse(selection);
+                    SendTalk("eventGLDifficulty", new List<object> { User.Instance.Character.Id });
+                }
+                else if (companyId == CompanyId && companytRank == 0) //not ranked
+                {
+                    SendTalk("eventTalkProvisional", new List<object> { User.Instance.Character.Id });
+                }
+                else if (companyId == CompanyId && companytRank > 0) //has rank
+                {
+                    SendTalk("talkOfferWelcome", new List<object> { true });
+                    MenuNav = 1;
+                }
+                else //not your company
+                {
+                    SendTalk("eventTalkExclusive", new List<object> { User.Instance.Character.Id });
                 }
             }
             else
             {
-                SendTalkResponse();
-                EventManager.Instance.CurrentEvent.Callback = "talkDefault";
-                EventManager.Instance.CurrentEvent.IsQuestion = true;
-            }
-        }     
+                uint? selection = (uint?)EventManager.Instance.CurrentEvent.Selection[0];
 
-        private void SendTalkResponse(uint? selection = null)
+                switch (MenuNav)
+                {
+                    case 0:
+                        EndTalk();
+                        break;
+                    case 1:
+                        SendTalk("askCompanyLeve", new List<object> { User.Instance.Character.Id });
+                        MenuNav = 2;
+                        break;
+
+                    
+                }
+
+                
+                //ChatProcessor.SendMessage(MessageType.System, ClassName + " not implemented. ");
+                
+            }
+        }
+
+        private void EndTalk()
         {
-            int companyId = 0;
-            int companytRank = 11;
+            EventManager.Instance.CurrentEvent.SendTalkResponse("eventTalkStepBreak", new List<object> { }, false);
+            EventManager.Instance.CurrentEvent.Finish();
+        }
 
-            if (companyId == 0) //not enlisted
-            {
-                SendResponse("talkOfferWelcome");
-            }
-            else if (companyId == CompanyId && companytRank == 0) //not ranked
-            {
-                SendResponse("eventTalkProvisional");
-            }
-            else if (companyId == CompanyId && companytRank > 0) //has rank
-            {
-                //CompanyMemberOptions(selection);
-            }
-            else //not your company
-            {
-                SendResponse("talkOutsider", new List<object> { CompanyId });
-            }
+        private void SendTalk(string function, List<object> parameters)
+        {
+            EventManager.Instance.CurrentEvent.SendTalkResponse(function, parameters, true);
         }
     }
 }

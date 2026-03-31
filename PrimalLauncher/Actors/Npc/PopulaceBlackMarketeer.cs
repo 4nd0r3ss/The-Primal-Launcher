@@ -25,10 +25,66 @@ namespace PrimalLauncher
 {
     public class PopulaceBlackMarketeer : PopulaceStandard
     {
+        private int MenuNav { get; set; }
         
         public PopulaceBlackMarketeer()
         {
             ClassName = GetType().Name;
+        }
+
+        public void talkDefault()
+        {
+            if (!EventManager.Instance.CurrentEvent.IsQuestion)
+            {
+                StartTalk();
+            }
+            else
+            {
+                uint? selection = (uint?)EventManager.Instance.CurrentEvent.Selection[0];
+
+                ChatProcessor.SendMessage(MessageType.System, "PopulaceBlackMarketeer not implemented. ");
+
+                EndTalk();
+
+                //switch (MenuNav)
+                //{
+                //    case 1:
+                //        SendTalk("eventAskMainMenu", new List<object> { User.Instance.Character.Id });
+                //        MenuNav = 2;
+                //        break;
+                //    case 2:
+                //        string function = "eventGilShopMenuOpen";
+
+                //        if (selection == 2)
+                //            function = "eventSealShopMenuOpen";
+
+                //        SendTalk(function, new List<object> { User.Instance.Character.Id });
+                //        break;
+
+                //}
+
+
+                //Log.Instance.Info("PopulaceGuildlevePublisher: " + selection + ", nav: " + MenuNav);
+            }
+        }
+
+        private void StartTalk()
+        {
+            //Play around with the parameter list value to see what happens.
+            //EventManager.Instance.CurrentEvent.SendTalkResponse("eventTalkWelcome", new List<object> { User.Instance.Character.Id }, true);
+            EventManager.Instance.CurrentEvent.SendTalkResponse("eventSealShopMenuOpen", new List<object> {  }, true);
+
+            MenuNav = 1;
+        }
+
+        private void EndTalk()
+        {
+            EventManager.Instance.CurrentEvent.Finish();           
+        }
+
+        private void SendTalk(string function, List<object> parameters)
+        {
+            EventManager.Instance.CurrentEvent.SendTalkResponse(function, parameters, true);
         }
     }
 }

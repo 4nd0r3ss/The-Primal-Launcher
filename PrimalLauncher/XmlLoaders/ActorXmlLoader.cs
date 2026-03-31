@@ -142,6 +142,10 @@ namespace PrimalLauncher
                 className == "PopulaceRetainerManager" ||
                 className == "MapObjShipPort" ||
                 className == "PopulaceSpecialEventCryer" ||
+                className == "PopulaceBlackMarketeer" ||
+                className == "PopulaceCompanySupply" ||
+                className == "PopulaceCompanyShop" ||
+                className == "ObjectItemStorage" ||
                 type.Name == "Monster" ||
                 type.Name == "Object" ||
                 type.Name == "MapObj" ||
@@ -191,6 +195,10 @@ namespace PrimalLauncher
                         PopulaceGuildlevePublisher publisher = (PopulaceGuildlevePublisher)actor;
                         publisher.GuildLevePackSet = GuildLeveXmlLoader.GetGuildLevePackSet(21);
                         return publisher;
+                    case "PopulacePassiveGLPublisher":
+                        PopulacePassiveGLPublisher pasiveGl = (PopulacePassiveGLPublisher)actor;
+                        pasiveGl.LoadPassiveGls();
+                        return pasiveGl;
                     case "PopulaceRetainerManager":
                         return (PopulaceRetainerManager)actor;
                     default:

@@ -171,8 +171,7 @@ namespace PrimalLauncher
                     Data = packet //only one account supported so far.          
                 };
 
-                Packet characterListPacket = new Packet(characterList);
-                characterListPacket.OutputToFile();               
+                Packet characterListPacket = new Packet(characterList);                             
                 LobbyServer.Instance.Sender.Send(characterListPacket.ToBytes(blowfish));
             }
 
@@ -195,8 +194,7 @@ namespace PrimalLauncher
 
         public void SendAccountList()
         {
-            Packet packet = new Packet(new GamePacket(0x0C, GetAccountListData()));
-            packet.OutputToFile();
+            Packet packet = new Packet(new GamePacket(0x0C, GetAccountListData()));            
             LobbyServer.Instance.Sender.Send(packet.ToBytes(LobbyServer.Instance.Blowfish));
             Log.Instance.Info("Account list sent.");
         }

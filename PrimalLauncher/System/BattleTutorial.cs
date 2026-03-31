@@ -86,7 +86,11 @@ namespace PrimalLauncher
             else if(category == JobClassCategory.DoM)
             {              
                 if (tutorialName == "magic" && !MagicSuccessTutorialDone) MagicSuccessTutorial();
-            }            
+            }
+            else //DoH + DoL
+            {
+
+            }
         }
 
         private void TpTutorial()
@@ -109,26 +113,24 @@ namespace PrimalLauncher
         {
             World.Instance.CloseTutorialWidget();            
             World.Instance.ShowSuccessDialog(new object[] { 0x2369 });  //weaponskill success
-            WeaponskillSuccessTutorialDone = true;
-            //Finish(); //this will be removed once I can detect group mobs dead
+            WeaponskillSuccessTutorialDone = true;           
         }
 
         private void MagicSuccessTutorial()
         {
-            MagicSuccessTutorialDone = true;
-            //Finish(); //this will be removed once I can detect group mobs dead
+            MagicSuccessTutorialDone = true;           
         }
 
         public void Finish()
         {
-            JobClassCategory jobClassCategory = User.Instance.Character.CharaWork.CurrentClass.GetCategory();
+            //JobClassCategory jobClassCategory = User.Instance.Character.CharaWork.CurrentClass.GetCategory();
 
-            if (jobClassCategory == JobClassCategory.DoW || jobClassCategory == JobClassCategory.DoM)
-            {
-                World.Instance.CloseTutorialWidget();
-                World.Instance.ShowAttentionDialog(new object[] { 0xC781, (int)User.Instance.Character.InitialTown });
-            }
-            
+            //if (jobClassCategory == JobClassCategory.DoW || jobClassCategory == JobClassCategory.DoM)
+            //{
+            World.Instance.CloseTutorialWidget();
+            World.Instance.ShowAttentionDialog(new object[] { 0xC781, (int)User.Instance.Character.InitialTown });
+            //}
+
             Thread.Sleep(3000);
             World.Instance.SetMusic(0x07, MusicMode.Crossfade); //0x07=silence                         
             ((QuestDirector)User.Instance.Character.GetCurrentZone().GetDirector("Quest")).StartEvent("noticeEvent");            

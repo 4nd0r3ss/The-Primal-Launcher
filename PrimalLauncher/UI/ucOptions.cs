@@ -52,8 +52,7 @@ namespace PrimalLauncher
             InitializeComponent();
             CheckForIllegalCrossThreadCalls = false;
             lblSeparator1.BackColor = Color.FromArgb(64, 128, 128, 128);
-            lblSeparator2.BackColor = Color.FromArgb(64, 128, 128, 128);
-            lblSeparator3.BackColor = Color.FromArgb(64, 128, 128, 128);
+            lblSeparator2.BackColor = Color.FromArgb(64, 128, 128, 128);            
 
             //load options
             string serverRegion = Preferences.Instance.Options.ServerRegion;
@@ -67,7 +66,10 @@ namespace PrimalLauncher
 
             PopulateLobbyComboBox();
 
-            //chkLegacy.Checked = Preferences.Instance.Options.ShowLegacyTag;
+            if(Preferences.Instance.Options.ShowLoginPage)
+                webServerSkip2.Checked = true;
+            else
+                webServerSkip1.Checked = true;
         }
 
         private void ChangeServerOptions(string serverRegion)
@@ -104,6 +106,23 @@ namespace PrimalLauncher
         private void cmbLobbyOptions_SelectedIndexChanged(object sender, EventArgs e)
         {
             Preferences.Instance.Options.LobbyOption = (byte)((ComboboxItem)cmbLobbyOptions.SelectedItem).Value;
+            Preferences.Instance.SaveConfigFile();
+        }
+
+        private void outlinedFontLabel7_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void webServerSkip1_CheckedChanged(object sender, EventArgs e)
+        {
+            Preferences.Instance.Options.ShowLoginPage = false;
+            Preferences.Instance.SaveConfigFile();
+        }
+
+        private void webServerSkip2_CheckedChanged(object sender, EventArgs e)
+        {
+            Preferences.Instance.Options.ShowLoginPage = true;
             Preferences.Instance.SaveConfigFile();
         }
     }

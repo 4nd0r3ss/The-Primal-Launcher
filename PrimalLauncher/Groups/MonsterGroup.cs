@@ -30,7 +30,6 @@ namespace PrimalLauncher
         public long SequenceId { get; set; }
         public List<Monster> Monsters { get; set; }
         public List<BattleGroupMember> BattleGroupMembers { get; set; }
-        public bool IsEngaged { get; set; }
 
         public MonsterGroup(uint zoneId) : base(GroupType.Monster)
         {

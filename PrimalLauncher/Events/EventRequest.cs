@@ -215,7 +215,7 @@ namespace PrimalLauncher
         /// </summary>       
         public virtual void ProcessEventResult(byte[] data)
         {
-            Log.Instance.Warning("EventRequest.ProcessEventResult()");
+            //Log.Instance.Warning("EventRequest.ProcessEventResult()");
 
             Data = data;
             Finish();
@@ -255,7 +255,15 @@ namespace PrimalLauncher
         /// </summary>       
         public virtual void DelegateEvent(uint questId, string functionName, object[] parameters = null)
         {
-            Log.Instance.Warning("EventRequest.DelegateEvent, function: " + functionName);
+            //Log.Instance.Warning("EventRequest.DelegateEvent, function: " + functionName);
+
+            if (string.IsNullOrEmpty(functionName))
+            {
+                string error = "DelegateEvent: function name is null or empty. Aborting.";
+                Log.Instance.Error(error);
+                ChatProcessor.SendMessage(MessageType.SystemError, error);
+                return;
+            }
 
             //we may want to execute the function from another quest that is not the current one,
             //like when transitioning from the first to the second start quests for example.
@@ -286,12 +294,12 @@ namespace PrimalLauncher
         public void GetQuestionSelection()
         {            
             var parameters = LuaParameters.ReadParameters(Data, 0x21);
-            List<object> result = new List<object>();            
+            List<object> result = new List<object>();
 
             for (int i = 0; i < parameters.Count; i++)
             {
                 //this is to fix an exception where negative integers cannot be cast as uint.
-                if(parameters[i] is Int32 j && j < 0)                                   
+                if (parameters[i] is Int32 j && j < 0)
                     parameters[i] = j.IntToUint32();
 
                 if (parameters[i] == null)
@@ -301,9 +309,14 @@ namespace PrimalLauncher
                 else
                     result.Add(Convert.ToUInt32(parameters[i]));
             }
-            
+
             Selection = result.ToArray();
-        }
+
+            //if (parameters == null || parameters.Count == 0)           
+            //    parameters = new List<object>();             
+
+            //Selection = parameters.ToArray();
+        }        
 
         public void SwitchEvent(uint[] talkOptions)
         {

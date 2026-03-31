@@ -30,11 +30,20 @@ namespace PrimalLauncher
         private int MenuNav { get; set; }
         private int SelectedLeveIndex { get; set; }
         private int SelectedPackId { get; set; }
+
+        //Main menu options
+        private bool ShowTutorialLeves { get; set; } //toggles tutotial leves option in main menu.
+        private bool IsFirstCall { get; set; } //is false, skips welcome talk.
+        private int OmenSpeech { get; set; } //can be 1 or 2. Lua function changes number on its own, so I go with 1.
+
         public GuildLevePackSet GuildLevePackSet { get; set; }       
 
         public PopulaceGuildlevePublisher()
         {
-            ClassName = GetType().Name;        
+            ClassName = GetType().Name;  
+            ShowTutorialLeves = true;
+            IsFirstCall = true;
+            OmenSpeech = 1;
         }
 
         public override void Spawn(ushort spawnType = 0, ushort isZoning = 0, int changingZone = 0)
@@ -44,7 +53,7 @@ namespace PrimalLauncher
         }
 
         /// <summary>
-        /// Default talk function.        ///
+        /// Default talk function.
         /// </summary>
         public override void talkDefault()
         {
@@ -73,7 +82,8 @@ namespace PrimalLauncher
                    
                     else //faction leves selected
                     {
-                        //selecting one of the factions is crashing the game.
+                        ChatProcessor.SendMessage(MessageType.System, "Faction Leve options not implemented.");
+                        EndTalk();
                     }
 
                     //eventHistoryleveCannot - add evaluation menu options here   
@@ -107,7 +117,7 @@ namespace PrimalLauncher
                         //TODO: still working on this, need more data mining.
                         //eventHistoryleveExist - player already have the leve in journal, abort
                         int selectedLeve = (int)GuildLevePackSet.GetGuildLevesFromPack(SelectedPackId)[SelectedLeveIndex];
-                        int result = User.Instance.Character.Journal.AddLocalGuidleve((uint)selectedLeve);
+                        int result = 0;// User.Instance.Character.Journal.AddLocalleve((uint)selectedLeve);
 
                         if (result == 1) //guildleve cap reached
                         {
@@ -119,6 +129,8 @@ namespace PrimalLauncher
                         }                           
                         else
                         {
+                            GuildLeve gl = new GuildLeve(selectedLeve);
+                            User.Instance.Character.Journal.AddGuildLeve(gl);
                             World.SendTextSheet(0xC3E8, new object[] { selectedLeve });
                             EventManager.Instance.CurrentEvent.SendTalkResponse("eventTalkAfterOffer", new List<object> { null }, true);
                         }
@@ -148,24 +160,42 @@ namespace PrimalLauncher
 
         private void GetLeveDetails(uint? selection)
         {
+            //| Bonus Type | Base Gil | Message ID  | Meaning (likely)                |
+            //| ---------- | -------- | ----------- | ------------------------------- |
+            //| 1          | 2250     | 90          | **Major bonus completion**      |
+            //| 2          | 800      | {91,92,103} | **Chain or mark-based bonus**   |
+            //| 3          | 800      | 104         | **Special objective completed** |
+            //| 4          | 800      | 105         | **Alternate objective**         |
+            //| 5          | 400      | 106         | **Minor bonus**                 |
+            //| 6          | 400      | 107         | **Minor bonus variant**         |
+            //| 7          | 200      | 108         | **Small bonus**                 |
+            //| 8          | 200      | 108         | **Same message as 7**           |
+            //| 9          | 100      | 108         | **Tiny bonus**                  |
+            //| 10         | 100      | 109         | **Failure consolation bonus**   |
+            //| 11         | 600      | 120         | **Unique event bonus**          |
+
             if(selection!=null && selection > 0 && selection != 0xffffffff)
-                SelectedLeveIndex = (int)selection - 1;
+                SelectedLeveIndex = (int)selection - 1;           
+            
+            GuildLeve gl = GuildLevePackSet.GetSelectedGuildleveByIndex(SelectedPackId, SelectedLeveIndex);
+            bool hasCompleted = User.Instance.Character.Journal.HasCompletedGuildLeve(gl.Id);
 
-            int selectedLeve = (int)GuildLevePackSet.GetGuildLevesFromPack(SelectedPackId)[SelectedLeveIndex];
+            //add reward calculations
 
+            int mark = 0; //mark is only used when bonusType == 2. Leve extra mark?
+            int bonusType = 1; //see table ablve.
+            int boost = 0;
 
             EventManager.Instance.CurrentEvent.SendTalkResponse("eventTalkDetail", new List<object> 
             {
-                selectedLeve, //leveId
-                1, //mark - values 1 to 11. this is a table in lua script with reward values.
-                1000001,//rewardItem - an item id. seems gil is default (1000001)
-                100,//rewardNum - reward pack?
-                0,//subItem - another item id?
-                0,//subNum - another reward pack?
-                0,//boost - gil bonus? [byte]
-                true,//completeFlag - player completed leve before
-                0//bonusType - values 1 to 11, same as mark
-
+                gl.Id,mark, 
+                gl.RewardItem,
+                gl.RewardNumber,
+                gl.RewardSubItem,
+                gl.RewardSubNumber,
+                boost,
+                hasCompleted,
+                bonusType
             }, true);
 
             MenuNav = 3;
@@ -183,19 +213,18 @@ namespace PrimalLauncher
         }
 
         private void StartTalk()
-        {
+        {           
             //Play around with the parameter list value to see what happens.
             EventManager.Instance.CurrentEvent.SendTalkResponse("eventTalkType", new List<object> {
-                    User.Instance.Character.CharaWork.CurrentClass.Level,
-                    null, //talkFlag - not used in the lua function
-                    true, //isFirstCall - if set to false will finish talk. need to figure out nextState first.
-                    false, //p3
-                    false, //p4
-                    false, //p5
-                    false, //restrictFlags
-                    1, //omenParam - if set to zero, npc won't say it's random omen speech.
+                    (int)User.Instance.Character.CharaWork.CurrentClass.Level,                    
+                    IsFirstCall, 
+                    1, //standing points - brotherhood of broken blade 
+                    2, //standing points - azeyma's shields
+                    3, //standing points - horn and hand
+                    ShowTutorialLeves,
+                    OmenSpeech, 
                     null, //nextState - null or int, changing to int numbers removes items from talk menu
-                    null, //rewardParam - not used in the lua function
+                    User.Instance.Character.LeveAllowances,
                     0, //extraParam1 - can be 0, 1 or 2.
                     0, //extraParam2 - it looks like it can be 1 or 2. it seems 0 does nothing.
                     0 //extraParam3
@@ -203,12 +232,14 @@ namespace PrimalLauncher
                 }, true);
 
             MenuNav = 0;
+            IsFirstCall = false;
         }
 
         private void EndTalk()
         {
             EventManager.Instance.CurrentEvent.Finish();
             MenuNav = 0;
+            IsFirstCall = true;
         }
 
     }

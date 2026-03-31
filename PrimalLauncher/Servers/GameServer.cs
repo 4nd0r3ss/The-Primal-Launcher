@@ -133,9 +133,7 @@ namespace PrimalLauncher
                         Data = serverListData
                     };
 
-                    Packet worldListPacket = new Packet(worldList);
-
-                    worldListPacket.OutputToFile();
+                    Packet worldListPacket = new Packet(worldList);                    
                     LobbyServer.Instance.Sender.Send(worldListPacket.ToBytes(blowfish));
                     Log.Instance.Info("World list sent.");
                 }
@@ -166,10 +164,7 @@ namespace PrimalLauncher
                         if (packet.IsCompressed == 1)
                             packet.Unzip();
 
-                        packet.ProcessSubPackets(null); //no decrypting here
-
-                        if (false)//(Preferences.Instance.Options.PrintPacketsToFile)
-                            packet.OutputToFile();
+                        packet.ProcessSubPackets(null); //no decrypting here                        
 
                         while (packet.SubPacketQueue.Count > 0)
                         {
@@ -240,6 +235,7 @@ namespace PrimalLauncher
                         ChatProcessor.SendMessage(MessageType.GeneralInfo, "Welcome to " + Name + "!");
                         ChatProcessor.SendMessage(MessageType.GeneralInfo, "Welcome to Eorzea!");
                         //ChatProcessor.SendMessage(MessageType.GeneralInfo, @"To get a list of custom commands, type \help in the chat window and hit enter.");
+                        World.Reset();
                         World.Instance.Initialize();
                         break;
 
@@ -273,11 +269,14 @@ namespace PrimalLauncher
                         switch (request)
                         {
                             case "charaWork/exp":
-                                _connection.Send(User.Instance.Character.CharaWork.ClassExp());
+                                _connection.Send(User.Instance.Character.CharaWork.Exp());
+                                break;
+                            case "charawork/command":
+                                User.Instance.Character.CharaWork.UpdateHotbar();
                                 break;
                         }
 
-                        Log.Instance.Info("Data request: " + request);
+                        //Log.Instance.Info("Data request: " + request);
 
                         break;
                     case (ushort)ClientOpcode.SelectTarget:
@@ -308,8 +307,7 @@ namespace PrimalLauncher
                         User.Instance.Character.SetTitle(subpacket.Data);
                         break;
                     default:
-                        Log.Instance.Error("[" + Name + "] Unknown command: 0x" + opcode.ToString("X"));
-                        File.WriteAllBytes("unknowncommand.txt", subpacket.Data);
+                        Log.Instance.Error("[" + Name + "] Unknown command: 0x" + opcode.ToString("X"));                        
                         break;
                 }
             }

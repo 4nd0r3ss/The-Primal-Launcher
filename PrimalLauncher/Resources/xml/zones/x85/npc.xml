@@ -107,11 +107,11 @@
 			<position x="-489.56" y="20" z="184.91" r="-0.24" />
 			<animation>1041</animation>
 		</PopulaceStandard>
-		<PopulaceStandard className="PopulacePassiveGLPublisher">
+        <PopulacePassiveGLPublisher>
 			<classId>1000455</classId>
 			<position x="-459.76" y="40" z="178.22" r="1.6" />
 			<animation>1015</animation>
-		</PopulaceStandard>
+		</PopulacePassiveGLPublisher>
 		<PopulaceStandard>
 			<classId>1000351</classId>
 			<position x="-441.8" y="21" z="175" r="-0.35" />

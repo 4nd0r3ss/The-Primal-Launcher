@@ -16,6 +16,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -24,82 +25,90 @@ namespace PrimalLauncher
     [Serializable]
     public class Journal
     {
-        public Dictionary<sbyte, object> Quests { get; set; }
+        public Dictionary<sbyte, object> QuestScenario { get; set; }
+        public Dictionary<sbyte, object> QuestGuildleve { get; set; }
+        public Dictionary<sbyte, object> Guildleves { get; set; }
+
+        public bool[] QuestScenarioComplete { get; set; }
+        public bool[] QuestGuildleveComplete { get; set; }
+        public List<int> GuildlevesComplete { get; set; }
+
+        //non-native members
         public List<Quest> QuestsAvailable { get; set; }
-        public List<uint> QuestsFinished { get; set; }
-        public List<uint> GuildLevesLocal { get; set; }
-        public List<uint> GuildLevesRegional { get; set; }
-        public List<uint> GuildLevesDone { get; set; }
-        public List<uint> GuildLevesChecked { get; set; }
+        public List<uint> QuestsFinished { get; set; }   
 
         public Journal(uint initialTown)
         {
             QuestsAddEmptySlots();
+            LocalLevesAddEmptySlots();
+            GuildlevesAddEmptySlots();        
+           
+            QuestGuildleveComplete = new bool[2048];
+            QuestScenarioComplete = new bool[2048];
+
             QuestsAvailable = new List<Quest>();
             QuestsFinished = new List<uint>();
-            GuildLevesLocal = new List<uint>();
-            GuildLevesRegional = new List<uint>();
-            GuildLevesDone = new List<uint>();
-            GuildLevesChecked = new List<uint>();
 
             //get initial quest
-            Quests[0] = QuestXmlLoader.GetFirstQuest(initialTown);
+            QuestScenario[0] = QuestXmlLoader.GetFirstQuest(initialTown);   
         }
 
         public void AddToWork(ref WorkProperties work)
         {
             for (sbyte i = 0; i < 0x10; i++)   
-                if(Quests[i] != null)
-                    work.Add(string.Format("playerWork.questScenario[{0}]", i), 0xA0F00000 | ((Quest)Quests[i]).Id);
+                if(QuestScenario[i] != null)
+                    work.Add(string.Format("playerWork.questScenario[{0}]", i), 0xA0F00000 | ((Quest)QuestScenario[i]).Id);
 
-            //debug stuff.
-            GuildLevesLocal = new List<uint>();
-            GuildLevesRegional = new List<uint>();
-            GuildLevesDone = new List<uint>();
-            GuildLevesChecked = new List<uint>();
-            //GuildLevesLocal.Add(10922);
-            //GuildLevesRegional.Add(10922);
-            //GuildLevesDone.Add(10923);
-            //GuildLevesChecked.Add(10924);
+            //Local Leves 
+            for (sbyte i = 0; i < 0x08; i++)
+                if (QuestGuildleve[i] != null)
+                    work.Add(string.Format("playerWork.questGuildleve[{0}]", i), 0xA0F00000 | ((PassiveGL)QuestGuildleve[i]).Id);
 
-            //GuildLeve - local
-            for (int i = 0; i < GuildLevesLocal.Count; i++)
-                work.Add(string.Format("playerWork.questGuildleve[{0}]", i), 0xA0F00000 | (int)GuildLevesLocal[i]);
+            //add guildleves to the first 8 lots
+            AddGuildLeveData(ref work, Guildleves, 0);
 
-            //GuildLeve - regional
-            for (int i = 0; i < GuildLevesRegional.Count; i++)
-                work.Add(string.Format("work.guildleveId[{0}]", i), GuildLevesRegional[i]);
+            //add local leves to remaining 8 slots.
+            //AddGuildLeveData(ref work, QuestGuildleve, 8);            
+        }
 
-            for (int i = 0; i < GuildLevesDone.Count; i++)
-                work.Add(string.Format("work.guildleveDone[{0}]", i), GuildLevesDone[i]);
+        private void AddGuildLeveData(ref WorkProperties work, Dictionary<sbyte, object> guildLeves, sbyte index)
+        {
+            //TODO: need to get Id as short, as this wont work if an int or uint is sent as id.
+            //ex: for local leve id 120203, we do 120203 - 120000 = 203, then we store 203 only.
+            //for guildleves that are not local, need to test as they have different id prefixes.
 
-            for (int i = 0; i < GuildLevesChecked.Count; i++)
-                work.Add(string.Format("work.guildleveChecked[{0}]", i), GuildLevesChecked[i]);  
-            
-
-
+            for (sbyte i = 0; i < guildLeves.Count; i++)
+            {
+                if (guildLeves[i] != null)
+                {
+                    GuildLeve gl = (GuildLeve)guildLeves[i];
+                    work.Add(string.Format("work.guildleveId[{0}]", i), gl.Id);
+                    work.Add(string.Format("work.guildleveDone[{0}]", i), gl.Done);
+                    work.Add(string.Format("work.guildleveChecked[{0}]", i), gl.Checked);
+                }
+            }
         }
 
         private void QuestsAddEmptySlots()
         {
-            if (Quests == null)
-                Quests = new Dictionary<sbyte, object>();
+            if (QuestScenario == null)
+                QuestScenario = new Dictionary<sbyte, object>();
 
             for (int i = 0; i < 0x10; i++)
-                Quests.Add((sbyte)i, null);
+                QuestScenario.Add((sbyte)i, null);
         }
 
         /// <summary>
-        /// Returns the first empty slot in an inventory this is necessary to keep the continuity
+        /// Returns the first empty slot in an inventory this is necessary to keep continuity
         /// </summary>
         /// <param name="inventory"></param>
         /// <returns></returns>
-        private sbyte GetFirstEmptySlot()
+        private sbyte GetQuestsFirstEmptySlot()
         {
-            foreach (var slot in Quests)
+            foreach (var slot in QuestScenario)
                 if (slot.Value == null) return slot.Key;
 
-            return 0; //no empty slots
+            return -1; //no empty slots
         }
 
         #region Quests
@@ -107,7 +116,7 @@ namespace PrimalLauncher
         {
             Quest quest = null; 
 
-            foreach (var slot in Quests)        
+            foreach (var slot in QuestScenario)        
                 if(slot.Value != null && ((Quest)slot.Value).Id == id)               
                     quest = (Quest)slot.Value;
 
@@ -119,7 +128,7 @@ namespace PrimalLauncher
 
         public sbyte GetQuestSlot(uint id)
         {
-            foreach (var slot in Quests)
+            foreach (var slot in QuestScenario)
             {
                 if (slot.Value != null)
                 {
@@ -130,14 +139,14 @@ namespace PrimalLauncher
                 }                
             }
 
-            return 0;
+            return -1; //quest not found
         }
 
         public List<Quest> GetAllQuests()
         {
             List<Quest> quests = new List<Quest>();
 
-            foreach (var slot in Quests)
+            foreach (var slot in QuestScenario)
                 if (slot.Value != null)                
                     quests.Add((Quest)slot.Value);                
 
@@ -181,7 +190,7 @@ namespace PrimalLauncher
             Quest quest = QuestsAvailable.FirstOrDefault(x => x.Id == id);
             quest.Accepted = true;
 
-            Quests[GetFirstEmptySlot()] = quest;
+            QuestScenario[GetQuestsFirstEmptySlot()] = quest;
             QuestsAvailable.Remove(quest);
 
             AddQuestUpdate(id);
@@ -190,7 +199,7 @@ namespace PrimalLauncher
         public void AddQuest(uint id)
         {
             Quest quest = QuestXmlLoader.GetMainScenarioQuest(id);
-            Quests[GetFirstEmptySlot()] = quest;
+            QuestScenario[GetQuestsFirstEmptySlot()] = quest;
 
             AddQuestUpdate(id);
         }
@@ -229,15 +238,19 @@ namespace PrimalLauncher
         {
             List<object> parameters = LuaParameters.ReadParameters(packet, 0x41);
             uint questId = Convert.ToUInt32(parameters[0]);
-            byte[] data = new byte[0xc0];
-            Quest quest = GetQuestById(questId);
+            byte[] data = new byte[0xc0];  
+
+            object quest = GetQuestObject(questId);
+
             toSend.Add("requestedData");
 
             if(parameters[1] == null)
             {
                 toSend.Add("qtdata");
                 toSend.Add(questId);
-                toSend.Add(quest.HistoryIndex);
+
+                if(quest is Quest)
+                    toSend.Add(((Quest)quest).HistoryIndex);
             }
             else
             {
@@ -246,11 +259,10 @@ namespace PrimalLauncher
                 //put this swtich here as maybe there are other options...
                 switch (option)
                 {
-                    case 2:
-                        int mapMarker = quest.NoMapMarker ? 1 : Convert.ToInt32(questId.ToString() + (quest.PhaseIndex + 1).ToString("D2"));
+                    case 2:                        
                         toSend.Add("qtmap");
                         toSend.Add(questId);
-                        toSend.Add(mapMarker);
+                        toSend.Add(GetQuestMapMarker(quest));
                         break;
                 }
                 
@@ -258,6 +270,33 @@ namespace PrimalLauncher
 
             LuaParameters.WriteParameters(ref data, toSend, 0);
             Packet.Send(ServerOpcode.GeneralData, data);
+        }
+
+        private int GetQuestMapMarker(object quest)
+        {
+            if (quest is Quest)
+            {
+                Quest q = (Quest)quest;
+                return q.NoMapMarker ? 1 : Convert.ToInt32(q.Id.ToString() + (q.PhaseIndex + 1).ToString("D2"));
+            }
+            else if (quest is PassiveGL)
+            {
+                return Convert.ToInt32(((PassiveGL)quest).Id * 100);
+            }
+            
+            return 0;
+        }
+
+        private object GetQuestObject(uint questId)
+        {
+            if (questId > 120000 && questId < 180000)
+            {
+                return GetLocalLeveById(questId);
+            }
+            else
+            {
+                return GetQuestById(questId);
+            }
         }
 
         public void FinishQuest(uint id)
@@ -269,7 +308,7 @@ namespace PrimalLauncher
                 sbyte slot = GetQuestSlot(id);
                 QuestsFinished.Add(finished.Id);
                 AddQuestUpdate(id, true);
-                Quests[slot] = null;
+                QuestScenario[slot] = null;
                 World.SendTextSheet(0x61FE, new object[] { (int)id });                
             }
             else
@@ -283,7 +322,7 @@ namespace PrimalLauncher
             QuestsAvailable.AddRange(QuestXmlLoader.GetAvailableQuests("MainScenarioQuests.xml"));
             QuestsAvailable.AddRange(QuestXmlLoader.GetAvailableQuests("SideQuests.xml"));
 
-            foreach (var item in Quests)            
+            foreach (var item in QuestScenario)            
                 InitializeQuest((Quest)item.Value);
 
             //we do not offer new quests on instances or private areas.
@@ -309,56 +348,169 @@ namespace PrimalLauncher
         }
         #endregion
 
-        public int AddLocalGuidleve(uint id)
+        #region Local Leves
+        private void LocalLevesAddEmptySlots()
         {
-            if (GuildLevesLocal.Count == 8)
-                return 1;
-            else if(GuildLevesLocal.Contains(id))
-                return 2;
-            else
-                GuildLevesLocal.Add(id);   
+            if (QuestGuildleve == null)
+                QuestGuildleve = new Dictionary<sbyte, object>();
 
-            return 0;            
+            for (int i = 0; i < 0x08; i++)
+                QuestGuildleve.Add((sbyte)i, null);
         }
 
-        public void LocalGuildleveDone(uint id)
+        public PassiveGL GetLocalLeveById(uint id)
         {
-            GuildLevesLocal.Remove(id);
-            GuildLevesDone.Add(id);
+            PassiveGL leve = null;
+
+            foreach (var slot in QuestGuildleve)
+                if (slot.Value != null && ((PassiveGL)slot.Value).Id == id)
+                    leve = (PassiveGL)slot.Value;
+
+            return leve;
         }
 
-        public void LocalGuildleveChecked(uint id)
+        public sbyte GetLocalLeveSlot(uint id)
+        {
+            foreach (var slot in QuestGuildleve)
+            {
+                if (slot.Value != null)
+                {
+                    PassiveGL leve = (PassiveGL)slot.Value;
+
+                    if (leve.Id == id)
+                        return slot.Key;
+                }
+            }
+
+            return 0;
+        }
+
+        private sbyte GetLocalLevesFirstEmptySlot()
+        {
+            foreach (var slot in QuestGuildleve)
+                if (slot.Value == null) return slot.Key;
+
+            return -1; //no empty slots
+        }
+
+        public void AddLocalleve(PassiveGL leve)
+        {            
+            QuestGuildleve[GetLocalLevesFirstEmptySlot()] = leve;
+            World.SendTextSheet(0xC3E8, new object[] { Convert.ToInt32(leve.Id) });
+            AddLocalLeveUpdate(leve.Id);
+        }
+
+        public void SendLeveAllowancesRamaining()
+        {
+            World.SendTextSheet(0xC3DD, new object[] { User.Instance.Character.LeveAllowances });
+        }
+               
+        public void LocalLeveChecked(uint id)
         {
 
         }
 
-        public void GetGuildleveData(ref LuaParameters parameters)
+        public void GetGuildleveData(ref LuaParameters response, byte[] request)
         {
             byte[] data = new byte[0xc0];
-            parameters.Add("requestedData");
-            parameters.Add("activegl");
-            parameters.Add(0x07); //???
-            parameters.Add(null);
-            parameters.Add(null);
-            parameters.Add(null);
-            parameters.Add(null);
-            parameters.Add(null);
-            parameters.Add(null);
-            parameters.Add(null);
-            LuaParameters.WriteParameters(ref data, parameters, 0);
+            List<object> requestParams = LuaParameters.ReadParameters(request, 0x31);
+            sbyte slot = Convert.ToSByte(requestParams[1]);
+            GuildLeve gl = (GuildLeve)Guildleves[slot];
+            
+            response.Add("requestedData");
+            response.Add("activegl");
+            response.Add(1);// gl.OfferLimit); 
+            response.Add(null);
+            response.Add(2);//gl.Reward1Type);
+            response.Add(3);//gl.Reward1Value);
+            response.Add(4);//gl.Reward2Type);
+            response.Add(5);//gl.Reward2Value);
+            response.Add(6);//gl.Evaluation);
+            response.Add(7);//gl.StageVisible);
+            LuaParameters.WriteParameters(ref data, response, 0);
             Packet.Send(ServerOpcode.GeneralData, data);
         }
 
-        public void AddLocalLeveUpdate(uint id, bool isFinished = false)
+        public void AddLocalLeveUpdate(uint id, sbyte slot = 0)
         {
             WorkProperties work = new WorkProperties(User.Instance.Character.Id, "work/guildleve");
-            int slot = GetLocalLeveSlot(id);        
-            //work.Add(string.Format("playerWork.questGuildleve[{0}]", slot), 0xA0F00000 | GuildLevesLocal[slot]); //this doesn't work, need to find out the real one
-            work.Add(0x19030954, (short)id);
+            slot = slot > 0 ? slot : GetLocalLeveSlot(id);
+            uint questActor = 0;
+
+            if (QuestGuildleve[slot] != null)
+                questActor = 0xA0F00000 | ((PassiveGL)QuestGuildleve[slot]).Id;
+
+            work.Add(string.Format("playerWork.questGuildleve[{0}]", slot), questActor);             
             work.SendUpdate(0x90);
         }
+        #endregion
 
-        private int GetLocalLeveSlot(uint id) => GuildLevesLocal.IndexOf(id);   
+        #region Guildleves
+        public bool HasCompletedGuildLeve(int id)
+        {
+            return GuildlevesComplete.Any(x => x == id);
+        }
+
+        public void AddGuildLeve(GuildLeve leve)
+        {
+            sbyte slot = GetGuildlevesFirstEmptySlot();
+            Guildleves[slot] = leve;
+            AddGuildLeveUpdate(slot);
+
+        }
+        private void GuildlevesAddEmptySlots()
+        {
+            if (Guildleves == null)
+                Guildleves = new Dictionary<sbyte, object>();
+
+            for (int i = 0; i < 0x08; i++)
+                Guildleves.Add((sbyte)i, null);
+        }
+
+        private sbyte GetGuildlevesFirstEmptySlot()
+        {
+            foreach (var slot in Guildleves)
+                if (slot.Value == null) return slot.Key;
+
+            return -1; //no empty slots
+        }
+
+        public void AddGuildLeveUpdate(sbyte slot)
+        {
+            GuildLeve gl = (GuildLeve)Guildleves[slot];
+            WorkProperties work = new WorkProperties(User.Instance.Character.Id, "work/guildleve");            
+            work.Add(string.Format("work.guildleveId[{0}]", slot), gl.Id); //TODO: need to fix the id, see line 76 in this file.
+            work.Add(string.Format("work.guildleveDone[{0}]", slot), gl.Done);            
+            work.Add(string.Format("work.guildleveChecked[{0}]", slot), gl.Checked);
+            work.SendUpdate();
+        }
+
+        public void CompleteGuildLeve(uint id)
+        {
+
+        }
+        #endregion
+
+        public void AbandonQuestLeve(byte[] data)
+        {
+            var parameters = LuaParameters.ReadParameters(data, 0x41);
+            uint questId = Convert.ToUInt32(parameters[0]);
+            int option = Convert.ToInt32(parameters[1]); //might be useful moving forward.
+
+            if (questId > 120000 && questId < 180000)
+            {
+                sbyte slot = GetLocalLeveSlot(questId);
+                QuestGuildleve[slot] = null;
+                AddLocalLeveUpdate(questId, slot);
+            }
+            else
+            {
+                sbyte slot = GetQuestSlot(questId);
+                QuestScenario[slot] = null;
+            }
+
+            World.SendTextSheet(50147, new object[] { Convert.ToInt32(questId) });            
+        }
 
         #region Debug functions
         public void ResetQuestHistory(uint questId)
@@ -399,7 +551,7 @@ namespace PrimalLauncher
                 if (quest == null)
                     quest = QuestXmlLoader.GetQuest("SideQuests.xml", questId);
 
-                User.Instance.Character.Journal.Quests[slot] = quest;               
+                User.Instance.Character.Journal.QuestScenario[slot] = quest;               
                 InitializeQuests();
             }
         }

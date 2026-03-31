@@ -1,4 +1,21 @@
-﻿
+﻿/* 
+Copyright (C) 2022 Andreus Faria
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
+
 namespace PrimalLauncher
 {
     partial class ucOptions
@@ -31,16 +48,14 @@ namespace PrimalLauncher
         {
             this.lblSeparator1 = new System.Windows.Forms.Label();
             this.lblSeparator2 = new System.Windows.Forms.Label();
-            this.radioButton1 = new System.Windows.Forms.RadioButton();
-            this.radioButton3 = new System.Windows.Forms.RadioButton();
-            this.lblSeparator3 = new System.Windows.Forms.Label();
+            this.webServerSkip2 = new System.Windows.Forms.RadioButton();
+            this.webServerSkip1 = new System.Windows.Forms.RadioButton();
             this.panel1 = new System.Windows.Forms.Panel();
             this.optServerEU = new System.Windows.Forms.RadioButton();
             this.optServerJP = new System.Windows.Forms.RadioButton();
             this.optServerNA = new System.Windows.Forms.RadioButton();
-            this.cmbLobbyOptions = new System.Windows.Forms.ComboBox();
             this.outlinedFontLabel4 = new PrimalLauncher.OutlinedFontLabel();
-            this.outlinedFontLabel8 = new PrimalLauncher.OutlinedFontLabel();
+            this.cmbLobbyOptions = new System.Windows.Forms.ComboBox();
             this.outlinedFontLabel7 = new PrimalLauncher.OutlinedFontLabel();
             this.outlinedFontLabel5 = new PrimalLauncher.OutlinedFontLabel();
             this.outlinedFontLabel3 = new PrimalLauncher.OutlinedFontLabel();
@@ -69,34 +84,27 @@ namespace PrimalLauncher
             this.lblSeparator2.Size = new System.Drawing.Size(724, 2);
             this.lblSeparator2.TabIndex = 17;
             // 
-            // radioButton1
+            // webServerSkip2
             // 
-            this.radioButton1.AutoSize = true;
-            this.radioButton1.Location = new System.Drawing.Point(217, 6);
-            this.radioButton1.Name = "radioButton1";
-            this.radioButton1.Size = new System.Drawing.Size(14, 13);
-            this.radioButton1.TabIndex = 26;
-            this.radioButton1.TabStop = true;
-            this.radioButton1.UseVisualStyleBackColor = true;
+            this.webServerSkip2.AutoSize = true;
+            this.webServerSkip2.Location = new System.Drawing.Point(217, 6);
+            this.webServerSkip2.Name = "webServerSkip2";
+            this.webServerSkip2.Size = new System.Drawing.Size(14, 13);
+            this.webServerSkip2.TabIndex = 26;
+            this.webServerSkip2.TabStop = true;
+            this.webServerSkip2.UseVisualStyleBackColor = true;
+            this.webServerSkip2.CheckedChanged += new System.EventHandler(this.webServerSkip2_CheckedChanged);
             // 
-            // radioButton3
+            // webServerSkip1
             // 
-            this.radioButton3.AutoSize = true;
-            this.radioButton3.Location = new System.Drawing.Point(5, 6);
-            this.radioButton3.Name = "radioButton3";
-            this.radioButton3.Size = new System.Drawing.Size(14, 13);
-            this.radioButton3.TabIndex = 28;
-            this.radioButton3.TabStop = true;
-            this.radioButton3.UseVisualStyleBackColor = true;
-            // 
-            // lblSeparator3
-            // 
-            this.lblSeparator3.BackColor = System.Drawing.SystemColors.ButtonFace;
-            this.lblSeparator3.Location = new System.Drawing.Point(0, 275);
-            this.lblSeparator3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.lblSeparator3.Name = "lblSeparator3";
-            this.lblSeparator3.Size = new System.Drawing.Size(724, 2);
-            this.lblSeparator3.TabIndex = 29;
+            this.webServerSkip1.AutoSize = true;
+            this.webServerSkip1.Location = new System.Drawing.Point(5, 6);
+            this.webServerSkip1.Name = "webServerSkip1";
+            this.webServerSkip1.Size = new System.Drawing.Size(14, 13);
+            this.webServerSkip1.TabIndex = 28;
+            this.webServerSkip1.TabStop = true;
+            this.webServerSkip1.UseVisualStyleBackColor = true;
+            this.webServerSkip1.CheckedChanged += new System.EventHandler(this.webServerSkip1_CheckedChanged);
             // 
             // panel1
             // 
@@ -145,15 +153,6 @@ namespace PrimalLauncher
             this.optServerNA.UseVisualStyleBackColor = true;
             this.optServerNA.CheckedChanged += new System.EventHandler(this.optServerNA_CheckedChanged);
             // 
-            // cmbLobbyOptions
-            // 
-            this.cmbLobbyOptions.FormattingEnabled = true;
-            this.cmbLobbyOptions.Location = new System.Drawing.Point(18, 71);
-            this.cmbLobbyOptions.Name = "cmbLobbyOptions";
-            this.cmbLobbyOptions.Size = new System.Drawing.Size(166, 23);
-            this.cmbLobbyOptions.TabIndex = 37;
-            this.cmbLobbyOptions.SelectedIndexChanged += new System.EventHandler(this.cmbLobbyOptions_SelectedIndexChanged);
-            // 
             // outlinedFontLabel4
             // 
             this.outlinedFontLabel4.AutoSize = true;
@@ -168,19 +167,14 @@ namespace PrimalLauncher
             this.outlinedFontLabel4.TabIndex = 34;
             this.outlinedFontLabel4.Text = "Server Region:";
             // 
-            // outlinedFontLabel8
+            // cmbLobbyOptions
             // 
-            this.outlinedFontLabel8.AutoSize = true;
-            this.outlinedFontLabel8.Font = new System.Drawing.Font("Cambria", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.outlinedFontLabel8.ForeColor = System.Drawing.Color.Moccasin;
-            this.outlinedFontLabel8.Location = new System.Drawing.Point(0, 253);
-            this.outlinedFontLabel8.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.outlinedFontLabel8.Name = "outlinedFontLabel8";
-            this.outlinedFontLabel8.OutlineForeColor = System.Drawing.Color.Black;
-            this.outlinedFontLabel8.OutlineWidth = 2F;
-            this.outlinedFontLabel8.Size = new System.Drawing.Size(131, 17);
-            this.outlinedFontLabel8.TabIndex = 30;
-            this.outlinedFontLabel8.Text = "Player Characters";
+            this.cmbLobbyOptions.FormattingEnabled = true;
+            this.cmbLobbyOptions.Location = new System.Drawing.Point(18, 71);
+            this.cmbLobbyOptions.Name = "cmbLobbyOptions";
+            this.cmbLobbyOptions.Size = new System.Drawing.Size(166, 23);
+            this.cmbLobbyOptions.TabIndex = 37;
+            this.cmbLobbyOptions.SelectedIndexChanged += new System.EventHandler(this.cmbLobbyOptions_SelectedIndexChanged);
             // 
             // outlinedFontLabel7
             // 
@@ -192,6 +186,7 @@ namespace PrimalLauncher
             this.outlinedFontLabel7.Size = new System.Drawing.Size(95, 15);
             this.outlinedFontLabel7.TabIndex = 25;
             this.outlinedFontLabel7.Text = "Skip web login";
+            this.outlinedFontLabel7.Click += new System.EventHandler(this.outlinedFontLabel7_Click);
             // 
             // outlinedFontLabel5
             // 
@@ -249,9 +244,9 @@ namespace PrimalLauncher
             // panel2
             // 
             this.panel2.Controls.Add(this.outlinedFontLabel7);
-            this.panel2.Controls.Add(this.radioButton3);
+            this.panel2.Controls.Add(this.webServerSkip1);
             this.panel2.Controls.Add(this.outlinedFontLabel5);
-            this.panel2.Controls.Add(this.radioButton1);
+            this.panel2.Controls.Add(this.webServerSkip2);
             this.panel2.Location = new System.Drawing.Point(13, 170);
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(420, 26);
@@ -265,8 +260,6 @@ namespace PrimalLauncher
             this.Controls.Add(this.panel2);
             this.Controls.Add(this.cmbLobbyOptions);
             this.Controls.Add(this.panel1);
-            this.Controls.Add(this.outlinedFontLabel8);
-            this.Controls.Add(this.lblSeparator3);
             this.Controls.Add(this.outlinedFontLabel3);
             this.Controls.Add(this.outlinedFontLabel2);
             this.Controls.Add(this.outlinedFontLabel1);
@@ -295,10 +288,8 @@ namespace PrimalLauncher
         private OutlinedFontLabel outlinedFontLabel2;
         private OutlinedFontLabel outlinedFontLabel5;
         private OutlinedFontLabel outlinedFontLabel7;
-        private System.Windows.Forms.RadioButton radioButton1;
-        private System.Windows.Forms.RadioButton radioButton3;
-        private System.Windows.Forms.Label lblSeparator3;
-        private OutlinedFontLabel outlinedFontLabel8;
+        private System.Windows.Forms.RadioButton webServerSkip2;
+        private System.Windows.Forms.RadioButton webServerSkip1;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.RadioButton optServerEU;
         private System.Windows.Forms.RadioButton optServerJP;

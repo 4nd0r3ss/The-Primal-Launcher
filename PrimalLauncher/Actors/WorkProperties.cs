@@ -66,7 +66,7 @@ namespace PrimalLauncher
             if (key is string)            
                 hashedId = (uint)MurmurHash2((string)key, 0);  
             else
-                hashedId = (uint)key;
+                hashedId = Convert.ToUInt32(key);
 
             if (value is bool)
             {
@@ -197,11 +197,7 @@ namespace PrimalLauncher
                     pageCount++;
 
                     //enqueue this packet    
-                    PacketQueue.Enqueue(new Packet(new GamePacket { Opcode = 0x137, Data = _buffer }).ToBytes());
-                    //_sender.Send(new Packet(new GamePacket { Opcode = 0x137, Data = _buffer }).ToBytes());
-
-                    //debug
-                    //File.WriteAllBytes("levelTest_" + hashedId.ToString("X") + "_" + pageCount + ".txt", _buffer);
+                    PacketQueue.Enqueue(new Packet(new GamePacket { Opcode = 0x137, Data = _buffer }).ToBytes());  
 
                     //reset stream
                     _bw.Dispose();

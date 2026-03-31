@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Reflection.Emit;
 
 namespace PrimalLauncher
 {
@@ -248,26 +249,7 @@ namespace PrimalLauncher
             ChunkEnd();
             InventoryEnd();
         }
-
-        /// <summary>
-        /// Put all default items into character's bag. Used only during character creation.
-        /// </summary>
-        /// <param name="graphId">An arrray with selected class default equipment graphic codes from game data table boot_skillequip</param>
-        public void AddDefaultItems(uint[] graphId, uint underShirtId, uint underGarmentId)
-        {          
-            //equipment
-            AddEquipmentPiece(ItemGraphics.Weapon, 0, graphicId: graphId[1]);
-            //AddDefaultItem(ItemGraphics.Weapon, graphId[2]); //leaving this on crashes the game. Seems that no class starts with a secondary weapon/tool. The value for archer/bard is for quiver graphics only.
-            AddEquipmentPiece(ItemGraphics.Head, 8, graphicId: graphId[8]);            
-            AddEquipmentPiece(ItemGraphics.Body, 9, itemId: underShirtId);
-            AddEquipmentPiece(ItemGraphics.Body, 10, graphicId: graphId[9]);           
-            AddEquipmentPiece(ItemGraphics.Legs, 11, itemId: underGarmentId);
-            AddEquipmentPiece(ItemGraphics.Legs, 12, graphicId: graphId[10]);
-            AddEquipmentPiece(ItemGraphics.Hands, 13, graphicId: graphId[11]);
-            AddEquipmentPiece(ItemGraphics.Feet, 14, graphicId: graphId[12]);
-            AddEquipmentPiece(ItemGraphics.Waist, 15, graphicId: graphId[13]);
-        }
-
+              
         public void AddGil(int quantity)
         {
             
@@ -466,6 +448,31 @@ namespace PrimalLauncher
             return numItems < chunkSize ? 0 : numItems - (chunkSize * numChunks);
         }
 
+        /// <summary>
+        /// Put all default items into character's bag. Used only during character creation.
+        /// </summary>
+        /// <param name="graphId">An arrray with selected class default equipment graphic codes from game data table boot_skillequip</param>
+        public void AddDefaultItems(uint[] graphId, uint underShirtId, uint underGarmentId)
+        {
+            uint[] itemIds = ItemGraphics.Instance.GetByGraphicsId(graphId);
+            
+            AddEquipmentPiece(0, itemIds[1]);
+            AddEquipmentPiece(8, itemIds[8]);
+            AddEquipmentPiece(9, underShirtId);
+            AddEquipmentPiece(11, underGarmentId);
+            AddEquipmentPiece(13, itemIds[11]);
+            AddEquipmentPiece(14, itemIds[12]);
+            AddEquipmentPiece(15, itemIds[13]);
+            
+            //body
+            if (itemIds[9] != underShirtId)
+                AddEquipmentPiece(10, itemIds[9]);            
+
+            //legs
+            if (itemIds[10] != underGarmentId)
+                AddEquipmentPiece(12, itemIds[10]);            
+        }
+
         #region Equipment Methods
         /// <summary>
         /// Adds one single default item into character's bag.
@@ -473,15 +480,24 @@ namespace PrimalLauncher
         /// <param name="equipList"></param>
         /// <param name="graphicId"></param>
         /// <param name="gearSlot"></param>
-        private void AddEquipmentPiece(Dictionary<uint, uint> equipList, ushort gearSlot, uint graphicId = 0, uint itemId = 0)
+        //private void AddEquipmentPiece(ushort gearSlot, uint graphicId = 0, uint itemId = 0)
+        //{
+        //    uint equipId = 0;
+
+        //    if (graphicId > 0)
+        //        equipId = ItemGraphics.Instance.GetByGraphicsId(graphicId);
+        //    else if (itemId > 0)
+        //        equipId = itemId;
+
+        //    if (equipId > 0)
+        //    {
+        //        ushort inventorySlot = AddEquipmentToBag(equipId);
+        //        AddEquipmentToGearSlot(gearSlot, inventorySlot);
+        //    }
+        //}
+
+        private void AddEquipmentPiece(ushort gearSlot, uint equipId)
         {
-            uint equipId = 0;
-
-            if (graphicId > 0)
-                equipId = equipList.FirstOrDefault(x => x.Value == graphicId).Key;
-            else if (itemId > 0)
-                equipId = itemId;
-
             if (equipId > 0)
             {
                 ushort inventorySlot = AddEquipmentToBag(equipId);
@@ -675,54 +691,66 @@ namespace PrimalLauncher
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="request"></param>
-        public void ChangeGear(byte gearSlot, uint itemUniqueId)
+        public void ChangeGear(byte gearSlot, uint itemToEquipUniqueId)
         {           
             byte invSlot = 0;           
             ServerOpcode opcode;
 
             //equip item
-            if (itemUniqueId > 0)
-            {               
-                opcode = ServerOpcode.x01SetEquipment;
+            if (itemToEquipUniqueId > 0)
+            {                              
+                Item item = null;
 
                 //search the bag for the item to be equipped.
                 foreach (var slot in Bag)
                 {
-                    Item item = (Item)slot.Value;
+                    item = slot.Value == null ? null : (Item)slot.Value;
+
                     //if item is found
-                    if (item.UniqueId == itemUniqueId)
-                    {
-                        //get the item bag slot
-                        invSlot = (byte)item.InventorySlot;
+                    if (item != null && item.UniqueId == itemToEquipUniqueId)
+                        break;                    
+                }                
 
-                        //chage the graphics in appearance slot to the piece being equipped
-                        User.Instance.Character.Appearance.Set(gearSlot, item.Id);
-
-                        if (GearSlots.Any(x => x.Key == gearSlot))
-                            GearSlots[gearSlot] = invSlot; //if there is anything in the slot, replace
-                        else
-                            GearSlots.Add(gearSlot, invSlot);
-
-                        break;
-                    }
-                }
-
-                SendChangeGearResult(opcode, gearSlot, invSlot);
-            }
-            else
-            {              
-                if (gearSlot != 0x09 && gearSlot != 0x0b && gearSlot != 0) //can't unequip underwear and main weapon, just switch to another piece.
+                if (item != null)
                 {
-                    GearSlots.Remove(gearSlot);
-                    User.Instance.Character.Appearance.Set(gearSlot, 0);
-                    opcode = ServerOpcode.x01RemoveEquipment;
-                    SendChangeGearResult(opcode, gearSlot, invSlot);
+                    //get the item bag slot
+                    invSlot = (byte)item.InventorySlot;
+
+                    //chage the graphics in appearance slot to the piece being equipped
+                    User.Instance.Character.Appearance.Set(gearSlot, item.Id);
+
+                    if (GearSlots.Any(x => x.Key == gearSlot))
+                        GearSlots[gearSlot] = invSlot; //if there is anything in the slot, replace
+                    else
+                        GearSlots.Add(gearSlot, invSlot);
+
+                    SendChangeGearResult(ServerOpcode.x01SetEquipment, gearSlot, invSlot);
                 }
                 else
                 {
-                    //TODO: send message warning that underwear cannot be unequipped.
+                    UnequipItem(gearSlot, invSlot);
                 }
             }
+            else
+            {
+                UnequipItem(gearSlot, invSlot);
+            }
+        }
+
+        private void UnequipItem(byte gearSlot, byte invSlot)
+        {
+            Item equippedItem = GetBagItemByGearSlot(gearSlot);
+            int textSheet = 30730; //could not unequip
+
+            if (gearSlot != 0x09 && gearSlot != 0x0b && gearSlot != 0) //can't unequip underwear and main weapon, just switch to another piece.
+            {
+                GearSlots.Remove(gearSlot);
+                User.Instance.Character.Appearance.Set(gearSlot, 0);                
+                SendChangeGearResult(ServerOpcode.x01RemoveEquipment, gearSlot, invSlot);
+                textSheet = 0x778A;                
+            }            
+
+            World.SendTextSheet(textSheet, new object[] {/*quality?*/ 1, (int)equippedItem.Id, 1, 0, 0, 1, 0 }, User.Instance.Character.Id);
         }
 
         /// <summary>

@@ -228,7 +228,7 @@ namespace PrimalLauncher
 
             Packet.Send(ServerOpcode.SetPosition, data, Id);           
         }
-        public void MoveToPosition(Position position, int moveState)
+        public void MoveToPosition(Position position, MoveState moveState)
         {            
             byte[] data = new byte[0x30];
             data.Write(new DataList()
@@ -553,11 +553,17 @@ namespace PrimalLauncher
         }
         #endregion
 
-        public void SendCommandResult(Command command, List<CommandResult> resultList, uint animationId = 0, uint unknown = 0, uint senderId = 0)
+        public void SendCommandResult(Command command, List<CommandResult> resultList = null, uint animationId = 0, uint unknown = 0, uint senderId = 0)
         {
             byte[] data;
             byte[] resultBytes;
-            ServerOpcode opcode = ServerOpcode.CommandResultX1;            
+            ServerOpcode opcode = ServerOpcode.CommandResultX1;    
+            
+            if(resultList == null)
+                resultList = new List<CommandResult>();
+
+            if (resultList.Count == 0)
+                resultList.Add(new CommandResult());
 
             //when we have one single result, we just print it.
             if (resultList.Count == 1)

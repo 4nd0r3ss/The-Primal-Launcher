@@ -33,12 +33,12 @@
 		<PopulaceShopSalesman welcomeTalk="263" menuId="-8" shopType="Item" itemSet="2024">
 			<classId>1600092</classId>
 			<position x="72" y="-7.4" z="-1193" r="-1.46" />
-		</PopulaceShopSalesman>	
-		<PopulaceStandard className="PopulacePassiveGLPublisher">
+		</PopulaceShopSalesman>
+        <PopulacePassiveGLPublisher>
 			<classId>1000456</classId>
 			<position x="56.59" y="4" z="-1205.44" r="2.4" />
 			<animation>1015</animation>
-		</PopulaceStandard>
+		</PopulacePassiveGLPublisher>
 		<PopulaceStandard>
 			<classId>1099063</classId>
 			<position x="67.09" y="-6.8" z="-1215.63" r="0" />

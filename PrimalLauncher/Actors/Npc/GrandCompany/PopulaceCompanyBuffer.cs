@@ -20,50 +20,30 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static System.Collections.Specialized.BitVector32;
 
 namespace PrimalLauncher
 {
-    public class PopulaceCompanyGuide : PopulaceCompany
+    public class PopulaceCompanyBuffer : PopulaceCompany
     {
-        public PopulaceCompanyGuide() 
+        public PopulaceCompanyBuffer()
         {
             ClassName = GetType().Name;
         }
 
         public override void talkDefault()
         {
-            //eventTalkWelcome - joined
-            //eventTalkProvisional - no company
-            //eventTalkExclusive - from anothe company
-            //eventTalkComMember - arguments are character id, npc id, festival flag
+
 
             if (!EventManager.Instance.CurrentEvent.IsQuestion)
             {
-                int companyId = User.Instance.Character.CompanyId;
-                int companytRank = User.Instance.Character.CompanyRank;
-
-                if (companyId == 0) //not enlisted
-                {
-                    SendTalk("eventTalkProvisional", new List<object> { User.Instance.Character.Id });                   
-                }
-                else if (companyId == CompanyId && companytRank == 0) //not ranked
-                {
-                    SendTalk("eventTalkProvisional", new List<object> { User.Instance.Character.Id });                   
-                }
-                else if (companyId == CompanyId && companytRank > 0) //has rank
-                {
-                    SendTalk("eventTalkComMember", new List<object> { User.Instance.Character.Id, Id, true });
-                }
-                else //not your company
-                {
-                    SendTalk("eventTalkExclusive", new List<object> { User.Instance.Character.Id });
-                }                
+                SendTalk("eventTalkWelcome", new List<object> { User.Instance.Character.Id, true });
             }
             else
             {
                 uint? selection = (uint?)EventManager.Instance.CurrentEvent.Selection[0];
-                //ChatProcessor.SendMessage(MessageType.System, ClassName + " not implemented. ");                
+
+                //ChatProcessor.SendMessage(MessageType.System, ClassName + " not implemented. ");
+
                 EndTalk();
             }
         }

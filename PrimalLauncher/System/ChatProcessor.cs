@@ -182,18 +182,13 @@ namespace PrimalLauncher
                             User.Instance.Character.AddTp(Convert.ToUInt16(parameters[0]));
                         break;
                     case @"\anim":
-                        short animid = 0x29;
-                        byte another = 0x04;
+                        uint animid = 0;
+                        
                         if (hasParameters)
-                            animid = Convert.ToInt16(parameters[0]);
+                            animid = Convert.ToUInt32(parameters[0],16);
 
-                        if (parameters.Count > 1)
-                            another = Convert.ToByte(parameters[1]);
-
-                        byte[] anim = new byte[] { 0x29, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00 };
-
-                        Buffer.BlockCopy(BitConverter.GetBytes(animid), 0, anim, 0, 2);
-                        anim[3] = another;
+                        byte[] anim = new byte[0x08];
+                        anim.Write(0, animid);                       
 
                         GameServer.Instance.Sender.Send(new Packet(new GamePacket
                         {
@@ -239,24 +234,19 @@ namespace PrimalLauncher
                         break;
                     case @"\cast":
                         if (hasParameters)
-                        {
+                        {                            
+                            uint first = Convert.ToUInt32(parameters[0], 16);
+                            uint second = Convert.ToUInt32(parameters[1]);
+                            uint third = Convert.ToUInt32(parameters[2]);
 
-                            User.Instance.Character.State.Type = 0;
-                            User.Instance.Character.SetMainState();
-                            //User.Instance.Character.SetCastBar((uint)27313, 3);// float.Parse());
-                            User.Instance.Character.SubState.Chant = byte.Parse(parameters[0]);// 0xF0; 
-                            User.Instance.Character.SubState.Waste = 0;
+                            uint baseAnimation = (first << 24) | (second << 12) | third;
 
-                            User.Instance.Character.SetSubState();
-                            User.Instance.Character.SetSubState();
+                            //pc.SubState.Chant = 0xF0;
+                            //pc.SetSubState();
 
-                            //Thread.Sleep(Convert.ToInt32(3) * 1000);
+                            pc.CharaWork.CurrentClass.Actions[1].AnimationId = baseAnimation;
 
-                            //User.Instance.Character.SetCastBar();
-                            //User.Instance.Character.SubState.Chant = 0;
-                            //User.Instance.Character.SetMainState();
-                            //User.Instance.Character.SetSubState();
-
+                            //pc.SendCommandResult((Command)27313, new List<CommandResult> { new CommandResult { TargetId = pc.Id } }, baseAnimation, senderId: pc.Id);
                         }
                         break;
                     case @"\reset":
@@ -277,8 +267,8 @@ namespace PrimalLauncher
                             //Thread.Sleep(Convert.ToInt32(3) * 1000);
 
                             //User.Instance.Character.SetCastBar();
-                            User.Instance.Character.SubState.Chant = 0;
-                            User.Instance.Character.SetMainState();
+                            User.Instance.Character.SubState.Chant = byte.Parse(parameters[0]);
+                            //User.Instance.Character.SetMainState();
                             User.Instance.Character.SetSubState();
 
                         }
@@ -363,7 +353,7 @@ namespace PrimalLauncher
                             {
                                 sbyte slotToRemove = -1;
 
-                                foreach (var slot in User.Instance.Character.Journal.Quests)
+                                foreach (var slot in User.Instance.Character.Journal.QuestScenario)
                                 {
                                     if (slot.Value != null)
                                     {                 
@@ -373,7 +363,7 @@ namespace PrimalLauncher
                                 }
 
                                 if(slotToRemove >= 0)
-                                    User.Instance.Character.Journal.Quests[slotToRemove] = null;
+                                    User.Instance.Character.Journal.QuestScenario[slotToRemove] = null;
                             }
 
                             User.Instance.Character.Journal.InitializeQuests();
@@ -382,7 +372,7 @@ namespace PrimalLauncher
                     case @"\listquests":
 
                         SendMessage(MessageType.System, "Current quests:");
-                        foreach (var slot in User.Instance.Character.Journal.Quests)
+                        foreach (var slot in User.Instance.Character.Journal.QuestScenario)
                         {
                             if(slot.Value != null)
                             {
@@ -493,7 +483,7 @@ namespace PrimalLauncher
                     case @"\setr":
                         ActorBattle bactors = (ActorBattle)User.Instance.Character.GetCurrentZone().GetActorById(User.Instance.Character.TargetId);
                         bactors.Position.R = (float)Convert.ToDouble(parameters[0]);
-                        bactors.MoveToPosition(bactors.Position, 2);
+                        bactors.MoveToPosition(bactors.Position, MoveState.Running);
 
                         SendMessage(MessageType.System, "M: " + bactors.Position.X + ", " + bactors.Position.Z + ", " + bactors.Position.R);
                         break;
@@ -568,20 +558,7 @@ namespace PrimalLauncher
                         User.Instance.Character.Inventory.AddItem(InventoryType.Currency, "Gil", 0);
                         break;
                     case @"\pub":
-                        if (hasParameters)
-                        {
-                            var pub = (PopulaceGuildlevePublisher)User.Instance.Character.GetCurrentZone().Actors.FirstOrDefault(x => x.GetType().Name == "PopulaceGuildlevePublisher");
-                                                        
-                            if (pub != null)
-                            {
-                                //for setting packs
-                                //pub.StartPack.Id = Convert.ToInt32(parameters[0]);
-                                //pub.EndPack.Id = Convert.ToInt32(parameters[1]);
-
-                                //for setting leve details
-                                //pub.Pack1 = Convert.ToInt32(parameters[0]);
-                            }
-                        }
+                        World.SendTextSheet(0xC3E8, new object[] { 120222 });
                         break;
                     case @"\raise":                      
                         User.Instance.Character.TestRaiseCommand();                      
@@ -610,6 +587,14 @@ namespace PrimalLauncher
                         //var gp = new GroupMonster(User.Instance.Character.GetCurrentZone().Id);
                         //gp.Send();
                         break;
+                    //case @"\direction":
+                    //    ActorBattle target = (ActorBattle)pc.GetTargetActor();
+                    //    if(target != null)
+                    //    {
+                    //        string result = pc.GetDirection(target);
+                    //        SendMessage(MessageType.System, result);
+                    //    }                       
+                    //    break;
                     default:
                         SendMessage(MessageType.System, "Unknown command.");
                         break;

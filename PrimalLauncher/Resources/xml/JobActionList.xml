@@ -151,5 +151,46 @@
     <JobAction id="27357" class="27" animationId="16782014" textSheet="30329" comboAction="0" range="20"/>
     <JobAction id="27358" class="27" animationId="16782015" textSheet="30328" comboAction="0" range="20"/>
     <JobAction id="27359" class="27" animationId="16782020" textSheet="30301" comboAction="0" range="0"/>
+    
+    <JobAction id="22114" class="99" animationId="285230057" textSheet="30301" comboAction="0" range="20" comments="Stone Throw command will be added to all DoL and DoH classes." />
+    <JobAction id="29861" class="99" animationId="285230057" textSheet="30301" comboAction="22114" range="0" comments="Wrist Flick command will be added to all DoL and DoH classes." />
 
+    <JobAction id="29873" class="98" animationId="16782020" textSheet="30301" comboAction="0" range="0" comments="Stealth will be added to all HoL classes."/>
+    <JobAction id="29874" class="98" animationId="16782020" textSheet="30301" comboAction="0" range="0" comments="Stealth II will be added to all HoL classes."/>
+    <JobAction id="29875" class="98" animationId="16782020" textSheet="30301" comboAction="0" range="0" comments="Stealth III will be added to all HoL classes."/>
+    <JobAction id="29876" class="98" animationId="16782020" textSheet="30301" comboAction="0" range="0" comments="Stealth IV will be added to all HoL classes."/>    
+
+    <JobAction id="29801" class="39" animationId="16782020" textSheet="30301" comboAction="0" range="0"/>
+    <JobAction id="29802" class="39" animationId="16782020" textSheet="30301" comboAction="0" range="0"/>
+    <JobAction id="29803" class="39" animationId="16782020" textSheet="30301" comboAction="0" range="0"/>
+    <JobAction id="29804" class="39" animationId="16782020" textSheet="30301" comboAction="0" range="0"/>
+    <JobAction id="29805" class="39" animationId="16782020" textSheet="30301" comboAction="0" range="0"/>
+    <JobAction id="29831" class="39" animationId="16782020" textSheet="30301" comboAction="0" range="0"/>
+    <JobAction id="29832" class="39" animationId="16782020" textSheet="30301" comboAction="0" range="0"/>
+    <JobAction id="29833" class="39" animationId="16782020" textSheet="30301" comboAction="0" range="0"/>
+    <JobAction id="29834" class="39" animationId="16782020" textSheet="30301" comboAction="0" range="0"/>
+    <JobAction id="29835" class="39" animationId="16782020" textSheet="30301" comboAction="0" range="0"/>   
+
+    <JobAction id="29811" class="40" animationId="16782020" textSheet="30301" comboAction="0" range="0"/>
+    <JobAction id="29812" class="40" animationId="16782020" textSheet="30301" comboAction="0" range="0"/>
+    <JobAction id="29813" class="40" animationId="16782020" textSheet="30301" comboAction="0" range="0"/>
+    <JobAction id="29814" class="40" animationId="16782020" textSheet="30301" comboAction="0" range="0"/>
+    <JobAction id="29815" class="40" animationId="16782020" textSheet="30301" comboAction="0" range="0"/>
+    <JobAction id="29841" class="40" animationId="16782020" textSheet="30301" comboAction="0" range="0"/>
+    <JobAction id="29842" class="40" animationId="16782020" textSheet="30301" comboAction="0" range="0"/>
+    <JobAction id="29843" class="40" animationId="16782020" textSheet="30301" comboAction="0" range="0"/>
+    <JobAction id="29844" class="40" animationId="16782020" textSheet="30301" comboAction="0" range="0"/>
+    <JobAction id="29845" class="40" animationId="16782020" textSheet="30301" comboAction="0" range="0"/>
+
+    <JobAction id="29821" class="41" animationId="16782020" textSheet="30301" comboAction="0" range="0"/>
+    <JobAction id="29822" class="41" animationId="16782020" textSheet="30301" comboAction="0" range="0"/>
+    <JobAction id="29823" class="41" animationId="16782020" textSheet="30301" comboAction="0" range="0"/>
+    <JobAction id="29824" class="41" animationId="16782020" textSheet="30301" comboAction="0" range="0"/>
+    <JobAction id="29825" class="41" animationId="16782020" textSheet="30301" comboAction="0" range="0"/>
+    <JobAction id="29851" class="41" animationId="16782020" textSheet="30301" comboAction="0" range="0"/>
+    <JobAction id="29852" class="41" animationId="16782020" textSheet="30301" comboAction="0" range="0"/>
+    <JobAction id="29853" class="41" animationId="16782020" textSheet="30301" comboAction="0" range="0"/>
+    <JobAction id="29854" class="41" animationId="16782020" textSheet="30301" comboAction="0" range="0"/>
+    <JobAction id="29855" class="41" animationId="16782020" textSheet="30301" comboAction="0" range="0"/>
+    
 </JobActions>

@@ -54,8 +54,7 @@ namespace PrimalLauncher
                 CurrentEvent.Execute();
             }
             else
-            {
-                File.WriteAllBytes("event_manager_error"+DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".txt", data);
+            {               
                 Log.Instance.Error("EventManager: Event type '" + eventName + "' not found.");
             }                                    
         }    

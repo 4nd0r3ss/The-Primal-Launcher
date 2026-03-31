@@ -160,16 +160,16 @@
 			<classId>1001260</classId>
 			<position x="-145.89" y="185.45" z="122.34" r="-2.18" />
 		</PopulaceStandard>
-		<PopulaceStandard className="PopulaceGuildlevePublisher">
+		<PopulaceGuildlevePublisher>
 			<classId>1001371</classId>
 			<position x="-54.07" y="196.47" z="52.49" r="-0.9" />
 			<animation>1041</animation>
-		</PopulaceStandard>
-		<PopulaceStandard className="PopulacePassiveGLPublisher">
+		</PopulaceGuildlevePublisher>
+		<PopulacePassiveGLPublisher>
 			<classId>1001372</classId>
 			<position x="-52.83" y="196.01" z="53.44" r="-0.34" />
 			<animation>1016</animation>
-		</PopulaceStandard>
+		</PopulacePassiveGLPublisher>
 		<PopulaceStandard>
 			<classId>1001424</classId>
 			<position x="-56.69" y="192" z="-6.59" r="2.89" />

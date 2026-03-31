@@ -152,7 +152,7 @@ namespace PrimalLauncher
                 PatchDownloadPath = @"patches\",
                 ServerAddress = "127.0.0.1",
                 UseExternalHttpServer = false,
-                ShowLoginPage = true,
+                ShowLoginPage = false,
                 ChooseGameAccount = true,
                 UserFilesPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
                 ServerRegion = "NA",

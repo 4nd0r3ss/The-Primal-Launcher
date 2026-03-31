@@ -109,7 +109,7 @@ namespace PrimalLauncher
 
         private void SetStatusShownTime(ref WorkProperties property)
         {
-            //status buff/ailment timer? database.cs ln 892
+            //status buff/ailment timer? 
             //property.Add(string.Format("charaWork.statusShownTime[{0}]", i), );
         }
 
@@ -131,22 +131,47 @@ namespace PrimalLauncher
             for (int i = 0; i < CommandBorder; i++)
                 if (Command[i] != 0)
                     property.Add(string.Format("charaWork.command[{0}]", i), 0xA0F00000 | Command[i]);
-
+                       
             SetHotbar(ref property);
+        }
+
+        private void AddDohActions(ref WorkProperties property)
+        {
+            uint[] actions = new uint[] { 0, 0, 0, 0, 0 };
+
+            if (User.Instance.Character.CharaWork.CurrentClass.GetCategory() == JobClassCategory.DoH)
+            {
+                actions[0] = 0xA0F00000 | 22001;
+                actions[1] = 0xA0F00000 | 22501;
+                actions[2] = 0xA0F00000 | 22502;
+                actions[3] = 0xA0F00000 | 22014;
+                actions[4] = 0xA0F00000 | 22016;
+            }
+
+            property.Add("charaWork.command[15]", actions[0]);
+            property.Add("charaWork.command[17]", actions[1]);
+            property.Add("charaWork.command[18]", actions[2]);
+            property.Add("charaWork.command[19]", actions[3]);
+            property.Add("charaWork.command[20]", actions[4]);
         }
 
         public void SetHotbar(ref WorkProperties property)
         {                        
             for (int i = 0; i < CurrentClass.Hotbar.Length; i++)
             {
-                if (CurrentClass.Hotbar[i] != 0)
-                    property.Add(string.Format("charaWork.command[{0}]", CommandBorder + i), 0xA0F00000 | CurrentClass.Hotbar[i]);                            
-            }           
+                uint slotValue = CurrentClass.Hotbar[i] != 0 ? 0xA0F00000 | CurrentClass.Hotbar[i] : 0;               
+                property.Add(string.Format("charaWork.command[{0}]", CommandBorder + i), slotValue);                            
+            }
+
+            AddDohActions(ref property); //couldn't think of a batter place to put this...
         }
+
         public void UpdateHotbar()
         {
             WorkProperties property = new WorkProperties(User.Instance.Character.Id, @"charaWork/command");
+            
             SetHotbar(ref property);
+
             for (int i = 0; i < 64; i++)
                 property.Add(string.Format("charaWork.commandCategory[{0}]", i), (byte)1);
 
@@ -264,11 +289,13 @@ namespace PrimalLauncher
                     levelsToUp++;
                 }
 
-                if (levelsToUp > 0)
+                for(int i = 0; i < levelsToUp; i++)
                 {
-                    CurrentClass.TotalExp = (currentLevel + levelsToUp) >= CurrentClass.LevelCap ? 0 : totalExp;
-                    LevelUp(levelsToUp);
+                    LevelUp();
                 }
+
+                //we show 0 exp when player reaches level cap.
+                CurrentClass.TotalExp = (currentLevel + levelsToUp) >= CurrentClass.LevelCap ? 0 : totalExp;
 
                 //refresh exp values in game client UI.
                 UpdateExp();
@@ -282,9 +309,9 @@ namespace PrimalLauncher
             prop.FinishWritingAndSend();
         }
 
-        private void LevelUp(short numLevels)
+        private void LevelUp()
         {
-            CurrentClass.Level += numLevels;
+            CurrentClass.Level++;
 
             User.Instance.Character.SendCommandResult(0, new List<CommandResult> {
                 new CommandResult
@@ -334,7 +361,11 @@ namespace PrimalLauncher
             property.FinishWritingAndSend();
         }
 
-        public byte[] ClassExp()
+        /// <summary>
+        /// Sent on data request
+        /// </summary>
+        /// <returns></returns>
+        public byte[] Exp()
         {
             if (PacketQueue == null || PacketQueue.Count == 0)
             {
@@ -398,12 +429,22 @@ namespace PrimalLauncher
             return (byte)(CurrentClassId + jobIndex);
         }
 
-        public void SetCommandRecast(uint actorId, float recastTime)
+        public int GetHotbarSlot(ushort value)
+        {          
+            for (int i = 0; i < CurrentClass.Hotbar.Length; i++)
+            {
+                if (CurrentClass.Hotbar[i] == value)
+                    return i;
+            }
+
+            return -1;
+        }
+
+        public void SetCommandRecast(uint actorId, float recastTime, int slot)
         {
-            int slotIndex = CommandBorder + 1;
             WorkProperties prop = new WorkProperties(actorId, "charaWork/commandDetailForSelf");
-            prop.Add("charaWork.parameterTemp.maxCommandRecastTime[" + slotIndex + "]", recastTime);
-            prop.Add("charaWork.parameterSave.commandSlot_recastTime[" + slotIndex + "]", Server.GetTimeStamp(recastTime));
+            prop.Add("charaWork.parameterTemp.maxCommandRecastTime[" + slot + "]", (short)recastTime);
+            prop.Add("charaWork.parameterSave.commandSlot_recastTime[" + slot + "]", Server.GetTimeStamp(recastTime));
             prop.FinishWritingAndSend();
         }
 
